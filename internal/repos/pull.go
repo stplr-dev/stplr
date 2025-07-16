@@ -1,8 +1,13 @@
-// This file was originally part of the project "LURE - Linux User REpository", created by Elara Musayelyan.
-// It has been modified as part of "ALR - Any Linux Repository" by the ALR Authors.
+// SPDX-License-Identifier: GPL-3.0-or-later
 //
-// ALR - Any Linux Repository
+// This file was originally part of the project "LURE - Linux User REpository",
+// created by Elara Musayelyan.
+// It was later modified as part of "ALR - Any Linux Repository" by the ALR Authors.
+// This version has been further modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
+// Copyright (C) Elara Musayelyan (LURE)
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -41,9 +46,10 @@ import (
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/config"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/shutils/handlers"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/types"
+	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/constants"
+	"go.stplr.dev/stplr/internal/shutils/handlers"
+	"go.stplr.dev/stplr/pkg/types"
 )
 
 type actionType uint8
@@ -234,9 +240,9 @@ func (rs *Repos) pullRepoFromURL(ctx context.Context, rawRepoUrl string, repo *t
 		}
 	}
 
-	fl, err := repoFS.Open("alr-repo.toml")
+	fl, err := repoFS.Open(constants.RepoConfigFile)
 	if err != nil {
-		slog.Warn(gotext.Get("Git repository does not appear to be a valid ALR repo"), "repo", repo.Name)
+		slog.Warn(gotext.Get("Git repository does not appear to be a valid Stapler repo"), "repo", repo.Name)
 		return nil
 	}
 
@@ -252,7 +258,7 @@ func (rs *Repos) pullRepoFromURL(ctx context.Context, rawRepoUrl string, repo *t
 	// to compare it to the repo version, so only compare versions with the "v".
 	if strings.HasPrefix(config.Version, "v") {
 		if vercmp.Compare(config.Version, repoCfg.Repo.MinVersion) == -1 {
-			slog.Warn(gotext.Get("ALR repo's minimum ALR version is greater than the current version. Try updating ALR if something doesn't work."), "repo", repo.Name)
+			slog.Warn(gotext.Get("Stapler repo's minimum Stapler version is greater than the current version. Try updating Stapler if something doesn't work."), "repo", repo.Name)
 		}
 	}
 
@@ -466,7 +472,7 @@ func (rs *Repos) processRepoChanges(ctx context.Context, repo types.Repo, r *git
 }
 
 func isValidScriptPath(path string) bool {
-	if filepath.Base(path) != "alr.sh" {
+	if filepath.Base(path) != "Staplerfile" {
 		return false
 	}
 
@@ -475,41 +481,41 @@ func isValidScriptPath(path string) bool {
 }
 
 func (rs *Repos) processRepoFull(ctx context.Context, repo types.Repo, repoDir string) error {
-	rootScript := filepath.Join(repoDir, "alr.sh")
+	rootScript := filepath.Join(repoDir, "Staplerfile")
 	if fi, err := os.Stat(rootScript); err == nil && !fi.IsDir() {
-		slog.Debug("Found root alr.sh, processing single-script repository", "repo", repo.Name)
+		slog.Debug("Found root Staplerfile, processing single-script repository", "repo", repo.Name)
 
 		runner, err := rs.processRepoChangesRunner(repoDir, repoDir)
 		if err != nil {
-			return fmt.Errorf("error creating runner for root alr.sh: %w", err)
+			return fmt.Errorf("error creating runner for root Staplerfile: %w", err)
 		}
 
 		scriptFl, err := os.Open(rootScript)
 		if err != nil {
-			return fmt.Errorf("error opening root alr.sh: %w", err)
+			return fmt.Errorf("error opening root Staplerfile: %w", err)
 		}
 		defer scriptFl.Close()
 
 		err = rs.updatePkg(ctx, repo, runner, scriptFl)
 		if err != nil {
-			return fmt.Errorf("error processing root alr.sh: %w", err)
+			return fmt.Errorf("error processing root Staplerfile: %w", err)
 		}
 
 		return nil
 	}
 
-	glob := filepath.Join(repoDir, "*/alr.sh")
+	glob := filepath.Join(repoDir, "*/Staplerfile")
 	matches, err := filepath.Glob(glob)
 	if err != nil {
-		return fmt.Errorf("error globbing for alr.sh files: %w", err)
+		return fmt.Errorf("error globbing for Staplerfile files: %w", err)
 	}
 
 	if len(matches) == 0 {
-		slog.Warn("No alr.sh files found in repository", "repo", repo.Name)
+		slog.Warn("No Staplerfile files found in repository", "repo", repo.Name)
 		return nil
 	}
 
-	slog.Debug("Found multiple alr.sh files, processing multi-package repository",
+	slog.Debug("Found multiple Staplerfile files, processing multi-package repository",
 		"repo", repo.Name, "count", len(matches))
 
 	for _, match := range matches {

@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,12 +43,12 @@ import (
 	"github.com/goreleaser/nfpm/v2"
 	"github.com/goreleaser/nfpm/v2/files"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/cpu"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/manager"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/overrides"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/alrsh"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/distro"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/types"
+	"go.stplr.dev/stplr/internal/cpu"
+	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/internal/overrides"
+	"go.stplr.dev/stplr/pkg/distro"
+	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
+	"go.stplr.dev/stplr/pkg/types"
 )
 
 // Функция prepareDirs подготавливает директории для сборки.
@@ -160,7 +166,7 @@ func normalizeContents(contents []*files.Content) {
 	}
 }
 
-var RegexpALRPackageName = regexp.MustCompile(`^(?P<package>[^+]+)\+alr-(?P<repo>.+)$`)
+var RegexpALRPackageName = regexp.MustCompile(`^(?P<package>[^+]+)\+stplr-(?P<repo>.+)$`)
 
 func getBasePkgInfo(vars *alrsh.Package, input interface {
 	RepositoryProvider
@@ -168,7 +174,7 @@ func getBasePkgInfo(vars *alrsh.Package, input interface {
 },
 ) *nfpm.Info {
 	return &nfpm.Info{
-		Name:    fmt.Sprintf("%s+alr-%s", vars.Name, input.Repository()),
+		Name:    fmt.Sprintf("%s+stplr-%s", vars.Name, input.Repository()),
 		Arch:    cpu.Arch(),
 		Version: vars.Version,
 		Release: overrides.ReleasePlatformSpecific(vars.Release, input.OSRelease()),

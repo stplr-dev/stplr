@@ -1,8 +1,13 @@
-// This file was originally part of the project "LURE - Linux User REpository", created by Elara Musayelyan.
-// It has been modified as part of "ALR - Any Linux Repository" by the ALR Authors.
+// SPDX-License-Identifier: GPL-3.0-or-later
 //
-// ALR - Any Linux Repository
+// This file was originally part of the project "LURE - Linux User REpository",
+// created by Elara Musayelyan.
+// It was later modified as part of "ALR - Any Linux Repository" by the ALR Authors.
+// This version has been further modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
+// Copyright (C) Elara Musayelyan (LURE)
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,10 +35,10 @@ import (
 	"mvdan.cc/sh/v3/expand"
 	"mvdan.cc/sh/v3/interp"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/cliutils"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/cpu"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/shutils/helpers"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/distro"
+	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/cpu"
+	"go.stplr.dev/stplr/internal/shutils/helpers"
+	"go.stplr.dev/stplr/pkg/distro"
 )
 
 func HelperCmd() *cli.Command {
@@ -51,7 +56,7 @@ func HelperCmd() *cli.Command {
 
 	return &cli.Command{
 		Name:        "helper",
-		Usage:       gotext.Get("Run a ALR helper command"),
+		Usage:       gotext.Get("Run a Stapler helper command"),
 		ArgsUsage:   `<helper_name|"list">`,
 		Subcommands: []*cli.Command{helperListCmd},
 		Flags: []cli.Flag{

@@ -1,8 +1,13 @@
-// This file was originally part of the project "LURE - Linux User REpository", created by Elara Musayelyan.
-// It has been modified as part of "ALR - Any Linux Repository" by the ALR Authors.
+// SPDX-License-Identifier: GPL-3.0-or-later
 //
-// ALR - Any Linux Repository
+// This file was originally part of the project "LURE - Linux User REpository",
+// created by Elara Musayelyan.
+// It was later modified as part of "ALR - Any Linux Repository" by the ALR Authors.
+// This version has been further modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
+// Copyright (C) Elara Musayelyan (LURE)
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,9 +36,9 @@ import (
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/shutils/decoder"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/alrsh"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/distro"
+	"go.stplr.dev/stplr/internal/shutils/decoder"
+	"go.stplr.dev/stplr/pkg/distro"
+	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
 )
 
 type BuildVars struct {
@@ -90,7 +95,7 @@ var osRelease = &distro.OSRelease{
 func TestDecodeVars(t *testing.T) {
 	ctx := context.Background()
 
-	fl, err := syntax.NewParser().Parse(strings.NewReader(testScript), "alr.sh")
+	fl, err := syntax.NewParser().Parse(strings.NewReader(testScript), "Staplerfile")
 	if err != nil {
 		t.Fatalf("Expected no error, got %s", err)
 	}
@@ -177,7 +182,7 @@ func TestDecodeVarsMissing(t *testing.T) {
 		}
 	`
 
-	fl, err := syntax.NewParser().Parse(strings.NewReader(testScript), "alr.sh")
+	fl, err := syntax.NewParser().Parse(strings.NewReader(testScript), "Staplerfile")
 	if err != nil {
 		t.Fatalf("Expected no error, got %s", err)
 	}
@@ -206,7 +211,7 @@ func TestDecodeVarsMissing(t *testing.T) {
 func TestGetFunc(t *testing.T) {
 	ctx := context.Background()
 
-	fl, err := syntax.NewParser().Parse(strings.NewReader(testScript), "alr.sh")
+	fl, err := syntax.NewParser().Parse(strings.NewReader(testScript), "Staplerfile")
 	if err != nil {
 		t.Fatalf("Expected no error, got %s", err)
 	}

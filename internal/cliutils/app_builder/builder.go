@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,12 +29,12 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/cliutils"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/config"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/db"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/manager"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/repos"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/distro"
+	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/db"
+	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/internal/repos"
+	"go.stplr.dev/stplr/pkg/distro"
 )
 
 type AppDeps struct {

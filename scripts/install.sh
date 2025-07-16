@@ -88,10 +88,10 @@ else
 fi
 
 if [ -z "$noPkgMgr" ]; then
-  info "Получение списка файлов с https://gitea.plemya-x.ru/Plemya-x/ALR/releases"
+  info "Получение списка файлов с https://go.stplr.dev/stplr/releases"
 
   # Изменено URL и регулярное выражение для списка файлов
-  pageContent=$(curl -s https://gitea.plemya-x.ru/Plemya-x/ALR/releases)
+  pageContent=$(curl -s https://go.stplr.dev/stplr/releases)
 
   # Извлечение списка файлов из HTML
   fileList=$(echo "$pageContent" | grep -oP '(?<=href=").*?(?=")' | grep -E 'alr-bin.*\.(pkg.tar.zst|rpm|deb)')

@@ -1,7 +1,13 @@
 // DO NOT EDIT MANUALLY. This file is generated.
 
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,10 +28,10 @@ import (
 	"net/rpc"
 
 	"context"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/manager"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/alrsh"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/types"
 	"github.com/hashicorp/go-plugin"
+	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/pkg/staplerfile"
+	"go.stplr.dev/stplr/pkg/types"
 )
 
 type InstallerExecutorPlugin struct {
@@ -210,10 +216,10 @@ type ScriptExecutorReadScriptArgs struct {
 }
 
 type ScriptExecutorReadScriptResp struct {
-	Result0 *alrsh.ScriptFile
+	Result0 *staplerfile.ScriptFile
 }
 
-func (s *ScriptExecutorRPC) ReadScript(ctx context.Context, scriptPath string) (*alrsh.ScriptFile, error) {
+func (s *ScriptExecutorRPC) ReadScript(ctx context.Context, scriptPath string) (*staplerfile.ScriptFile, error) {
 	var resp *ScriptExecutorReadScriptResp
 	err := s.client.Call("Plugin.ReadScript", &ScriptExecutorReadScriptArgs{
 		ScriptPath: scriptPath,
@@ -237,15 +243,15 @@ func (s *ScriptExecutorRPCServer) ReadScript(args *ScriptExecutorReadScriptArgs,
 
 type ScriptExecutorExecuteFirstPassArgs struct {
 	Input *BuildInput
-	Sf    *alrsh.ScriptFile
+	Sf    *staplerfile.ScriptFile
 }
 
 type ScriptExecutorExecuteFirstPassResp struct {
 	Result0 string
-	Result1 []*alrsh.Package
+	Result1 []*staplerfile.Package
 }
 
-func (s *ScriptExecutorRPC) ExecuteFirstPass(ctx context.Context, input *BuildInput, sf *alrsh.ScriptFile) (string, []*alrsh.Package, error) {
+func (s *ScriptExecutorRPC) ExecuteFirstPass(ctx context.Context, input *BuildInput, sf *staplerfile.ScriptFile) (string, []*staplerfile.Package, error) {
 	var resp *ScriptExecutorExecuteFirstPassResp
 	err := s.client.Call("Plugin.ExecuteFirstPass", &ScriptExecutorExecuteFirstPassArgs{
 		Input: input,
@@ -300,8 +306,8 @@ func (s *ScriptExecutorRPCServer) PrepareDirs(args *ScriptExecutorPrepareDirsArg
 
 type ScriptExecutorExecuteSecondPassArgs struct {
 	Input          *BuildInput
-	Sf             *alrsh.ScriptFile
-	VarsOfPackages []*alrsh.Package
+	Sf             *staplerfile.ScriptFile
+	VarsOfPackages []*staplerfile.Package
 	RepoDeps       []string
 	BuiltDeps      []*BuiltDep
 	BasePkg        string
@@ -311,7 +317,7 @@ type ScriptExecutorExecuteSecondPassResp struct {
 	Result0 []*BuiltDep
 }
 
-func (s *ScriptExecutorRPC) ExecuteSecondPass(ctx context.Context, input *BuildInput, sf *alrsh.ScriptFile, varsOfPackages []*alrsh.Package, repoDeps []string, builtDeps []*BuiltDep, basePkg string) ([]*BuiltDep, error) {
+func (s *ScriptExecutorRPC) ExecuteSecondPass(ctx context.Context, input *BuildInput, sf *staplerfile.ScriptFile, varsOfPackages []*staplerfile.Package, repoDeps []string, builtDeps []*BuiltDep, basePkg string) ([]*BuiltDep, error) {
 	var resp *ScriptExecutorExecuteSecondPassResp
 	err := s.client.Call("Plugin.ExecuteSecondPass", &ScriptExecutorExecuteSecondPassArgs{
 		Input:          input,

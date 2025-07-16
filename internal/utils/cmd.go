@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,6 +24,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"os/user"
@@ -27,13 +34,13 @@ import (
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v2"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/cliutils"
-	appbuilder "gitea.plemya-x.ru/Plemya-x/ALR/internal/cliutils/app_builder"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/constants"
+	"go.stplr.dev/stplr/internal/cliutils"
+	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
+	"go.stplr.dev/stplr/internal/constants"
 )
 
 func GetUidGidAlrUserString() (string, string, error) {
-	u, err := user.Lookup("alr")
+	u, err := user.Lookup("stapler-builder")
 	if err != nil {
 		return "", "", err
 	}
@@ -41,7 +48,7 @@ func GetUidGidAlrUserString() (string, string, error) {
 	return u.Uid, u.Gid, nil
 }
 
-func GetUidGidAlrUser() (int, int, error) {
+func GetUidGidStaplerUser() (int, int, error) {
 	strUid, strGid, err := GetUidGidAlrUserString()
 	if err != nil {
 		return 0, 0, err
@@ -60,7 +67,7 @@ func GetUidGidAlrUser() (int, int, error) {
 }
 
 func DropCapsToAlrUser() error {
-	uid, gid, err := GetUidGidAlrUser()
+	uid, gid, err := GetUidGidStaplerUser()
 	if err != nil {
 		return err
 	}
@@ -75,14 +82,14 @@ func DropCapsToAlrUser() error {
 	return EnsureIsAlrUser()
 }
 
-func ExitIfCantDropGidToAlr() cli.ExitCoder {
-	_, gid, err := GetUidGidAlrUser()
+func ExitIfCantDropGidToStapler() cli.ExitCoder {
+	_, gid, err := GetUidGidStaplerUser()
 	if err != nil {
-		return cliutils.FormatCliExit("cannot get gid alr", err)
+		return cliutils.FormatCliExit(fmt.Sprintf("cannot get gid %s", constants.BuilderUser), err)
 	}
 	err = syscall.Setgid(gid)
 	if err != nil {
-		return cliutils.FormatCliExit("cannot get setgid alr", err)
+		return cliutils.FormatCliExit(fmt.Sprintf("cannot get setgid %s", constants.BuilderUser), err)
 	}
 	return nil
 }
@@ -125,7 +132,7 @@ func IsNotRoot() bool {
 }
 
 func EnsureIsAlrUser() error {
-	uid, gid, err := GetUidGidAlrUser()
+	uid, gid, err := GetUidGidStaplerUser()
 	if err != nil {
 		return err
 	}

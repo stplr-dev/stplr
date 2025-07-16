@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -60,12 +66,13 @@ func execShouldError(t *testing.T, r capytest.Runner, cmd string, args ...string
 }
 
 const REPO_NAME_FOR_E2E_TESTS = "alr-repo"
-const REPO_URL_FOR_E2E_TESTS = "https://gitea.plemya-x.ru/Plemya-x/repo-for-tests.git"
+const REPO_URL_FOR_E2E_TESTS = "https://codeberg.org/stapler/repo-for-tests.git"
+const REPO_URL_FOR_E2E_TESTS_SINGLE_PACKAGE = "https://altlinux.space/stapler/repo-for-tests-single-package.git"
 
 func defaultPrepare(t *testing.T, r capytest.Runner) {
 	execShouldNoError(t, r,
 		"sudo",
-		"alr",
+		"stplr",
 		"repo",
 		"add",
 		REPO_NAME_FOR_E2E_TESTS,
@@ -74,7 +81,7 @@ func defaultPrepare(t *testing.T, r capytest.Runner) {
 
 	execShouldNoError(t, r,
 		"sudo",
-		"alr",
+		"stplr",
 		"ref",
 	)
 }
@@ -83,13 +90,13 @@ func runMatrixSuite(t *testing.T, name string, images []string, test func(t *tes
 	t.Helper()
 	for _, image := range images {
 		ts := capytest.NewTestSuite(t, podman.Provider(
-			podman.WithImage(fmt.Sprintf("ghcr.io/maks1ms/alr-e2e-test-image-%s", image)),
-			podman.WithVolumes("./alr:/tmp/alr"),
+			podman.WithImage(fmt.Sprintf("ghcr.io/maks1ms/stplr-e2e-test-image-%s", image)),
+			podman.WithVolumes("./stplr:/tmp/stplr"),
 			podman.WithPrivileged(true),
 		))
 		ts.BeforeEach(func(t *testing.T, r capytest.Runner) {
-			execShouldNoError(t, r, "/bin/alr-test-setup", "alr-install")
-			execShouldNoError(t, r, "/bin/alr-test-setup", "passwordless-sudo-setup")
+			execShouldNoError(t, r, "/bin/stplr-test-setup", "stplr-install")
+			execShouldNoError(t, r, "/bin/stplr-test-setup", "passwordless-sudo-setup")
 		})
 		ts.Run(fmt.Sprintf("%s/%s", name, image), test)
 	}

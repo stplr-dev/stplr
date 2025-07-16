@@ -26,11 +26,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"mvdan.cc/sh/v3/syntax"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/config"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/db"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/types"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/distro"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/manager"
+	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/db"
+	"go.stplr.dev/stplr/pkg/types"
+	"go.stplr.dev/stplr/pkg/distro"
+	"go.stplr.dev/stplr/internal/manager"
 )
 
 type TestPackageFinder struct {

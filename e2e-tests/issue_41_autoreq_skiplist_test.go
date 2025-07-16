@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,7 +37,7 @@ func TestE2EIssue41AutoreqSkiplist(t *testing.T) {
 		AUTOREQ_AUTOPROV_SYSTEMS,
 		func(t *testing.T, r capytest.Runner) {
 			defaultPrepare(t, r)
-			execShouldNoError(t, r, "alr", "build", "-p", "alr-repo/test-autoreq-autoprov")
+			execShouldNoError(t, r, "stplr", "build", "-p", "alr-repo/test-autoreq-autoprov")
 			execShouldNoError(t, r, "sh", "-c", "rpm -qp --requires *.rpm | grep \"^/bin/sh$\"")
 			execShouldError(t, r, "sh", "-c", "rpm -qp --requires *.rpm | grep \"^/bin/bash$\"")
 			execShouldError(t, r, "sh", "-c", "rpm -qp --requires *.rpm | grep \"^/bin/zsh$\"")

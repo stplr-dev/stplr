@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,7 +27,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/alrsh"
+	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
 )
 
 type ScriptResolver struct {
@@ -42,18 +48,18 @@ func (s *ScriptResolver) ResolveScript(
 	repodir := s.cfg.GetPaths().RepoDir
 	repository = pkg.Repository
 
-	// First, we check if there is a root alr.sh in the repository
-	rootScriptPath := filepath.Join(repodir, repository, "alr.sh")
+	// First, we check if there is a root Staplerfile in the repository
+	rootScriptPath := filepath.Join(repodir, repository, "Staplerfile")
 	if _, err := os.Stat(rootScriptPath); err == nil {
-		// A repository with a single alr.sh at the root
+		// A repository with a single Staplerfile at the root
 		script = rootScriptPath
 	} else {
-		// Multi-package repository - we are looking for alr.sh in the subfolder
+		// Multi-package repository - we are looking for Staplerfile in the subfolder
 		var scriptPath string
 		if pkg.BasePkgName != "" {
-			scriptPath = filepath.Join(repodir, repository, pkg.BasePkgName, "alr.sh")
+			scriptPath = filepath.Join(repodir, repository, pkg.BasePkgName, "Staplerfile")
 		} else {
-			scriptPath = filepath.Join(repodir, repository, pkg.Name, "alr.sh")
+			scriptPath = filepath.Join(repodir, repository, pkg.Name, "Staplerfile")
 		}
 		script = scriptPath
 	}

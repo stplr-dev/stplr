@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,23 +38,23 @@ func Test75SinglePackageRepo(t *testing.T) {
 		func(t *testing.T, r capytest.Runner) {
 			execShouldNoError(t, r,
 				"sudo",
-				"alr",
+				"stplr",
 				"repo",
 				"add",
 				REPO_NAME_FOR_E2E_TESTS,
-				"https://gitea.plemya-x.ru/Maks1mS/test-single-package-alr-repo.git",
+				REPO_URL_FOR_E2E_TESTS_SINGLE_PACKAGE,
 			)
-			execShouldNoError(t, r, "sudo", "alr", "ref")
-			execShouldNoError(t, r, "sudo", "alr", "repo", "set-ref", REPO_NAME_FOR_E2E_TESTS, "1075c918be")
-			execShouldNoError(t, r, "alr", "fix")
-			execShouldNoError(t, r, "sudo", "alr", "in", "test-single-repo")
-			execShouldNoError(t, r, "sh", "-c", "alr list -U")
-			execShouldNoError(t, r, "sh", "-c", "test $(alr list -U | wc -l) -eq 0 || exit 1")
-			execShouldNoError(t, r, "sudo", "alr", "repo", "set-ref", REPO_NAME_FOR_E2E_TESTS, "5e361c50d7")
-			execShouldNoError(t, r, "sudo", "alr", "ref")
-			execShouldNoError(t, r, "sh", "-c", "test $(alr list -U | wc -l) -eq 1 || exit 1")
-			execShouldNoError(t, r, "sudo", "alr", "up")
-			execShouldNoError(t, r, "sh", "-c", "test $(alr list -U | wc -l) -eq 0 || exit 1")
+			execShouldNoError(t, r, "sudo", "stplr", "ref")
+			execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", REPO_NAME_FOR_E2E_TESTS, "1546b4ed8a")
+			execShouldNoError(t, r, "stplr", "fix")
+			execShouldNoError(t, r, "sudo", "stplr", "in", "test-single-repo")
+			execShouldNoError(t, r, "sh", "-c", "stplr list -U")
+			execShouldNoError(t, r, "sh", "-c", "test $(stplr list -U | wc -l) -eq 0 || exit 1")
+			execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", REPO_NAME_FOR_E2E_TESTS, "edfee20f56")
+			execShouldNoError(t, r, "sudo", "stplr", "ref")
+			execShouldNoError(t, r, "sh", "-c", "test $(stplr list -U | wc -l) -eq 1 || exit 1")
+			execShouldNoError(t, r, "sudo", "stplr", "up")
+			execShouldNoError(t, r, "sh", "-c", "test $(stplr list -U | wc -l) -eq 0 || exit 1")
 		},
 	)
 }

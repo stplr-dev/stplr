@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,7 +20,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package alrsh
+package staplerfile
 
 import (
 	"context"
@@ -30,12 +36,12 @@ import (
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/cpu"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/shutils/decoder"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/shutils/handlers"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/shutils/helpers"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/distro"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/types"
+	"go.stplr.dev/stplr/internal/cpu"
+	"go.stplr.dev/stplr/internal/shutils/decoder"
+	"go.stplr.dev/stplr/internal/shutils/handlers"
+	"go.stplr.dev/stplr/internal/shutils/helpers"
+	"go.stplr.dev/stplr/pkg/distro"
+	"go.stplr.dev/stplr/pkg/types"
 )
 
 type ScriptFile struct {

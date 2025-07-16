@@ -1,8 +1,13 @@
-// This file was originally part of the project "LURE - Linux User REpository", created by Elara Musayelyan.
-// It has been modified as part of "ALR - Any Linux Repository" by the ALR Authors.
+// SPDX-License-Identifier: GPL-3.0-or-later
 //
-// ALR - Any Linux Repository
+// This file was originally part of the project "LURE - Linux User REpository",
+// created by Elara Musayelyan.
+// It was later modified as part of "ALR - Any Linux Repository" by the ALR Authors.
+// This version has been further modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
+// Copyright (C) Elara Musayelyan (LURE)
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,9 +32,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/config"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/db"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/alrsh"
+	"go.stplr.dev/stplr/pkg/staplerfile"
+
+	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/db"
 )
 
 type TestALRConfig struct{}
@@ -46,19 +52,19 @@ func prepareDb() *db.Database {
 	return database
 }
 
-var testPkg = alrsh.Package{
+var testPkg = staplerfile.Package{
 	Name:    "test",
 	Version: "0.0.1",
 	Release: 1,
 	Epoch:   2,
-	Description: alrsh.OverridableFromMap(map[string]string{
+	Description: staplerfile.OverridableFromMap(map[string]string{
 		"en": "Test package",
 		"ru": "Проверочный пакет",
 	}),
-	Homepage: alrsh.OverridableFromMap(map[string]string{
+	Homepage: staplerfile.OverridableFromMap(map[string]string{
 		"en": "https://gitea.plemya-x.ru/xpamych/ALR",
 	}),
-	Maintainer: alrsh.OverridableFromMap(map[string]string{
+	Maintainer: staplerfile.OverridableFromMap(map[string]string{
 		"en": "Evgeniy Khramov <xpamych@yandex.ru>",
 		"ru": "Евгений Храмов <xpamych@yandex.ru>",
 	}),
@@ -67,17 +73,17 @@ var testPkg = alrsh.Package{
 	Provides:      []string{"test"},
 	Conflicts:     []string{"test"},
 	Replaces:      []string{"test-old"},
-	Depends: alrsh.OverridableFromMap(map[string][]string{
+	Depends: staplerfile.OverridableFromMap(map[string][]string{
 		"": {"sudo"},
 	}),
-	BuildDepends: alrsh.OverridableFromMap(map[string][]string{
+	BuildDepends: staplerfile.OverridableFromMap(map[string][]string{
 		"":     {"golang"},
 		"arch": {"go"},
 	}),
 	Repository: "default",
-	Summary:    alrsh.OverridableFromMap(map[string]string{}),
-	Group:      alrsh.OverridableFromMap(map[string]string{}),
-	OptDepends: alrsh.OverridableFromMap(map[string][]string{}),
+	Summary:    staplerfile.OverridableFromMap(map[string]string{}),
+	Group:      staplerfile.OverridableFromMap(map[string]string{}),
+	OptDepends: staplerfile.OverridableFromMap(map[string][]string{}),
 }
 
 func TestInit(t *testing.T) {

@@ -1,4 +1,4 @@
-NAME := alr
+NAME := stplr
 GIT_VERSION ?= $(shell git describe --tags )
 IGNORE_ROOT_CHECK ?= 0
 DESTDIR ?=
@@ -14,7 +14,7 @@ INSTALLED_ZSH_COMPLETION := $(DESTDIR)$(PREFIX)/share/zsh/site-functions/_$(NAME
 GENERATE ?= 1
 
 CREATE_SYSTEM_RESOURCES ?= 1
-ROOT_DIRS := /var/cache/alr /etc/alr
+ROOT_DIRS := /var/cache/stplr /etc/stplr
 
 ADD_LICENSE_BIN := go run github.com/google/addlicense@4caba19b7ed7818bb86bc4cd20411a246aa4a524
 GOLANGCI_LINT_BIN := go run github.com/golangci/golangci-lint/cmd/golangci-lint@v1.63.4
@@ -31,7 +31,7 @@ ifeq ($(GENERATE),1)
 else
 	@echo "Skipping go generate (GENERATE=0)"
 endif
-	go build -ldflags="-X 'gitea.plemya-x.ru/Plemya-x/ALR/internal/config.Version=$(GIT_VERSION)'" -o $@
+	go build -ldflags="-X 'go.stplr.dev/stplr/internal/config.Version=$(GIT_VERSION)'" -o $@
 
 check-no-root:
 	@if [ "$$IGNORE_ROOT_CHECK" != "1" ] && [ "`whoami`" = "root" ]; then \
@@ -50,13 +50,13 @@ $(INSTALLED_BIN): $(BIN)
 	install -Dm755 $< $@
 ifeq ($(CREATE_SYSTEM_RESOURCES),1)
 	setcap cap_setuid,cap_setgid+ep $(INSTALLED_BIN)
-	@if id alr >/dev/null 2>&1; then \
-		echo "User 'alr' already exists. Skipping."; \
+	@if id stapler-builder >/dev/null 2>&1; then \
+		echo "User 'stapler-builder' already exists. Skipping."; \
 	else \
-		useradd -r -s /usr/sbin/nologin alr; \
+		useradd -r -s /usr/sbin/nologin stapler-builder; \
 	fi
 	@for dir in $(ROOT_DIRS); do \
-		install -d -o alr -g alr -m 755 $$dir; \
+		install -d -o stapler-builder -g stapler-builder -m 755 $$dir; \
 	done
 else
 	@echo "Skipping user and root dir creation (CREATE_SYSTEM_RESOURCES=0)"
@@ -80,7 +80,6 @@ clean clear:
 OLD_FILES=$(shell cat old-files)
 IGNORE_OLD_FILES := $(foreach file,$(shell cat old-files),-ignore $(file))
 update-license:
-	$(ADD_LICENSE_BIN) -v -f license-header-old-files.tmpl $(OLD_FILES)
 	$(ADD_LICENSE_BIN) -v -f license-header.tmpl $(IGNORE_OLD_FILES) .
 
 fmt:
@@ -101,7 +100,7 @@ update-deps-cve:
 
 prepare-for-e2e-test: clean build
 	rm -f ./e2e-tests/alr
-	cp alr e2e-tests
+	cp $(NAME) e2e-tests
 
 e2e-test: prepare-for-e2e-test
 	go test -tags=e2e ./...

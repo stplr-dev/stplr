@@ -1,6 +1,4 @@
-/alr
-/alr-api-server
-/cmd/alr-api-server/alr-api-server
+/stplr
 /dist/
 /internal/config/version.txt
 .fleet
@@ -9,5 +7,5 @@
 
 *.out
 
-e2e-tests/alr
+e2e-tests/stplr
 commit_msg.txt

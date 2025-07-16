@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,9 +31,9 @@ import (
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v2"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/cliutils"
-	appbuilder "gitea.plemya-x.ru/Plemya-x/ALR/internal/cliutils/app_builder"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/utils"
+	"go.stplr.dev/stplr/internal/cliutils"
+	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
+	"go.stplr.dev/stplr/internal/utils"
 )
 
 func ConfigCmd() *cli.Command {

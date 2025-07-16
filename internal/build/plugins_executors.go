@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,9 +25,9 @@ package build
 import (
 	"context"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/manager"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/alrsh"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/types"
+	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/pkg/staplerfile"
+	"go.stplr.dev/stplr/pkg/types"
 )
 
 //go:generate go run ../../generators/plugin-generator InstallerExecutor ScriptExecutor ReposExecutor
@@ -37,8 +43,8 @@ type InstallerExecutor interface {
 }
 
 type ScriptExecutor interface {
-	ReadScript(ctx context.Context, scriptPath string) (*alrsh.ScriptFile, error)
-	ExecuteFirstPass(ctx context.Context, input *BuildInput, sf *alrsh.ScriptFile) (string, []*alrsh.Package, error)
+	ReadScript(ctx context.Context, scriptPath string) (*staplerfile.ScriptFile, error)
+	ExecuteFirstPass(ctx context.Context, input *BuildInput, sf *staplerfile.ScriptFile) (string, []*staplerfile.Package, error)
 	PrepareDirs(
 		ctx context.Context,
 		input *BuildInput,
@@ -47,8 +53,8 @@ type ScriptExecutor interface {
 	ExecuteSecondPass(
 		ctx context.Context,
 		input *BuildInput,
-		sf *alrsh.ScriptFile,
-		varsOfPackages []*alrsh.Package,
+		sf *staplerfile.ScriptFile,
+		varsOfPackages []*staplerfile.Package,
 		repoDeps []string,
 		builtDeps []*BuiltDep,
 		basePkg string,

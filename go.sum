@@ -432,8 +432,6 @@ github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673/go.mod h1:N3UwUGtsr
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 gitlab.com/digitalxero/go-conventional-commit v1.0.7 h1:8/dO6WWG+98PMhlZowt/YjuiKhqhGlOCwlIV8SqqGh8=
 gitlab.com/digitalxero/go-conventional-commit v1.0.7/go.mod h1:05Xc2BFsSyC5tKhK0y+P3bs0AwUtNuTp+mTpbCU/DZ0=
-go.alt-gnome.ru/capytest v0.0.2 h1:clmvIqmYS86hhA1rsvivSSPpfOFkJTpbn38EQP7I3E8=
-go.alt-gnome.ru/capytest v0.0.2/go.mod h1:lvxPx3H6h+LPnStBFblgoT2wkjv0wbug3S14troykEg=
 go.alt-gnome.ru/capytest v0.0.3-0.20250706082755-f20413e052f9 h1:NST+V5LV/eLgs0p6PsuvfHiZ4UrIWqftCdifO8zgg0g=
 go.alt-gnome.ru/capytest v0.0.3-0.20250706082755-f20413e052f9/go.mod h1:qiM8LARP+JBZr5mrDoVylOoqjrN0MAzvZ21NR9qMc0Y=
 go.alt-gnome.ru/capytest/providers/podman v0.0.3-0.20250706082755-f20413e052f9 h1:VZclgdJxARvhZ6PIWWW2hQ6Ge4XeE36pzUr/U/y62bE=

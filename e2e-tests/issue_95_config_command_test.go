@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,17 +37,17 @@ func TestE2EIssue95ConfigCommand(t *testing.T) {
 		COMMON_SYSTEMS,
 		func(t *testing.T, r capytest.Runner) {
 			defaultPrepare(t, r)
-			execShouldNoError(t, r, "sh", "-c", "alr config show | grep \"autoPull: true\"")
-			execShouldNoError(t, r, "sh", "-c", "alr config get | grep \"autoPull: true\"")
-			execShouldError(t, r, "sh", "-c", "cat /etc/alr/alr.toml | grep \"autoPull\"")
-			execShouldNoError(t, r, "alr", "config", "get", "autoPull")
-			execShouldError(t, r, "alr", "config", "set", "autoPull")
-			execShouldNoError(t, r, "sudo", "alr", "config", "set", "autoPull", "false")
-			execShouldNoError(t, r, "sh", "-c", "alr config show | grep \"autoPull: false\"")
-			execShouldNoError(t, r, "sh", "-c", "alr config get | grep \"autoPull: false\"")
-			execShouldNoError(t, r, "sh", "-c", "cat /etc/alr/alr.toml | grep \"autoPull = false\"")
-			execShouldNoError(t, r, "alr", "config", "set", "autoPull", "true")
-			execShouldNoError(t, r, "sh", "-c", "cat /etc/alr/alr.toml | grep \"autoPull = true\"")
+			execShouldNoError(t, r, "sh", "-c", "stplr config show | grep \"autoPull: true\"")
+			execShouldNoError(t, r, "sh", "-c", "stplr config get | grep \"autoPull: true\"")
+			execShouldError(t, r, "sh", "-c", "cat /etc/stplr/stplr.toml | grep \"autoPull\"")
+			execShouldNoError(t, r, "stplr", "config", "get", "autoPull")
+			execShouldError(t, r, "stplr", "config", "set", "autoPull")
+			execShouldNoError(t, r, "sudo", "stplr", "config", "set", "autoPull", "false")
+			execShouldNoError(t, r, "sh", "-c", "stplr config show | grep \"autoPull: false\"")
+			execShouldNoError(t, r, "sh", "-c", "stplr config get | grep \"autoPull: false\"")
+			execShouldNoError(t, r, "sh", "-c", "cat /etc/stplr/stplr.toml | grep \"autoPull = false\"")
+			execShouldNoError(t, r, "stplr", "config", "set", "autoPull", "true")
+			execShouldNoError(t, r, "sh", "-c", "cat /etc/stplr/stplr.toml | grep \"autoPull = true\"")
 		},
 	)
 }

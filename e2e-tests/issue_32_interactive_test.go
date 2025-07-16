@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,11 +36,11 @@ func TestE2EIssue32Interactive(t *testing.T) {
 		"issue-32-interactive",
 		COMMON_SYSTEMS,
 		func(t *testing.T, r capytest.Runner) {
-			execShouldNoError(t, r, "alr", "--interactive=false", "remove", "ca-certificates")
-			execShouldNoError(t, r, "sudo", "alr", "--interactive=false", "remove", "openssl")
-			execShouldNoError(t, r, "alr", "fix")
+			execShouldNoError(t, r, "stplr", "--interactive=false", "remove", "ca-certificates")
+			execShouldNoError(t, r, "sudo", "stplr", "--interactive=false", "remove", "openssl")
+			execShouldNoError(t, r, "stplr", "fix")
 			execShouldNoError(t, r, "sudo", "apt-get", "update")
-			execShouldNoError(t, r, "sudo", "alr", "--interactive=false", "install", "ca-certificates")
+			execShouldNoError(t, r, "sudo", "stplr", "--interactive=false", "install", "ca-certificates")
 		},
 	)
 }

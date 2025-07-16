@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,10 +38,10 @@ func TestE2EFirejailedPackage(t *testing.T) {
 		COMMON_SYSTEMS,
 		func(t *testing.T, r capytest.Runner) {
 			defaultPrepare(t, r)
-			execShouldNoError(t, r, "alr", "build", "-p", fmt.Sprintf("%s/firejailed-pkg", REPO_NAME_FOR_E2E_TESTS))
-			execShouldError(t, r, "alr", "build", "-p", fmt.Sprintf("%s/firejailed-pkg-incorrect", REPO_NAME_FOR_E2E_TESTS))
-			execShouldNoError(t, r, "sh", "-c", "dpkg -c *.deb | grep -q '/usr/lib/alr/firejailed/_usr_bin_danger.sh'")
-			execShouldNoError(t, r, "sh", "-c", "dpkg -c *.deb | grep -q '/usr/lib/alr/firejailed/_usr_bin_danger.sh.profile'")
+			execShouldNoError(t, r, "stplr", "build", "-p", fmt.Sprintf("%s/firejailed-pkg", REPO_NAME_FOR_E2E_TESTS))
+			execShouldError(t, r, "stplr", "build", "-p", fmt.Sprintf("%s/firejailed-pkg-incorrect", REPO_NAME_FOR_E2E_TESTS))
+			execShouldNoError(t, r, "sh", "-c", "dpkg -c *.deb | grep -q '/usr/lib/stplr/firejailed/_usr_bin_danger.sh'")
+			execShouldNoError(t, r, "sh", "-c", "dpkg -c *.deb | grep -q '/usr/lib/stplr/firejailed/_usr_bin_danger.sh.profile'")
 		},
 	)
 }

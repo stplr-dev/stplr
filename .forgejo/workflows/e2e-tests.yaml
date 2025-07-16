@@ -1,5 +1,11 @@
-# ALR - Any Linux Repository
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# This file was originally part of the project "ALR - Any Linux Repository"
+# created by the ALR Authors.
+# It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+#
 # Copyright (C) 2025 The ALR Authors
+# Copyright (C) 2025 The Stapler Authors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,10 +22,10 @@
 
 name: E2E
 
-# on:
-#   push:
-#     branches: [ main ]
-#   pull_request:
+on:
+  push:
+    branches: [ main ]
+  pull_request:
 on:
   workflow_dispatch:
 
@@ -32,23 +38,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: https://github.com/actions/checkout@v4
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       
       - name: Set up Go
-        uses: https://github.com/actions/setup-go@v5
+        uses: actions/setup-go@v5
         with:
           go-version: '1.24'
           cache: false
-
-      # - name: Cache Podman images
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: |
-      #       ~/.local/share/containers/storage
-      #       /var/lib/containers/storage
-      #     key: ${{ runner.os }}-primes            
 
       - name: Run E2E tests
         env:

@@ -1,8 +1,13 @@
-// This file was originally part of the project "LURE - Linux User REpository", created by Elara Musayelyan.
-// It has been modified as part of "ALR - Any Linux Repository" by the ALR Authors.
+// SPDX-License-Identifier: GPL-3.0-or-later
 //
-// ALR - Any Linux Repository
+// This file was originally part of the project "LURE - Linux User REpository",
+// created by Elara Musayelyan.
+// It was later modified as part of "ALR - Any Linux Repository" by the ALR Authors.
+// This version has been further modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
+// Copyright (C) Elara Musayelyan (LURE)
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,19 +35,19 @@ import (
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v2"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/build"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/cliutils"
-	appbuilder "gitea.plemya-x.ru/Plemya-x/ALR/internal/cliutils/app_builder"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/manager"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/overrides"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/utils"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/alrsh"
+	"go.stplr.dev/stplr/internal/build"
+	"go.stplr.dev/stplr/internal/cliutils"
+	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
+	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/internal/overrides"
+	"go.stplr.dev/stplr/internal/utils"
+	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
 )
 
 func ListCmd() *cli.Command {
 	return &cli.Command{
 		Name:    "list",
-		Usage:   gotext.Get("List ALR repo packages"),
+		Usage:   gotext.Get("List Stapler repo packages"),
 		Aliases: []string{"ls"},
 		Flags: []cli.Flag{
 			&cli.BoolFlag{

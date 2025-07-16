@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,7 +20,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package alrsh
+package staplerfile
 
 import (
 	"fmt"
@@ -32,7 +38,7 @@ func (fs *localFs) Open(name string) (fs.File, error) {
 }
 
 func ReadFromIOReader(r io.Reader, script string) (*ScriptFile, error) {
-	file, err := syntax.NewParser().Parse(r, "alr.sh")
+	file, err := syntax.NewParser().Parse(r, "Staplerfile")
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +51,7 @@ func ReadFromIOReader(r io.Reader, script string) (*ScriptFile, error) {
 func ReadFromFS(fsys fs.FS, script string) (*ScriptFile, error) {
 	fl, err := fsys.Open(script)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open alr.sh: %w", err)
+		return nil, fmt.Errorf("failed to open Staplerfile: %w", err)
 	}
 	defer fl.Close()
 

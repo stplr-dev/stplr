@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,7 +33,8 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/logger"
+	"go.stplr.dev/stplr/internal/constants"
+	"go.stplr.dev/stplr/internal/logger"
 )
 
 var pluginMap = map[string]plugin.Plugin{
@@ -38,15 +45,15 @@ var pluginMap = map[string]plugin.Plugin{
 
 var HandshakeConfig = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
-	MagicCookieKey:   "ALR_PLUGIN",
+	MagicCookieKey:   "STPLR_PLUGIN",
 	MagicCookieValue: "-",
 }
 
 func setCommonCmdEnv(cmd *exec.Cmd) {
 	cmd.Env = []string{
-		"HOME=/var/cache/alr",
-		"LOGNAME=alr",
-		"USER=alr",
+		fmt.Sprintf("HOME=%s", constants.SystemCachePath),
+		fmt.Sprintf("LOGNAME=%s", constants.BuilderUser),
+		fmt.Sprintf("USER=%s", constants.BuilderUser),
 		"PATH=/usr/bin:/bin:/usr/local/bin",
 	}
 	for _, env := range os.Environ() {
@@ -103,7 +110,7 @@ func getSafeExecutor[T any](subCommand, pluginName string) (T, func(), error) {
 		Logger:          logger.GetHCLoggerAdapter(),
 		SkipHostEnv:     true,
 		UnixSocketConfig: &plugin.UnixSocketConfig{
-			Group: "alr",
+			Group: constants.BuilderGroup,
 		},
 		SyncStderr: os.Stderr,
 	})

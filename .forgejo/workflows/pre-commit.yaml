@@ -1,5 +1,11 @@
-# ALR - Any Linux Repository
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# This file was originally part of the project "ALR - Any Linux Repository"
+# created by the ALR Authors.
+# It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+#
 # Copyright (C) 2025 The ALR Authors
+# Copyright (C) 2025 The Stapler Authors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,15 +37,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: https://github.com/actions/checkout@v4
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: https://github.com/actions/setup-go@v5
+        uses: actions/setup-go@v5
         with:
           go-version: '1.24'
       
       - name: Set up Python for pre-commit
-        uses: https://github.com/actions/setup-python@v5
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       

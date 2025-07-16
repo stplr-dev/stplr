@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,7 +37,7 @@ func TestE2EIssue50InstallMultiple(t *testing.T) {
 		COMMON_SYSTEMS,
 		func(t *testing.T, r capytest.Runner) {
 			defaultPrepare(t, r)
-			execShouldNoError(t, r, "sudo", "alr", "in", "foo-pkg", "bar-pkg")
+			execShouldNoError(t, r, "sudo", "stplr", "in", "foo-pkg", "bar-pkg")
 			execShouldNoError(t, r, "cat", "/opt/foo")
 			execShouldNoError(t, r, "cat", "/opt/bar")
 		},

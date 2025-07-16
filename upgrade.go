@@ -1,8 +1,13 @@
-// This file was originally part of the project "LURE - Linux User REpository", created by Elara Musayelyan.
-// It has been modified as part of "ALR - Any Linux Repository" by the ALR Authors.
+// SPDX-License-Identifier: GPL-3.0-or-later
 //
-// ALR - Any Linux Repository
+// This file was originally part of the project "LURE - Linux User REpository",
+// created by Elara Musayelyan.
+// It was later modified as part of "ALR - Any Linux Repository" by the ALR Authors.
+// This version has been further modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
+// Copyright (C) Elara Musayelyan (LURE)
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,17 +34,17 @@ import (
 	"go.elara.ws/vercmp"
 	"golang.org/x/exp/maps"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/build"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/cliutils"
-	appbuilder "gitea.plemya-x.ru/Plemya-x/ALR/internal/cliutils/app_builder"
-	database "gitea.plemya-x.ru/Plemya-x/ALR/internal/db"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/manager"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/overrides"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/search"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/utils"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/alrsh"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/distro"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/types"
+	"go.stplr.dev/stplr/internal/build"
+	"go.stplr.dev/stplr/internal/cliutils"
+	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
+	database "go.stplr.dev/stplr/internal/db"
+	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/internal/overrides"
+	"go.stplr.dev/stplr/internal/search"
+	"go.stplr.dev/stplr/internal/utils"
+	"go.stplr.dev/stplr/pkg/distro"
+	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
+	"go.stplr.dev/stplr/pkg/types"
 )
 
 func UpgradeCmd() *cli.Command {

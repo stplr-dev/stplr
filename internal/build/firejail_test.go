@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,8 +30,8 @@ import (
 	"github.com/goreleaser/nfpm/v2/files"
 	"github.com/stretchr/testify/assert"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/alrsh"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/types"
+	"go.stplr.dev/stplr/pkg/staplerfile"
+	"go.stplr.dev/stplr/pkg/types"
 )
 
 func TestIsBinaryFile(t *testing.T) {
@@ -89,15 +95,15 @@ func TestCreateWrapperScript(t *testing.T) {
 	}{
 		{
 			"basic wrapper",
-			"/usr/lib/alr/firejailed/_usr_bin_test",
-			"/usr/lib/alr/firejailed/_usr_bin_test.profile",
-			"#!/bin/bash\nexec firejail --profile=\"/usr/lib/alr/firejailed/_usr_bin_test.profile\" \"/usr/lib/alr/firejailed/_usr_bin_test\" \"$@\"\n",
+			"/usr/lib/sta/firejailed/_usr_bin_test",
+			"/usr/lib/sta/firejailed/_usr_bin_test.profile",
+			"#!/bin/bash\nexec firejail --profile=\"/usr/lib/sta/firejailed/_usr_bin_test.profile\" \"/usr/lib/sta/firejailed/_usr_bin_test\" \"$@\"\n",
 		},
 		{
 			"path with spaces",
-			"/usr/lib/alr/firejailed/_usr_bin_my_app",
-			"/usr/lib/alr/firejailed/_usr_bin_my_app.profile",
-			"#!/bin/bash\nexec firejail --profile=\"/usr/lib/alr/firejailed/_usr_bin_my_app.profile\" \"/usr/lib/alr/firejailed/_usr_bin_my_app\" \"$@\"\n",
+			"/usr/lib/sta/firejailed/_usr_bin_my_app",
+			"/usr/lib/sta/firejailed/_usr_bin_my_app.profile",
+			"#!/bin/bash\nexec firejail --profile=\"/usr/lib/sta/firejailed/_usr_bin_my_app.profile\" \"/usr/lib/sta/firejailed/_usr_bin_my_app\" \"$@\"\n",
 		},
 	}
 
@@ -126,13 +132,13 @@ func TestCreateWrapperScript(t *testing.T) {
 func TestCreateFirejailedBinary(t *testing.T) {
 	tests := []struct {
 		name        string
-		setupFunc   func(string) (*alrsh.Package, *files.Content, types.Directories)
+		setupFunc   func(string) (*staplerfile.Package, *files.Content, types.Directories)
 		expectError bool
 		errorMsg    string
 	}{
 		{
 			"successful creation with default profile",
-			func(tmpDir string) (*alrsh.Package, *files.Content, types.Directories) {
+			func(tmpDir string) (*staplerfile.Package, *files.Content, types.Directories) {
 				pkgDir := filepath.Join(tmpDir, "pkg")
 				scriptDir := filepath.Join(tmpDir, "scripts")
 				os.MkdirAll(pkgDir, 0o755)
@@ -147,13 +153,13 @@ func TestCreateFirejailedBinary(t *testing.T) {
 				defaultProfile := filepath.Join(scriptDir, "default.profile")
 				os.WriteFile(defaultProfile, []byte("include /etc/firejail/default.profile\nnet none"), 0o644)
 
-				pkg := &alrsh.Package{
+				pkg := &staplerfile.Package{
 					Name: "test-pkg",
-					FireJailProfiles: alrsh.OverridableFromMap(map[string]map[string]string{
+					FireJailProfiles: staplerfile.OverridableFromMap(map[string]map[string]string{
 						"": {"default": "default.profile"},
 					}),
 				}
-				alrsh.ResolvePackage(pkg, []string{""})
+				staplerfile.ResolvePackage(pkg, []string{""})
 
 				content := &files.Content{
 					Source:      srcBinary,
@@ -169,7 +175,7 @@ func TestCreateFirejailedBinary(t *testing.T) {
 		},
 		{
 			"successful creation with specific profile",
-			func(tmpDir string) (*alrsh.Package, *files.Content, types.Directories) {
+			func(tmpDir string) (*staplerfile.Package, *files.Content, types.Directories) {
 				pkgDir := filepath.Join(tmpDir, "pkg")
 				scriptDir := filepath.Join(tmpDir, "scripts")
 				os.MkdirAll(pkgDir, 0o755)
@@ -187,13 +193,13 @@ func TestCreateFirejailedBinary(t *testing.T) {
 				specialProfile := filepath.Join(scriptDir, "special.profile")
 				os.WriteFile(specialProfile, []byte("include /etc/firejail/default.profile\nnet none\nprivate-tmp"), 0o644)
 
-				pkg := &alrsh.Package{
+				pkg := &staplerfile.Package{
 					Name: "test-pkg",
-					FireJailProfiles: alrsh.OverridableFromMap(map[string]map[string]string{
+					FireJailProfiles: staplerfile.OverridableFromMap(map[string]map[string]string{
 						"": {"default": "default.profile", "/usr/bin/special-binary": "special.profile"},
 					}),
 				}
-				alrsh.ResolvePackage(pkg, []string{""})
+				staplerfile.ResolvePackage(pkg, []string{""})
 
 				content := &files.Content{
 					Source:      srcBinary,
@@ -209,7 +215,7 @@ func TestCreateFirejailedBinary(t *testing.T) {
 		},
 		{
 			"missing default profile",
-			func(tmpDir string) (*alrsh.Package, *files.Content, types.Directories) {
+			func(tmpDir string) (*staplerfile.Package, *files.Content, types.Directories) {
 				pkgDir := filepath.Join(tmpDir, "pkg")
 				scriptDir := filepath.Join(tmpDir, "scripts")
 				os.MkdirAll(pkgDir, 0o755)
@@ -218,11 +224,11 @@ func TestCreateFirejailedBinary(t *testing.T) {
 				srcBinary := filepath.Join(tmpDir, "test-binary")
 				os.WriteFile(srcBinary, []byte("#!/bin/bash\necho test"), 0o755)
 
-				pkg := &alrsh.Package{
+				pkg := &staplerfile.Package{
 					Name:             "test-pkg",
-					FireJailProfiles: alrsh.OverridableFromMap(map[string]map[string]string{"": {}}),
+					FireJailProfiles: staplerfile.OverridableFromMap(map[string]map[string]string{"": {}}),
 				}
-				alrsh.ResolvePackage(pkg, []string{""})
+				staplerfile.ResolvePackage(pkg, []string{""})
 
 				content := &files.Content{Source: srcBinary, Destination: "./usr/bin/test-binary", Type: "file"}
 				dirs := types.Directories{PkgDir: pkgDir, ScriptDir: scriptDir}
@@ -233,7 +239,7 @@ func TestCreateFirejailedBinary(t *testing.T) {
 		},
 		{
 			"profile file not found",
-			func(tmpDir string) (*alrsh.Package, *files.Content, types.Directories) {
+			func(tmpDir string) (*staplerfile.Package, *files.Content, types.Directories) {
 				pkgDir := filepath.Join(tmpDir, "pkg")
 				scriptDir := filepath.Join(tmpDir, "scripts")
 				os.MkdirAll(pkgDir, 0o755)
@@ -242,11 +248,11 @@ func TestCreateFirejailedBinary(t *testing.T) {
 				srcBinary := filepath.Join(tmpDir, "test-binary")
 				os.WriteFile(srcBinary, []byte("#!/bin/bash\necho test"), 0o755)
 
-				pkg := &alrsh.Package{
+				pkg := &staplerfile.Package{
 					Name:             "test-pkg",
-					FireJailProfiles: alrsh.OverridableFromMap(map[string]map[string]string{"": {"default": "nonexistent.profile"}}),
+					FireJailProfiles: staplerfile.OverridableFromMap(map[string]map[string]string{"": {"default": "nonexistent.profile"}}),
 				}
-				alrsh.ResolvePackage(pkg, []string{""})
+				staplerfile.ResolvePackage(pkg, []string{""})
 
 				content := &files.Content{Source: srcBinary, Destination: "./usr/bin/test-binary", Type: "file"}
 				dirs := types.Directories{PkgDir: pkgDir, ScriptDir: scriptDir}
@@ -257,7 +263,7 @@ func TestCreateFirejailedBinary(t *testing.T) {
 		},
 		{
 			"invalid destination path",
-			func(tmpDir string) (*alrsh.Package, *files.Content, types.Directories) {
+			func(tmpDir string) (*staplerfile.Package, *files.Content, types.Directories) {
 				pkgDir := filepath.Join(tmpDir, "pkg")
 				scriptDir := filepath.Join(tmpDir, "scripts")
 				os.MkdirAll(pkgDir, 0o755)
@@ -269,8 +275,8 @@ func TestCreateFirejailedBinary(t *testing.T) {
 				defaultProfile := filepath.Join(scriptDir, "default.profile")
 				os.WriteFile(defaultProfile, []byte("include /etc/firejail/default.profile"), 0o644)
 
-				pkg := &alrsh.Package{Name: "test-pkg", FireJailProfiles: alrsh.OverridableFromMap(map[string]map[string]string{"": {"default": "default.profile"}})}
-				alrsh.ResolvePackage(pkg, []string{""})
+				pkg := &staplerfile.Package{Name: "test-pkg", FireJailProfiles: staplerfile.OverridableFromMap(map[string]map[string]string{"": {"default": "default.profile"}})}
+				staplerfile.ResolvePackage(pkg, []string{""})
 
 				content := &files.Content{Source: srcBinary, Destination: ".", Type: "file"}
 				dirs := types.Directories{PkgDir: pkgDir, ScriptDir: scriptDir}
@@ -302,11 +308,11 @@ func TestCreateFirejailedBinary(t *testing.T) {
 				assert.Len(t, result, 2)
 
 				binContent := result[0]
-				assert.Contains(t, binContent.Destination, "usr/lib/alr/firejailed/")
+				assert.Contains(t, binContent.Destination, "usr/lib/stplr/firejailed/")
 				assert.FileExists(t, binContent.Source)
 
 				profileContent := result[1]
-				assert.Contains(t, profileContent.Destination, "usr/lib/alr/firejailed/")
+				assert.Contains(t, profileContent.Destination, "usr/lib/stplr/firejailed/")
 				assert.Contains(t, profileContent.Destination, ".profile")
 				assert.FileExists(t, profileContent.Source)
 

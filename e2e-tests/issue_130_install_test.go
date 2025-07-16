@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,34 +34,34 @@ import (
 func TestE2EIssue130Install(t *testing.T) {
 	runMatrixSuite(
 		t,
-		"alr install {repo}/{package}",
+		"stplr install {repo}/{package}",
 		COMMON_SYSTEMS,
 		func(t *testing.T, r capytest.Runner) {
 			t.Parallel()
 			defaultPrepare(t, r)
 
-			r.Command("sudo", "alr", "in", fmt.Sprintf("%s/foo-pkg", REPO_NAME_FOR_E2E_TESTS)).
+			r.Command("sudo", "stplr", "in", fmt.Sprintf("%s/foo-pkg", REPO_NAME_FOR_E2E_TESTS)).
 				ExpectSuccess().
 				Run(t)
 
-			r.Command("sudo", "alr", "in", fmt.Sprintf("%s/bar-pkg", "NOT_REPO_NAME_FOR_E2E_TESTS")).
+			r.Command("sudo", "stplr", "in", fmt.Sprintf("%s/bar-pkg", "NOT_REPO_NAME_FOR_E2E_TESTS")).
 				ExpectFailure().
 				Run(t)
 		},
 	)
 	runMatrixSuite(
 		t,
-		"alr install {package}+alr-{repo}",
+		"alr install {package}+stplr-{repo}",
 		COMMON_SYSTEMS,
 		func(t *testing.T, r capytest.Runner) {
 			t.Parallel()
 			defaultPrepare(t, r)
 
-			r.Command("sudo", "alr", "in", fmt.Sprintf("foo-pkg+alr-%s", REPO_NAME_FOR_E2E_TESTS)).
+			r.Command("sudo", "stplr", "in", fmt.Sprintf("foo-pkg+stplr-%s", REPO_NAME_FOR_E2E_TESTS)).
 				ExpectSuccess().
 				Run(t)
 
-			r.Command("sudo", "alr", "in", fmt.Sprintf("bar-pkg+alr-%s", "NOT_REPO_NAME_FOR_E2E_TESTS")).
+			r.Command("sudo", "stplr", "in", fmt.Sprintf("bar-pkg+stplr-%s", "NOT_REPO_NAME_FOR_E2E_TESTS")).
 				ExpectFailure().
 				Run(t)
 		},

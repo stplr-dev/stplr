@@ -1,4 +1,4 @@
-module gitea.plemya-x.ru/Plemya-x/ALR
+module go.stplr.dev/stplr
 
 go 1.24.4
 

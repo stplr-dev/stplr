@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,13 +37,13 @@ func TestE2EIssue74Upgradable(t *testing.T) {
 		COMMON_SYSTEMS,
 		func(t *testing.T, r capytest.Runner) {
 			defaultPrepare(t, r)
-			execShouldNoError(t, r, "sudo", "alr", "repo", "set-ref", "alr-repo", "bd26236cd7")
-			execShouldNoError(t, r, "alr", "ref")
-			execShouldNoError(t, r, "sudo", "alr", "in", "bar-pkg")
-			execShouldNoError(t, r, "sh", "-c", "test $(alr list -U | wc -l) -eq 0 || exit 1")
-			execShouldNoError(t, r, "sudo", "alr", "repo", "set-ref", "alr-repo", "d9a3541561")
-			execShouldNoError(t, r, "sudo", "alr", "ref")
-			execShouldNoError(t, r, "sh", "-c", "test $(alr list -U | wc -l) -eq 1 || exit 1")
+			execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", REPO_NAME_FOR_E2E_TESTS, "9889ee9375bdf9a6410c86dc00f225ca7eb78bac")
+			execShouldNoError(t, r, "stplr", "ref")
+			execShouldNoError(t, r, "sudo", "stplr", "in", "bar-pkg")
+			execShouldNoError(t, r, "sh", "-c", "test $(stplr list -U | wc -l) -eq 0 || exit 1")
+			execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", REPO_NAME_FOR_E2E_TESTS, "2a0187ea1118a922124f7567aa4565034dc77517")
+			execShouldNoError(t, r, "sudo", "stplr", "ref")
+			execShouldNoError(t, r, "sh", "-c", "test $(stplr list -U | wc -l) -eq 1 || exit 1")
 		},
 	)
 }

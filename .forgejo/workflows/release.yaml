@@ -1,0 +1,78 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# This file was originally part of the project "ALR - Any Linux Repository"
+# created by the ALR Authors.
+# It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+#
+# Copyright (C) 2025 The ALR Authors
+# Copyright (C) 2025 The Stapler Authors
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Get Changes between Tags
+        id: changes
+        uses: https://github.com/simbo/changes-between-tags-action@v1
+
+      - name: Set version
+        run: |
+          version=$(echo "${GITHUB_REF##*/}" | sed 's/^v//')
+          echo "Version - $version"
+          echo "VERSION=$version" >> $GITHUB_ENV
+
+      - name: Prepare for install
+        run: |
+          apt-get update && apt-get install -y libcap2-bin bindfs
+
+      - name: Build
+        env:
+          IGNORE_ROOT_CHECK: 1
+        run: |
+          make build
+
+      - name: Create tar.gz
+        run: |
+          mkdir -p ./out/completion
+          cp stplr ./out
+          cp scripts/completion/bash ./out/completion/stplr
+          cp scripts/completion/zsh ./out/completion/_stplr
+
+          ( cd out && tar -czvf ../stplr-${{ env.VERSION }}-linux-x86_64.tar.gz * )
+
+      - name: Release
+        uses: https://github.com/akkuman/gitea-release-action@v1
+        with:
+          body: ${{ steps.changes.outputs.changes }}
+          files: |-
+            stplr-${{ env.VERSION }}-linux-x86_64.tar.gz

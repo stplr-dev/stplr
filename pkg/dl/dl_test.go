@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,9 +37,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/config"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/dl"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/dlcache"
+	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/pkg/dl"
+	"go.stplr.dev/stplr/pkg/dlcache"
 )
 
 type TestALRConfig struct{}
@@ -52,8 +58,7 @@ func TestDownloadWithoutCache(t *testing.T) {
 	}
 
 	prepareServer := func() *httptest.Server {
-		// URL вашего Git-сервера
-		gitServerURL, err := url.Parse("https://gitea.plemya-x.ru")
+		gitServerURL, err := url.Parse("https://codeberg.org")
 		if err != nil {
 			log.Fatalf("Failed to parse git server URL: %v", err)
 		}
@@ -91,11 +96,11 @@ func TestDownloadWithoutCache(t *testing.T) {
 		},
 		{
 			name: "git download",
-			path: "git+%s/git-downloader/git/Plemya-x/alr-repo",
+			path: "git+%s/git-downloader/git/stapler/repo-for-tests",
 			expected: func(t *testing.T, err error, tmpdir string) {
 				assert.NoError(t, err)
 
-				_, err = os.Stat(path.Join(tmpdir, "alr-repo.toml"))
+				_, err = os.Stat(path.Join(tmpdir, "stapler-repo.toml"))
 				assert.NoError(t, err)
 			},
 		},

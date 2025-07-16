@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -30,11 +36,11 @@ func TestE2EAlrAddRepo(t *testing.T) {
 		"add-repo-remove-repo",
 		COMMON_SYSTEMS,
 		func(t *testing.T, r capytest.Runner) {
-			execShouldNoError(t, r, "sudo", "alr", "addrepo", "--name", "alr-repo", "--url", "https://gitea.plemya-x.ru/Plemya-x/alr-repo.git")
-			execShouldNoError(t, r, "bash", "-c", "cat /etc/alr/alr.toml")
-			execShouldNoError(t, r, "sudo", "alr", "removerepo", "--name", "alr-repo")
+			execShouldNoError(t, r, "sudo", "stplr", "addrepo", "--name", "alr-repo", "--url", REPO_URL_FOR_E2E_TESTS)
+			execShouldNoError(t, r, "bash", "-c", "cat /etc/stplr/stplr.toml")
+			execShouldNoError(t, r, "sudo", "stplr", "removerepo", "--name", "alr-repo")
 
-			r.Command("bash", "-c", "cat /etc/alr/alr.toml").
+			r.Command("bash", "-c", "cat /etc/stplr/stplr.toml").
 				ExpectStdoutContains("repo = []").
 				Run(t)
 		},

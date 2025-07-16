@@ -1,5 +1,11 @@
-// ALR - Any Linux Repository
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// This file was originally part of the project "ALR - Any Linux Repository"
+// created by the ALR Authors.
+// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,14 +38,14 @@ import (
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v2"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/build"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/cliutils"
-	appbuilder "gitea.plemya-x.ru/Plemya-x/ALR/internal/cliutils/app_builder"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/config"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/constants"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/logger"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/manager"
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/utils"
+	"go.stplr.dev/stplr/internal/build"
+	"go.stplr.dev/stplr/internal/cliutils"
+	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
+	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/constants"
+	"go.stplr.dev/stplr/internal/logger"
+	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/internal/utils"
 )
 
 func InternalBuildCmd() *cli.Command {
@@ -239,9 +245,9 @@ func InternalMountCmd() *cli.Command {
 				return cliutils.FormatCliExit("cannot get current user", err)
 			}
 
-			_, alrGid, err := utils.GetUidGidAlrUser()
+			_, alrGid, err := utils.GetUidGidStaplerUser()
 			if err != nil {
-				return cliutils.FormatCliExit("cannot get alr user", err)
+				return cliutils.FormatCliExit("cannot get stapler-builder user", err)
 			}
 
 			if _, err := os.Stat(sourceDir); err != nil {
@@ -262,15 +268,15 @@ func InternalMountCmd() *cli.Command {
 				return err
 			}
 
-			if err := os.MkdirAll(constants.AlrRunDir, 0o770); err != nil {
-				return cliutils.FormatCliExit(fmt.Sprintf("failed to create %s", constants.AlrRunDir), err)
+			if err := os.MkdirAll(constants.StaRunDir, 0o770); err != nil {
+				return cliutils.FormatCliExit(fmt.Sprintf("failed to create %s", constants.StaRunDir), err)
 			}
 
-			if err := os.Chown(constants.AlrRunDir, 0, alrGid); err != nil {
-				return cliutils.FormatCliExit(fmt.Sprintf("failed to chown %s", constants.AlrRunDir), err)
+			if err := os.Chown(constants.StaRunDir, 0, alrGid); err != nil {
+				return cliutils.FormatCliExit(fmt.Sprintf("failed to chown %s", constants.StaRunDir), err)
 			}
 
-			targetDir := filepath.Join(constants.AlrRunDir, fmt.Sprintf("bindfs-%d", os.Getpid()))
+			targetDir := filepath.Join(constants.StaRunDir, fmt.Sprintf("bindfs-%d", os.Getpid()))
 			// 0750: owner (root) and group (alr)
 			if err := os.MkdirAll(targetDir, 0o750); err != nil {
 				return cliutils.FormatCliExit("error creating bindfs target directory", err)
@@ -284,7 +290,7 @@ func InternalMountCmd() *cli.Command {
 
 			bindfsCmd := exec.Command(
 				"bindfs",
-				fmt.Sprintf("--map=%s/alr:@%s/@alr", u.Uid, u.Gid),
+				fmt.Sprintf("--map=%s/%s:@%s/@%s", u.Uid, constants.BuilderUser, u.Gid, constants.BuilderGroup),
 				sourceDir,
 				targetDir,
 			)

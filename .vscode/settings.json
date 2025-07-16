@@ -1,0 +1,6 @@
+{
+    "explorer.confirmDelete": false,
+    "go.testTags": "e2e",
+    "go.buildTags": "e2e",
+    "go.testTimeout": "30m"
+}

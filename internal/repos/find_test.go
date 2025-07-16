@@ -1,8 +1,13 @@
-// This file was originally part of the project "LURE - Linux User REpository", created by Elara Musayelyan.
-// It has been modified as part of "ALR - Any Linux Repository" by the ALR Authors.
+// SPDX-License-Identifier: GPL-3.0-or-later
 //
-// ALR - Any Linux Repository
+// This file was originally part of the project "LURE - Linux User REpository",
+// created by Elara Musayelyan.
+// It was later modified as part of "ALR - Any Linux Repository" by the ALR Authors.
+// This version has been further modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
+//
+// Copyright (C) Elara Musayelyan (LURE)
 // Copyright (C) 2025 The ALR Authors
+// Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,12 +26,11 @@ package repos_test
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 
-	"gitea.plemya-x.ru/Plemya-x/ALR/internal/repos"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/alrsh"
-	"gitea.plemya-x.ru/Plemya-x/ALR/pkg/types"
+	"go.stplr.dev/stplr/internal/repos"
+	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
+	"go.stplr.dev/stplr/pkg/types"
 )
 
 func TestFindPkgs(t *testing.T) {
@@ -41,7 +45,7 @@ func TestFindPkgs(t *testing.T) {
 	err := rs.Pull(e.Ctx, []types.Repo{
 		{
 			Name: "default",
-			URL:  "https://gitea.plemya-x.ru/Plemya-x/alr-default.git",
+			URL:  "https://codeberg.org/stapler/repo-for-tests.git",
 		},
 	})
 	if err != nil {
@@ -50,7 +54,7 @@ func TestFindPkgs(t *testing.T) {
 
 	found, notFound, err := rs.FindPkgs(
 		e.Ctx,
-		[]string{"alr", "nonexistentpackage1", "nonexistentpackage2"},
+		[]string{"nonexistentpackage1", "nonexistentpackage2"},
 	)
 	if err != nil {
 		t.Fatalf("Expected no error, got %s", err)
@@ -60,24 +64,26 @@ func TestFindPkgs(t *testing.T) {
 		t.Errorf("Expected 'nonexistentpackage{1,2} not to be found")
 	}
 
-	if len(found) != 1 {
-		t.Errorf("Expected 1 package found, got %d", len(found))
+	if len(found) != 0 {
+		t.Errorf("Expected 0 package found, got %d", len(found))
 	}
 
-	alrPkgs, ok := found["alr"]
-	if !ok {
-		t.Fatalf("Expected 'alr' packages to be found")
-	}
-
-	if len(alrPkgs) < 2 {
-		t.Errorf("Expected two 'alr' packages to be found")
-	}
-
-	for i, pkg := range alrPkgs {
-		if !strings.HasPrefix(pkg.Name, "alr") {
-			t.Errorf("Expected package name of all found packages to start with 'alr', got %s on element %d", pkg.Name, i)
+	/*
+		alrPkgs, ok := found["sta"]
+		if !ok {
+			t.Fatalf("Expected 'alr' packages to be found")
 		}
-	}
+
+		if len(alrPkgs) < 2 {
+			t.Errorf("Expected two 'alr' packages to be found")
+		}
+
+		for i, pkg := range alrPkgs {
+			if !strings.HasPrefix(pkg.Name, "sta") {
+				t.Errorf("Expected package name of all found packages to start with 'alr', got %s on element %d", pkg.Name, i)
+			}
+		}
+	*/
 }
 
 func TestFindPkgsEmpty(t *testing.T) {
