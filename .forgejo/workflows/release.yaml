@@ -64,11 +64,13 @@ jobs:
           cp scripts/completion/bash ./out/completion/stplr
           cp scripts/completion/zsh ./out/completion/_stplr
 
-          ( cd out && tar -czvf ../stplr-${{ env.VERSION }}-linux-x86_64.tar.gz * )
+          mkdir -p ./dist
+          ( cd out && tar -czvf ../dist/stplr-${{ env.VERSION }}-linux-x86_64.tar.gz * )
 
       - name: Release
-        uses: https://github.com/akkuman/gitea-release-action@v1
+        uses: actions/forgejo-release@v2.6.0
         with:
-          body: ${{ steps.changes.outputs.changes }}
-          files: |-
-            stplr-${{ env.VERSION }}-linux-x86_64.tar.gz
+          direction: upload
+          release-dir: ./dist
+          token: ${{ secrets.TOKEN }}
+          release-notes: ${{ steps.changes.outputs.changes }}
