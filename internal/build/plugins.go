@@ -60,7 +60,7 @@ func setCommonCmdEnv(cmd *exec.Cmd) {
 		if strings.HasPrefix(env, "LANG=") ||
 			strings.HasPrefix(env, "LANGUAGE=") ||
 			strings.HasPrefix(env, "LC_") ||
-			strings.HasPrefix(env, "ALR_LOG_LEVEL=") {
+			strings.HasPrefix(env, "STPLR_LOG_LEVEL=") {
 			cmd.Env = append(cmd.Env, env)
 		}
 	}

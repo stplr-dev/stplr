@@ -98,8 +98,8 @@ func TestResolveName(t *testing.T) {
 }
 
 func TestResolveArch(t *testing.T) {
-	os.Setenv("ALR_ARCH", "arm7")
-	defer os.Setenv("ALR_ARCH", "")
+	os.Setenv("STPLR_ARCH", "arm7")
+	defer os.Setenv("STPLR_ARCH", "")
 
 	names, err := overrides.Resolve(info, &overrides.Opts{
 		Name:        "deps",

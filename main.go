@@ -130,7 +130,7 @@ func setLogLevel(newLevel string) {
 
 func main() {
 	logger.SetupDefault()
-	setLogLevel(os.Getenv("ALR_LOG_LEVEL"))
+	setLogLevel(os.Getenv("STPLR_LOG_LEVEL"))
 	translations.Setup()
 
 	ctx := context.Background()

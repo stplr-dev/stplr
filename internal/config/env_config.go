@@ -47,16 +47,16 @@ func (c *EnvConfig) koanf() *koanf.Koanf {
 
 func (c *EnvConfig) Load() error {
 	allowedKeys := map[string]struct{}{
-		"ALR_LOG_LEVEL":   {},
-		"ALR_PAGER_STYLE": {},
-		"ALR_AUTO_PULL":   {},
+		"STPLR_LOG_LEVEL":   {},
+		"STPLR_PAGER_STYLE": {},
+		"STPLR_AUTO_PULL":   {},
 	}
-	err := c.k.Load(env.Provider("ALR_", ".", func(s string) string {
+	err := c.k.Load(env.Provider("STPLR_", ".", func(s string) string {
 		_, ok := allowedKeys[s]
 		if !ok {
 			return ""
 		}
-		withoutPrefix := strings.TrimPrefix(s, "ALR_")
+		withoutPrefix := strings.TrimPrefix(s, "STPLR_")
 		lowered := strings.ToLower(withoutPrefix)
 		dotted := strings.ReplaceAll(lowered, "__", ".")
 		parts := strings.Split(dotted, ".")

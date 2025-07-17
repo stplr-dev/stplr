@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+//
 // Stapler
 // Copyright (C) 2025 The Stapler Authors
 //

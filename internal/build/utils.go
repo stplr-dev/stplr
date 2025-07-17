@@ -183,10 +183,10 @@ func getBasePkgInfo(vars *alrsh.Package, input interface {
 }
 
 // Функция getPkgFormat возвращает формат пакета из менеджера пакетов,
-// или ALR_PKG_FORMAT, если он установлен.
+// или STPLR_PKG_FORMAT, если он установлен.
 func GetPkgFormat(mgr manager.Manager) string {
 	pkgFormat := mgr.Format()
-	if format, ok := os.LookupEnv("ALR_PKG_FORMAT"); ok {
+	if format, ok := os.LookupEnv("STPLR_PKG_FORMAT"); ok {
 		pkgFormat = format
 	}
 	return pkgFormat

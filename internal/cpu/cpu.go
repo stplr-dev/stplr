@@ -34,10 +34,10 @@ import (
 	"golang.org/x/sys/cpu"
 )
 
-// armVariant checks which variant of ARM alr is running
+// armVariant checks which variant of ARM stplr is running
 // on, by using the same detection method as Go itself
 func armVariant() string {
-	armEnv := os.Getenv("ALR_ARM_VARIANT")
+	armEnv := os.Getenv("STPLR_ARM_VARIANT")
 	// ensure value has "arm" prefix, such as arm5 or arm6
 	if strings.HasPrefix(armEnv, "arm") {
 		return armEnv
@@ -55,7 +55,7 @@ func armVariant() string {
 
 // Arch returns the canonical CPU architecture of the system
 func Arch() string {
-	arch := os.Getenv("ALR_ARCH")
+	arch := os.Getenv("STPLR_ARCH")
 	if arch == "" {
 		arch = runtime.GOARCH
 	}

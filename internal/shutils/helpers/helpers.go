@@ -200,7 +200,7 @@ var usrLibDistros = []string{
 
 // Based on CMake's GNUInstallDirs
 func getLibPrefix(hc interp.HandlerContext) string {
-	if dir, ok := os.LookupEnv("ALR_LIB_DIR"); ok {
+	if dir, ok := os.LookupEnv("STPLR_LIB_DIR"); ok {
 		return dir
 	}
 
