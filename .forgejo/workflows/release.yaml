@@ -29,7 +29,7 @@ on:
 
 jobs:
   changelog:
-    runs-on: ubuntu-latest
+    runs-on: alt-latest
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
@@ -50,10 +50,6 @@ jobs:
           version=$(echo "${GITHUB_REF##*/}" | sed 's/^v//')
           echo "Version - $version"
           echo "VERSION=$version" >> $GITHUB_ENV
-
-      - name: Prepare for install
-        run: |
-          apt-get update && apt-get install -y libcap2-bin bindfs
 
       - name: Build
         env:
