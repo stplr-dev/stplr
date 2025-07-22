@@ -43,7 +43,7 @@ func FixCmd() *cli.Command {
 		Name:  "fix",
 		Usage: gotext.Get("Attempt to fix problems with Stapler"),
 		Action: func(c *cli.Context) error {
-			if err := utils.ExitIfCantDropCapsToAlrUserNoPrivs(); err != nil {
+			if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
 				return err
 			}
 

@@ -96,7 +96,7 @@ func ExitIfCantDropGidToStapler() cli.ExitCoder {
 
 // ExitIfCantDropCapsToAlrUser attempts to drop capabilities to the already
 // running user. Returns a cli.ExitCoder with an error if the operation fails.
-// See also [ExitIfCantDropCapsToAlrUserNoPrivs] for a version that also applies
+// See also [ExitIfCantDropCapsToBuilderUserNoPrivs] for a version that also applies
 // no-new-privs.
 func ExitIfCantDropCapsToAlrUser() cli.ExitCoder {
 	err := DropCapsToAlrUser()
@@ -114,8 +114,8 @@ func ExitIfCantSetNoNewPrivs() cli.ExitCoder {
 	return nil
 }
 
-// ExitIfCantDropCapsToAlrUserNoPrivs combines [ExitIfCantDropCapsToAlrUser] with [ExitIfCantSetNoNewPrivs]
-func ExitIfCantDropCapsToAlrUserNoPrivs() cli.ExitCoder {
+// ExitIfCantDropCapsToBuilderUserNoPrivs combines [ExitIfCantDropCapsToAlrUser] with [ExitIfCantSetNoNewPrivs]
+func ExitIfCantDropCapsToBuilderUserNoPrivs() cli.ExitCoder {
 	if err := ExitIfCantDropCapsToAlrUser(); err != nil {
 		return err
 	}
@@ -147,10 +147,14 @@ func EnsureIsAlrUser() error {
 	return nil
 }
 
-func EnuseIsPrivilegedGroupMember() error {
+func EnsureIsPrivilegedGroupMemberOrRoot() error {
 	currentUser, err := user.Current()
 	if err != nil {
 		return err
+	}
+
+	if currentUser.Uid == "0" {
+		return nil
 	}
 
 	group, err := user.LookupGroup(constants.PrivilegedGroup)
@@ -168,7 +172,11 @@ func EnuseIsPrivilegedGroupMember() error {
 			return nil
 		}
 	}
-	return cliutils.FormatCliExit(gotext.Get("You need to be a %s member to perform this action", constants.PrivilegedGroup), nil)
+
+	return cliutils.FormatCliExit(
+		gotext.Get("You need to be a %s member or root to perform this action", constants.PrivilegedGroup),
+		nil,
+	)
 }
 
 func EscalateToRootGid() error {

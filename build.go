@@ -68,7 +68,8 @@ func BuildCmd() *cli.Command {
 			},
 		},
 		Action: func(c *cli.Context) error {
-			if err := utils.EnuseIsPrivilegedGroupMember(); err != nil {
+			// EscalateToRootUid is used lower
+			if err := utils.EnsureIsPrivilegedGroupMemberOrRoot(); err != nil {
 				return err
 			}
 
@@ -171,25 +172,17 @@ func BuildCmd() *cli.Command {
 				scriptArgs.Script = filepath.Join(newScriptDir, scriptFile)
 			}
 
-			if err := utils.ExitIfCantDropCapsToAlrUser(); err != nil {
-				return err
+			// EnsureIsPrivilegedGroupMemberOrRoot is used higher
+			err = utils.EscalateToRootUid()
+			if err != nil {
+				return cliutils.FormatCliExit("cannot escalate to root", err)
 			}
 
-			installer, installerClose, err := build.GetSafeInstaller()
+			installer, scripter, cleanup, err := prepareInstallerAndScripter()
 			if err != nil {
 				return err
 			}
-			defer installerClose()
-
-			if err := utils.ExitIfCantSetNoNewPrivs(); err != nil {
-				return err
-			}
-
-			scripter, scripterClose, err := build.GetSafeScriptExecutor()
-			if err != nil {
-				return err
-			}
-			defer scripterClose()
+			defer cleanup()
 
 			builder, err := build.NewMainBuilder(
 				deps.Cfg,

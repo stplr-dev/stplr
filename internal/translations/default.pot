@@ -30,31 +30,31 @@ msgid ""
 "Build package from scratch even if there's an already built package available"
 msgstr ""
 
-#: build.go:77
+#: build.go:78
 msgid "Error getting working directory"
 msgstr ""
 
-#: build.go:122
+#: build.go:123
 msgid "Cannot get absolute script path"
 msgstr ""
 
-#: build.go:148
+#: build.go:149
 msgid "Package not found"
 msgstr ""
 
-#: build.go:161
+#: build.go:162
 msgid "Nothing to build"
 msgstr ""
 
-#: build.go:218
+#: build.go:211
 msgid "Error building package"
 msgstr ""
 
-#: build.go:225
+#: build.go:218
 msgid "Error moving the package"
 msgstr ""
 
-#: build.go:229
+#: build.go:222
 msgid "Done"
 msgstr ""
 
@@ -198,23 +198,23 @@ msgstr ""
 msgid "Command install expected at least 1 argument, got %d"
 msgstr ""
 
-#: install.go:118
+#: install.go:104
 msgid "Error when installing the package"
 msgstr ""
 
-#: install.go:156
+#: install.go:142
 msgid "Remove an installed package"
 msgstr ""
 
-#: install.go:175
+#: install.go:161
 msgid "Error listing installed packages"
 msgstr ""
 
-#: install.go:204
+#: install.go:190
 msgid "Command remove expected at least 1 argument, got %d"
 msgstr ""
 
-#: install.go:219
+#: install.go:205
 msgid "Error removing packages"
 msgstr ""
 
@@ -437,11 +437,11 @@ msgstr ""
 msgid "Error on dropping capabilities"
 msgstr ""
 
-#: internal/utils/cmd.go:171
-msgid "You need to be a %s member to perform this action"
+#: internal/utils/cmd.go:177
+msgid "You need to be a %s member or root to perform this action"
 msgstr ""
 
-#: internal/utils/cmd.go:207
+#: internal/utils/cmd.go:215
 msgid "You need to be root to perform this action"
 msgstr ""
 
@@ -646,14 +646,14 @@ msgstr ""
 msgid "Error while executing search"
 msgstr ""
 
-#: upgrade.go:53
+#: upgrade.go:78
 msgid "Upgrade all installed packages"
 msgstr ""
 
-#: upgrade.go:111 upgrade.go:128
+#: upgrade.go:122 upgrade.go:139
 msgid "Error checking for updates"
 msgstr ""
 
-#: upgrade.go:131
+#: upgrade.go:142
 msgid "There is nothing to do."
 msgstr ""

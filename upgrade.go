@@ -47,6 +47,31 @@ import (
 	"go.stplr.dev/stplr/pkg/types"
 )
 
+func prepareInstallerAndScripter() (installer build.InstallerExecutor, scripter build.ScriptExecutor, cleanup func(), err error) {
+	installer, installerClose, err := build.GetSafeInstaller()
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
+		installerClose()
+		return nil, nil, nil, err
+	}
+
+	scripter, scripterClose, err := build.GetSafeScriptExecutor()
+	if err != nil {
+		installerClose()
+		return nil, nil, nil, err
+	}
+
+	cleanup = func() {
+		scripterClose()
+		installerClose()
+	}
+
+	return installer, scripter, cleanup, nil
+}
+
 func UpgradeCmd() *cli.Command {
 	return &cli.Command{
 		Name:    "upgrade",
@@ -60,25 +85,11 @@ func UpgradeCmd() *cli.Command {
 			},
 		},
 		Action: utils.RootNeededAction(func(c *cli.Context) error {
-			if err := utils.ExitIfCantDropCapsToAlrUser(); err != nil {
-				return err
-			}
-
-			installer, installerClose, err := build.GetSafeInstaller()
+			installer, scripter, cleanup, err := prepareInstallerAndScripter()
 			if err != nil {
 				return err
 			}
-			defer installerClose()
-
-			if err := utils.ExitIfCantSetNoNewPrivs(); err != nil {
-				return err
-			}
-
-			scripter, scripterClose, err := build.GetSafeScriptExecutor()
-			if err != nil {
-				return err
-			}
-			defer scripterClose()
+			defer cleanup()
 
 			ctx := c.Context
 

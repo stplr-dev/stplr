@@ -132,19 +132,8 @@ func InternalInstallCmd() *cli.Command {
 		Name:     "_internal-installer",
 		HideHelp: true,
 		Hidden:   true,
-		Action: func(c *cli.Context) error {
+		Action: utils.RootNeededAction(func(c *cli.Context) error {
 			logger.SetupForGoPlugin()
-
-			if err := utils.EnsureIsAlrUser(); err != nil {
-				return err
-			}
-
-			// Before escalating the rights, we made sure that
-			// this is an ALR user, so it looks safe.
-			err := utils.EscalateToRootUid()
-			if err != nil {
-				return cliutils.FormatCliExit("cannot escalate to root", err)
-			}
 
 			deps, err := appbuilder.
 				New(c.Context).
@@ -177,7 +166,7 @@ func InternalInstallCmd() *cli.Command {
 				Logger: logger,
 			})
 			return nil
-		},
+		}),
 	}
 }
 
@@ -254,7 +243,7 @@ func InternalMountCmd() *cli.Command {
 				return cliutils.FormatCliExit(fmt.Sprintf("cannot read %s", sourceDir), err)
 			}
 
-			if err := utils.EnuseIsPrivilegedGroupMember(); err != nil {
+			if err := utils.EnsureIsPrivilegedGroupMemberOrRoot(); err != nil {
 				return err
 			}
 

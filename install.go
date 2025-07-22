@@ -56,25 +56,11 @@ func InstallCmd() *cli.Command {
 				return cliutils.FormatCliExit(gotext.Get("Command install expected at least 1 argument, got %d", args.Len()), nil)
 			}
 
-			if err := utils.ExitIfCantDropCapsToAlrUser(); err != nil {
-				return err
-			}
-
-			installer, installerClose, err := build.GetSafeInstaller()
+			installer, scripter, cleanup, err := prepareInstallerAndScripter()
 			if err != nil {
 				return err
 			}
-			defer installerClose()
-
-			if err := utils.ExitIfCantSetNoNewPrivs(); err != nil {
-				return err
-			}
-
-			scripter, scripterClose, err := build.GetSafeScriptExecutor()
-			if err != nil {
-				return err
-			}
-			defer scripterClose()
+			defer cleanup()
 
 			ctx := c.Context
 

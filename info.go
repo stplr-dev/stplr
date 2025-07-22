@@ -80,7 +80,7 @@ func InfoCmd() *cli.Command {
 			return nil
 		}),
 		Action: func(c *cli.Context) error {
-			if err := utils.ExitIfCantDropCapsToAlrUserNoPrivs(); err != nil {
+			if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
 				return err
 			}
 

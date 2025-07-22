@@ -37,31 +37,31 @@ msgid ""
 "Build package from scratch even if there's an already built package available"
 msgstr "Создайте пакет с нуля, даже если уже имеется готовый пакет"
 
-#: build.go:77
+#: build.go:78
 msgid "Error getting working directory"
 msgstr "Ошибка при получении рабочего каталога"
 
-#: build.go:122
+#: build.go:123
 msgid "Cannot get absolute script path"
 msgstr "Невозможно получить абсолютный путь к скрипту"
 
-#: build.go:148
+#: build.go:149
 msgid "Package not found"
 msgstr "Пакет не найден"
 
-#: build.go:161
+#: build.go:162
 msgid "Nothing to build"
 msgstr "Нечего собирать"
 
-#: build.go:218
+#: build.go:211
 msgid "Error building package"
 msgstr "Ошибка при сборке пакета"
 
-#: build.go:225
+#: build.go:218
 msgid "Error moving the package"
 msgstr "Ошибка при перемещении пакета"
 
-#: build.go:229
+#: build.go:222
 msgid "Done"
 msgstr "Сделано"
 
@@ -205,23 +205,23 @@ msgstr "Установить новый пакет"
 msgid "Command install expected at least 1 argument, got %d"
 msgstr "Для команды install ожидался хотя бы 1 аргумент, получено %d"
 
-#: install.go:118
+#: install.go:104
 msgid "Error when installing the package"
 msgstr "Ошибка при установке пакета"
 
-#: install.go:156
+#: install.go:142
 msgid "Remove an installed package"
 msgstr "Удалить установленный пакет"
 
-#: install.go:175
+#: install.go:161
 msgid "Error listing installed packages"
 msgstr "Ошибка при составлении списка установленных пакетов"
 
-#: install.go:204
+#: install.go:190
 msgid "Command remove expected at least 1 argument, got %d"
 msgstr "Для команды remove ожидался хотя бы 1 аргумент, получено %d"
 
-#: install.go:219
+#: install.go:205
 msgid "Error removing packages"
 msgstr "Ошибка при удалении пакетов"
 
@@ -454,11 +454,12 @@ msgstr ""
 msgid "Error on dropping capabilities"
 msgstr "Ошибка при понижении привилегий"
 
-#: internal/utils/cmd.go:171
-msgid "You need to be a %s member to perform this action"
+#: internal/utils/cmd.go:177
+#, fuzzy
+msgid "You need to be a %s member or root to perform this action"
 msgstr "Вы должны быть членом %s чтобы выполнить это"
 
-#: internal/utils/cmd.go:207
+#: internal/utils/cmd.go:215
 msgid "You need to be root to perform this action"
 msgstr "Вы должны быть root чтобы выполнить это"
 
@@ -663,14 +664,14 @@ msgstr "Иcкать по provides"
 msgid "Error while executing search"
 msgstr "Ошибка при выполнении поиска"
 
-#: upgrade.go:53
+#: upgrade.go:78
 msgid "Upgrade all installed packages"
 msgstr "Обновить все установленные пакеты"
 
-#: upgrade.go:111 upgrade.go:128
+#: upgrade.go:122 upgrade.go:139
 msgid "Error checking for updates"
 msgstr "Ошибка при проверке обновлений"
 
-#: upgrade.go:131
+#: upgrade.go:142
 msgid "There is nothing to do."
 msgstr "Здесь нечего делать."
