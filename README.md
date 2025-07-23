@@ -1,4 +1,5 @@
-![Test coverage](./assets/coverage-badge.svg) ![ru translate](./assets/i18n-ru-badge.svg)
+![Test coverage](./assets/coverage-badge.svg)
+[![Translate status](https://translate.codeberg.org/widget/stapler/stplr/svg-badge.svg)](https://translate.codeberg.org/engage/stapler/)
 
 # Stapler
 
