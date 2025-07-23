@@ -300,10 +300,6 @@ msgstr ""
 msgid "Error pulling repositories"
 msgstr ""
 
-#: internal/cliutils/app_builder/builder.go:165
-msgid "Error parsing os release"
-msgstr ""
-
 #: internal/cliutils/app_builder/builder.go:178
 msgid "Unable to detect a supported package manager on the system"
 msgstr ""
@@ -329,8 +325,10 @@ msgid "Choose which package to %s"
 msgstr ""
 
 #: internal/cliutils/prompt.go:162
-msgid "Choose which optional package(s) to install"
-msgstr ""
+msgid "Choose which optional package to install"
+msgid_plural "Choose which optional packages to install"
+msgstr[0] ""
+msgstr[1] ""
 
 #: internal/cliutils/template.go:80 internal/cliutils/template.go:99
 msgid "NAME"

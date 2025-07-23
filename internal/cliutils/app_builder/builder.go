@@ -162,7 +162,7 @@ func (b *AppBuilder) WithDistroInfo() *AppBuilder {
 
 	b.deps.Info, b.err = distro.ParseOSRelease(b.ctx)
 	if b.err != nil {
-		b.err = cliutils.FormatCliExit(gotext.Get("Error parsing os release"), b.err)
+		b.err = cliutils.FormatCliExit(gotext.Get("Error parsing os-release file"), b.err)
 	}
 
 	return b

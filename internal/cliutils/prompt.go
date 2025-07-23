@@ -159,7 +159,7 @@ func ChooseOptDepends(ctx context.Context, options []string, verb string, intera
 
 	prompt := &survey.MultiSelect{
 		Options: options,
-		Message: gotext.Get("Choose which optional package(s) to install"),
+		Message: gotext.GetN("Choose which optional package to install", "Choose which optional packages to install", len(options)),
 	}
 
 	var choices []int
