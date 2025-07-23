@@ -31,6 +31,8 @@ import (
 )
 
 func TestE2EIssue62List(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"issue-62-list",

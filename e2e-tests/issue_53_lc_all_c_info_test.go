@@ -31,6 +31,8 @@ import (
 )
 
 func TestE2EIssue53LcAllCInfo(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"issue-53-lc-all-c-info",

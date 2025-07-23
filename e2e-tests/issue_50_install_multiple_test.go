@@ -31,6 +31,8 @@ import (
 )
 
 func TestE2EIssue50InstallMultiple(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"issue-50-install-multiple",

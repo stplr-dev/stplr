@@ -31,6 +31,8 @@ import (
 )
 
 func Test75SinglePackageRepo(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"issue-76-single-package-repo",

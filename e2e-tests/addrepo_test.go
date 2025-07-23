@@ -31,6 +31,8 @@ import (
 )
 
 func TestE2EAlrAddRepo(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"add-repo-remove-repo",

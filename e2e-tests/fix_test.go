@@ -31,6 +31,8 @@ import (
 )
 
 func TestE2EAlrFix(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(t, "run-fix", COMMON_SYSTEMS, func(t *testing.T, r capytest.Runner) {
 		r.Command("stplr", "fix").
 			ExpectStderrContains("--> Done").

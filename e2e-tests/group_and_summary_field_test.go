@@ -31,6 +31,8 @@ import (
 )
 
 func TestE2EGroupAndSummaryField(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"group-and-summary-field",

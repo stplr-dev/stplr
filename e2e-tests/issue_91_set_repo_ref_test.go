@@ -31,6 +31,8 @@ import (
 )
 
 func TestE2EIssue91MultiplePackages(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"issue-91-set-repo-ref",

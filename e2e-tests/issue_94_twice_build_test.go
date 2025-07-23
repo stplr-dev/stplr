@@ -34,6 +34,8 @@ import (
 )
 
 func TestE2EIssue94TwiceBuild(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"issue-94-twice-build",

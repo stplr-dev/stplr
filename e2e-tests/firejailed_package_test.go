@@ -32,6 +32,8 @@ import (
 )
 
 func TestE2EFirejailedPackage(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"firejailed-package",

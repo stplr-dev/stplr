@@ -31,6 +31,8 @@ import (
 )
 
 func TestE2EBashCompletion(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"bash-completion",

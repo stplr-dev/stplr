@@ -31,6 +31,8 @@ import (
 )
 
 func TestE2EIssue129RepoTomlImportTest(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"issue-129-repo-toml-import-test",

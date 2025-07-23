@@ -31,6 +31,8 @@ import (
 )
 
 func TestE2EIssue78Mirrors(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(t, "issue-78-mirrors", COMMON_SYSTEMS, func(t *testing.T, r capytest.Runner) {
 		defaultPrepare(t, r)
 		execShouldNoError(t, r, "sudo", "stplr", "repo", "mirror", "add", REPO_NAME_FOR_E2E_TESTS, "https://gitea.plemya-x.ru/Maks1mS/repo-for-tests.git")

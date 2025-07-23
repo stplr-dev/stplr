@@ -31,6 +31,8 @@ import (
 )
 
 func TestE2EIssue75InstallWithDeps(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"issue-75-ref-specify",

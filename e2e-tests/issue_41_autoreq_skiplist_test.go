@@ -31,6 +31,8 @@ import (
 )
 
 func TestE2EIssue41AutoreqSkiplist(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"issue-41-autoreq-skiplist",

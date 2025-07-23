@@ -1,0 +1,5 @@
+- name: alr-repo
+  url: https://codeberg.org/stapler/repo-for-tests
+  ref: main
+  mirrors:
+  - https://github.com/example/example.git

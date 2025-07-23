@@ -31,6 +31,8 @@ import (
 )
 
 func TestE2EIssue81MultiplePackages(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"issue-81-multiple-packages",

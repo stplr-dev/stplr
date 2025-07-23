@@ -32,6 +32,8 @@ import (
 )
 
 func TestE2EIssue130Install(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"stplr install {repo}/{package}",

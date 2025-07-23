@@ -31,6 +31,8 @@ import (
 )
 
 func TestE2EIssue32Interactive(t *testing.T) {
+	t.Parallel()
+
 	runMatrixSuite(
 		t,
 		"issue-32-interactive",
