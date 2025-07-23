@@ -287,15 +287,15 @@ msgstr "Применение интеграции FireJail"
 msgid "Building package metadata"
 msgstr "Сборка метаданных пакета"
 
-#: internal/build/script_executor.go:292
+#: internal/build/script_executor.go:293
 msgid "Executing prepare()"
 msgstr "Выполнение prepare()"
 
-#: internal/build/script_executor.go:301
+#: internal/build/script_executor.go:302
 msgid "Executing build()"
 msgstr "Выполнение build()"
 
-#: internal/build/script_executor.go:330 internal/build/script_executor.go:350
+#: internal/build/script_executor.go:331 internal/build/script_executor.go:351
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
 

@@ -40,8 +40,17 @@ func TestE2EFirejailedPackage(t *testing.T) {
 			defaultPrepare(t, r)
 			execShouldNoError(t, r, "stplr", "build", "-p", fmt.Sprintf("%s/firejailed-pkg", REPO_NAME_FOR_E2E_TESTS))
 			execShouldError(t, r, "stplr", "build", "-p", fmt.Sprintf("%s/firejailed-pkg-incorrect", REPO_NAME_FOR_E2E_TESTS))
-			execShouldNoError(t, r, "sh", "-c", "dpkg -c *.deb | grep -q '/usr/lib/stplr/firejailed/_usr_bin_danger.sh'")
-			execShouldNoError(t, r, "sh", "-c", "dpkg -c *.deb | grep -q '/usr/lib/stplr/firejailed/_usr_bin_danger.sh.profile'")
+
+			r.Command("sh", "-c", "dpkg -c *.deb").
+				ExpectSuccess().
+				ExpectStdoutRegex("(?m)^.*\\./usr/lib/stplr/firejailed/_usr_bin_danger\\.sh$").
+				ExpectStdoutRegex("(?m)^.*\\./usr/lib/stplr/firejailed/_usr_bin_danger\\.sh\\.profile$").
+				Run(t)
+
+			r.Command("sh", "-c", "dpkg-deb -f *.deb Depends").
+				ExpectSuccess().
+				ExpectStdoutContains("firejail").
+				Run(t)
 		},
 	)
 }

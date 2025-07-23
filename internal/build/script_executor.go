@@ -263,6 +263,7 @@ func buildPkgMetadata(
 		if err != nil {
 			return nil, err
 		}
+		pkgInfo.Depends = append(pkgInfo.Depends, "firejail")
 	}
 
 	pkgInfo.Overridables.Contents = contents
