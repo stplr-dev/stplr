@@ -26,7 +26,6 @@ package db_test
 
 import (
 	"context"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -105,19 +104,12 @@ func TestInsertPackage(t *testing.T) {
 	defer database.Close()
 
 	err := database.InsertPackage(ctx, testPkg)
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	pkgs, err := database.GetPkgs(ctx, "name = 'test' AND repository = 'default'")
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
-	if len(pkgs) != 1 {
-		t.Fatalf("Expected 1 package, got %d", len(pkgs))
-	}
-
+	assert.Len(t, pkgs, 1)
 	assert.Equal(t, testPkg, pkgs[0])
 }
 
@@ -132,24 +124,16 @@ func TestGetPkgs(t *testing.T) {
 	x2.Name = "x2"
 
 	err := database.InsertPackage(ctx, x1)
-	if err != nil {
-		t.Errorf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	err = database.InsertPackage(ctx, x2)
-	if err != nil {
-		t.Errorf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	pkgs, err := database.GetPkgs(ctx, "name LIKE 'x%'")
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	for _, dbPkg := range pkgs {
-		if !strings.HasPrefix(dbPkg.Name, "x") {
-			t.Errorf("Expected package name to start with 'x', got %s", dbPkg.Name)
-		}
+		assert.True(t, strings.HasPrefix(dbPkg.Name, "x"), "Expected package name to start with 'x', got %s", dbPkg.Name)
 	}
 }
 
@@ -164,27 +148,15 @@ func TestGetPkg(t *testing.T) {
 	x2.Name = "x2"
 
 	err := database.InsertPackage(ctx, x1)
-	if err != nil {
-		t.Errorf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	err = database.InsertPackage(ctx, x2)
-	if err != nil {
-		t.Errorf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	pkg, err := database.GetPkg("name LIKE 'x%'")
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
-	if pkg.Name != "x1" {
-		t.Errorf("Expected x1 package, got %s", pkg.Name)
-	}
-
-	if !reflect.DeepEqual(*pkg, x1) {
-		t.Errorf("Expected x1 to be %v, got %v", x1, *pkg)
-	}
+	assert.Equal(t, x1, *pkg)
 }
 
 func TestDeletePkgs(t *testing.T) {
@@ -198,19 +170,13 @@ func TestDeletePkgs(t *testing.T) {
 	x2.Name = "x2"
 
 	err := database.InsertPackage(ctx, x1)
-	if err != nil {
-		t.Errorf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	err = database.InsertPackage(ctx, x2)
-	if err != nil {
-		t.Errorf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	err = database.DeletePkgs(ctx, "name = 'x1'")
-	if err != nil {
-		t.Errorf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 }
 
 func TestJsonArrayContains(t *testing.T) {
@@ -225,33 +191,17 @@ func TestJsonArrayContains(t *testing.T) {
 	x2.Provides = append(x2.Provides, "x")
 
 	err := database.InsertPackage(ctx, x1)
-	if err != nil {
-		t.Errorf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	err = database.InsertPackage(ctx, x2)
-	if err != nil {
-		t.Errorf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	pkgs, err := database.GetPkgs(ctx, "name = 'x2'")
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
-	if len(pkgs) != 1 || pkgs[0].Name != "x2" {
-		t.Errorf("Expected x2 package, got %v", pkgs)
-	}
-
-	// Verify the provides field contains 'x'
-	found := false
-	for _, p := range pkgs[0].Provides {
-		if p == "x" {
-			found = true
-			break
-		}
-	}
-	if !found {
-		t.Errorf("Expected provides to contain 'x'")
+	if assert.Len(t, pkgs, 1) {
+		assert.Equal(t, "x2", pkgs[0].Name, "Expected package name to be 'x2'")
+		// Verify the provides field contains 'x'
+		assert.Contains(t, pkgs[0].Provides, "x")
 	}
 }

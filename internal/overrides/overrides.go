@@ -146,14 +146,6 @@ func (o *Opts) WithLanguages(langs []string) *Opts {
 	return out
 }
 
-func (o *Opts) WithLanguageTags(langs []string) *Opts {
-	out := &Opts{}
-	*out = *o
-
-	out.Languages = langs
-	return out
-}
-
 func parseLangs(langs []string, tags []language.Tag) ([]string, error) {
 	out := make([]string, len(tags)+len(langs))
 	for i, tag := range tags {

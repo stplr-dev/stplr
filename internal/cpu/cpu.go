@@ -65,29 +65,27 @@ func Arch() string {
 	return arch
 }
 
+func isCompatibleARM(target, arch string) bool {
+	if !strings.HasPrefix(target, "arm") || !strings.HasPrefix(arch, "arm") {
+		return false
+	}
+
+	targetVer, err1 := getARMVersion(target)
+	archVer, err2 := getARMVersion(arch)
+	if err1 != nil || err2 != nil {
+		return false
+	}
+
+	return targetVer >= archVer
+}
+
 func IsCompatibleWith(target string, list []string) bool {
 	if target == "all" || slices.Contains(list, "all") {
 		return true
 	}
 
 	for _, arch := range list {
-		if strings.HasPrefix(target, "arm") && strings.HasPrefix(arch, "arm") {
-			targetVer, err := getARMVersion(target)
-			if err != nil {
-				return false
-			}
-
-			archVer, err := getARMVersion(arch)
-			if err != nil {
-				return false
-			}
-
-			if targetVer >= archVer {
-				return true
-			}
-		}
-
-		if target == arch {
+		if target == arch || isCompatibleARM(target, arch) {
 			return true
 		}
 	}
@@ -95,6 +93,7 @@ func IsCompatibleWith(target string, list []string) bool {
 	return false
 }
 
+// CompatibleArches returns a slice of compatible architectures for the given processor architecture
 func CompatibleArches(arch string) ([]string, error) {
 	if strings.HasPrefix(arch, "arm") {
 		ver, err := getARMVersion(arch)
