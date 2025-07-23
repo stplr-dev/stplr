@@ -1,0 +1,64 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Stapler
+# Copyright (C) 2025 The Stapler Authors
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+name: "[RU] 🐞 Баг-репорт"
+description: "Сообщите об ошибке в работе приложения"
+title: "bug: "
+labels: [Kind/Bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ **Прежде чем отправить баг-репорт:**
+        - Проверьте, не было ли уже создано похожее обращение.
+        - Убедитесь, что это действительно ошибка, а не ожидаемое поведение.
+
+  - type: input
+    id: version
+    attributes:
+      label: Версия
+      description: Укажите версию приложения или коммит, на котором воспроизводится ошибка
+      placeholder: например, v0.0.26 или коммит abc123
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как воспроизвести?
+      description: Опишите пошагово, что нужно сделать, чтобы воспроизвести ошибку
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Что вы ожидали?
+      description: Опишите, какое поведение считаете правильным
+      placeholder: Например: "После нажатия кнопки должно открыться окно подтверждения"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Что произошло на самом деле?
+      description: Опишите фактическое поведение системы
+      placeholder: Например: "Кнопка не реагирует, в консоли ошибка 500"
+    validations:
+      required: true

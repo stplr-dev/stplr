@@ -1,0 +1,64 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Stapler
+# Copyright (C) 2025 The Stapler Authors
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+name: "🐞 Bug Report"
+description: "Report an issue with the application"
+title: "bug: "
+labels: [Kind/Bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ **Before submitting a bug report:**
+        - Please check if a similar issue has already been reported.
+        - Make sure it's actually a bug, not expected behavior.
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Specify the app version or commit where the issue occurs
+      placeholder: e.g. v0.0.26 or commit abc123
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce?
+      description: Describe the steps to reproduce the issue
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+      description: Describe the expected behavior
+      placeholder: For example: "Clicking the button should open a confirmation dialog"
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What actually happened?
+      description: Describe the actual behavior
+      placeholder: For example: "Button does nothing, console shows 500 error"
+    validations:
+      required: true
