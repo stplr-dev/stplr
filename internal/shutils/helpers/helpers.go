@@ -47,6 +47,16 @@ var (
 	ErrNoDetectManNum = errors.New("manual number cannot be detected from the filename")
 )
 
+func filterExecFuncs(cmds map[string]handlers.ExecFunc, allowed []string) handlers.ExecFuncs {
+	out := make(handlers.ExecFuncs)
+	for _, name := range allowed {
+		if fn, ok := cmds[name]; ok {
+			out[name] = fn
+		}
+	}
+	return out
+}
+
 // Helpers contains all the helper commands
 var Helpers = handlers.ExecFuncs{
 	"install-binary":       installHelperCmd("/usr/bin", 0o755),
@@ -55,25 +65,39 @@ var Helpers = handlers.ExecFuncs{
 	"install-config":       installHelperCmd("/etc", 0o644),
 	"install-license":      installHelperCmd("/usr/share/licenses", 0o644),
 	"install-desktop":      installHelperCmd("/usr/share/applications", 0o644),
-	"install-icon":         installHelperCmd("/usr/share/pixmaps", 0o644),
+	"install-pixmap":       installHelperCmd("/usr/share/pixmaps", 0o644),
 	"install-manual":       installManualCmd,
 	"install-completion":   installCompletionCmd,
 	"install-library":      installLibraryCmd,
 	"git-version":          gitVersionCmd,
 
-	"files-find":      filesFindCmd,
-	"files-find-lang": filesFindLangCmd,
-	"files-find-doc":  filesFindDocCmd,
+	"files-find":              filesFindCmd,
+	"files-find-lang":         filesFindLangCmd,
+	"files-find-doc":          filesFindDocCmd,
+	"files-find-binary":       filesFindFromPrefixCmdNoRecursive("/usr/bin"),
+	"files-find-systemd-user": filesFindFromPrefixCmdNoRecursive("/usr/lib/systemd/user"),
+	"files-find-systemd":      filesFindFromPrefixCmdNoRecursive("/usr/lib/systemd/system"),
+	"files-find-config":       filesFindFromPrefixCmdNoRecursive("/etc"),
+	"files-find-license":      filesFindFromPrefixCmdRecursive("/usr/share/licenses"),
+	"files-find-desktop":      filesFindFromPrefixCmdNoRecursive("/usr/share/applications"),
+	"files-find-pixmap":       filesFindFromPrefixCmdNoRecursive("/usr/share/pixmaps"),
 }
 
 // Restricted contains restricted read-only helper commands
 // that don't modify any state
-var Restricted = handlers.ExecFuncs{
-	"git-version":     gitVersionCmd,
-	"files-find":      filesFindCmd,
-	"files-find-lang": filesFindLangCmd,
-	"files-find-doc":  filesFindDocCmd,
-}
+var Restricted = filterExecFuncs(Helpers, []string{
+	"git-version",
+	"files-find",
+	"files-find-lang",
+	"files-find-doc",
+	"files-find-binary",
+	"files-find-systemd-user",
+	"files-find-systemd",
+	"files-find-config",
+	"files-find-license",
+	"files-find-desktop",
+	"files-find-pixmap",
+})
 
 func installHelperCmd(prefix string, perms os.FileMode) handlers.ExecFunc {
 	return func(hc interp.HandlerContext, cmd string, args []string) error {

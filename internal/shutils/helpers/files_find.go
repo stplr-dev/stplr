@@ -27,10 +27,13 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
+
+	"go.stplr.dev/stplr/internal/shutils/handlers"
 )
 
 func matchNamePattern(name, pattern string) bool {
@@ -182,4 +185,51 @@ func filesFindCmd(hc interp.HandlerContext, cmd string, args []string) error {
 	}
 
 	return outputFiles(hc, foundFiles)
+}
+
+type findPrefixOptions struct {
+	recursive      bool
+	defaultPattern string
+}
+
+func filesFindFromPrefixCmd(subPath string, opts findPrefixOptions) handlers.ExecFunc {
+	return func(hc interp.HandlerContext, name string, args []string) error {
+		if len(args) == 0 {
+			// If there are no arguments, use the default pattern
+			defaultPattern := opts.defaultPattern
+			if defaultPattern == "" {
+				if opts.recursive {
+					defaultPattern = "**/*"
+				} else {
+					defaultPattern = "*"
+				}
+			}
+			return filesFindCmd(hc, name, []string{filepath.Join(subPath, defaultPattern)})
+		}
+
+		findArgs := make([]string, 0, len(args)*2)
+		for _, arg := range args {
+			if opts.recursive {
+				// If the argument already contains global patterns, we use it as it is
+				if strings.Contains(arg, "*") || strings.Contains(arg, "?") || strings.Contains(arg, "[") {
+					findArgs = append(findArgs, filepath.Join(subPath, arg))
+				} else {
+					// Adding both the directory itself and all the contents recursively
+					findArgs = append(findArgs, filepath.Join(subPath, arg))
+					findArgs = append(findArgs, filepath.Join(subPath, arg, "**/*"))
+				}
+			} else {
+				findArgs = append(findArgs, filepath.Join(subPath, arg))
+			}
+		}
+		return filesFindCmd(hc, name, findArgs)
+	}
+}
+
+func filesFindFromPrefixCmdRecursive(subPath string) handlers.ExecFunc {
+	return filesFindFromPrefixCmd(subPath, findPrefixOptions{recursive: true})
+}
+
+func filesFindFromPrefixCmdNoRecursive(subPath string) handlers.ExecFunc {
+	return filesFindFromPrefixCmd(subPath, findPrefixOptions{recursive: false})
 }

@@ -25,6 +25,7 @@ package helpers
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -35,8 +36,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
-
-	"go.stplr.dev/stplr/internal/shutils/handlers"
 )
 
 type symlink struct {
@@ -52,6 +51,65 @@ type testCase struct {
 	symlinksToCreate []symlink
 	args             string
 	expectedError    error
+}
+
+func testFilesFindCommon(t *testing.T, command string, tc testCase) {
+	t.Helper()
+	t.Run(tc.name, func(t *testing.T) {
+		tempDir, err := os.MkdirTemp("", fmt.Sprintf("test-%s", command))
+		assert.NoError(t, err)
+		defer os.RemoveAll(tempDir)
+
+		for _, dir := range tc.dirsToCreate {
+			dirPath := filepath.Join(tempDir, dir)
+			err := os.MkdirAll(dirPath, 0o755)
+			assert.NoError(t, err)
+		}
+
+		for _, file := range tc.filesToCreate {
+			filePath := filepath.Join(tempDir, file)
+			err := os.WriteFile(filePath, []byte("test content"), 0o644)
+			assert.NoError(t, err)
+		}
+
+		for _, sl := range tc.symlinksToCreate {
+			linkFullPath := filepath.Join(tempDir, sl.linkPath)
+			targetFullPath := sl.targetPath
+
+			// make sure parent dir exists
+			err := os.MkdirAll(filepath.Dir(linkFullPath), 0o755)
+			assert.NoError(t, err)
+
+			err = os.Symlink(targetFullPath, linkFullPath)
+			assert.NoError(t, err)
+		}
+
+		buf := &bytes.Buffer{}
+		runner, err := interp.New(
+			interp.Dir(tempDir),
+			interp.StdIO(os.Stdin, buf, os.Stderr),
+			interp.ExecHandlers(func(next interp.ExecHandlerFunc) interp.ExecHandlerFunc {
+				return Helpers.ExecHandler(interp.DefaultExecHandler(1000))
+			}),
+		)
+		assert.NoError(t, err)
+
+		scriptContent := command + " " + tc.args
+
+		script, err := syntax.NewParser().Parse(strings.NewReader(scriptContent), "")
+		assert.NoError(t, err)
+
+		err = runner.Run(context.Background(), script)
+		if tc.expectedError != nil {
+			assert.ErrorAs(t, err, &tc.expectedError)
+		} else {
+			assert.NoError(t, err)
+		}
+
+		contents, err := shlex.Split(buf.String())
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, tc.expectedOutput, contents)
+	})
 }
 
 func TestFindFilesDoc(t *testing.T) {
@@ -102,48 +160,7 @@ func TestFindFilesDoc(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			tempDir, err := os.MkdirTemp("", "test-files-find-doc")
-			assert.NoError(t, err)
-			defer os.RemoveAll(tempDir)
-
-			for _, dir := range tc.dirsToCreate {
-				dirPath := filepath.Join(tempDir, dir)
-				err := os.MkdirAll(dirPath, 0o755)
-				assert.NoError(t, err)
-			}
-
-			for _, file := range tc.filesToCreate {
-				filePath := filepath.Join(tempDir, file)
-				err := os.WriteFile(filePath, []byte("test content"), 0o644)
-				assert.NoError(t, err)
-			}
-
-			helpers := handlers.ExecFuncs{
-				"files-find-doc": filesFindDocCmd,
-			}
-			buf := &bytes.Buffer{}
-			runner, err := interp.New(
-				interp.Dir(tempDir),
-				interp.StdIO(os.Stdin, buf, os.Stderr),
-				interp.ExecHandler(helpers.ExecHandler(interp.DefaultExecHandler(1000))),
-			)
-			assert.NoError(t, err)
-
-			scriptContent := `
-shopt -s globstar
-files-find-doc ` + tc.args
-
-			script, err := syntax.NewParser().Parse(strings.NewReader(scriptContent), "")
-			assert.NoError(t, err)
-
-			err = runner.Run(context.Background(), script)
-			assert.NoError(t, err)
-
-			contents, err := shlex.Split(buf.String())
-			assert.NoError(t, err)
-			assert.ElementsMatch(t, tc.expectedOutput, contents)
-		})
+		testFilesFindCommon(t, "files-find-doc", tc)
 	}
 }
 
@@ -187,48 +204,7 @@ func TestFindLang(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			tempDir, err := os.MkdirTemp("", "test-files-find-lang")
-			assert.NoError(t, err)
-			defer os.RemoveAll(tempDir)
-
-			for _, dir := range tc.dirsToCreate {
-				dirPath := filepath.Join(tempDir, dir)
-				err := os.MkdirAll(dirPath, 0o755)
-				assert.NoError(t, err)
-			}
-
-			for _, file := range tc.filesToCreate {
-				filePath := filepath.Join(tempDir, file)
-				err := os.WriteFile(filePath, []byte("test content"), 0o644)
-				assert.NoError(t, err)
-			}
-
-			helpers := handlers.ExecFuncs{
-				"files-find-lang": filesFindLangCmd,
-			}
-			buf := &bytes.Buffer{}
-			runner, err := interp.New(
-				interp.Dir(tempDir),
-				interp.StdIO(os.Stdin, buf, os.Stderr),
-				interp.ExecHandler(helpers.ExecHandler(interp.DefaultExecHandler(1000))),
-			)
-			assert.NoError(t, err)
-
-			scriptContent := `
-shopt -s globstar
-files-find-lang ` + tc.args
-
-			script, err := syntax.NewParser().Parse(strings.NewReader(scriptContent), "")
-			assert.NoError(t, err)
-
-			err = runner.Run(context.Background(), script)
-			assert.NoError(t, err)
-
-			contents, err := shlex.Split(buf.String())
-			assert.NoError(t, err)
-			assert.ElementsMatch(t, tc.expectedOutput, contents)
-		})
+		testFilesFindCommon(t, "files-find-lang", tc)
 	}
 }
 
@@ -283,63 +259,165 @@ func TestFindFiles(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			tempDir, err := os.MkdirTemp("", "test-files-find")
-			assert.NoError(t, err)
-			defer os.RemoveAll(tempDir)
+		testFilesFindCommon(t, "files-find", tc)
+	}
+}
 
-			for _, dir := range tc.dirsToCreate {
-				dirPath := filepath.Join(tempDir, dir)
-				err := os.MkdirAll(dirPath, 0o755)
-				assert.NoError(t, err)
-			}
+func TestFindFilesPrefix(t *testing.T) {
+	tests := []testCase{
+		{
+			name: "With file and dir symlinks",
+			dirsToCreate: []string{
+				"usr/bin",
+			},
+			filesToCreate: []string{
+				"usr/bin/foo",
+			},
+			symlinksToCreate: []symlink{
+				{
+					linkPath:   "/usr/bin/file",
+					targetPath: "/not-existing",
+				},
+			},
+			expectedOutput: []string{
+				"./usr/bin/file",
+				"./usr/bin/foo",
+			},
+			args:          "\"f*\"",
+			expectedError: nil,
+		},
+		{
+			name:          "Not existing paths should throw error",
+			args:          "\"/opt/test/not-existing\"",
+			expectedError: doublestar.ErrPatternNotExist,
+		},
+	}
 
-			for _, file := range tc.filesToCreate {
-				filePath := filepath.Join(tempDir, file)
-				err := os.WriteFile(filePath, []byte("test content"), 0o644)
-				assert.NoError(t, err)
-			}
+	for _, tc := range tests {
+		testFilesFindCommon(t, "files-find-binary", tc)
+	}
+}
 
-			for _, sl := range tc.symlinksToCreate {
-				linkFullPath := filepath.Join(tempDir, sl.linkPath)
-				targetFullPath := sl.targetPath
+func TestFindFilesLicense(t *testing.T) {
+	tests := []testCase{
+		{
+			name: "All dirs",
+			dirsToCreate: []string{
+				"./usr/share/licenses/yandex-disk",
+				"./usr/share/licenses/chrome",
+				"./usr/share/licenses/vk",
+			},
+			filesToCreate: []string{
+				"./usr/share/licenses/yandex-disk/LICENSE",
+				"./usr/share/licenses/chrome/LICENSE",
+				"./usr/share/licenses/vk/LICENSE",
+			},
+			expectedOutput: []string{
+				"./usr/share/licenses/yandex-disk",
+				"./usr/share/licenses/yandex-disk/LICENSE",
+				"./usr/share/licenses/chrome",
+				"./usr/share/licenses/chrome/LICENSE",
+				"./usr/share/licenses/vk",
+				"./usr/share/licenses/vk/LICENSE",
+			},
+			args: "",
+		},
+		{
+			name: "Only one",
+			dirsToCreate: []string{
+				"./usr/share/licenses/yandex-disk",
+				"./usr/share/licenses/chrome",
+			},
+			filesToCreate: []string{
+				"./usr/share/licenses/yandex-disk/LICENSE",
+				"./usr/share/licenses/chrome/LICENSE",
+			},
+			expectedOutput: []string{
+				"./usr/share/licenses/yandex-disk",
+				"./usr/share/licenses/yandex-disk/LICENSE",
+			},
+			args: "yandex-disk",
+		},
+		{
+			name: "Multiple",
+			dirsToCreate: []string{
+				"./usr/share/licenses/yandex-disk",
+				"./usr/share/licenses/chrome",
+				"./usr/share/licenses/vk",
+			},
+			filesToCreate: []string{
+				"./usr/share/licenses/yandex-disk/LICENSE",
+				"./usr/share/licenses/chrome/LICENSE",
+				"./usr/share/licenses/vk/LICENSE",
+			},
+			expectedOutput: []string{
+				"./usr/share/licenses/yandex-disk",
+				"./usr/share/licenses/yandex-disk/LICENSE",
+				"./usr/share/licenses/vk",
+				"./usr/share/licenses/vk/LICENSE",
+			},
+			args: "vk yandex-disk",
+		},
+	}
 
-				// make sure parent dir exists
-				err := os.MkdirAll(filepath.Dir(linkFullPath), 0o755)
-				assert.NoError(t, err)
+	for _, tc := range tests {
+		testFilesFindCommon(t, "files-find-license", tc)
+	}
+}
 
-				err = os.Symlink(targetFullPath, linkFullPath)
-				assert.NoError(t, err)
-			}
+func TestFindFilesBinary(t *testing.T) {
+	tests := []testCase{
+		{
+			name: "All dirs",
+			dirsToCreate: []string{
+				"./usr/bin",
+			},
+			filesToCreate: []string{
+				"./usr/bin/yandex-disk",
+				"./usr/bin/chrome",
+				"./usr/bin/vk",
+			},
+			expectedOutput: []string{
+				"./usr/bin/yandex-disk",
+				"./usr/bin/chrome",
+				"./usr/bin/vk",
+			},
+			args: "",
+		},
+		{
+			name: "Only one",
+			dirsToCreate: []string{
+				"./usr/bin",
+			},
+			filesToCreate: []string{
+				"./usr/bin/yandex-disk",
+				"./usr/bin/chrome",
+				"./usr/bin/vk",
+			},
+			expectedOutput: []string{
+				"./usr/bin/yandex-disk",
+			},
+			args: "yandex-disk",
+		},
+		{
+			name: "Multiple",
+			dirsToCreate: []string{
+				"./usr/bin",
+			},
+			filesToCreate: []string{
+				"./usr/bin/yandex-disk",
+				"./usr/bin/chrome",
+				"./usr/bin/vk",
+			},
+			expectedOutput: []string{
+				"./usr/bin/yandex-disk",
+				"./usr/bin/vk",
+			},
+			args: "vk yandex-disk",
+		},
+	}
 
-			helpers := handlers.ExecFuncs{
-				"files-find": filesFindCmd,
-			}
-			buf := &bytes.Buffer{}
-			runner, err := interp.New(
-				interp.Dir(tempDir),
-				interp.StdIO(os.Stdin, buf, os.Stderr),
-				interp.ExecHandler(helpers.ExecHandler(interp.DefaultExecHandler(1000))),
-			)
-			assert.NoError(t, err)
-
-			scriptContent := `
-shopt -s globstar
-files-find ` + tc.args
-
-			script, err := syntax.NewParser().Parse(strings.NewReader(scriptContent), "")
-			assert.NoError(t, err)
-
-			err = runner.Run(context.Background(), script)
-			if tc.expectedError != nil {
-				assert.ErrorAs(t, err, &tc.expectedError)
-			} else {
-				assert.NoError(t, err)
-			}
-
-			contents, err := shlex.Split(buf.String())
-			assert.NoError(t, err)
-			assert.ElementsMatch(t, tc.expectedOutput, contents)
-		})
+	for _, tc := range tests {
+		testFilesFindCommon(t, "files-find-binary", tc)
 	}
 }
