@@ -39,7 +39,9 @@ func TestE2EIssue41AutoreqSkiplist(t *testing.T) {
 		AUTOREQ_AUTOPROV_SYSTEMS,
 		func(t *testing.T, r capytest.Runner) {
 			defaultPrepare(t, r)
+			execShouldError(t, r, "sh", "-c", "rpm -q rpm-build")
 			execShouldNoError(t, r, "stplr", "build", "-p", "alr-repo/test-autoreq-autoprov")
+			execShouldNoError(t, r, "sh", "-c", "rpm -q rpm-build")
 			execShouldNoError(t, r, "sh", "-c", "rpm -qp --requires *.rpm | grep \"^/bin/sh$\"")
 			execShouldError(t, r, "sh", "-c", "rpm -qp --requires *.rpm | grep \"^/bin/bash$\"")
 			execShouldError(t, r, "sh", "-c", "rpm -qp --requires *.rpm | grep \"^/bin/zsh$\"")

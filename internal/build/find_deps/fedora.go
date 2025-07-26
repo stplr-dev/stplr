@@ -122,3 +122,7 @@ func (o *FedoraFindProvReq) FindRequires(ctx context.Context, pkgInfo *nfpm.Info
 			pkgInfo.Overridables.Depends = append(pkgInfo.Overridables.Depends, dep)
 		})
 }
+
+func (o *FedoraFindProvReq) BuildDepends(ctx context.Context) ([]string, error) {
+	return []string{"rpm-build"}, nil
+}

@@ -225,23 +225,23 @@ msgstr "Для команды remove ожидался хотя бы 1 аргум
 msgid "Error removing packages"
 msgstr "Ошибка при удалении пакетов"
 
-#: internal/build/build.go:356
+#: internal/build/build.go:357
 msgid "Building package"
 msgstr "Сборка пакета"
 
-#: internal/build/build.go:385
+#: internal/build/build.go:398
 msgid "The checksums array must be the same length as sources"
 msgstr "Массив контрольных сумм должен быть той же длины, что и источники"
 
-#: internal/build/build.go:427
+#: internal/build/build.go:440
 msgid "Downloading sources"
 msgstr "Скачивание источников"
 
-#: internal/build/build.go:473
+#: internal/build/build.go:486
 msgid "Would you like to remove the build dependencies?"
 msgstr "Хотели бы вы удалить зависимости сборки?"
 
-#: internal/build/build.go:551
+#: internal/build/build.go:564
 msgid "Installing dependencies"
 msgstr "Установка зависимостей"
 

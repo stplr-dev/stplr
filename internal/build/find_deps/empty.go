@@ -43,3 +43,7 @@ func (o *EmptyFindProvReq) FindRequires(ctx context.Context, pkgInfo *nfpm.Info,
 	slog.Info(gotext.Get("AutoReq is not implemented for this package format, so it's skipped"))
 	return nil
 }
+
+func (o *EmptyFindProvReq) BuildDepends(ctx context.Context) ([]string, error) {
+	return []string{}, nil
+}

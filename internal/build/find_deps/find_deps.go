@@ -24,6 +24,7 @@ package finddeps
 
 import (
 	"context"
+	"slices"
 
 	"github.com/goreleaser/nfpm/v2"
 
@@ -34,6 +35,7 @@ import (
 type ProvReqFinder interface {
 	FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist []string) error
 	FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist []string) error
+	BuildDepends(ctx context.Context) ([]string, error)
 }
 
 type ProvReqService struct {
@@ -45,10 +47,10 @@ func New(info *distro.OSRelease, pkgFormat string) *ProvReqService {
 		finder: &EmptyFindProvReq{},
 	}
 	if pkgFormat == "rpm" {
-		switch info.ID {
-		case "altlinux":
+		switch {
+		case info.ID == "altlinux":
 			s.finder = &ALTLinuxFindProvReq{}
-		case "fedora":
+		case info.ID == "fedora" || slices.Contains(info.Like, "fedora"):
 			s.finder = &FedoraFindProvReq{}
 		}
 	}
@@ -61,4 +63,8 @@ func (s *ProvReqService) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, d
 
 func (s *ProvReqService) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist []string) error {
 	return s.finder.FindRequires(ctx, pkgInfo, dirs, skiplist)
+}
+
+func (s *ProvReqService) BuildDepends(ctx context.Context) ([]string, error) {
+	return s.finder.BuildDepends(ctx)
 }

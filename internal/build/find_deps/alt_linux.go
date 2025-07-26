@@ -100,3 +100,7 @@ func (o *ALTLinuxFindProvReq) FindRequires(ctx context.Context, pkgInfo *nfpm.In
 		pkgInfo.Overridables.Depends = append(pkgInfo.Overridables.Depends, dep)
 	})
 }
+
+func (o *ALTLinuxFindProvReq) BuildDepends(ctx context.Context) ([]string, error) {
+	return []string{"rpm-build"}, nil
+}

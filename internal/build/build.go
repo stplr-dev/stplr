@@ -34,6 +34,7 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	finddeps "go.stplr.dev/stplr/internal/build/find_deps"
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/manager"
@@ -380,6 +381,18 @@ func (b *Builder) BuildPackage(
 	buildDepends = removeDuplicates(buildDepends)
 	optDepends = removeDuplicates(optDepends)
 	depends = removeDuplicates(depends)
+
+	f := finddeps.New(
+		input.OSRelease(),
+		input.PkgFormat(),
+	)
+
+	newBuildDeps, err := f.BuildDepends(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get build deps from finddeps %w", err)
+	}
+
+	buildDepends = append(buildDepends, newBuildDeps...)
 
 	if len(sources) != len(checksums) {
 		slog.Error(gotext.Get("The checksums array must be the same length as sources"))
