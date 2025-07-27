@@ -70,7 +70,7 @@ $(INSTALLED_ZSH_COMPLETION): $(ZSH_COMPLETION)
 
 install-config:
 	install -d -m 755 $(SYSCONFDIR)
-	install -m 644 $(DEFAULT_CONF) $(SYSCONFDIR)/stplr.toml
+	[ -f $(SYSCONFDIR)/stplr.toml ] || install -m 644 $(DEFAULT_CONF) $(SYSCONFDIR)/stplr.toml
 
 install-sysusers:
 	install -Dpm644 $(SYSUSERS_CONF) $(SYSUSERS_DIR)/stplr.conf

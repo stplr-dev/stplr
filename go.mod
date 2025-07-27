@@ -9,8 +9,8 @@ require (
 	github.com/alecthomas/chroma/v2 v2.9.1
 	github.com/bmatcuk/doublestar/v4 v4.8.1
 	github.com/charmbracelet/bubbles v0.20.0
-	github.com/charmbracelet/bubbletea v1.2.4
-	github.com/charmbracelet/lipgloss v1.0.0
+	github.com/charmbracelet/bubbletea v1.3.6
+	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/log v0.4.0
 	github.com/go-git/go-billy/v5 v5.6.0
 	github.com/go-git/go-git/v5 v5.13.0
@@ -61,8 +61,10 @@ require (
 	github.com/bodgit/sevenzip v1.3.0 // indirect
 	github.com/bodgit/windows v1.0.0 // indirect
 	github.com/cavaliergopher/cpio v1.0.1 // indirect
+	github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc // indirect
 	github.com/charmbracelet/harmonica v0.2.0 // indirect
-	github.com/charmbracelet/x/ansi v0.4.5 // indirect
+	github.com/charmbracelet/x/ansi v0.9.3 // indirect
+	github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/connesc/cipherio v0.2.1 // indirect
@@ -118,7 +120,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
-	github.com/muesli/termenv v0.15.2 // indirect
+	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/nwaples/rardecode/v2 v2.0.0-beta.2 // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
@@ -141,12 +143,13 @@ require (
 	github.com/ulikunitz/xz v0.5.12 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
+	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	gitlab.com/digitalxero/go-conventional-commit v1.0.7 // indirect
 	go4.org v0.0.0-20200411211856-f5505b9728dd // indirect
 	golang.org/x/mod v0.19.0 // indirect
 	golang.org/x/net v0.38.0 // indirect
-	golang.org/x/sync v0.12.0 // indirect
+	golang.org/x/sync v0.15.0 // indirect
 	golang.org/x/term v0.30.0 // indirect
 	golang.org/x/tools v0.23.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241223144023-3abc09e42ca8 // indirect

@@ -61,6 +61,11 @@ type Package struct {
 	Conflicts     []string `sh:"conflicts" xorm:"json 'conflicts'" json:"conflicts"`
 	Replaces      []string `sh:"replaces" xorm:"json 'replaces'" json:"replaces"`
 
+	NonFree        bool                     `sh:"nonfree" xorm:"'nonfree'" json:"nonfree"`
+	NonFreeUrl     OverridableField[string] `sh:"nonfree_url" xorm:"'nonfree_url'" json:"nonfree_url"`
+	NonFreeMsg     OverridableField[string] `sh:"nonfree_msg" xorm:"-" json:"nonfree_msg"`
+	NonFreeMsgFile OverridableField[string] `sh:"nonfree_msgfile" xorm:"-" json:"nonfree_msgfile"`
+
 	Summary          OverridableField[string]   `sh:"summary" xorm:"'summary'" json:"summary"`
 	Description      OverridableField[string]   `sh:"desc" xorm:"'description'" json:"description"`
 	Group            OverridableField[string]   `sh:"group" xorm:"'group_name'" json:"group"`

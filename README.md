@@ -1,5 +1,6 @@
 ![Test coverage](./assets/coverage-badge.svg)
 [![Translate status](https://translate.codeberg.org/widget/stapler/stplr/svg-badge.svg)](https://translate.codeberg.org/engage/stapler/)
+[![Quality gate](https://sonar.alt-gnome.ru/api/project_badges/measure?project=go.stplr.dev%3Astplr&metric=alert_status&token=sqb_9a27359198d7d0bc80477f0310c1738841dc28f0)](https://sonar.alt-gnome.ru/dashboard?id=go.stplr.dev%3Astplr)
 
 # Stapler
 

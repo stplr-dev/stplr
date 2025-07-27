@@ -69,11 +69,19 @@ type Decoder struct {
 	Overrides bool
 	// Enable using like distros for overrides
 	LikeDistros bool
+
+	OverridesOpts *overrides.Opts
 }
 
 // New creates a new variable decoder
 func New(info *distro.OSRelease, runner *interp.Runner) *Decoder {
-	return &Decoder{info, runner, true, len(info.Like) > 0}
+	return &Decoder{
+		info,
+		runner,
+		true,
+		len(info.Like) > 0,
+		overrides.DefaultOpts,
+	}
 }
 
 // DecodeVar decodes a variable to val using reflection.
@@ -165,7 +173,7 @@ func (d *Decoder) DecodeVar(name string, val any) error {
 			return fmt.Errorf("method Resolve not found on OverridableField")
 		}
 
-		names, err := overrides.Resolve(d.info, overrides.DefaultOpts)
+		names, err := overrides.Resolve(d.info, d.OverridesOpts)
 		if err != nil {
 			return err
 		}
@@ -334,21 +342,29 @@ type vars struct {
 	Value *expand.Variable
 }
 
+var skipSubPrefixesMap = map[string][]string{
+	"auto_req":  {"auto_req_skiplist"},
+	"auto_prov": {"auto_prov_skiplist"},
+	"nonfree":   {"nonfree_msg", "nonfree_msgfile", "nonfree_url"},
+}
+
 func (d *Decoder) getVarsByPrefix(prefix string) []*vars {
 	result := make([]*vars, 0)
+	skipSubPrefixes := skipSubPrefixesMap[prefix]
+
 	for name, val := range d.Runner.Vars {
 		if !strings.HasPrefix(name, prefix) {
 			continue
 		}
-		switch prefix {
-		case "auto_req":
-			if strings.HasPrefix(name, "auto_req_skiplist") {
-				continue
+		shouldSkip := false
+		for _, skipPrefix := range skipSubPrefixes {
+			if strings.HasPrefix(name, skipPrefix) {
+				shouldSkip = true
+				break
 			}
-		case "auto_prov":
-			if strings.HasPrefix(name, "auto_prov_skiplist") {
-				continue
-			}
+		}
+		if shouldSkip {
+			continue
 		}
 		result = append(result, &vars{name, &val})
 	}

@@ -354,6 +354,12 @@ func (b *Builder) BuildPackage(
 		return nil, err
 	}
 
+	for _, vars := range varsOfPackages {
+		if err := ViewNonfree(ctx, input, vars); err != nil {
+			return nil, err
+		}
+	}
+
 	slog.Info(gotext.Get("Building package"), "name", basePkg)
 
 	for _, vars := range varsOfPackages {

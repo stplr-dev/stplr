@@ -32,6 +32,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jeandeaual/go-locale"
 	"mvdan.cc/sh/v3/expand"
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
@@ -81,18 +82,21 @@ func createBuildEnvVars(info *distro.OSRelease, dirs types.Directories) []string
 func (s *ScriptFile) ParseBuildVars(ctx context.Context, info *distro.OSRelease, packages []string) (string, []*Package, error) {
 	runner, err := s.createRunner(info)
 	if err != nil {
-		return "", nil, err
+		return "", nil, fmt.Errorf("failed to create runner: %w", err)
 	}
 
 	if err := runScript(ctx, runner, s.file); err != nil {
-		return "", nil, err
+		return "", nil, fmt.Errorf("failed to run script: %w", err)
 	}
 
-	dec := newDecoder(info, runner)
+	dec, err := newDecoder(info, runner)
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to get decoder: %w", err)
+	}
 
 	pkgNames, err := ParseNames(dec)
 	if err != nil {
-		return "", nil, err
+		return "", nil, fmt.Errorf("failed to parse names: %w", err)
 	}
 
 	if len(pkgNames.Names) == 0 {
@@ -106,7 +110,7 @@ func (s *ScriptFile) ParseBuildVars(ctx context.Context, info *distro.OSRelease,
 
 	varsOfPackages, err := s.createPackagesForBuildVars(ctx, dec, pkgNames, targetPackages)
 	if err != nil {
-		return "", nil, err
+		return "", nil, fmt.Errorf("failed to createPackagesForBuildVars: %w", err)
 	}
 
 	baseName := pkgNames.BasePkgName
@@ -144,7 +148,7 @@ func (s *ScriptFile) createPackagesForBuildVars(
 		var pkg Package
 		pkg.Name = pkgNames.Names[0]
 		if err := dec.DecodeVars(&pkg); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to decode vars: %w", err)
 		}
 		varsOfPackages = append(varsOfPackages, &pkg)
 		return varsOfPackages, nil
@@ -153,7 +157,7 @@ func (s *ScriptFile) createPackagesForBuildVars(
 	for _, pkgName := range targetPackages {
 		pkg, err := s.createPackageFromMeta(ctx, dec, pkgName, pkgNames.BasePkgName)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to createPackageFromMeta: %w", err)
 		}
 		varsOfPackages = append(varsOfPackages, pkg)
 	}
@@ -195,11 +199,17 @@ func runScript(ctx context.Context, runner *interp.Runner, fl *syntax.File) erro
 	return runner.Run(ctx, fl)
 }
 
-func newDecoder(info *distro.OSRelease, runner *interp.Runner) *decoder.Decoder {
+func newDecoder(info *distro.OSRelease, runner *interp.Runner) (*decoder.Decoder, error) {
 	d := decoder.New(info, runner)
-	// d.Overrides = false
-	// d.LikeDistros = false
-	return d
+	systemLang, err := locale.GetLanguage()
+	if err != nil {
+		return nil, fmt.Errorf("cant get systemlang: %w", err)
+	}
+	if systemLang == "" || systemLang == "C" {
+		systemLang = "en"
+	}
+	d.OverridesOpts = d.OverridesOpts.WithLanguages([]string{systemLang})
+	return d, nil
 }
 
 func (a *ScriptFile) Path() string {

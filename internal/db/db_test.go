@@ -83,6 +83,7 @@ var testPkg = staplerfile.Package{
 	Summary:    staplerfile.OverridableFromMap(map[string]string{}),
 	Group:      staplerfile.OverridableFromMap(map[string]string{}),
 	OptDepends: staplerfile.OverridableFromMap(map[string][]string{}),
+	NonFreeUrl: staplerfile.OverridableFromMap(map[string]string{}),
 }
 
 func TestInit(t *testing.T) {

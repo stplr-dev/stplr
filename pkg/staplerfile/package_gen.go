@@ -31,6 +31,10 @@ type packageResolved struct {
 	Provides         []string          `json:"provides"`
 	Conflicts        []string          `json:"conflicts"`
 	Replaces         []string          `json:"replaces"`
+	NonFree          bool              `json:"nonfree"`
+	NonFreeUrl       string            `json:"nonfree_url"`
+	NonFreeMsg       string            `json:"nonfree_msg"`
+	NonFreeMsgFile   string            `json:"nonfree_msgfile"`
 	Summary          string            `json:"summary"`
 	Description      string            `json:"description"`
 	Group            string            `json:"group"`
@@ -64,6 +68,10 @@ func PackageToResolved(src *Package) packageResolved {
 		Provides:         src.Provides,
 		Conflicts:        src.Conflicts,
 		Replaces:         src.Replaces,
+		NonFree:          src.NonFree,
+		NonFreeUrl:       src.NonFreeUrl.Resolved(),
+		NonFreeMsg:       src.NonFreeMsg.Resolved(),
+		NonFreeMsgFile:   src.NonFreeMsgFile.Resolved(),
 		Summary:          src.Summary.Resolved(),
 		Description:      src.Description.Resolved(),
 		Group:            src.Group.Resolved(),
@@ -86,6 +94,9 @@ func PackageToResolved(src *Package) packageResolved {
 }
 
 func ResolvePackage(pkg *Package, overrides []string) {
+	pkg.NonFreeUrl.Resolve(overrides)
+	pkg.NonFreeMsg.Resolve(overrides)
+	pkg.NonFreeMsgFile.Resolve(overrides)
 	pkg.Summary.Resolve(overrides)
 	pkg.Description.Resolve(overrides)
 	pkg.Group.Resolve(overrides)

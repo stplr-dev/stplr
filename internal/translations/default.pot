@@ -218,23 +218,23 @@ msgstr ""
 msgid "Error removing packages"
 msgstr ""
 
-#: internal/build/build.go:357
+#: internal/build/build.go:363
 msgid "Building package"
 msgstr ""
 
-#: internal/build/build.go:398
+#: internal/build/build.go:404
 msgid "The checksums array must be the same length as sources"
 msgstr ""
 
-#: internal/build/build.go:440
+#: internal/build/build.go:446
 msgid "Downloading sources"
 msgstr ""
 
-#: internal/build/build.go:486
+#: internal/build/build.go:492
 msgid "Would you like to remove the build dependencies?"
 msgstr ""
 
-#: internal/build/build.go:564
+#: internal/build/build.go:570
 msgid "Installing dependencies"
 msgstr ""
 
@@ -270,6 +270,27 @@ msgstr ""
 
 #: internal/build/firejail.go:151
 msgid "Applying FireJail integration"
+msgstr ""
+
+#: internal/build/nonfree.go:60
+msgid ""
+"This package contains non-free software that requires license acceptance."
+msgstr ""
+
+#: internal/build/nonfree_pager.go:161
+msgid "NON-FREE SOFTWARE AGREEMENT"
+msgstr ""
+
+#: internal/build/nonfree_pager.go:169
+msgid "y - Accept"
+msgstr ""
+
+#: internal/build/nonfree_pager.go:170
+msgid "n/q/Esc - Decline"
+msgstr ""
+
+#: internal/build/nonfree_pager.go:180
+msgid "Full license available at: %s"
 msgstr ""
 
 #: internal/build/script_executor.go:152
