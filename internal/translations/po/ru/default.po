@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2025-07-22 09:32+0000\n"
+"PO-Revision-Date: 2025-07-29 13:13+0000\n"
 "Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
 "stplr/ru/>\n"
@@ -358,12 +358,11 @@ msgid "Choose which package to %s"
 msgstr "Выберите, какой пакет использовать для %s"
 
 #: internal/cliutils/prompt.go:162
-#, fuzzy
 msgid "Choose which optional package to install"
 msgid_plural "Choose which optional packages to install"
-msgstr[0] "Выберите, какой дополнительный пакет(ы) следует установить"
-msgstr[1] "Выберите, какой дополнительный пакет(ы) следует установить"
-msgstr[2] "Выберите, какой дополнительный пакет(ы) следует установить"
+msgstr[0] "Выберите, какой дополнительный пакет следует установить"
+msgstr[1] "Выберите, какие дополнительные пакеты следует установить"
+msgstr[2] "Выберите, какие дополнительные пакеты следует установить"
 
 #: internal/cliutils/template.go:80 internal/cliutils/template.go:99
 msgid "NAME"
