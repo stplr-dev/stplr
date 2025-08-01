@@ -38,6 +38,7 @@ import (
 	"mvdan.cc/sh/v3/syntax"
 
 	"go.stplr.dev/stplr/internal/overrides"
+	"go.stplr.dev/stplr/internal/shutils/runner"
 	"go.stplr.dev/stplr/pkg/distro"
 )
 
@@ -264,6 +265,33 @@ func (d *Decoder) GetFunc(name string) (ScriptFunc, bool) {
 
 type PrepareFunc func(context.Context, *interp.Runner) error
 
+func (d *Decoder) runFunc(
+	ctx context.Context,
+	fn *syntax.Stmt,
+	prepare PrepareFunc,
+	opts ...interp.RunnerOption,
+) (*interp.Runner, error) {
+	sub := d.Runner.Subshell()
+
+	for _, opt := range opts {
+		if err := opt(sub); err != nil {
+			return nil, err
+		}
+	}
+
+	if err := runner.EnableStrictShellMode(ctx, sub); err != nil {
+		return nil, err
+	}
+
+	if prepare != nil {
+		if err := prepare(ctx, sub); err != nil {
+			return nil, err
+		}
+	}
+
+	return sub, sub.Run(ctx, fn)
+}
+
 func (d *Decoder) GetFuncP(name string, prepare PrepareFunc) (ScriptFunc, bool) {
 	fn := d.getFunc(name)
 	if fn == nil {
@@ -271,19 +299,8 @@ func (d *Decoder) GetFuncP(name string, prepare PrepareFunc) (ScriptFunc, bool) 
 	}
 
 	return func(ctx context.Context, opts ...interp.RunnerOption) error {
-		sub := d.Runner.Subshell()
-		for _, opt := range opts {
-			err := opt(sub)
-			if err != nil {
-				return err
-			}
-		}
-		if prepare != nil {
-			if err := prepare(ctx, sub); err != nil {
-				return err
-			}
-		}
-		return sub.Run(ctx, fn)
+		_, err := d.runFunc(ctx, fn, prepare, opts...)
+		return err
 	}, true
 }
 
@@ -294,14 +311,7 @@ func (d *Decoder) GetFuncWithSubshell(name string) (ScriptFuncWithSubshell, bool
 	}
 
 	return func(ctx context.Context, opts ...interp.RunnerOption) (*interp.Runner, error) {
-		sub := d.Runner.Subshell()
-		for _, opt := range opts {
-			err := opt(sub)
-			if err != nil {
-				return nil, err
-			}
-		}
-		return sub, sub.Run(ctx, fn)
+		return d.runFunc(ctx, fn, nil, opts...)
 	}, true
 }
 

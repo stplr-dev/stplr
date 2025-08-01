@@ -101,7 +101,6 @@ clean clear:
 	rm -f $(BIN)
 
 
-IGNORE_OLD_FILES := $(foreach file,$(shell cat old-files),-ignore $(file))
 update-license:
 	$(ADD_LICENSE_BIN) -v -ignore 'packaging/**' -ignore 'vendor/**' -f license-header.tmpl .
 
@@ -117,6 +116,7 @@ i18n:
 test-coverage:
 	go test ./... -v -coverpkg=./... -coverprofile=coverage.out
 	bash scripts/coverage-badge.sh
+	rm -f coverage.out
 
 update-deps-cve:
 	bash scripts/update-deps-cve.sh

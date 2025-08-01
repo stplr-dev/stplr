@@ -41,6 +41,7 @@ import (
 	"go.stplr.dev/stplr/internal/shutils/decoder"
 	"go.stplr.dev/stplr/internal/shutils/handlers"
 	"go.stplr.dev/stplr/internal/shutils/helpers"
+	"go.stplr.dev/stplr/internal/shutils/runner"
 	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/types"
 )
@@ -80,16 +81,20 @@ func createBuildEnvVars(info *distro.OSRelease, dirs types.Directories) []string
 }
 
 func (s *ScriptFile) ParseBuildVars(ctx context.Context, info *distro.OSRelease, packages []string) (string, []*Package, error) {
-	runner, err := s.createRunner(info)
+	r, err := s.createRunner(info)
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to create runner: %w", err)
 	}
 
-	if err := runScript(ctx, runner, s.file); err != nil {
+	if err := runner.EnableStrictShellMode(ctx, r); err != nil {
+		return "", nil, fmt.Errorf("failed to enable strict shell mode: %w", err)
+	}
+
+	if err := runScript(ctx, r, s.file); err != nil {
 		return "", nil, fmt.Errorf("failed to run script: %w", err)
 	}
 
-	dec, err := newDecoder(info, runner)
+	dec, err := newDecoder(info, r)
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to get decoder: %w", err)
 	}
@@ -108,7 +113,7 @@ func (s *ScriptFile) ParseBuildVars(ctx context.Context, info *distro.OSRelease,
 		targetPackages = pkgNames.Names
 	}
 
-	varsOfPackages, err := s.createPackagesForBuildVars(ctx, dec, pkgNames, targetPackages)
+	varsOfPackages, err := s.createPackagesForBuildVars(ctx, dec, info, pkgNames, targetPackages)
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to createPackagesForBuildVars: %w", err)
 	}
@@ -139,6 +144,7 @@ func (s *ScriptFile) createRunner(info *distro.OSRelease) (*interp.Runner, error
 func (s *ScriptFile) createPackagesForBuildVars(
 	ctx context.Context,
 	dec *decoder.Decoder,
+	info *distro.OSRelease,
 	pkgNames *PackageNames,
 	targetPackages []string,
 ) ([]*Package, error) {
@@ -155,7 +161,7 @@ func (s *ScriptFile) createPackagesForBuildVars(
 	}
 
 	for _, pkgName := range targetPackages {
-		pkg, err := s.createPackageFromMeta(ctx, dec, pkgName, pkgNames.BasePkgName)
+		pkg, err := s.createPackageFromMeta(ctx, dec, info, pkgName, pkgNames.BasePkgName)
 		if err != nil {
 			return nil, fmt.Errorf("failed to createPackageFromMeta: %w", err)
 		}
@@ -168,30 +174,30 @@ func (s *ScriptFile) createPackagesForBuildVars(
 func (s *ScriptFile) createPackageFromMeta(
 	ctx context.Context,
 	dec *decoder.Decoder,
+	info *distro.OSRelease,
 	pkgName, basePkgName string,
 ) (*Package, error) {
 	funcName := fmt.Sprintf("meta_%s", pkgName)
 	meta, ok := dec.GetFuncWithSubshell(funcName)
-	if !ok {
-		return nil, fmt.Errorf("func %s is missing", funcName)
+
+	var pkg Package
+	if ok {
+		metaRunner, err := meta(ctx)
+		if err != nil {
+			return nil, err
+		}
+		metaDecoder := decoder.New(info, metaRunner)
+		if err := metaDecoder.DecodeVars(&pkg); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := dec.DecodeVars(&pkg); err != nil {
+			return nil, fmt.Errorf("failed to decode vars: %w", err)
+		}
 	}
-
-	metaRunner, err := meta(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	metaDecoder := decoder.New(&distro.OSRelease{}, metaRunner)
-
-	var vars Package
-	if err := metaDecoder.DecodeVars(&vars); err != nil {
-		return nil, err
-	}
-
-	vars.Name = pkgName
-	vars.BasePkgName = basePkgName
-
-	return &vars, nil
+	pkg.Name = pkgName
+	pkg.BasePkgName = basePkgName
+	return &pkg, nil
 }
 
 func runScript(ctx context.Context, runner *interp.Runner, fl *syntax.File) error {
