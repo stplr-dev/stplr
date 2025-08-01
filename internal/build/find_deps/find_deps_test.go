@@ -36,7 +36,7 @@ const (
 )
 
 func TestEmptyBuildDepends(t *testing.T) {
-	svc := finddeps.New(&distro.OSRelease{ID: "unknown"}, "deb")
+	svc := finddeps.New(&distro.OSRelease{ID: "unknown"}, "deb", "")
 	deps, err := svc.BuildDepends(context.Background())
 
 	assert.NoError(t, err)
@@ -44,7 +44,7 @@ func TestEmptyBuildDepends(t *testing.T) {
 }
 
 func TestAltLinuxBuildDepends(t *testing.T) {
-	svc := finddeps.New(&distro.OSRelease{ID: altId}, "rpm")
+	svc := finddeps.New(&distro.OSRelease{ID: altId}, "rpm", "")
 	deps, err := svc.BuildDepends(context.Background())
 
 	assert.NoError(t, err)
@@ -52,7 +52,7 @@ func TestAltLinuxBuildDepends(t *testing.T) {
 }
 
 func TestFedoraBuildDependsByID(t *testing.T) {
-	svc := finddeps.New(&distro.OSRelease{ID: fedoraId}, "rpm")
+	svc := finddeps.New(&distro.OSRelease{ID: fedoraId}, "rpm", "")
 	deps, err := svc.BuildDepends(context.Background())
 
 	assert.NoError(t, err)
@@ -60,17 +60,9 @@ func TestFedoraBuildDependsByID(t *testing.T) {
 }
 
 func TestFedoraBuildDependsByLike(t *testing.T) {
-	svc := finddeps.New(&distro.OSRelease{ID: "mycustom", Like: []string{fedoraId}}, "rpm")
+	svc := finddeps.New(&distro.OSRelease{ID: "mycustom", Like: []string{fedoraId}}, "rpm", "")
 	deps, err := svc.BuildDepends(context.Background())
 
 	assert.NoError(t, err)
 	assert.Equal(t, []string{fedoraRpmBuild}, deps)
-}
-
-func TestNonRPMFormatUsesEmpty(t *testing.T) {
-	svc := finddeps.New(&distro.OSRelease{ID: altId}, "deb")
-	deps, err := svc.BuildDepends(context.Background())
-
-	assert.NoError(t, err)
-	assert.Empty(t, deps)
 }

@@ -38,6 +38,7 @@ import (
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/internal/shutils/decoder"
 	"go.stplr.dev/stplr/pkg/distro"
 	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
@@ -388,17 +389,23 @@ func (b *Builder) BuildPackage(
 	optDepends = removeDuplicates(optDepends)
 	depends = removeDuplicates(depends)
 
-	f := finddeps.New(
-		input.OSRelease(),
-		input.PkgFormat(),
-	)
+	for _, vars := range varsOfPackages {
+		if len(vars.AutoReq.Resolved()) == 1 && decoder.IsTruthy(vars.AutoReq.Resolved()[0]) {
+			f := finddeps.New(
+				input.OSRelease(),
+				input.PkgFormat(),
+				vars.AutoReqProvMethod.Resolved(),
+			)
 
-	newBuildDeps, err := f.BuildDepends(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get build deps from finddeps %w", err)
+			newBuildDeps, err := f.BuildDepends(ctx)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get build deps from finddeps %w", err)
+			}
+			buildDepends = append(buildDepends, newBuildDeps...)
+		}
 	}
 
-	buildDepends = append(buildDepends, newBuildDeps...)
+	buildDepends = removeDuplicates(buildDepends)
 
 	if len(sources) != len(checksums) {
 		slog.Error(gotext.Get("The checksums array must be the same length as sources"))

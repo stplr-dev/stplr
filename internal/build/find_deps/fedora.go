@@ -83,7 +83,7 @@ func rpmFindDependenciesFedora(ctx context.Context, pkgInfo *nfpm.Info, dirs typ
 	return nil
 }
 
-func (o *FedoraFindProvReq) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist []string) error {
+func (o *FedoraFindProvReq) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	return rpmFindDependenciesFedora(
 		ctx,
 		pkgInfo,
@@ -103,7 +103,7 @@ func (o *FedoraFindProvReq) FindProvides(ctx context.Context, pkgInfo *nfpm.Info
 		})
 }
 
-func (o *FedoraFindProvReq) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist []string) error {
+func (o *FedoraFindProvReq) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	return rpmFindDependenciesFedora(
 		ctx,
 		pkgInfo,

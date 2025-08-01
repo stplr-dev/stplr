@@ -20,30 +20,30 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package finddeps
+//go:build e2e
+
+package e2etests_test
 
 import (
-	"context"
-	"log/slog"
+	"testing"
 
-	"github.com/goreleaser/nfpm/v2"
-	"github.com/leonelquinteros/gotext"
-
-	"go.stplr.dev/stplr/pkg/types"
+	"go.alt-gnome.ru/capytest"
 )
 
-type EmptyFindProvReq struct{}
+func TestE2EAutoreqprovDirty(t *testing.T) {
+	t.Parallel()
 
-func (o *EmptyFindProvReq) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
-	slog.Info(gotext.Get("AutoProv is not implemented for this package format, so it's skipped"))
-	return nil
-}
-
-func (o *EmptyFindProvReq) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
-	slog.Info(gotext.Get("AutoReq is not implemented for this package format, so it's skipped"))
-	return nil
-}
-
-func (o *EmptyFindProvReq) BuildDepends(ctx context.Context) ([]string, error) {
-	return []string{}, nil
+	runMatrixSuite(
+		t,
+		"autoreqprov-dirty",
+		AUTOREQ_AUTOPROV_SYSTEMS,
+		func(t *testing.T, r capytest.Runner) {
+			defaultPrepare(t, r)
+			execShouldNoError(t, r, "stplr", "-i=false", "build", "-p", "alr-repo/test-autoreq-dirty")
+			r.Command("sh", "-c", "rpm -qp --requires *.rpm | sort").
+				ExpectStdoutMatchesSnapshot().
+				ExpectSuccess().
+				Run(t)
+		},
+	)
 }

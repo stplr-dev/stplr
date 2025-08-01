@@ -33,8 +33,8 @@ import (
 )
 
 type ProvReqFinder interface {
-	FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist []string) error
-	FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist []string) error
+	FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error
+	FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error
 	BuildDepends(ctx context.Context) ([]string, error)
 }
 
@@ -42,27 +42,35 @@ type ProvReqService struct {
 	finder ProvReqFinder
 }
 
-func New(info *distro.OSRelease, pkgFormat string) *ProvReqService {
+func New(info *distro.OSRelease, pkgFormat, method string) *ProvReqService {
 	s := &ProvReqService{
 		finder: &EmptyFindProvReq{},
 	}
-	if pkgFormat == "rpm" {
+
+	if method == "" {
+		method = "rpm"
+	}
+
+	switch method {
+	case "rpm":
 		switch {
 		case info.ID == "altlinux":
 			s.finder = &ALTLinuxFindProvReq{}
 		case info.ID == "fedora" || slices.Contains(info.Like, "fedora"):
 			s.finder = &FedoraFindProvReq{}
 		}
+	case "dirty":
+		s.finder = &DirtyFindProvReq{}
 	}
 	return s
 }
 
-func (s *ProvReqService) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist []string) error {
-	return s.finder.FindProvides(ctx, pkgInfo, dirs, skiplist)
+func (s *ProvReqService) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+	return s.finder.FindProvides(ctx, pkgInfo, dirs, skiplist, filter)
 }
 
-func (s *ProvReqService) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist []string) error {
-	return s.finder.FindRequires(ctx, pkgInfo, dirs, skiplist)
+func (s *ProvReqService) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+	return s.finder.FindRequires(ctx, pkgInfo, dirs, skiplist, filter)
 }
 
 func (s *ProvReqService) BuildDepends(ctx context.Context) ([]string, error) {

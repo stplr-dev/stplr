@@ -343,8 +343,8 @@ type vars struct {
 }
 
 var skipSubPrefixesMap = map[string][]string{
-	"auto_req":  {"auto_req_skiplist"},
-	"auto_prov": {"auto_prov_skiplist"},
+	"auto_req":  {"auto_req_skiplist", "auto_req_filter"},
+	"auto_prov": {"auto_prov_skiplist", "auto_prov_filter"},
 	"nonfree":   {"nonfree_msg", "nonfree_msgfile", "nonfree_url"},
 }
 

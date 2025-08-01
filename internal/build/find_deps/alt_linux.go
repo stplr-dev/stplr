@@ -70,10 +70,16 @@ func rpmFindDependenciesALTLinux(ctx context.Context, pkgInfo *nfpm.Info, dirs t
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		slog.Error(stderr.String())
+		filteredStderr := []string{}
+		for _, line := range strings.Split(stderr.String(), "\n") {
+			if !strings.HasPrefix(line, "lib.req: WARNING") {
+				filteredStderr = append(filteredStderr, line)
+			}
+		}
+		filteredStderrStr := strings.Join(filteredStderr, "\n")
+		slog.Error(filteredStderrStr)
 		return err
 	}
-	slog.Debug(stderr.String())
 
 	dependencies := strings.Split(strings.TrimSpace(out.String()), "\n")
 	for _, dep := range dependencies {
@@ -87,14 +93,14 @@ func rpmFindDependenciesALTLinux(ctx context.Context, pkgInfo *nfpm.Info, dirs t
 
 type ALTLinuxFindProvReq struct{}
 
-func (o *ALTLinuxFindProvReq) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist []string) error {
+func (o *ALTLinuxFindProvReq) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	return rpmFindDependenciesALTLinux(ctx, pkgInfo, dirs, "/usr/lib/rpm/find-provides", []string{"RPM_FINDPROV_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
 		slog.Info(gotext.Get("Provided dependency found"), "dep", dep)
 		pkgInfo.Overridables.Provides = append(pkgInfo.Overridables.Provides, dep)
 	})
 }
 
-func (o *ALTLinuxFindProvReq) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist []string) error {
+func (o *ALTLinuxFindProvReq) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	return rpmFindDependenciesALTLinux(ctx, pkgInfo, dirs, "/usr/lib/rpm/find-requires", []string{"RPM_FINDREQ_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
 		slog.Info(gotext.Get("Required dependency found"), "dep", dep)
 		pkgInfo.Overridables.Depends = append(pkgInfo.Overridables.Depends, dep)

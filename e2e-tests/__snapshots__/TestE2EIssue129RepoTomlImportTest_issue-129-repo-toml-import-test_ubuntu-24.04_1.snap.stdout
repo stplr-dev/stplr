@@ -1,5 +1,5 @@
 - name: alr-repo
-  url: https://codeberg.org/stapler/repo-for-tests
+  url: https://altlinux.space/stapler/repo-for-tests.git
   ref: main
   mirrors:
   - https://github.com/example/example.git

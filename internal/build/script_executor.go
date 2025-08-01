@@ -179,10 +179,14 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 			return nil, err
 		}
 
+		// utils.WriteProf("/tmp", "stplr-before")
+		// google/rpmpack performs in-memory, which is critical for large rpms
 		err = packager.Package(pkgInfo, pkgFile)
 		if err != nil {
 			return nil, err
 		}
+		// debug.FreeOSMemory()
+		// utils.WriteProf("/tmp", "stplr-after")
 
 		builtDeps = append(builtDeps, &BuiltDep{
 			Name: vars.Name,
@@ -268,21 +272,35 @@ func buildPkgMetadata(
 
 	pkgInfo.Overridables.Contents = contents
 
+	f := finddeps.New(info, pkgFormat, vars.AutoReqProvMethod.Resolved())
+
 	if len(vars.AutoProv.Resolved()) == 1 && decoder.IsTruthy(vars.AutoProv.Resolved()[0]) {
-		f := finddeps.New(info, pkgFormat)
-		err = f.FindProvides(ctx, pkgInfo, dirs, vars.AutoProvSkipList.Resolved())
+		err = f.FindProvides(
+			ctx,
+			pkgInfo,
+			dirs,
+			vars.AutoProvSkipList.Resolved(),
+			vars.AutoProvFilter.Resolved(),
+		)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	if len(vars.AutoReq.Resolved()) == 1 && decoder.IsTruthy(vars.AutoReq.Resolved()[0]) {
-		f := finddeps.New(info, pkgFormat)
-		err = f.FindRequires(ctx, pkgInfo, dirs, vars.AutoReqSkipList.Resolved())
+		err = f.FindRequires(
+			ctx,
+			pkgInfo,
+			dirs,
+			vars.AutoReqSkipList.Resolved(),
+			vars.AutoReqFilter.Resolved(),
+		)
 		if err != nil {
 			return nil, err
 		}
 	}
+
+	pkgInfo.RPM.Compression = "xz"
 
 	return pkgInfo, nil
 }

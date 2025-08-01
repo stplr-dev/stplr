@@ -45,7 +45,7 @@ func TestFindPkgs(t *testing.T) {
 	err := rs.Pull(e.Ctx, []types.Repo{
 		{
 			Name: "default",
-			URL:  "https://codeberg.org/stapler/repo-for-tests.git",
+			URL:  "https://altlinux.space/stapler/repo-for-tests.git",
 		},
 	})
 	if err != nil {

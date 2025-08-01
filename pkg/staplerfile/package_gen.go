@@ -20,76 +20,82 @@
 package staplerfile
 
 type packageResolved struct {
-	Repository       string            `json:"repository"`
-	Name             string            `json:"name"`
-	BasePkgName      string            `json:"basepkg_name"`
-	Version          string            `json:"version"`
-	Release          int               `json:"release"`
-	Epoch            uint              `json:"epoch"`
-	Architectures    []string          `json:"architectures"`
-	Licenses         []string          `json:"license"`
-	Provides         []string          `json:"provides"`
-	Conflicts        []string          `json:"conflicts"`
-	Replaces         []string          `json:"replaces"`
-	NonFree          bool              `json:"nonfree"`
-	NonFreeUrl       string            `json:"nonfree_url"`
-	NonFreeMsg       string            `json:"nonfree_msg"`
-	NonFreeMsgFile   string            `json:"nonfree_msgfile"`
-	Summary          string            `json:"summary"`
-	Description      string            `json:"description"`
-	Group            string            `json:"group"`
-	Homepage         string            `json:"homepage"`
-	Maintainer       string            `json:"maintainer"`
-	Depends          []string          `json:"deps"`
-	BuildDepends     []string          `json:"build_deps"`
-	OptDepends       []string          `json:"opt_deps,omitempty"`
-	Sources          []string          `json:"sources"`
-	Checksums        []string          `json:"checksums,omitempty"`
-	Backup           []string          `json:"backup"`
-	Scripts          Scripts           `json:"scripts,omitempty"`
-	AutoReq          []string          `json:"auto_req"`
-	AutoProv         []string          `json:"auto_prov"`
-	AutoReqSkipList  []string          `json:"auto_req_skiplist,omitempty"`
-	AutoProvSkipList []string          `json:"auto_prov_skiplist,omitempty"`
-	FireJailed       bool              `json:"firejailed"`
-	FireJailProfiles map[string]string `json:"firejail_profiles,omitempty"`
+	Repository        string            `json:"repository"`
+	Name              string            `json:"name"`
+	BasePkgName       string            `json:"basepkg_name"`
+	Version           string            `json:"version"`
+	Release           int               `json:"release"`
+	Epoch             uint              `json:"epoch"`
+	Architectures     []string          `json:"architectures"`
+	Licenses          []string          `json:"license"`
+	Provides          []string          `json:"provides"`
+	Conflicts         []string          `json:"conflicts"`
+	Replaces          []string          `json:"replaces"`
+	NonFree           bool              `json:"nonfree"`
+	NonFreeUrl        string            `json:"nonfree_url"`
+	NonFreeMsg        string            `json:"nonfree_msg"`
+	NonFreeMsgFile    string            `json:"nonfree_msgfile"`
+	Summary           string            `json:"summary"`
+	Description       string            `json:"description"`
+	Group             string            `json:"group"`
+	Homepage          string            `json:"homepage"`
+	Maintainer        string            `json:"maintainer"`
+	Depends           []string          `json:"deps"`
+	BuildDepends      []string          `json:"build_deps"`
+	OptDepends        []string          `json:"opt_deps,omitempty"`
+	Sources           []string          `json:"sources"`
+	Checksums         []string          `json:"checksums,omitempty"`
+	Backup            []string          `json:"backup"`
+	Scripts           Scripts           `json:"scripts,omitempty"`
+	AutoReqProvMethod string            `json:"auto_req_method"`
+	AutoReq           []string          `json:"auto_req"`
+	AutoReqSkipList   []string          `json:"auto_req_skiplist,omitempty"`
+	AutoReqFilter     []string          `json:"auto_req_filter,omitempty"`
+	AutoProv          []string          `json:"auto_prov"`
+	AutoProvSkipList  []string          `json:"auto_prov_skiplist,omitempty"`
+	AutoProvFilter    []string          `json:"auto_prov_filter,omitempty"`
+	FireJailed        bool              `json:"firejailed"`
+	FireJailProfiles  map[string]string `json:"firejail_profiles,omitempty"`
 }
 
 func PackageToResolved(src *Package) packageResolved {
 	return packageResolved{
-		Repository:       src.Repository,
-		Name:             src.Name,
-		BasePkgName:      src.BasePkgName,
-		Version:          src.Version,
-		Release:          src.Release,
-		Epoch:            src.Epoch,
-		Architectures:    src.Architectures,
-		Licenses:         src.Licenses,
-		Provides:         src.Provides,
-		Conflicts:        src.Conflicts,
-		Replaces:         src.Replaces,
-		NonFree:          src.NonFree,
-		NonFreeUrl:       src.NonFreeUrl.Resolved(),
-		NonFreeMsg:       src.NonFreeMsg.Resolved(),
-		NonFreeMsgFile:   src.NonFreeMsgFile.Resolved(),
-		Summary:          src.Summary.Resolved(),
-		Description:      src.Description.Resolved(),
-		Group:            src.Group.Resolved(),
-		Homepage:         src.Homepage.Resolved(),
-		Maintainer:       src.Maintainer.Resolved(),
-		Depends:          src.Depends.Resolved(),
-		BuildDepends:     src.BuildDepends.Resolved(),
-		OptDepends:       src.OptDepends.Resolved(),
-		Sources:          src.Sources.Resolved(),
-		Checksums:        src.Checksums.Resolved(),
-		Backup:           src.Backup.Resolved(),
-		Scripts:          src.Scripts.Resolved(),
-		AutoReq:          src.AutoReq.Resolved(),
-		AutoProv:         src.AutoProv.Resolved(),
-		AutoReqSkipList:  src.AutoReqSkipList.Resolved(),
-		AutoProvSkipList: src.AutoProvSkipList.Resolved(),
-		FireJailed:       src.FireJailed.Resolved(),
-		FireJailProfiles: src.FireJailProfiles.Resolved(),
+		Repository:        src.Repository,
+		Name:              src.Name,
+		BasePkgName:       src.BasePkgName,
+		Version:           src.Version,
+		Release:           src.Release,
+		Epoch:             src.Epoch,
+		Architectures:     src.Architectures,
+		Licenses:          src.Licenses,
+		Provides:          src.Provides,
+		Conflicts:         src.Conflicts,
+		Replaces:          src.Replaces,
+		NonFree:           src.NonFree,
+		NonFreeUrl:        src.NonFreeUrl.Resolved(),
+		NonFreeMsg:        src.NonFreeMsg.Resolved(),
+		NonFreeMsgFile:    src.NonFreeMsgFile.Resolved(),
+		Summary:           src.Summary.Resolved(),
+		Description:       src.Description.Resolved(),
+		Group:             src.Group.Resolved(),
+		Homepage:          src.Homepage.Resolved(),
+		Maintainer:        src.Maintainer.Resolved(),
+		Depends:           src.Depends.Resolved(),
+		BuildDepends:      src.BuildDepends.Resolved(),
+		OptDepends:        src.OptDepends.Resolved(),
+		Sources:           src.Sources.Resolved(),
+		Checksums:         src.Checksums.Resolved(),
+		Backup:            src.Backup.Resolved(),
+		Scripts:           src.Scripts.Resolved(),
+		AutoReqProvMethod: src.AutoReqProvMethod.Resolved(),
+		AutoReq:           src.AutoReq.Resolved(),
+		AutoReqSkipList:   src.AutoReqSkipList.Resolved(),
+		AutoReqFilter:     src.AutoReqFilter.Resolved(),
+		AutoProv:          src.AutoProv.Resolved(),
+		AutoProvSkipList:  src.AutoProvSkipList.Resolved(),
+		AutoProvFilter:    src.AutoProvFilter.Resolved(),
+		FireJailed:        src.FireJailed.Resolved(),
+		FireJailProfiles:  src.FireJailProfiles.Resolved(),
 	}
 }
 
@@ -109,10 +115,13 @@ func ResolvePackage(pkg *Package, overrides []string) {
 	pkg.Checksums.Resolve(overrides)
 	pkg.Backup.Resolve(overrides)
 	pkg.Scripts.Resolve(overrides)
+	pkg.AutoReqProvMethod.Resolve(overrides)
 	pkg.AutoReq.Resolve(overrides)
-	pkg.AutoProv.Resolve(overrides)
 	pkg.AutoReqSkipList.Resolve(overrides)
+	pkg.AutoReqFilter.Resolve(overrides)
+	pkg.AutoProv.Resolve(overrides)
 	pkg.AutoProvSkipList.Resolve(overrides)
+	pkg.AutoProvFilter.Resolve(overrides)
 	pkg.FireJailed.Resolve(overrides)
 	pkg.FireJailProfiles.Resolve(overrides)
 }

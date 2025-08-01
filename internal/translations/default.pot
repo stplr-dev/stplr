@@ -218,23 +218,23 @@ msgstr ""
 msgid "Error removing packages"
 msgstr ""
 
-#: internal/build/build.go:363
+#: internal/build/build.go:364
 msgid "Building package"
 msgstr ""
 
-#: internal/build/build.go:404
+#: internal/build/build.go:411
 msgid "The checksums array must be the same length as sources"
 msgstr ""
 
-#: internal/build/build.go:446
+#: internal/build/build.go:453
 msgid "Downloading sources"
 msgstr ""
 
-#: internal/build/build.go:492
+#: internal/build/build.go:499
 msgid "Would you like to remove the build dependencies?"
 msgstr ""
 
-#: internal/build/build.go:570
+#: internal/build/build.go:577
 msgid "Installing dependencies"
 msgstr ""
 
@@ -252,15 +252,15 @@ msgstr ""
 msgid "Command not found on the system"
 msgstr ""
 
-#: internal/build/find_deps/alt_linux.go:92
+#: internal/build/find_deps/alt_linux.go:98
 msgid "Provided dependency found"
 msgstr ""
 
-#: internal/build/find_deps/alt_linux.go:99
+#: internal/build/find_deps/alt_linux.go:105
 msgid "Required dependency found"
 msgstr ""
 
-#: internal/build/find_deps/empty.go:38
+#: internal/build/find_deps/dirty.go:45
 msgid "AutoProv is not implemented for this package format, so it's skipped"
 msgstr ""
 
@@ -297,15 +297,15 @@ msgstr ""
 msgid "Building package metadata"
 msgstr ""
 
-#: internal/build/script_executor.go:293
+#: internal/build/script_executor.go:311
 msgid "Executing prepare()"
 msgstr ""
 
-#: internal/build/script_executor.go:302
+#: internal/build/script_executor.go:320
 msgid "Executing build()"
 msgstr ""
 
-#: internal/build/script_executor.go:331 internal/build/script_executor.go:351
+#: internal/build/script_executor.go:349 internal/build/script_executor.go:369
 msgid "Executing %s()"
 msgstr ""
 

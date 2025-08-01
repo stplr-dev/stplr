@@ -66,22 +66,25 @@ type Package struct {
 	NonFreeMsg     OverridableField[string] `sh:"nonfree_msg" xorm:"-" json:"nonfree_msg"`
 	NonFreeMsgFile OverridableField[string] `sh:"nonfree_msgfile" xorm:"-" json:"nonfree_msgfile"`
 
-	Summary          OverridableField[string]   `sh:"summary" xorm:"'summary'" json:"summary"`
-	Description      OverridableField[string]   `sh:"desc" xorm:"'description'" json:"description"`
-	Group            OverridableField[string]   `sh:"group" xorm:"'group_name'" json:"group"`
-	Homepage         OverridableField[string]   `sh:"homepage" xorm:"'homepage'" json:"homepage"`
-	Maintainer       OverridableField[string]   `sh:"maintainer" xorm:"'maintainer'" json:"maintainer"`
-	Depends          OverridableField[[]string] `sh:"deps" xorm:"'depends'" json:"deps"`
-	BuildDepends     OverridableField[[]string] `sh:"build_deps" xorm:"'builddepends'" json:"build_deps"`
-	OptDepends       OverridableField[[]string] `sh:"opt_deps" xorm:"'optdepends'" json:"opt_deps,omitempty"`
-	Sources          OverridableField[[]string] `sh:"sources" xorm:"-" json:"sources"`
-	Checksums        OverridableField[[]string] `sh:"checksums" xorm:"-" json:"checksums,omitempty"`
-	Backup           OverridableField[[]string] `sh:"backup" xorm:"-" json:"backup"`
-	Scripts          OverridableField[Scripts]  `sh:"scripts" xorm:"-" json:"scripts,omitempty"`
-	AutoReq          OverridableField[[]string] `sh:"auto_req" xorm:"-" json:"auto_req"`
-	AutoProv         OverridableField[[]string] `sh:"auto_prov" xorm:"-" json:"auto_prov"`
-	AutoReqSkipList  OverridableField[[]string] `sh:"auto_req_skiplist" xorm:"-" json:"auto_req_skiplist,omitempty"`
-	AutoProvSkipList OverridableField[[]string] `sh:"auto_prov_skiplist" xorm:"-" json:"auto_prov_skiplist,omitempty"`
+	Summary           OverridableField[string]   `sh:"summary" xorm:"'summary'" json:"summary"`
+	Description       OverridableField[string]   `sh:"desc" xorm:"'description'" json:"description"`
+	Group             OverridableField[string]   `sh:"group" xorm:"'group_name'" json:"group"`
+	Homepage          OverridableField[string]   `sh:"homepage" xorm:"'homepage'" json:"homepage"`
+	Maintainer        OverridableField[string]   `sh:"maintainer" xorm:"'maintainer'" json:"maintainer"`
+	Depends           OverridableField[[]string] `sh:"deps" xorm:"'depends'" json:"deps"`
+	BuildDepends      OverridableField[[]string] `sh:"build_deps" xorm:"'builddepends'" json:"build_deps"`
+	OptDepends        OverridableField[[]string] `sh:"opt_deps" xorm:"'optdepends'" json:"opt_deps,omitempty"`
+	Sources           OverridableField[[]string] `sh:"sources" xorm:"-" json:"sources"`
+	Checksums         OverridableField[[]string] `sh:"checksums" xorm:"-" json:"checksums,omitempty"`
+	Backup            OverridableField[[]string] `sh:"backup" xorm:"-" json:"backup"`
+	Scripts           OverridableField[Scripts]  `sh:"scripts" xorm:"-" json:"scripts,omitempty"`
+	AutoReqProvMethod OverridableField[string]   `sh:"auto_reqprov_method" xorm:"-" json:"auto_req_method"`
+	AutoReq           OverridableField[[]string] `sh:"auto_req" xorm:"-" json:"auto_req"`
+	AutoReqSkipList   OverridableField[[]string] `sh:"auto_req_skiplist" xorm:"-" json:"auto_req_skiplist,omitempty"`
+	AutoReqFilter     OverridableField[[]string] `sh:"auto_req_filter" xorm:"-" json:"auto_req_filter,omitempty"`
+	AutoProv          OverridableField[[]string] `sh:"auto_prov" xorm:"-" json:"auto_prov"`
+	AutoProvSkipList  OverridableField[[]string] `sh:"auto_prov_skiplist" xorm:"-" json:"auto_prov_skiplist,omitempty"`
+	AutoProvFilter    OverridableField[[]string] `sh:"auto_prov_filter" xorm:"-" json:"auto_prov_filter,omitempty"`
 
 	FireJailed       OverridableField[bool]              `sh:"firejailed" xorm:"-" json:"firejailed"`
 	FireJailProfiles OverridableField[map[string]string] `sh:"firejail_profiles" xorm:"-" json:"firejail_profiles,omitempty"`
