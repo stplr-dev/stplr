@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package finddeps
+package dirty
 
 import (
 	"path/filepath"
@@ -33,37 +33,6 @@ func TestBracketValue(t *testing.T) {
 	assert.Equal(t, "", bracketValue("test]"))
 	assert.Equal(t, "", bracketValue("test"))
 	assert.Equal(t, "a", bracketValue("[a]test[b]"))
-}
-
-func TestDiffSets(t *testing.T) {
-	assert.Equal(t, map[string]struct{}{"a": {}}, diffSets(
-		map[string]struct{}{"a": {}},
-		map[string]struct{}{"b": {}},
-	))
-
-	assert.Equal(t, map[string]struct{}{"a": {}}, diffSets(
-		map[string]struct{}{"a": {}},
-		map[string]struct{}{},
-	))
-
-	assert.Equal(t, map[string]struct{}{}, diffSets(
-		map[string]struct{}{"a": {}},
-		map[string]struct{}{
-			"a": {},
-			"b": {},
-		},
-	))
-}
-
-func TestToSet(t *testing.T) {
-	input := []string{"a", "b", "a"}
-	expected := map[string]struct{}{
-		"a": {},
-		"b": {},
-	}
-
-	result := ToSet(input)
-	assert.Equal(t, expected, result)
 }
 
 func TestRelWithSlash(t *testing.T) {

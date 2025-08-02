@@ -20,59 +20,72 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package finddeps
+package reqprov
 
 import (
 	"context"
+	"fmt"
 	"slices"
 
 	"github.com/goreleaser/nfpm/v2"
 
 	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/types"
+
+	"go.stplr.dev/stplr/pkg/reqprov/dirty"
+	"go.stplr.dev/stplr/pkg/reqprov/rpm"
 )
 
-type ProvReqFinder interface {
-	FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error
+type ReqProvFinder interface {
 	FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error
+	FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error
 	BuildDepends(ctx context.Context) ([]string, error)
 }
 
-type ProvReqService struct {
-	finder ProvReqFinder
+type ReqProvService struct {
+	finder ReqProvFinder
 }
 
-func New(info *distro.OSRelease, pkgFormat, method string) *ProvReqService {
-	s := &ProvReqService{
-		finder: &EmptyFindProvReq{},
-	}
-
+func getFinder(info *distro.OSRelease, method string) (ReqProvFinder, error) {
 	if method == "" {
 		method = "rpm"
 	}
-
 	switch method {
 	case "rpm":
 		switch {
 		case info.ID == "altlinux":
-			s.finder = &ALTLinuxFindProvReq{}
+			return &rpm.ALTLinux{}, nil
 		case info.ID == "fedora" || slices.Contains(info.Like, "fedora"):
-			s.finder = &FedoraFindProvReq{}
+			return &rpm.Fedora{}, nil
+		default:
+			return nil, fmt.Errorf("unsupported RPM-based distro: %s", info.ID)
 		}
 	case "dirty":
-		s.finder = &DirtyFindProvReq{}
+		return &dirty.Dirty{}, nil
+	default:
+		return nil, fmt.Errorf("unsupported method: %s", method)
 	}
-	return s
 }
 
-func (s *ProvReqService) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+func New(info *distro.OSRelease, pkgFormat, method string) (*ReqProvService, error) {
+	finder, err := getFinder(info, method)
+	if err != nil {
+		return nil, fmt.Errorf("cannot getFinder: %w", err)
+	}
+
+	return &ReqProvService{
+		finder: finder,
+	}, nil
+}
+
+func (s *ReqProvService) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	return s.finder.FindProvides(ctx, pkgInfo, dirs, skiplist, filter)
 }
 
-func (s *ProvReqService) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+func (s *ReqProvService) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	return s.finder.FindRequires(ctx, pkgInfo, dirs, skiplist, filter)
 }
 
-func (s *ProvReqService) BuildDepends(ctx context.Context) ([]string, error) {
+func (s *ReqProvService) BuildDepends(ctx context.Context) ([]string, error) {
 	return s.finder.BuildDepends(ctx)
 }

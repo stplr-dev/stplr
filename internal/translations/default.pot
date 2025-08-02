@@ -222,19 +222,19 @@ msgstr ""
 msgid "Building package"
 msgstr ""
 
-#: internal/build/build.go:411
+#: internal/build/build.go:414
 msgid "The checksums array must be the same length as sources"
 msgstr ""
 
-#: internal/build/build.go:453
+#: internal/build/build.go:456
 msgid "Downloading sources"
 msgstr ""
 
-#: internal/build/build.go:499
+#: internal/build/build.go:502
 msgid "Would you like to remove the build dependencies?"
 msgstr ""
 
-#: internal/build/build.go:577
+#: internal/build/build.go:580
 msgid "Installing dependencies"
 msgstr ""
 
@@ -246,26 +246,6 @@ msgstr ""
 
 #: internal/build/checker.go:73
 msgid "This package is already installed"
-msgstr ""
-
-#: internal/build/find_deps/alt_linux.go:41
-msgid "Command not found on the system"
-msgstr ""
-
-#: internal/build/find_deps/alt_linux.go:98
-msgid "Provided dependency found"
-msgstr ""
-
-#: internal/build/find_deps/alt_linux.go:105
-msgid "Required dependency found"
-msgstr ""
-
-#: internal/build/find_deps/dirty.go:45
-msgid "AutoProv is not implemented for this package format, so it's skipped"
-msgstr ""
-
-#: internal/build/find_deps/empty.go:43
-msgid "AutoReq is not implemented for this package format, so it's skipped"
 msgstr ""
 
 #: internal/build/firejail.go:151
@@ -297,15 +277,15 @@ msgstr ""
 msgid "Building package metadata"
 msgstr ""
 
-#: internal/build/script_executor.go:311
+#: internal/build/script_executor.go:325
 msgid "Executing prepare()"
 msgstr ""
 
-#: internal/build/script_executor.go:320
+#: internal/build/script_executor.go:334
 msgid "Executing build()"
 msgstr ""
 
-#: internal/build/script_executor.go:349 internal/build/script_executor.go:369
+#: internal/build/script_executor.go:363 internal/build/script_executor.go:383
 msgid "Executing %s()"
 msgstr ""
 
@@ -534,6 +514,22 @@ msgstr ""
 
 #: pkg/dl/progress_tui.go:110
 msgid "%s %s downloading at %s/s\n"
+msgstr ""
+
+#: pkg/reqprov/dirty/dirty.go:42
+msgid "AutoProv is not implemented for this package format, so it's skipped"
+msgstr ""
+
+#: pkg/reqprov/rpm/altlinux.go:43
+msgid "Provided dependency found"
+msgstr ""
+
+#: pkg/reqprov/rpm/altlinux.go:50
+msgid "Required dependency found"
+msgstr ""
+
+#: pkg/reqprov/rpm/altlinux.go:61
+msgid "Command not found on the system"
 msgstr ""
 
 #: refresh.go:36

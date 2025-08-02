@@ -34,12 +34,12 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	finddeps "go.stplr.dev/stplr/internal/build/find_deps"
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/manager"
 	"go.stplr.dev/stplr/internal/shutils/decoder"
 	"go.stplr.dev/stplr/pkg/distro"
+	"go.stplr.dev/stplr/pkg/reqprov"
 	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
 )
@@ -391,15 +391,18 @@ func (b *Builder) BuildPackage(
 
 	for _, vars := range varsOfPackages {
 		if len(vars.AutoReq.Resolved()) == 1 && decoder.IsTruthy(vars.AutoReq.Resolved()[0]) {
-			f := finddeps.New(
+			f, err := reqprov.New(
 				input.OSRelease(),
 				input.PkgFormat(),
 				vars.AutoReqProvMethod.Resolved(),
 			)
+			if err != nil {
+				return nil, fmt.Errorf("failed to init provreq: %w", err)
+			}
 
 			newBuildDeps, err := f.BuildDepends(ctx)
 			if err != nil {
-				return nil, fmt.Errorf("failed to get build deps from finddeps %w", err)
+				return nil, fmt.Errorf("failed to get build deps from provreq %w", err)
 			}
 			buildDepends = append(buildDepends, newBuildDeps...)
 		}

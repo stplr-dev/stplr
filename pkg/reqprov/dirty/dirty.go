@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package finddeps
+package dirty
 
 import (
 	"bytes"
@@ -27,7 +27,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
@@ -37,21 +36,42 @@ import (
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-type DirtyFindProvReq struct {
-	// info *distro.OSRelease
-}
+type Dirty struct{}
 
-func (o *DirtyFindProvReq) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+func (o *Dirty) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	slog.Info(gotext.Get("AutoProv is not implemented for this package format, so it's skipped"))
 	return nil
 }
 
-func looksLikeLib(path string) bool {
-	ok, _ := filepath.Match("lib*.so*", filepath.Base(path))
-	return ok
+func (o *Dirty) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+	provSet := make(map[string]struct{})
+	needSet := make(map[string]struct{})
+
+	paths, err := getPaths(pkgInfo, dirs, skiplist)
+	if err != nil {
+		return err
+	}
+
+	for _, p := range paths {
+		info, err := os.Lstat(p)
+		if err != nil {
+			return err
+		}
+		err = o.processFile(p, info, provSet, needSet)
+		if err != nil {
+			return err
+		}
+	}
+
+	extern := diffSets(needSet, provSet)
+	o.updatePackageDependencies(pkgInfo, extern, filter)
+
+	return nil
 }
 
-func (o *DirtyFindProvReq) processFile(path string, fi os.FileInfo, provSet, needSet map[string]struct{}) error {
+func (o *Dirty) BuildDepends(ctx context.Context) ([]string, error) { return []string{}, nil }
+
+func (o *Dirty) processFile(path string, fi os.FileInfo, provSet, needSet map[string]struct{}) error {
 	if fi.IsDir() || !isELF(path) {
 		return nil
 	}
@@ -64,41 +84,7 @@ func (o *DirtyFindProvReq) processFile(path string, fi os.FileInfo, provSet, nee
 	return processELF(path, provSet, needSet)
 }
 
-func makeRegexList(filter []string) []*regexp.Regexp {
-	var regexFilters []*regexp.Regexp
-	for _, f := range filter {
-		r, err := regexp.Compile(f)
-		if err == nil {
-			regexFilters = append(regexFilters, r)
-		}
-	}
-	return regexFilters
-}
-
-func matchesRegexList(dep string, regexFilters []*regexp.Regexp) bool {
-	return AnyMatch(regexFilters, func(r *regexp.Regexp) bool {
-		return r.MatchString(dep)
-	})
-}
-
-func AnyMatch[T any](items []T, predicate func(T) bool) bool {
-	for _, item := range items {
-		if predicate(item) {
-			return true
-		}
-	}
-	return false
-}
-
-func ToSet[T comparable](xs []T) map[T]struct{} {
-	set := make(map[T]struct{}, len(xs))
-	for _, x := range xs {
-		set[x] = struct{}{}
-	}
-	return set
-}
-
-func (o *DirtyFindProvReq) updatePackageDependencies(pkgInfo *nfpm.Info, extern map[string]struct{}, filter []string) {
+func (o *Dirty) updatePackageDependencies(pkgInfo *nfpm.Info, extern map[string]struct{}, filter []string) {
 	regexFilters := makeRegexList(filter)
 	existing := ToSet(pkgInfo.Depends)
 	newDeps := make([]string, 0, len(extern))
@@ -152,36 +138,6 @@ func getPaths(pkgInfo *nfpm.Info, dirs types.Directories, skiplist []string) ([]
 	}
 
 	return paths, nil
-}
-
-func (o *DirtyFindProvReq) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
-	provSet := make(map[string]struct{})
-	needSet := make(map[string]struct{})
-
-	paths, err := getPaths(pkgInfo, dirs, skiplist)
-	if err != nil {
-		return err
-	}
-
-	for _, p := range paths {
-		info, err := os.Lstat(p)
-		if err != nil {
-			return err
-		}
-		err = o.processFile(p, info, provSet, needSet)
-		if err != nil {
-			return err
-		}
-	}
-
-	extern := diffSets(needSet, provSet)
-	o.updatePackageDependencies(pkgInfo, extern, filter)
-
-	return nil
-}
-
-func (o *DirtyFindProvReq) BuildDepends(ctx context.Context) ([]string, error) {
-	return []string{}, nil
 }
 
 func isELF(path string) bool {
@@ -254,14 +210,4 @@ func bracketValue(s string) string {
 		return ""
 	}
 	return s[i+1 : i+1+j]
-}
-
-func diffSets(a, b map[string]struct{}) map[string]struct{} {
-	out := make(map[string]struct{}, len(a))
-	for k := range a {
-		if _, ok := b[k]; !ok {
-			out[k] = struct{}{}
-		}
-	}
-	return out
 }

@@ -20,7 +20,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package finddeps
+package rpm
 
 import (
 	"bytes"
@@ -37,7 +37,51 @@ import (
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-type FedoraFindProvReq struct{}
+type Fedora struct{}
+
+func (o *Fedora) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+	return rpmFindDependenciesFedora(
+		ctx,
+		pkgInfo,
+		dirs,
+		"/usr/lib/rpm/rpmdeps",
+		[]string{
+			"--define=_use_internal_dependency_generator 1",
+			"--provides",
+			fmt.Sprintf(
+				"--define=__provides_exclude_from %s\"",
+				strings.Join(skiplist, "|"),
+			),
+		},
+		func(dep string) {
+			slog.Info(gotext.Get("Provided dependency found"), "dep", dep)
+			pkgInfo.Overridables.Provides = append(pkgInfo.Overridables.Provides, dep)
+		})
+}
+
+func (o *Fedora) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+	return rpmFindDependenciesFedora(
+		ctx,
+		pkgInfo,
+		dirs,
+		"/usr/lib/rpm/rpmdeps",
+		[]string{
+			"--define=_use_internal_dependency_generator 1",
+			"--requires",
+			fmt.Sprintf(
+				"--define=__requires_exclude_from %s",
+				strings.Join(skiplist, "|"),
+			),
+		},
+		func(dep string) {
+			slog.Info(gotext.Get("Required dependency found"), "dep", dep)
+			pkgInfo.Overridables.Depends = append(pkgInfo.Overridables.Depends, dep)
+		})
+}
+
+func (o *Fedora) BuildDepends(ctx context.Context) ([]string, error) {
+	return []string{"rpm-build"}, nil
+}
 
 func rpmFindDependenciesFedora(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, command string, args []string, updateFunc func(string)) error {
 	if _, err := exec.LookPath(command); err != nil {
@@ -81,48 +125,4 @@ func rpmFindDependenciesFedora(ctx context.Context, pkgInfo *nfpm.Info, dirs typ
 	}
 
 	return nil
-}
-
-func (o *FedoraFindProvReq) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
-	return rpmFindDependenciesFedora(
-		ctx,
-		pkgInfo,
-		dirs,
-		"/usr/lib/rpm/rpmdeps",
-		[]string{
-			"--define=_use_internal_dependency_generator 1",
-			"--provides",
-			fmt.Sprintf(
-				"--define=__provides_exclude_from %s\"",
-				strings.Join(skiplist, "|"),
-			),
-		},
-		func(dep string) {
-			slog.Info(gotext.Get("Provided dependency found"), "dep", dep)
-			pkgInfo.Overridables.Provides = append(pkgInfo.Overridables.Provides, dep)
-		})
-}
-
-func (o *FedoraFindProvReq) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
-	return rpmFindDependenciesFedora(
-		ctx,
-		pkgInfo,
-		dirs,
-		"/usr/lib/rpm/rpmdeps",
-		[]string{
-			"--define=_use_internal_dependency_generator 1",
-			"--requires",
-			fmt.Sprintf(
-				"--define=__requires_exclude_from %s",
-				strings.Join(skiplist, "|"),
-			),
-		},
-		func(dep string) {
-			slog.Info(gotext.Get("Required dependency found"), "dep", dep)
-			pkgInfo.Overridables.Depends = append(pkgInfo.Overridables.Depends, dep)
-		})
-}
-
-func (o *FedoraFindProvReq) BuildDepends(ctx context.Context) ([]string, error) {
-	return []string{"rpm-build"}, nil
 }

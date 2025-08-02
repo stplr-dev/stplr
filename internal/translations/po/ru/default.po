@@ -229,19 +229,19 @@ msgstr "Ошибка при удалении пакетов"
 msgid "Building package"
 msgstr "Сборка пакета"
 
-#: internal/build/build.go:411
+#: internal/build/build.go:414
 msgid "The checksums array must be the same length as sources"
 msgstr "Массив контрольных сумм должен быть той же длины, что и источники"
 
-#: internal/build/build.go:453
+#: internal/build/build.go:456
 msgid "Downloading sources"
 msgstr "Скачивание источников"
 
-#: internal/build/build.go:499
+#: internal/build/build.go:502
 msgid "Would you like to remove the build dependencies?"
 msgstr "Хотели бы вы удалить зависимости сборки?"
 
-#: internal/build/build.go:577
+#: internal/build/build.go:580
 msgid "Installing dependencies"
 msgstr "Установка зависимостей"
 
@@ -256,28 +256,6 @@ msgstr ""
 #: internal/build/checker.go:73
 msgid "This package is already installed"
 msgstr "Этот пакет уже установлен"
-
-#: internal/build/find_deps/alt_linux.go:41
-msgid "Command not found on the system"
-msgstr "Команда не найдена в системе"
-
-#: internal/build/find_deps/alt_linux.go:98
-msgid "Provided dependency found"
-msgstr "Найденная предоставленная зависимость"
-
-#: internal/build/find_deps/alt_linux.go:105
-msgid "Required dependency found"
-msgstr "Найдена требуемая зависимость"
-
-#: internal/build/find_deps/dirty.go:45
-msgid "AutoProv is not implemented for this package format, so it's skipped"
-msgstr ""
-"AutoProv не реализовано для этого формата пакета, поэтому будет пропущено"
-
-#: internal/build/find_deps/empty.go:43
-msgid "AutoReq is not implemented for this package format, so it's skipped"
-msgstr ""
-"AutoReq не реализовано для этого формата пакета, поэтому будет пропущено"
 
 #: internal/build/firejail.go:151
 msgid "Applying FireJail integration"
@@ -308,15 +286,15 @@ msgstr ""
 msgid "Building package metadata"
 msgstr "Сборка метаданных пакета"
 
-#: internal/build/script_executor.go:311
+#: internal/build/script_executor.go:325
 msgid "Executing prepare()"
 msgstr "Выполнение prepare()"
 
-#: internal/build/script_executor.go:320
+#: internal/build/script_executor.go:334
 msgid "Executing build()"
 msgstr "Выполнение build()"
 
-#: internal/build/script_executor.go:349 internal/build/script_executor.go:369
+#: internal/build/script_executor.go:363 internal/build/script_executor.go:383
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
 
@@ -556,6 +534,23 @@ msgstr "%s: выполнено!\n"
 msgid "%s %s downloading at %s/s\n"
 msgstr "%s %s загружается — %s/с\n"
 
+#: pkg/reqprov/dirty/dirty.go:42
+msgid "AutoProv is not implemented for this package format, so it's skipped"
+msgstr ""
+"AutoProv не реализовано для этого формата пакета, поэтому будет пропущено"
+
+#: pkg/reqprov/rpm/altlinux.go:43
+msgid "Provided dependency found"
+msgstr "Найденная предоставленная зависимость"
+
+#: pkg/reqprov/rpm/altlinux.go:50
+msgid "Required dependency found"
+msgstr "Найдена требуемая зависимость"
+
+#: pkg/reqprov/rpm/altlinux.go:61
+msgid "Command not found on the system"
+msgstr "Команда не найдена в системе"
+
 #: refresh.go:36
 msgid "Pull all repositories that have changed"
 msgstr "Скачать все изменённые репозитории"
@@ -696,6 +691,10 @@ msgstr "Ошибка при проверке обновлений"
 #: upgrade.go:142
 msgid "There is nothing to do."
 msgstr "Здесь нечего делать."
+
+#~ msgid "AutoReq is not implemented for this package format, so it's skipped"
+#~ msgstr ""
+#~ "AutoReq не реализовано для этого формата пакета, поэтому будет пропущено"
 
 #~ msgid "Error parsing os release"
 #~ msgstr "Ошибка при разборе файла выпуска операционной системы"

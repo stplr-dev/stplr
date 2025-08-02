@@ -16,16 +16,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package finddeps_test
+package reqprov_test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
-	finddeps "go.stplr.dev/stplr/internal/build/find_deps"
 	"go.stplr.dev/stplr/pkg/distro"
+	"go.stplr.dev/stplr/pkg/reqprov"
 )
 
 const (
@@ -36,15 +37,13 @@ const (
 )
 
 func TestEmptyBuildDepends(t *testing.T) {
-	svc := finddeps.New(&distro.OSRelease{ID: "unknown"}, "deb", "")
-	deps, err := svc.BuildDepends(context.Background())
-
-	assert.NoError(t, err)
-	assert.Empty(t, deps)
+	_, err := reqprov.New(&distro.OSRelease{ID: "unknown"}, "deb", "")
+	require.Error(t, err)
 }
 
 func TestAltLinuxBuildDepends(t *testing.T) {
-	svc := finddeps.New(&distro.OSRelease{ID: altId}, "rpm", "")
+	svc, err := reqprov.New(&distro.OSRelease{ID: altId}, "rpm", "")
+	require.NoError(t, err)
 	deps, err := svc.BuildDepends(context.Background())
 
 	assert.NoError(t, err)
@@ -52,7 +51,8 @@ func TestAltLinuxBuildDepends(t *testing.T) {
 }
 
 func TestFedoraBuildDependsByID(t *testing.T) {
-	svc := finddeps.New(&distro.OSRelease{ID: fedoraId}, "rpm", "")
+	svc, err := reqprov.New(&distro.OSRelease{ID: fedoraId}, "rpm", "")
+	require.NoError(t, err)
 	deps, err := svc.BuildDepends(context.Background())
 
 	assert.NoError(t, err)
@@ -60,7 +60,8 @@ func TestFedoraBuildDependsByID(t *testing.T) {
 }
 
 func TestFedoraBuildDependsByLike(t *testing.T) {
-	svc := finddeps.New(&distro.OSRelease{ID: "mycustom", Like: []string{fedoraId}}, "rpm", "")
+	svc, err := reqprov.New(&distro.OSRelease{ID: "mycustom", Like: []string{fedoraId}}, "rpm", "")
+	require.NoError(t, err)
 	deps, err := svc.BuildDepends(context.Background())
 
 	assert.NoError(t, err)

@@ -43,10 +43,10 @@ import (
 
 	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
 
-	finddeps "go.stplr.dev/stplr/internal/build/find_deps"
 	"go.stplr.dev/stplr/internal/shutils/decoder"
 	"go.stplr.dev/stplr/internal/shutils/handlers"
 	"go.stplr.dev/stplr/internal/shutils/helpers"
+	"go.stplr.dev/stplr/pkg/reqprov"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
@@ -272,31 +272,45 @@ func buildPkgMetadata(
 
 	pkgInfo.Overridables.Contents = contents
 
-	f := finddeps.New(info, pkgFormat, vars.AutoReqProvMethod.Resolved())
+	var f *reqprov.ReqProvService
+	initFinder := func() error {
+		var err error
+		f, err = reqprov.New(info, pkgFormat, vars.AutoReqProvMethod.Resolved())
+		if err != nil {
+			return fmt.Errorf("failed to init provreq: %w", err)
+		}
+		return nil
+	}
 
-	if len(vars.AutoProv.Resolved()) == 1 && decoder.IsTruthy(vars.AutoProv.Resolved()[0]) {
-		err = f.FindProvides(
+	autoProv := vars.AutoProv.Resolved()
+	if len(autoProv) == 1 && decoder.IsTruthy(autoProv[0]) {
+		if err := initFinder(); err != nil {
+			return nil, err
+		}
+		if err := f.FindProvides(
 			ctx,
 			pkgInfo,
 			dirs,
 			vars.AutoProvSkipList.Resolved(),
 			vars.AutoProvFilter.Resolved(),
-		)
-		if err != nil {
-			return nil, err
+		); err != nil {
+			return nil, fmt.Errorf("failed to find provides: %w", err)
 		}
 	}
 
-	if len(vars.AutoReq.Resolved()) == 1 && decoder.IsTruthy(vars.AutoReq.Resolved()[0]) {
-		err = f.FindRequires(
+	autoReq := vars.AutoReq.Resolved()
+	if len(autoReq) == 1 && decoder.IsTruthy(autoReq[0]) {
+		if err := initFinder(); err != nil {
+			return nil, err
+		}
+		if err := f.FindRequires(
 			ctx,
 			pkgInfo,
 			dirs,
 			vars.AutoReqSkipList.Resolved(),
 			vars.AutoReqFilter.Resolved(),
-		)
-		if err != nil {
-			return nil, err
+		); err != nil {
+			return nil, fmt.Errorf("failed to find requires: %w", err)
 		}
 	}
 

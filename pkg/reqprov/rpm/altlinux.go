@@ -20,7 +20,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package finddeps
+package rpm
 
 import (
 	"bytes"
@@ -35,6 +35,26 @@ import (
 
 	"go.stplr.dev/stplr/pkg/types"
 )
+
+type ALTLinux struct{}
+
+func (o *ALTLinux) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+	return rpmFindDependenciesALTLinux(ctx, pkgInfo, dirs, "/usr/lib/rpm/find-provides", []string{"RPM_FINDPROV_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
+		slog.Info(gotext.Get("Provided dependency found"), "dep", dep)
+		pkgInfo.Overridables.Provides = append(pkgInfo.Overridables.Provides, dep)
+	})
+}
+
+func (o *ALTLinux) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+	return rpmFindDependenciesALTLinux(ctx, pkgInfo, dirs, "/usr/lib/rpm/find-requires", []string{"RPM_FINDREQ_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
+		slog.Info(gotext.Get("Required dependency found"), "dep", dep)
+		pkgInfo.Overridables.Depends = append(pkgInfo.Overridables.Depends, dep)
+	})
+}
+
+func (o *ALTLinux) BuildDepends(ctx context.Context) ([]string, error) {
+	return []string{"rpm-build"}, nil
+}
 
 func rpmFindDependenciesALTLinux(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, command string, envs []string, updateFunc func(string)) error {
 	if _, err := exec.LookPath(command); err != nil {
@@ -89,24 +109,4 @@ func rpmFindDependenciesALTLinux(ctx context.Context, pkgInfo *nfpm.Info, dirs t
 	}
 
 	return nil
-}
-
-type ALTLinuxFindProvReq struct{}
-
-func (o *ALTLinuxFindProvReq) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
-	return rpmFindDependenciesALTLinux(ctx, pkgInfo, dirs, "/usr/lib/rpm/find-provides", []string{"RPM_FINDPROV_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
-		slog.Info(gotext.Get("Provided dependency found"), "dep", dep)
-		pkgInfo.Overridables.Provides = append(pkgInfo.Overridables.Provides, dep)
-	})
-}
-
-func (o *ALTLinuxFindProvReq) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
-	return rpmFindDependenciesALTLinux(ctx, pkgInfo, dirs, "/usr/lib/rpm/find-requires", []string{"RPM_FINDREQ_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
-		slog.Info(gotext.Get("Required dependency found"), "dep", dep)
-		pkgInfo.Overridables.Depends = append(pkgInfo.Overridables.Depends, dep)
-	})
-}
-
-func (o *ALTLinuxFindProvReq) BuildDepends(ctx context.Context) ([]string, error) {
-	return []string{"rpm-build"}, nil
 }
