@@ -116,6 +116,8 @@ i18n:
 test-coverage:
 	go test ./... -v -coverpkg=./... -coverprofile=coverage.out
 	bash scripts/coverage-badge.sh
+
+test-coverage-with-clean: test-coverage
 	rm -f coverage.out
 
 update-deps-cve:

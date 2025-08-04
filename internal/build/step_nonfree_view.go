@@ -28,24 +28,26 @@ import (
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
-func ViewNonfree(
-	ctx context.Context,
-	input *BuildInput,
-	vars *staplerfile.Package,
-) error {
-	if !input.opts.Interactive {
+type NonFreeViewer struct{ cfg Config }
+
+func NewNonFreeViewer(cfg Config) *NonFreeViewer {
+	return &NonFreeViewer{cfg: cfg}
+}
+
+func (v *NonFreeViewer) ViewNonfree(ctx context.Context, pkg *staplerfile.Package, interactive bool) error {
+	if !interactive {
 		return nil
 	}
 
-	if !vars.NonFree {
+	if !pkg.NonFree {
 		return nil
 	}
 
 	var content string
 	var err error
 
-	msgFile := vars.NonFreeMsgFile.Resolved()
-	msg := vars.NonFreeMsg.Resolved()
+	msgFile := pkg.NonFreeMsgFile.Resolved()
+	msg := pkg.NonFreeMsg.Resolved()
 
 	switch {
 	case msgFile != "":
@@ -60,15 +62,40 @@ func ViewNonfree(
 		content = gotext.Get("This package contains non-free software that requires license acceptance.")
 	}
 
-	pager := NewNonfree(vars.Name, content, vars.NonFreeUrl.Resolved())
+	pager := NewNonfree(pkg.Name, content, pkg.NonFreeUrl.Resolved())
 	accepted, err := pager.Run()
 	if err != nil {
-		return fmt.Errorf("failed to display EULA: %w", err)
+		return fmt.Errorf("failed to display nonfree: %w", err)
 	}
 
 	if !accepted {
 		return fmt.Errorf("license agreement was declined")
 	}
 
+	return nil
+}
+
+type NonFreeViewerExecutor interface {
+	ViewNonfree(ctx context.Context, pkg *staplerfile.Package, interactive bool) error
+}
+
+type nonfreeViewStep struct {
+	e NonFreeViewerExecutor
+}
+
+func NonfreeViewStep(e NonFreeViewerExecutor) *nonfreeViewStep {
+	return &nonfreeViewStep{e: e}
+}
+
+func (s *nonfreeViewStep) Run(ctx context.Context, state *BuildState) error {
+	for _, pkg := range state.Packages {
+		if err := s.e.ViewNonfree(
+			ctx,
+			pkg,
+			state.Input.Opts.Interactive,
+		); err != nil {
+			return err
+		}
+	}
 	return nil
 }

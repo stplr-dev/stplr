@@ -31,7 +31,7 @@ import (
 
 type reposExecutor struct{ r *repos.Repos }
 
-func NewRepos(r *repos.Repos) ReposExecutor {
+func NewRepos(r *repos.Repos) *reposExecutor {
 	return &reposExecutor{r}
 }
 

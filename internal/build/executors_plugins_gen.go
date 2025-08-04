@@ -30,6 +30,7 @@ import (
 	"context"
 	"github.com/hashicorp/go-plugin"
 	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
 )
@@ -92,6 +93,46 @@ func (p *ReposExecutorPlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (interf
 
 func (p *ReposExecutorPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
 	return &ReposExecutorRPCServer{Impl: p.Impl}, nil
+}
+
+type ScriptReaderPlugin struct {
+	Impl ScriptReader
+}
+
+type ScriptReaderRPCServer struct {
+	Impl ScriptReader
+}
+
+type ScriptReaderRPC struct {
+	client *rpc.Client
+}
+
+func (p *ScriptReaderPlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
+	return &ScriptReaderRPC{client: c}, nil
+}
+
+func (p *ScriptReaderPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
+	return &ScriptReaderRPCServer{Impl: p.Impl}, nil
+}
+
+type PackagesParserPlugin struct {
+	Impl PackagesParser
+}
+
+type PackagesParserRPCServer struct {
+	Impl PackagesParser
+}
+
+type PackagesParserRPC struct {
+	client *rpc.Client
+}
+
+func (p *PackagesParserPlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
+	return &PackagesParserRPC{client: c}, nil
+}
+
+func (p *PackagesParserPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
+	return &PackagesParserRPCServer{Impl: p.Impl}, nil
 }
 
 type InstallerExecutorInstallLocalArgs struct {
@@ -211,17 +252,17 @@ func (s *InstallerExecutorRPCServer) RemoveAlreadyInstalled(args *InstallerExecu
 	return nil
 }
 
-type ScriptExecutorReadScriptArgs struct {
+type ScriptExecutorReadArgs struct {
 	ScriptPath string
 }
 
-type ScriptExecutorReadScriptResp struct {
+type ScriptExecutorReadResp struct {
 	Result0 *staplerfile.ScriptFile
 }
 
-func (s *ScriptExecutorRPC) ReadScript(ctx context.Context, scriptPath string) (*staplerfile.ScriptFile, error) {
-	var resp *ScriptExecutorReadScriptResp
-	err := s.client.Call("Plugin.ReadScript", &ScriptExecutorReadScriptArgs{
+func (s *ScriptExecutorRPC) Read(ctx context.Context, scriptPath string) (*staplerfile.ScriptFile, error) {
+	var resp *ScriptExecutorReadResp
+	err := s.client.Call("Plugin.Read", &ScriptExecutorReadArgs{
 		ScriptPath: scriptPath,
 	}, &resp)
 	if err != nil {
@@ -230,32 +271,34 @@ func (s *ScriptExecutorRPC) ReadScript(ctx context.Context, scriptPath string) (
 	return resp.Result0, nil
 }
 
-func (s *ScriptExecutorRPCServer) ReadScript(args *ScriptExecutorReadScriptArgs, resp *ScriptExecutorReadScriptResp) error {
-	result0, err := s.Impl.ReadScript(context.Background(), args.ScriptPath)
+func (s *ScriptExecutorRPCServer) Read(args *ScriptExecutorReadArgs, resp *ScriptExecutorReadResp) error {
+	result0, err := s.Impl.Read(context.Background(), args.ScriptPath)
 	if err != nil {
 		return err
 	}
-	*resp = ScriptExecutorReadScriptResp{
+	*resp = ScriptExecutorReadResp{
 		Result0: result0,
 	}
 	return nil
 }
 
-type ScriptExecutorExecuteFirstPassArgs struct {
-	Input *BuildInput
-	Sf    *staplerfile.ScriptFile
+type ScriptExecutorParsePackagesArgs struct {
+	File     *staplerfile.ScriptFile
+	Packages []string
+	Info     distro.OSRelease
 }
 
-type ScriptExecutorExecuteFirstPassResp struct {
+type ScriptExecutorParsePackagesResp struct {
 	Result0 string
 	Result1 []*staplerfile.Package
 }
 
-func (s *ScriptExecutorRPC) ExecuteFirstPass(ctx context.Context, input *BuildInput, sf *staplerfile.ScriptFile) (string, []*staplerfile.Package, error) {
-	var resp *ScriptExecutorExecuteFirstPassResp
-	err := s.client.Call("Plugin.ExecuteFirstPass", &ScriptExecutorExecuteFirstPassArgs{
-		Input: input,
-		Sf:    sf,
+func (s *ScriptExecutorRPC) ParsePackages(ctx context.Context, file *staplerfile.ScriptFile, packages []string, info distro.OSRelease) (string, []*staplerfile.Package, error) {
+	var resp *ScriptExecutorParsePackagesResp
+	err := s.client.Call("Plugin.ParsePackages", &ScriptExecutorParsePackagesArgs{
+		File:     file,
+		Packages: packages,
+		Info:     info,
 	}, &resp)
 	if err != nil {
 		return "", nil, err
@@ -263,12 +306,12 @@ func (s *ScriptExecutorRPC) ExecuteFirstPass(ctx context.Context, input *BuildIn
 	return resp.Result0, resp.Result1, nil
 }
 
-func (s *ScriptExecutorRPCServer) ExecuteFirstPass(args *ScriptExecutorExecuteFirstPassArgs, resp *ScriptExecutorExecuteFirstPassResp) error {
-	result0, result1, err := s.Impl.ExecuteFirstPass(context.Background(), args.Input, args.Sf)
+func (s *ScriptExecutorRPCServer) ParsePackages(args *ScriptExecutorParsePackagesArgs, resp *ScriptExecutorParsePackagesResp) error {
+	result0, result1, err := s.Impl.ParsePackages(context.Background(), args.File, args.Packages, args.Info)
 	if err != nil {
 		return err
 	}
-	*resp = ScriptExecutorExecuteFirstPassResp{
+	*resp = ScriptExecutorParsePackagesResp{
 		Result0: result0,
 		Result1: result1,
 	}
@@ -370,6 +413,72 @@ func (s *ReposExecutorRPCServer) PullOneAndUpdateFromConfig(args *ReposExecutorP
 	}
 	*resp = ReposExecutorPullOneAndUpdateFromConfigResp{
 		Result0: result0,
+	}
+	return nil
+}
+
+type ScriptReaderReadArgs struct {
+	Path string
+}
+
+type ScriptReaderReadResp struct {
+	Result0 *staplerfile.ScriptFile
+}
+
+func (s *ScriptReaderRPC) Read(ctx context.Context, path string) (*staplerfile.ScriptFile, error) {
+	var resp *ScriptReaderReadResp
+	err := s.client.Call("Plugin.Read", &ScriptReaderReadArgs{
+		Path: path,
+	}, &resp)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Result0, nil
+}
+
+func (s *ScriptReaderRPCServer) Read(args *ScriptReaderReadArgs, resp *ScriptReaderReadResp) error {
+	result0, err := s.Impl.Read(context.Background(), args.Path)
+	if err != nil {
+		return err
+	}
+	*resp = ScriptReaderReadResp{
+		Result0: result0,
+	}
+	return nil
+}
+
+type PackagesParserParsePackagesArgs struct {
+	File     *staplerfile.ScriptFile
+	Packages []string
+	Info     distro.OSRelease
+}
+
+type PackagesParserParsePackagesResp struct {
+	Result0 string
+	Result1 []*staplerfile.Package
+}
+
+func (s *PackagesParserRPC) ParsePackages(ctx context.Context, file *staplerfile.ScriptFile, packages []string, info distro.OSRelease) (string, []*staplerfile.Package, error) {
+	var resp *PackagesParserParsePackagesResp
+	err := s.client.Call("Plugin.ParsePackages", &PackagesParserParsePackagesArgs{
+		File:     file,
+		Packages: packages,
+		Info:     info,
+	}, &resp)
+	if err != nil {
+		return "", nil, err
+	}
+	return resp.Result0, resp.Result1, nil
+}
+
+func (s *PackagesParserRPCServer) ParsePackages(args *PackagesParserParsePackagesArgs, resp *PackagesParserParsePackagesResp) error {
+	result0, result1, err := s.Impl.ParsePackages(context.Background(), args.File, args.Packages, args.Info)
+	if err != nil {
+		return err
+	}
+	*resp = PackagesParserParsePackagesResp{
+		Result0: result0,
+		Result1: result1,
 	}
 	return nil
 }

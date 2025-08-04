@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// This file was originally part of the project "ALR - Any Linux Repository"
-// created by the ALR Authors.
-// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
-//
-// Copyright (C) 2025 The ALR Authors
+// Stapler
 // Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
@@ -29,24 +25,32 @@ import (
 
 	"github.com/goreleaser/nfpm/v2"
 
-	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
+	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
-type Cache struct {
-	cfg Config
+type LocalCacheExecutor struct{ cfg Config }
+
+func NewLocalCacheExecutor(cfg Config) *LocalCacheExecutor {
+	return &LocalCacheExecutor{cfg: cfg}
 }
 
-func (c *Cache) CheckForBuiltPackage(
+type CheckForBuiltPackageInput interface {
+	OSReleaser
+	PkgFormatter
+	RepositoryGetter
+}
+
+func (c *LocalCacheExecutor) CheckForBuiltPackage(
 	ctx context.Context,
-	input *BuildInput,
-	vars *alrsh.Package,
+	input CheckForBuiltPackageInput,
+	pkg *staplerfile.Package,
 ) (string, bool, error) {
-	filename, err := pkgFileName(input, vars)
+	filename, err := pkgFileName(input, pkg)
 	if err != nil {
 		return "", false, err
 	}
 
-	pkgPath := filepath.Join(getBaseDir(c.cfg, vars.Name), filename)
+	pkgPath := filepath.Join(getBaseDir(c.cfg, pkg.Name), filename)
 
 	_, err = os.Stat(pkgPath)
 	if err != nil {
@@ -56,15 +60,8 @@ func (c *Cache) CheckForBuiltPackage(
 	return pkgPath, true, nil
 }
 
-func pkgFileName(
-	input interface {
-		OsInfoProvider
-		PkgFormatProvider
-		RepositoryProvider
-	},
-	vars *alrsh.Package,
-) (string, error) {
-	pkgInfo := getBasePkgInfo(vars, input)
+func pkgFileName(input CheckForBuiltPackageInput, pkg *staplerfile.Package) (string, error) {
+	pkgInfo := getBasePkgInfo(pkg, input)
 
 	packager, err := nfpm.Get(input.PkgFormat())
 	if err != nil {

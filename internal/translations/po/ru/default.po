@@ -225,27 +225,11 @@ msgstr "Для команды remove ожидался хотя бы 1 аргум
 msgid "Error removing packages"
 msgstr "Ошибка при удалении пакетов"
 
-#: internal/build/build.go:364
-msgid "Building package"
-msgstr "Сборка пакета"
-
-#: internal/build/build.go:414
-msgid "The checksums array must be the same length as sources"
-msgstr "Массив контрольных сумм должен быть той же длины, что и источники"
-
-#: internal/build/build.go:456
-msgid "Downloading sources"
-msgstr "Скачивание источников"
-
-#: internal/build/build.go:502
-msgid "Would you like to remove the build dependencies?"
-msgstr "Хотели бы вы удалить зависимости сборки?"
-
-#: internal/build/build.go:580
+#: internal/build/build.go:334
 msgid "Installing dependencies"
 msgstr "Установка зависимостей"
 
-#: internal/build/checker.go:49
+#: internal/build/check_executor.go:45
 msgid ""
 "Your system's CPU architecture doesn't match this package. Do you want to "
 "build anyway?"
@@ -253,18 +237,13 @@ msgstr ""
 "Архитектура процессора вашей системы не соответствует этому пакету. Вы все "
 "равно хотите выполнить сборку?"
 
-#: internal/build/checker.go:73
+#: internal/build/check_executor.go:68
 msgid "This package is already installed"
 msgstr "Этот пакет уже установлен"
 
 #: internal/build/firejail.go:151
 msgid "Applying FireJail integration"
 msgstr "Применение интеграции FireJail"
-
-#: internal/build/nonfree.go:60
-msgid ""
-"This package contains non-free software that requires license acceptance."
-msgstr ""
 
 #: internal/build/nonfree_pager.go:161
 msgid "NON-FREE SOFTWARE AGREEMENT"
@@ -282,21 +261,34 @@ msgstr ""
 msgid "Full license available at: %s"
 msgstr ""
 
-#: internal/build/script_executor.go:152
+#: internal/build/script_executor.go:156
 msgid "Building package metadata"
 msgstr "Сборка метаданных пакета"
 
-#: internal/build/script_executor.go:325
-msgid "Executing prepare()"
-msgstr "Выполнение prepare()"
-
-#: internal/build/script_executor.go:334
-msgid "Executing build()"
-msgstr "Выполнение build()"
-
-#: internal/build/script_executor.go:363 internal/build/script_executor.go:383
+#: internal/build/script_executor.go:327 internal/build/script_executor.go:381
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
+
+#: internal/build/step_checks.go:39
+msgid "Building package"
+msgstr "Сборка пакета"
+
+#: internal/build/step_flat_vars.go:47
+msgid "The checksums array must be the same length as sources"
+msgstr "Массив контрольных сумм должен быть той же длины, что и источники"
+
+#: internal/build/step_nonfree_view.go:62
+msgid ""
+"This package contains non-free software that requires license acceptance."
+msgstr ""
+
+#: internal/build/step_post.go:49
+msgid "Would you like to remove the build dependencies?"
+msgstr "Хотели бы вы удалить зависимости сборки?"
+
+#: internal/build/step_prepare.go:50
+msgid "Downloading sources"
+msgstr "Скачивание источников"
 
 #: internal/cliutils/app_builder/builder.go:81
 msgid "Error loading config"
@@ -691,6 +683,12 @@ msgstr "Ошибка при проверке обновлений"
 #: upgrade.go:142
 msgid "There is nothing to do."
 msgstr "Здесь нечего делать."
+
+#~ msgid "Executing prepare()"
+#~ msgstr "Выполнение prepare()"
+
+#~ msgid "Executing build()"
+#~ msgstr "Выполнение build()"
 
 #~ msgid "AutoReq is not implemented for this package format, so it's skipped"
 #~ msgstr ""

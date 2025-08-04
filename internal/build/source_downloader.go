@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// This file was originally part of the project "ALR - Any Linux Repository"
-// created by the ALR Authors.
-// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
-//
-// Copyright (C) 2025 The ALR Authors
+// Stapler
 // Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
@@ -33,60 +29,67 @@ import (
 	"go.stplr.dev/stplr/pkg/dlcache"
 )
 
-type SourceDownloader struct {
+type LocalSourceDownloader struct {
 	cfg Config
 }
 
-func NewSourceDownloader(cfg Config) *SourceDownloader {
-	return &SourceDownloader{
+func NewLocalSourceDownloader(cfg Config) *LocalSourceDownloader {
+	return &LocalSourceDownloader{
 		cfg,
 	}
 }
 
-func (s *SourceDownloader) DownloadSources(
+func (s *LocalSourceDownloader) DownloadSources(
 	ctx context.Context,
 	input *BuildInput,
 	basePkg string,
 	si SourcesInput,
 ) error {
 	for i, src := range si.Sources {
-
 		opts := dl.Options{
 			Name:        fmt.Sprintf("[%d]", i),
 			URL:         src,
-			Destination: getSrcDir(s.cfg, basePkg),
 			Progress:    os.Stderr,
-			LocalDir:    getScriptDir(input.script),
-		}
-
-		if !strings.EqualFold(si.Checksums[i], "SKIP") {
-			// Если контрольная сумма содержит двоеточие, используйте часть до двоеточия
-			// как алгоритм, а часть после как фактическую контрольную сумму.
-			// В противном случае используйте sha256 по умолчанию с целой строкой как контрольной суммой.
-			algo, hashData, ok := strings.Cut(si.Checksums[i], ":")
-			if ok {
-				checksum, err := hex.DecodeString(hashData)
-				if err != nil {
-					return err
-				}
-				opts.Hash = checksum
-				opts.HashAlgorithm = algo
-			} else {
-				checksum, err := hex.DecodeString(si.Checksums[i])
-				if err != nil {
-					return err
-				}
-				opts.Hash = checksum
-			}
+			Destination: getSrcDir(s.cfg, basePkg),
+			LocalDir:    getScriptDir(input.Script),
 		}
 
 		opts.DlCache = dlcache.New(s.cfg.GetPaths().CacheDir)
 
-		err := dl.Download(ctx, opts)
+		err := s.setHashFromChecksum(si.Checksums[i], &opts)
+		if err != nil {
+			return err
+		}
+
+		err = dl.Download(ctx, opts)
 		if err != nil {
 			return err
 		}
 	}
 
+	return nil
+}
+
+func (s *LocalSourceDownloader) setHashFromChecksum(checksum string, opts *dl.Options) error {
+	if !strings.EqualFold(checksum, "SKIP") {
+		// If the checksum contains a colon, use the part before the colon
+		// as the algorithm, and the part after as the actual checksum.
+		// Otherwise, use SHA-256 by default with the whole string as the checksum.
+		algo, hashData, ok := strings.Cut(checksum, ":")
+		if ok {
+			checksum, err := hex.DecodeString(hashData)
+			if err != nil {
+				return err
+			}
+			opts.Hash = checksum
+			opts.HashAlgorithm = algo
+		} else {
+			checksum, err := hex.DecodeString(checksum)
+			if err != nil {
+				return err
+			}
+			opts.Hash = checksum
+		}
+	}
 	return nil
 }

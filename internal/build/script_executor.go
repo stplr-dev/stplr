@@ -41,7 +41,8 @@ import (
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
 
-	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
+	"go.stplr.dev/stplr/pkg/distro"
+	"go.stplr.dev/stplr/pkg/staplerfile"
 
 	"go.stplr.dev/stplr/internal/shutils/decoder"
 	"go.stplr.dev/stplr/internal/shutils/handlers"
@@ -50,9 +51,7 @@ import (
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-type LocalScriptExecutor struct {
-	cfg Config
-}
+type LocalScriptExecutor struct{ cfg Config }
 
 func NewLocalScriptExecutor(cfg Config) *LocalScriptExecutor {
 	return &LocalScriptExecutor{
@@ -60,12 +59,17 @@ func NewLocalScriptExecutor(cfg Config) *LocalScriptExecutor {
 	}
 }
 
-func (e *LocalScriptExecutor) ReadScript(ctx context.Context, scriptPath string) (*alrsh.ScriptFile, error) {
-	return alrsh.ReadFromLocal(scriptPath)
+func (e *LocalScriptExecutor) Read(ctx context.Context, scriptPath string) (*staplerfile.ScriptFile, error) {
+	return staplerfile.ReadFromLocal(scriptPath)
 }
 
-func (e *LocalScriptExecutor) ExecuteFirstPass(ctx context.Context, input *BuildInput, sf *alrsh.ScriptFile) (string, []*alrsh.Package, error) {
-	return sf.ParseBuildVars(ctx, input.info, input.packages)
+func (e *LocalScriptExecutor) ParsePackages(
+	ctx context.Context,
+	file *staplerfile.ScriptFile,
+	packages []string,
+	info distro.OSRelease,
+) (string, []*staplerfile.Package, error) {
+	return file.ParseBuildVars(ctx, &info, packages)
 }
 
 func (e *LocalScriptExecutor) PrepareDirs(
@@ -75,7 +79,7 @@ func (e *LocalScriptExecutor) PrepareDirs(
 ) error {
 	dirs, err := getDirs(
 		e.cfg,
-		input.script,
+		input.Script,
 		basePkg,
 	)
 	if err != nil {
@@ -93,8 +97,8 @@ func (e *LocalScriptExecutor) PrepareDirs(
 func (e *LocalScriptExecutor) ExecuteSecondPass(
 	ctx context.Context,
 	input *BuildInput,
-	sf *alrsh.ScriptFile,
-	varsOfPackages []*alrsh.Package,
+	sf *staplerfile.ScriptFile,
+	varsOfPackages []*staplerfile.Package,
 	repoDeps []string,
 	builtDeps []*BuiltDep,
 	basePkg string,
@@ -103,7 +107,7 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 	if err != nil {
 		return nil, err
 	}
-	env := createBuildEnvVars(input.info, dirs)
+	env := createBuildEnvVars(input.OSRelease(), dirs)
 
 	fakeroot := handlers.FakerootExecHandler(2 * time.Second)
 	runner, err := interp.New(
@@ -122,7 +126,7 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 		return nil, err
 	}
 
-	dec := decoder.New(input.info, runner)
+	dec := decoder.New(input.OSRelease(), runner)
 
 	// var builtPaths []string
 
@@ -137,7 +141,7 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 			packageName = vars.Name
 		}
 
-		pkgFormat := input.pkgFormat
+		pkgFormat := input.PkgFormat()
 
 		funcOut, err := e.ExecutePackageFunctions(
 			ctx,
@@ -205,7 +209,7 @@ func buildPkgMetadata(
 		PkgFormatProvider
 		RepositoryProvider
 	},
-	vars *alrsh.Package,
+	vars *staplerfile.Package,
 	dirs types.Directories,
 	deps []string,
 	preferedContents *[]string,
@@ -314,30 +318,29 @@ func buildPkgMetadata(
 		}
 	}
 
-	pkgInfo.RPM.Compression = "xz"
-
 	return pkgInfo, nil
 }
 
+func execFunc(ctx context.Context, d *decoder.Decoder, name string, dirs types.Directories) error {
+	fn, ok := d.GetFunc(name)
+	if ok {
+		slog.Info(gotext.Get("Executing %s()", name))
+		err := fn(ctx, interp.Dir(dirs.SrcDir))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (e *LocalScriptExecutor) ExecuteFunctions(ctx context.Context, dirs types.Directories, dec *decoder.Decoder) error {
-	prepare, ok := dec.GetFunc("prepare")
-	if ok {
-		slog.Info(gotext.Get("Executing prepare()"))
-
-		err := prepare(ctx, interp.Dir(dirs.SrcDir))
-		if err != nil {
-			return err
-		}
+	if err := execFunc(ctx, dec, "prepare", dirs); err != nil {
+		return err
 	}
-	build, ok := dec.GetFunc("build")
-	if ok {
-		slog.Info(gotext.Get("Executing build()"))
-
-		err := build(ctx, interp.Dir(dirs.SrcDir))
-		if err != nil {
-			return err
-		}
+	if err := execFunc(ctx, dec, "build", dirs); err != nil {
+		return err
 	}
+
 	return nil
 }
 
@@ -358,13 +361,8 @@ func (e *LocalScriptExecutor) ExecutePackageFunctions(
 		packageFuncName = fmt.Sprintf("package_%s", packageName)
 		filesFuncName = fmt.Sprintf("files_%s", packageName)
 	}
-	packageFn, ok := dec.GetFunc(packageFuncName)
-	if ok {
-		slog.Info(gotext.Get("Executing %s()", packageFuncName))
-		err := packageFn(ctx, interp.Dir(dirs.SrcDir))
-		if err != nil {
-			return nil, err
-		}
+	if err := execFunc(ctx, dec, packageFuncName, dirs); err != nil {
+		return nil, err
 	}
 
 	files, ok := dec.GetFuncP(filesFuncName, func(ctx context.Context, s *interp.Runner) error {

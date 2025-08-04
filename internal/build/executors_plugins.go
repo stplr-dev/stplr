@@ -26,11 +26,12 @@ import (
 	"context"
 
 	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-//go:generate go run ../../generators/plugin-generator InstallerExecutor ScriptExecutor ReposExecutor
+//go:generate go run ../../generators/plugin-generator InstallerExecutor ScriptExecutor ReposExecutor ScriptReader PackagesParser
 
 // The Executors interfaces must use context.Context as the first parameter,
 // because the plugin-generator cannot generate code without it.
@@ -43,8 +44,13 @@ type InstallerExecutor interface {
 }
 
 type ScriptExecutor interface {
-	ReadScript(ctx context.Context, scriptPath string) (*staplerfile.ScriptFile, error)
-	ExecuteFirstPass(ctx context.Context, input *BuildInput, sf *staplerfile.ScriptFile) (string, []*staplerfile.Package, error)
+	Read(ctx context.Context, scriptPath string) (*staplerfile.ScriptFile, error)
+	ParsePackages(
+		ctx context.Context,
+		file *staplerfile.ScriptFile,
+		packages []string,
+		info distro.OSRelease,
+	) (string, []*staplerfile.Package, error)
 	PrepareDirs(
 		ctx context.Context,
 		input *BuildInput,
@@ -63,4 +69,17 @@ type ScriptExecutor interface {
 
 type ReposExecutor interface {
 	PullOneAndUpdateFromConfig(ctx context.Context, repo *types.Repo) (types.Repo, error)
+}
+
+type ScriptReader interface {
+	Read(ctx context.Context, path string) (*staplerfile.ScriptFile, error)
+}
+
+type PackagesParser interface {
+	ParsePackages(
+		ctx context.Context,
+		file *staplerfile.ScriptFile,
+		packages []string,
+		info distro.OSRelease,
+	) (string, []*staplerfile.Package, error)
 }

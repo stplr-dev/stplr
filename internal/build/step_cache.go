@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// This file was originally part of the project "ALR - Any Linux Repository"
-// created by the ALR Authors.
-// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
-//
-// Copyright (C) 2025 The ALR Authors
+// Stapler
 // Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
@@ -25,35 +21,39 @@ package build
 import (
 	"context"
 
-	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
-type ScriptViewerConfig interface {
-	PagerStyle() string
+type checkCacheStep struct {
+	cacheExecutor CacheExecutor
 }
 
-type ScriptViewer struct {
-	config ScriptViewerConfig
+func CheckCacheStep(cacheExecutor CacheExecutor) *checkCacheStep {
+	return &checkCacheStep{cacheExecutor: cacheExecutor}
 }
 
-func NewScriptViewer(cfg ScriptViewerConfig) *ScriptViewer {
-	return &ScriptViewer{
-		config: cfg,
+func (s *checkCacheStep) Run(ctx context.Context, state *BuildState) error {
+	if !state.Input.Opts.Clean {
+		var remaining []*staplerfile.Package
+		for _, pkg := range state.Packages {
+			builtPkgPath, ok, err := s.cacheExecutor.CheckForBuiltPackage(ctx, state.Input, pkg)
+			if err != nil {
+				return err
+			}
+			if ok {
+				state.BuiltDeps = append(state.BuiltDeps, &BuiltDep{
+					Path: builtPkgPath,
+				})
+			} else {
+				remaining = append(remaining, pkg)
+			}
+		}
+
+		if len(remaining) == 0 {
+			state.ShouldExit = true
+			return nil
+		}
 	}
-}
 
-func (s *ScriptViewer) ViewScript(
-	ctx context.Context,
-	input *BuildInput,
-	f *staplerfile.ScriptFile,
-	basePkg string,
-) error {
-	return cliutils.PromptViewScript(
-		ctx,
-		f.Path(),
-		basePkg,
-		s.config.PagerStyle(),
-		input.Opts.Interactive,
-	)
+	return nil
 }

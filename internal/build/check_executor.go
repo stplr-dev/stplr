@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// This file was originally part of the project "ALR - Any Linux Repository"
-// created by the ALR Authors.
-// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
-//
-// Copyright (C) 2025 The ALR Authors
+// Stapler
 // Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
@@ -31,50 +27,53 @@ import (
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/cpu"
 	"go.stplr.dev/stplr/internal/manager"
-	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
+	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
-type Checker struct {
+type ChecksRunner struct {
 	mgr manager.Manager
 }
 
-func (c *Checker) PerformChecks(
-	ctx context.Context,
-	input *BuildInput,
-	vars *alrsh.Package,
-) (bool, error) {
-	if !cpu.IsCompatibleWith(cpu.Arch(), vars.Architectures) { // Проверяем совместимость архитектуры
+func NewChecksRunner(mgr manager.Manager) *ChecksRunner {
+	return &ChecksRunner{mgr: mgr}
+}
+
+func (r *ChecksRunner) RunChecks(ctx context.Context, pkg *staplerfile.Package, input *BuildInput) (bool, error) {
+	if !cpu.IsCompatibleWith(cpu.Arch(), pkg.Architectures) {
 		cont, err := cliutils.YesNoPrompt(
 			ctx,
 			gotext.Get("Your system's CPU architecture doesn't match this package. Do you want to build anyway?"),
-			input.opts.Interactive,
+			input.Opts.Interactive,
 			true,
 		)
 		if err != nil {
 			return false, err
 		}
-
 		if !cont {
 			return false, nil
 		}
 	}
 
-	installed, err := c.mgr.ListInstalled(nil)
+	installed, err := r.mgr.ListInstalled(nil)
 	if err != nil {
 		return false, err
 	}
 
-	filename, err := pkgFileName(input, vars)
+	filename, err := pkgFileName(input, pkg)
 	if err != nil {
 		return false, err
 	}
 
-	if instVer, ok := installed[filename]; ok { // Если пакет уже установлен, выводим предупреждение
+	if instVer, ok := installed[filename]; ok {
 		slog.Warn(gotext.Get("This package is already installed"),
-			"name", vars.Name,
+			"name", pkg.Name,
 			"version", instVer,
 		)
 	}
 
 	return true, nil
+}
+
+type ChecksExecutor interface {
+	RunChecks(ctx context.Context, pkg *staplerfile.Package, input *BuildInput) (bool, error)
 }

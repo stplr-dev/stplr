@@ -168,11 +168,12 @@ func normalizeContents(contents []*files.Content) {
 
 var RegexpALRPackageName = regexp.MustCompile(`^(?P<package>[^+]+)\+stplr-(?P<repo>.+)$`)
 
-func getBasePkgInfo(vars *alrsh.Package, input interface {
-	RepositoryProvider
-	OsInfoProvider
-},
-) *nfpm.Info {
+type getBasePkgInfoInput interface {
+	OSReleaser
+	RepositoryGetter
+}
+
+func getBasePkgInfo(vars *alrsh.Package, input getBasePkgInfoInput) *nfpm.Info {
 	return &nfpm.Info{
 		Name:    fmt.Sprintf("%s+stplr-%s", vars.Name, input.Repository()),
 		Arch:    cpu.Arch(),

@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// This file was originally part of the project "ALR - Any Linux Repository"
-// created by the ALR Authors.
-// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
-//
-// Copyright (C) 2025 The ALR Authors
+// Stapler
 // Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
@@ -23,27 +19,20 @@
 package build
 
 import (
-	"go.stplr.dev/stplr/internal/manager"
+	"context"
+
+	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
-func NewMainBuilder(
-	cfg Config,
-	mgr manager.Manager,
-	repos PackageFinder,
-	scriptExecutor ScriptExecutor,
-	installerExecutor InstallerExecutor,
-) (*Builder, error) {
-	builder := NewBuilder(
-		NewScriptResolver(cfg),
-		scriptExecutor,
-		NewLocalCacheExecutor(cfg),
-		installerExecutor,
-		NewLocalSourceDownloader(cfg),
-		NewChecksRunner(mgr),
-		NewNonFreeViewer(cfg),
-		repos,
-		NewScriptViewer(cfg),
-	)
+type CacheExecutor interface {
+	CheckForBuiltPackage(ctx context.Context, input CheckForBuiltPackageInput, pkgs *staplerfile.Package) (string, bool, error)
+}
 
-	return builder, nil
+type SourceDownloaderExecutor interface {
+	DownloadSources(
+		ctx context.Context,
+		input *BuildInput,
+		basePkg string,
+		si SourcesInput,
+	) error
 }

@@ -28,7 +28,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"errors"
 	"fmt"
 	"log/slog"
 
@@ -37,42 +36,40 @@ import (
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/manager"
-	"go.stplr.dev/stplr/internal/shutils/decoder"
 	"go.stplr.dev/stplr/pkg/distro"
-	"go.stplr.dev/stplr/pkg/reqprov"
-	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
+	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
 type BuildInput struct {
-	opts       *types.BuildOpts
-	info       *distro.OSRelease
-	pkgFormat  string
-	script     string
-	repository string
-	packages   []string
+	Opts        *types.BuildOpts
+	Info_       *distro.OSRelease
+	PkgFormat_  string
+	Script      string
+	Repository_ string
+	Packages_   []string
 }
 
 func (bi *BuildInput) GobEncode() ([]byte, error) {
 	w := new(bytes.Buffer)
 	encoder := gob.NewEncoder(w)
 
-	if err := encoder.Encode(bi.opts); err != nil {
+	if err := encoder.Encode(bi.Opts); err != nil {
 		return nil, err
 	}
-	if err := encoder.Encode(bi.info); err != nil {
+	if err := encoder.Encode(bi.Info_); err != nil {
 		return nil, err
 	}
-	if err := encoder.Encode(bi.pkgFormat); err != nil {
+	if err := encoder.Encode(bi.PkgFormat_); err != nil {
 		return nil, err
 	}
-	if err := encoder.Encode(bi.script); err != nil {
+	if err := encoder.Encode(bi.Script); err != nil {
 		return nil, err
 	}
-	if err := encoder.Encode(bi.repository); err != nil {
+	if err := encoder.Encode(bi.Repository_); err != nil {
 		return nil, err
 	}
-	if err := encoder.Encode(bi.packages); err != nil {
+	if err := encoder.Encode(bi.Packages_); err != nil {
 		return nil, err
 	}
 
@@ -83,22 +80,22 @@ func (bi *BuildInput) GobDecode(data []byte) error {
 	r := bytes.NewBuffer(data)
 	decoder := gob.NewDecoder(r)
 
-	if err := decoder.Decode(&bi.opts); err != nil {
+	if err := decoder.Decode(&bi.Opts); err != nil {
 		return err
 	}
-	if err := decoder.Decode(&bi.info); err != nil {
+	if err := decoder.Decode(&bi.Info_); err != nil {
 		return err
 	}
-	if err := decoder.Decode(&bi.pkgFormat); err != nil {
+	if err := decoder.Decode(&bi.PkgFormat_); err != nil {
 		return err
 	}
-	if err := decoder.Decode(&bi.script); err != nil {
+	if err := decoder.Decode(&bi.Script); err != nil {
 		return err
 	}
-	if err := decoder.Decode(&bi.repository); err != nil {
+	if err := decoder.Decode(&bi.Repository_); err != nil {
 		return err
 	}
-	if err := decoder.Decode(&bi.packages); err != nil {
+	if err := decoder.Decode(&bi.Packages_); err != nil {
 		return err
 	}
 
@@ -106,19 +103,23 @@ func (bi *BuildInput) GobDecode(data []byte) error {
 }
 
 func (b *BuildInput) Repository() string {
-	return b.repository
+	return b.Repository_
 }
 
 func (b *BuildInput) BuildOpts() *types.BuildOpts {
-	return b.opts
+	return b.Opts
 }
 
 func (b *BuildInput) OSRelease() *distro.OSRelease {
-	return b.info
+	return b.Info_
 }
 
 func (b *BuildInput) PkgFormat() string {
-	return b.pkgFormat
+	return b.PkgFormat_
+}
+
+func (b *BuildInput) Packages() []string {
+	return b.Packages_
 }
 
 type BuildOptsProvider interface {
@@ -138,11 +139,6 @@ type RepositoryProvider interface {
 }
 
 // ================================================
-
-type BuiltDep struct {
-	Name string
-	Path string
-}
 
 func Map[T, R any](items []T, f func(T) R) []R {
 	res := make([]R, len(items))
@@ -165,7 +161,7 @@ func GetBuiltName(deps []*BuiltDep) []string {
 }
 
 type PackageFinder interface {
-	FindPkgs(ctx context.Context, pkgs []string) (map[string][]alrsh.Package, []string, error)
+	FindPkgs(ctx context.Context, pkgs []string) (map[string][]staplerfile.Package, []string, error)
 }
 
 type Config interface {
@@ -173,30 +169,21 @@ type Config interface {
 	PagerStyle() string
 }
 
-type FunctionsOutput struct {
-	Contents *[]string
+type BuiltDep struct {
+	Name string
+	Path string
 }
 
-// EXECUTORS
-
-type ScriptResolverExecutor interface {
-	ResolveScript(ctx context.Context, pkg *alrsh.Package) *ScriptInfo
+type OSReleaser interface {
+	OSRelease() *distro.OSRelease
 }
 
-type CacheExecutor interface {
-	CheckForBuiltPackage(ctx context.Context, input *BuildInput, vars *alrsh.Package) (string, bool, error)
+type PkgFormatter interface {
+	PkgFormat() string
 }
 
-type ScriptViewerExecutor interface {
-	ViewScript(ctx context.Context, input *BuildInput, sf *alrsh.ScriptFile, basePkg string) error
-}
-
-type CheckerExecutor interface {
-	PerformChecks(
-		ctx context.Context,
-		input *BuildInput,
-		vars *alrsh.Package,
-	) (bool, error)
+type RepositoryGetter interface {
+	Repository() string
 }
 
 type SourcesInput struct {
@@ -204,47 +191,8 @@ type SourcesInput struct {
 	Checksums []string
 }
 
-type SourceDownloaderExecutor interface {
-	DownloadSources(
-		ctx context.Context,
-		input *BuildInput,
-		basePkg string,
-		si SourcesInput,
-	) error
-}
-
-//
-
-func NewBuilder(
-	scriptResolver ScriptResolverExecutor,
-	scriptExecutor ScriptExecutor,
-	cacheExecutor CacheExecutor,
-	scriptViewerExecutor ScriptViewerExecutor,
-	checkerExecutor CheckerExecutor,
-	installerExecutor InstallerExecutor,
-	sourceExecutor SourceDownloaderExecutor,
-) *Builder {
-	return &Builder{
-		scriptResolver:       scriptResolver,
-		scriptExecutor:       scriptExecutor,
-		cacheExecutor:        cacheExecutor,
-		scriptViewerExecutor: scriptViewerExecutor,
-		checkerExecutor:      checkerExecutor,
-		installerExecutor:    installerExecutor,
-		sourceExecutor:       sourceExecutor,
-	}
-}
-
-type Builder struct {
-	scriptResolver       ScriptResolverExecutor
-	scriptExecutor       ScriptExecutor
-	cacheExecutor        CacheExecutor
-	scriptViewerExecutor ScriptViewerExecutor
-	checkerExecutor      CheckerExecutor
-	installerExecutor    InstallerExecutor
-	sourceExecutor       SourceDownloaderExecutor
-	repos                PackageFinder
-	// mgr                  manager.Manager
+type FunctionsOutput struct {
+	Contents *[]string
 }
 
 type BuildArgs struct {
@@ -267,7 +215,7 @@ func (b *BuildArgs) PkgFormat() string {
 
 type BuildPackageFromDbArgs struct {
 	BuildArgs
-	Package  *alrsh.Package
+	Package  *staplerfile.Package
 	Packages []string
 }
 
@@ -284,12 +232,12 @@ func (b *Builder) BuildPackageFromDb(
 	scriptInfo := b.scriptResolver.ResolveScript(ctx, args.Package)
 
 	return b.BuildPackage(ctx, &BuildInput{
-		script:     scriptInfo.Script,
-		repository: scriptInfo.Repository,
-		packages:   args.Packages,
-		pkgFormat:  args.PkgFormat(),
-		opts:       args.Opts,
-		info:       args.Info,
+		Script:      scriptInfo.Script,
+		Repository_: scriptInfo.Repository,
+		Packages_:   args.Packages,
+		PkgFormat_:  args.PkgFormat(),
+		Opts:        args.Opts,
+		Info_:       args.Info,
 	})
 }
 
@@ -298,244 +246,27 @@ func (b *Builder) BuildPackageFromScript(
 	args *BuildPackageFromScriptArgs,
 ) ([]*BuiltDep, error) {
 	return b.BuildPackage(ctx, &BuildInput{
-		script:     args.Script,
-		repository: "default",
-		packages:   args.Packages,
-		pkgFormat:  args.PkgFormat(),
-		opts:       args.Opts,
-		info:       args.Info,
+		Script:      args.Script,
+		Repository_: "default",
+		Packages_:   args.Packages,
+		PkgFormat_:  args.PkgFormat(),
+		Opts:        args.Opts,
+		Info_:       args.Info,
 	})
-}
-
-func (b *Builder) BuildPackage(
-	ctx context.Context,
-	input *BuildInput,
-) ([]*BuiltDep, error) {
-	scriptPath := input.script
-
-	slog.Debug("ReadScript")
-	sf, err := b.scriptExecutor.ReadScript(ctx, scriptPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed reading script: %w", err)
-	}
-
-	slog.Debug("ExecuteFirstPass")
-	basePkg, varsOfPackages, err := b.scriptExecutor.ExecuteFirstPass(ctx, input, sf)
-	if err != nil {
-		return nil, fmt.Errorf("failed ExecuteFirstPass: %w", err)
-	}
-
-	var builtDeps []*BuiltDep
-
-	if !input.opts.Clean {
-		var remainingVars []*alrsh.Package
-		for _, vars := range varsOfPackages {
-			builtPkgPath, ok, err := b.cacheExecutor.CheckForBuiltPackage(ctx, input, vars)
-			if err != nil {
-				return nil, err
-			}
-			if ok {
-				builtDeps = append(builtDeps, &BuiltDep{
-					Path: builtPkgPath,
-				})
-			} else {
-				remainingVars = append(remainingVars, vars)
-			}
-		}
-
-		if len(remainingVars) == 0 {
-			return builtDeps, nil
-		}
-	}
-
-	slog.Debug("ViewScript")
-	slog.Debug("", "varsOfPackages", varsOfPackages[0])
-	err = b.scriptViewerExecutor.ViewScript(ctx, input, sf, basePkg)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, vars := range varsOfPackages {
-		if err := ViewNonfree(ctx, input, vars); err != nil {
-			return nil, err
-		}
-	}
-
-	slog.Info(gotext.Get("Building package"), "name", basePkg)
-
-	for _, vars := range varsOfPackages {
-		cont, err := b.checkerExecutor.PerformChecks(ctx, input, vars)
-		if err != nil {
-			return nil, err
-		}
-		if !cont {
-			return nil, errors.New("exit...")
-		}
-	}
-
-	buildDepends := []string{}
-	optDepends := []string{}
-	depends := []string{}
-	sources := []string{}
-	checksums := []string{}
-	for _, vars := range varsOfPackages {
-		buildDepends = append(buildDepends, vars.BuildDepends.Resolved()...)
-		optDepends = append(optDepends, vars.OptDepends.Resolved()...)
-		depends = append(depends, vars.Depends.Resolved()...)
-		sources = append(sources, vars.Sources.Resolved()...)
-		checksums = append(checksums, vars.Checksums.Resolved()...)
-	}
-	buildDepends = removeDuplicates(buildDepends)
-	optDepends = removeDuplicates(optDepends)
-	depends = removeDuplicates(depends)
-
-	for _, vars := range varsOfPackages {
-		if len(vars.AutoReq.Resolved()) == 1 && decoder.IsTruthy(vars.AutoReq.Resolved()[0]) {
-			f, err := reqprov.New(
-				input.OSRelease(),
-				input.PkgFormat(),
-				vars.AutoReqProvMethod.Resolved(),
-			)
-			if err != nil {
-				return nil, fmt.Errorf("failed to init provreq: %w", err)
-			}
-
-			newBuildDeps, err := f.BuildDepends(ctx)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get build deps from provreq %w", err)
-			}
-			buildDepends = append(buildDepends, newBuildDeps...)
-		}
-	}
-
-	buildDepends = removeDuplicates(buildDepends)
-
-	if len(sources) != len(checksums) {
-		slog.Error(gotext.Get("The checksums array must be the same length as sources"))
-		return nil, errors.New("exit...")
-	}
-	sources, checksums = removeDuplicatesSources(sources, checksums)
-
-	slog.Debug("installBuildDeps")
-	alrBuildDeps, installedBuildDeps, err := b.installBuildDeps(ctx, input, buildDepends)
-	if err != nil {
-		return nil, err
-	}
-
-	slog.Debug("installOptDeps")
-	_, err = b.installOptDeps(ctx, input, optDepends)
-	if err != nil {
-		return nil, err
-	}
-
-	depNames := make(map[string]struct{})
-	for _, dep := range alrBuildDeps {
-		depNames[dep.Name] = struct{}{}
-	}
-
-	// We filter so as not to re-build what has already been built at the `installBuildDeps` stage.
-	var filteredDepends []string
-	for _, d := range depends {
-		if _, found := depNames[d]; !found {
-			filteredDepends = append(filteredDepends, d)
-		}
-	}
-
-	slog.Debug("BuildALRDeps")
-	newBuiltDeps, repoDeps, err := b.BuildALRDeps(ctx, input, filteredDepends)
-	if err != nil {
-		return nil, err
-	}
-
-	slog.Debug("PrepareDirs")
-	err = b.scriptExecutor.PrepareDirs(ctx, input, basePkg)
-	if err != nil {
-		return nil, err
-	}
-
-	slog.Info(gotext.Get("Downloading sources"))
-	slog.Debug("DownloadSources")
-	err = b.sourceExecutor.DownloadSources(
-		ctx,
-		input,
-		basePkg,
-		SourcesInput{
-			Sources:   sources,
-			Checksums: checksums,
-		},
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	builtDeps = removeDuplicates(append(builtDeps, newBuiltDeps...))
-
-	slog.Debug("ExecuteSecondPass")
-	res, err := b.scriptExecutor.ExecuteSecondPass(
-		ctx,
-		input,
-		sf,
-		varsOfPackages,
-		repoDeps,
-		builtDeps,
-		basePkg,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	builtDeps = removeDuplicates(append(builtDeps, res...))
-
-	err = b.removeBuildDeps(ctx, input, installedBuildDeps)
-	if err != nil {
-		return nil, err
-	}
-
-	return builtDeps, nil
-}
-
-func (b *Builder) removeBuildDeps(ctx context.Context, input interface {
-	BuildOptsProvider
-}, deps []string,
-) error {
-	if len(deps) > 0 {
-		remove, err := cliutils.YesNoPrompt(ctx, gotext.Get("Would you like to remove the build dependencies?"), input.BuildOpts().Interactive, false)
-		if err != nil {
-			return err
-		}
-
-		if remove {
-			err = b.installerExecutor.Remove(
-				ctx,
-				deps,
-				&manager.Opts{
-					NoConfirm: !input.BuildOpts().Interactive,
-				},
-			)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
 }
 
 type InstallPkgsArgs struct {
 	BuildArgs
-	AlrPkgs    []alrsh.Package
+	AlrPkgs    []staplerfile.Package
 	NativePkgs []string
 }
 
 func (b *Builder) InstallALRPackages(
 	ctx context.Context,
-	input interface {
-		OsInfoProvider
-		BuildOptsProvider
-		PkgFormatProvider
-	},
-	alrPkgs []alrsh.Package,
+	input InstallInput,
+	pkgs []staplerfile.Package,
 ) error {
-	for _, pkg := range alrPkgs {
+	for _, pkg := range pkgs {
 		res, err := b.BuildPackageFromDb(
 			ctx,
 			&BuildPackageFromDbArgs{
@@ -567,51 +298,54 @@ func (b *Builder) InstallALRPackages(
 	return nil
 }
 
-func (b *Builder) BuildALRDeps(
+func (i *Builder) InstallPkgs(
 	ctx context.Context,
-	input interface {
-		OsInfoProvider
-		BuildOptsProvider
-		PkgFormatProvider
-	},
-	depends []string,
-) (buildDeps []*BuiltDep, repoDeps []string, err error) {
+	input InstallInput,
+	pkgs []string,
+) ([]*BuiltDep, error) {
+	builtDeps, repoDeps, err := i.BuildALRDeps(ctx, input, pkgs)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(builtDeps) > 0 {
+		err = i.installerExecutor.InstallLocal(ctx, GetBuiltPaths(builtDeps), &manager.Opts{
+			NoConfirm: !input.BuildOpts().Interactive,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if len(repoDeps) > 0 {
+		err = i.installerExecutor.Install(ctx, repoDeps, &manager.Opts{
+			NoConfirm: !input.BuildOpts().Interactive,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return builtDeps, nil
+}
+
+func (b *Builder) BuildALRDeps(ctx context.Context, input InstallInput, depends []string) (buildDeps []*BuiltDep, repoDeps []string, err error) {
 	if len(depends) > 0 {
 		slog.Info(gotext.Get("Installing dependencies"))
 
-		found, notFound, err := b.repos.FindPkgs(ctx, depends) // Поиск зависимостей
+		found, notFound, err := b.repos.FindPkgs(ctx, depends)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed FindPkgs: %w", err)
 		}
 		repoDeps = notFound
 
-		// Если для некоторых пакетов есть несколько опций, упрощаем их все в один срез
 		pkgs := cliutils.FlattenPkgs(
 			ctx,
 			found,
 			"install",
 			input.BuildOpts().Interactive,
 		)
-		type item struct {
-			pkg      *alrsh.Package
-			packages []string
-		}
-		pkgsMap := make(map[string]*item)
-		for _, pkg := range pkgs {
-			name := pkg.BasePkgName
-			if name == "" {
-				name = pkg.Name
-			}
-			if pkgsMap[name] == nil {
-				pkgsMap[name] = &item{
-					pkg: &pkg,
-				}
-			}
-			pkgsMap[name].packages = append(
-				pkgsMap[name].packages,
-				pkg.Name,
-			)
-		}
+		pkgsMap := groupPackages(pkgs)
 
 		for basePkgName := range pkgsMap {
 			pkg := pkgsMap[basePkgName].pkg
@@ -641,100 +375,25 @@ func (b *Builder) BuildALRDeps(
 	return buildDeps, repoDeps, nil
 }
 
-func (i *Builder) installBuildDeps(
-	ctx context.Context,
-	input interface {
-		OsInfoProvider
-		BuildOptsProvider
-		PkgFormatProvider
-	},
-	pkgs []string,
-) ([]*BuiltDep, []string, error) {
-	var builtDeps []*BuiltDep
-	var deps []string
-	var err error
-	if len(pkgs) > 0 {
-		deps, err = i.installerExecutor.RemoveAlreadyInstalled(ctx, pkgs)
-		if err != nil {
-			return nil, nil, err
-		}
-
-		builtDeps, err = i.InstallPkgs(ctx, input, deps) // Устанавливаем выбранные пакеты
-		if err != nil {
-			return nil, nil, err
-		}
-	}
-	return builtDeps, deps, nil
+type pkgItem struct {
+	pkg      *staplerfile.Package
+	packages []string
 }
 
-func (i *Builder) installOptDeps(
-	ctx context.Context,
-	input interface {
-		OsInfoProvider
-		BuildOptsProvider
-		PkgFormatProvider
-	},
-	pkgs []string,
-) ([]*BuiltDep, error) {
-	var builtDeps []*BuiltDep
-	optDeps, err := i.installerExecutor.RemoveAlreadyInstalled(ctx, pkgs)
-	if err != nil {
-		return nil, err
-	}
-	if len(optDeps) > 0 {
-		optDeps, err := cliutils.ChooseOptDepends(
-			ctx,
-			optDeps,
-			"install",
-			input.BuildOpts().Interactive,
-		) // Пользователя просят выбрать опциональные зависимости
-		if err != nil {
-			return nil, err
+func groupPackages(pkgs []staplerfile.Package) map[string]pkgItem {
+	pkgsMap := make(map[string]pkgItem)
+	for _, pkg := range pkgs {
+		name := pkg.BasePkgName
+		if name == "" {
+			name = pkg.Name
 		}
-
-		if len(optDeps) == 0 {
-			return builtDeps, nil
+		it, ok := pkgsMap[name]
+		if !ok {
+			copy := pkg
+			it = pkgItem{pkg: &copy}
 		}
-
-		builtDeps, err = i.InstallPkgs(ctx, input, optDeps) // Устанавливаем выбранные пакеты
-		if err != nil {
-			return nil, err
-		}
+		it.packages = append(it.packages, pkg.Name)
+		pkgsMap[name] = it // be sure to overwrite it!
 	}
-	return builtDeps, nil
-}
-
-func (i *Builder) InstallPkgs(
-	ctx context.Context,
-	input interface {
-		OsInfoProvider
-		BuildOptsProvider
-		PkgFormatProvider
-	},
-	pkgs []string,
-) ([]*BuiltDep, error) {
-	builtDeps, repoDeps, err := i.BuildALRDeps(ctx, input, pkgs)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(builtDeps) > 0 {
-		err = i.installerExecutor.InstallLocal(ctx, GetBuiltPaths(builtDeps), &manager.Opts{
-			NoConfirm: !input.BuildOpts().Interactive,
-		})
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if len(repoDeps) > 0 {
-		err = i.installerExecutor.Install(ctx, repoDeps, &manager.Opts{
-			NoConfirm: !input.BuildOpts().Interactive,
-		})
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return builtDeps, nil
+	return pkgsMap
 }

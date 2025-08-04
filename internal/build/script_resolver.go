@@ -27,11 +27,20 @@ import (
 	"os"
 	"path/filepath"
 
+	"go.stplr.dev/stplr/pkg/staplerfile"
 	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
 )
 
+type ScriptResolverExecutor interface {
+	ResolveScript(ctx context.Context, pkg *staplerfile.Package) *ScriptInfo
+}
+
 type ScriptResolver struct {
 	cfg Config
+}
+
+func NewScriptResolver(cfg Config) *ScriptResolver {
+	return &ScriptResolver{cfg: cfg}
 }
 
 type ScriptInfo struct {
