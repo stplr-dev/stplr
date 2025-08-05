@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Stapler
+# Copyright (C) 2025 The Stapler Authors
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+name: "🚀 Feature Request"
+description: "Suggest a new feature or enhancement for the application"
+title: "feature: "
+labels: [Kind/Feature]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ **Before submitting a feature request:**
+        - Please check if a similar feature has already been requested.
+        - Ensure your suggestion aligns with the project's goals.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature Description
+      description: Provide a detailed description of the proposed feature
+    validations:
+      required: true
+
+  - type: textarea
+    id: usecase
+    attributes:
+      label: Use Case
+      description: Describe the use case or problem this feature would address
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed Solution
+      description: Suggest how this feature could be implemented (optional)
+    validations:
+      required: false
