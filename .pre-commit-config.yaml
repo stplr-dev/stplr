@@ -23,9 +23,9 @@
 repos:
   - repo: local
     hooks:
-      - id: test-coverage-with-clean
+      - id: test-unit
         name: Run test coverage
-        entry: make test-coverage-with-clean
+        entry: make test-unit
         language: system
         pass_filenames: false
 

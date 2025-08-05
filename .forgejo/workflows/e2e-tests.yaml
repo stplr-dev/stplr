@@ -24,7 +24,8 @@ name: E2E
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
@@ -33,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: altlinux.space/maks1ms/actions-container-runner:latest
+      image: altlinux.space/actions/runner/containers:sisyphus
 
     steps:
       - name: Checkout
@@ -51,4 +52,4 @@ jobs:
         env:
           IGNORE_ROOT_CHECK: 1
         run: |
-          make e2e-test
+          make test-e2e

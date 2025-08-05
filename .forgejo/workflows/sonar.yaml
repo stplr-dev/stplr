@@ -46,7 +46,7 @@ jobs:
       env:
         IGNORE_ROOT_CHECK: 1
       run: |
-        make test-coverage
+        make test-unit-coverage
 
     - name: SonarQube Scan for Pull Request
       if: github.event_name == 'pull_request'
