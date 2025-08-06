@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2025-07-29 13:13+0000\n"
+"PO-Revision-Date: 2025-08-06 07:13+0000\n"
 "Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
 "stplr/ru/>\n"
@@ -288,22 +288,24 @@ msgstr "Применение интеграции FireJail"
 msgid ""
 "This package contains non-free software that requires license acceptance."
 msgstr ""
+"Этот пакет содержит несвободное программное обеспечение, которое требует "
+"принятия лицензии."
 
 #: internal/build/nonfree_pager.go:161
 msgid "NON-FREE SOFTWARE AGREEMENT"
-msgstr ""
+msgstr "СОГЛАШЕНИЕ О НЕСВОБОДНОМ ПО"
 
 #: internal/build/nonfree_pager.go:169
 msgid "y - Accept"
-msgstr ""
+msgstr "y - Принять"
 
 #: internal/build/nonfree_pager.go:170
 msgid "n/q/Esc - Decline"
-msgstr ""
+msgstr "n/q/Esc - Отклонить"
 
 #: internal/build/nonfree_pager.go:180
 msgid "Full license available at: %s"
-msgstr ""
+msgstr "Полный текст лицензии доступен по адресу: %s"
 
 #: internal/build/script_executor.go:152
 msgid "Building package metadata"
