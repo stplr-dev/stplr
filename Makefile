@@ -99,7 +99,6 @@ i18n:
 	$(XGOTEXT_BIN) --output ./internal/translations/default.pot
 	msguniq --use-first -o ./internal/translations/default.pot ./internal/translations/default.pot
 	msgmerge --backup=off -U ./internal/translations/po/ru/default.po ./internal/translations/default.pot
-	bash scripts/i18n-badge.sh
 
 test: test-unit-coverage test-e2e
 	@echo "All tests completed successfully!"
@@ -110,7 +109,6 @@ test-unit:
 test-unit-coverage:
 	go test ./... -v -coverpkg=./... -coverprofile=coverage.out
 	bash scripts/coverage-badge.sh
-	rm coverage.out
 
 prepare-test-e2e: clean build
 	rm -f e2e-tests/$(NAME)
