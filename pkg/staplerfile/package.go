@@ -101,6 +101,35 @@ type Scripts struct {
 	PostTrans   string `sh:"posttrans"`
 }
 
+func (s Scripts) Files() []string {
+	out := make([]string, 0)
+	if s.PreInstall != "" {
+		out = append(out, s.PreInstall)
+	}
+	if s.PostInstall != "" {
+		out = append(out, s.PostInstall)
+	}
+	if s.PreRemove != "" {
+		out = append(out, s.PreRemove)
+	}
+	if s.PostRemove != "" {
+		out = append(out, s.PostRemove)
+	}
+	if s.PreUpgrade != "" {
+		out = append(out, s.PreUpgrade)
+	}
+	if s.PostUpgrade != "" {
+		out = append(out, s.PostUpgrade)
+	}
+	if s.PreTrans != "" {
+		out = append(out, s.PreTrans)
+	}
+	if s.PostTrans != "" {
+		out = append(out, s.PostTrans)
+	}
+	return out
+}
+
 func (p Package) MarshalJSONWithOptions(includeOverrides bool) ([]byte, error) {
 	// Сначала сериализуем обычным способом для получения базовой структуры
 	type PackageAlias Package

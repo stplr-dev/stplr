@@ -28,6 +28,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"syscall"
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v2"
@@ -35,8 +36,8 @@ import (
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/cliutils"
 	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
-	"go.stplr.dev/stplr/internal/osutils"
 	"go.stplr.dev/stplr/internal/utils"
+	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
@@ -78,11 +79,7 @@ func BuildCmd() *cli.Command {
 				return cliutils.FormatCliExit(gotext.Get("Error getting working directory"), err)
 			}
 
-			wd, wdCleanup, err := Mount(wd)
-			if err != nil {
-				return err
-			}
-			defer wdCleanup()
+			origUid, origGid := syscall.Getuid(), syscall.Getgid()
 
 			ctx := c.Context
 
@@ -162,20 +159,39 @@ func BuildCmd() *cli.Command {
 				return cliutils.FormatCliExit(gotext.Get("Nothing to build"), nil)
 			}
 
+			var file *staplerfile.ScriptFile
+
 			if scriptArgs != nil {
-				scriptFile := filepath.Base(scriptArgs.Script)
-				newScriptDir, scriptDirCleanup, err := Mount(filepath.Dir(scriptArgs.Script))
+				file, err = staplerfile.ReadFromLocal(scriptArgs.Script)
 				if err != nil {
 					return err
 				}
-				defer scriptDirCleanup()
-				scriptArgs.Script = filepath.Join(newScriptDir, scriptFile)
 			}
 
 			// EnsureIsPrivilegedGroupMemberOrRoot is used higher
 			err = utils.EscalateToRootUid()
 			if err != nil {
 				return cliutils.FormatCliExit("cannot escalate to root", err)
+			}
+
+			copier, cleanup, err := build.GetSafeScriptCopier()
+			if err != nil {
+				return cliutils.FormatCliExit("failed to init copier", err)
+			}
+			defer cleanup()
+
+			if scriptArgs != nil {
+				scriptArgs.Script, err = copier.Copy(ctx, file, deps.Info)
+				if err != nil {
+					cleanup()
+					return err
+				}
+				defer func() {
+					err = os.RemoveAll(filepath.Dir(scriptArgs.Script))
+					if err != nil {
+						panic(err)
+					}
+				}()
 			}
 
 			installer, scripter, cleanup, err := prepareInstallerAndScripter()
@@ -213,8 +229,8 @@ func BuildCmd() *cli.Command {
 
 			for _, pkg := range res {
 				name := filepath.Base(pkg.Path)
-				err = osutils.Move(pkg.Path, filepath.Join(wd, name))
-				if err != nil {
+
+				if err = copier.CopyOut(ctx, pkg.Path, filepath.Join(wd, name), origUid, origGid); err != nil {
 					return cliutils.FormatCliExit(gotext.Get("Error moving the package"), err)
 				}
 			}

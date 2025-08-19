@@ -41,14 +41,14 @@ type ALTLinux struct{}
 func (o *ALTLinux) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	return rpmFindDependenciesALTLinux(ctx, pkgInfo, dirs, "/usr/lib/rpm/find-provides", []string{"RPM_FINDPROV_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
 		slog.Info(gotext.Get("Provided dependency found"), "dep", dep)
-		pkgInfo.Overridables.Provides = append(pkgInfo.Overridables.Provides, dep)
+		pkgInfo.Provides = append(pkgInfo.Provides, dep)
 	})
 }
 
 func (o *ALTLinux) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	return rpmFindDependenciesALTLinux(ctx, pkgInfo, dirs, "/usr/lib/rpm/find-requires", []string{"RPM_FINDREQ_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
 		slog.Info(gotext.Get("Required dependency found"), "dep", dep)
-		pkgInfo.Overridables.Depends = append(pkgInfo.Overridables.Depends, dep)
+		pkgInfo.Depends = append(pkgInfo.Depends, dep)
 	})
 }
 

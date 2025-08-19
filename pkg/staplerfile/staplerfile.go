@@ -26,58 +26,28 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
-	"runtime"
-	"strconv"
-	"strings"
 
 	"github.com/jeandeaual/go-locale"
 	"mvdan.cc/sh/v3/expand"
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
 
-	"go.stplr.dev/stplr/internal/cpu"
+	"go.stplr.dev/stplr/internal/build/common"
 	"go.stplr.dev/stplr/internal/shutils/decoder"
 	"go.stplr.dev/stplr/internal/shutils/handlers"
 	"go.stplr.dev/stplr/internal/shutils/helpers"
 	"go.stplr.dev/stplr/internal/shutils/runner"
 	"go.stplr.dev/stplr/pkg/distro"
+	"go.stplr.dev/stplr/pkg/dl"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
 type ScriptFile struct {
 	file *syntax.File
 	path string
-}
-
-func createBuildEnvVars(info *distro.OSRelease, dirs types.Directories) []string {
-	env := os.Environ()
-
-	env = append(
-		env,
-		"DISTRO_NAME="+info.Name,
-		"DISTRO_PRETTY_NAME="+info.PrettyName,
-		"DISTRO_ID="+info.ID,
-		"DISTRO_VERSION_ID="+info.VersionID,
-		"DISTRO_ID_LIKE="+strings.Join(info.Like, " "),
-		"ARCH="+cpu.Arch(),
-		"NCPU="+strconv.Itoa(runtime.NumCPU()),
-	)
-
-	if dirs.ScriptDir != "" {
-		env = append(env, "scriptdir="+dirs.ScriptDir)
-	}
-
-	if dirs.PkgDir != "" {
-		env = append(env, "pkgdir="+dirs.PkgDir)
-	}
-
-	if dirs.SrcDir != "" {
-		env = append(env, "srcdir="+dirs.SrcDir)
-	}
-
-	return env
 }
 
 func (s *ScriptFile) ParseBuildVars(ctx context.Context, info *distro.OSRelease, packages []string) (string, []*Package, error) {
@@ -128,7 +98,7 @@ func (s *ScriptFile) ParseBuildVars(ctx context.Context, info *distro.OSRelease,
 
 func (s *ScriptFile) createRunner(info *distro.OSRelease) (*interp.Runner, error) {
 	scriptDir := filepath.Dir(s.path)
-	env := createBuildEnvVars(info, types.Directories{ScriptDir: scriptDir})
+	env := common.CreateBuildEnvVars(info, types.Directories{})
 
 	return interp.New(
 		interp.Env(expand.ListEnviron(env...)),
@@ -224,4 +194,74 @@ func (a *ScriptFile) Path() string {
 
 func (a *ScriptFile) File() *syntax.File {
 	return a.file
+}
+
+func (a *ScriptFile) ExternalFiles(ctx context.Context, info *distro.OSRelease) ([]string, error) {
+	_, pkgs, err := a.ParseBuildVars(ctx, info, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var out []string
+	for _, pkg := range pkgs {
+		out = append(out,
+			getScriptFiles(pkg)...,
+		)
+		out = append(out,
+			getFireJailProfilePaths(pkg)...,
+		)
+		out = append(out,
+			getNonFreeMsgFilePaths(pkg)...,
+		)
+
+		sourceFiles, err := getLocalSourceFiles(pkg)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, sourceFiles...)
+	}
+
+	return out, nil
+}
+
+func getScriptFiles(pkg *Package) []string {
+	var files []string
+	for _, scripts := range pkg.Scripts.All() {
+		files = append(files, scripts.Files()...)
+	}
+	return files
+}
+
+func getFireJailProfilePaths(pkg *Package) []string {
+	var files []string
+	for _, profiles := range pkg.FireJailProfiles.All() {
+		for _, profilePath := range profiles {
+			files = append(files, profilePath)
+		}
+	}
+	return files
+}
+
+func getNonFreeMsgFilePaths(pkg *Package) []string {
+	var files []string
+	for _, msgfile := range pkg.NonFreeMsgFile.All() {
+		files = append(files, msgfile)
+	}
+	return files
+}
+
+func getLocalSourceFiles(pkg *Package) ([]string, error) {
+	var files []string
+	for _, sources := range pkg.Sources.All() {
+		for _, src := range sources {
+			u, err := url.Parse(src)
+			if err != nil {
+				return nil, err
+			}
+			if dl.IsLocalUrl(u) {
+				files = append(files, u.Path)
+			}
+		}
+	}
+	return files, nil
 }

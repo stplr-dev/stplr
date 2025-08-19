@@ -139,8 +139,8 @@ func TestDownloadFileWithCache(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			called := 0
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				switch {
-				case r.URL.Path == "/file":
+				switch r.URL.Path {
+				case "/file":
 					called += 1
 					w.WriteHeader(http.StatusOK)
 					w.Write([]byte("Hello, World!"))

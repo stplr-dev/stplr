@@ -17,52 +17,52 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 5.12.2\n"
 
-#: build.go:46
+#: build.go:47
 msgid "Build a local package"
 msgstr "Сборка локального пакета"
 
-#: build.go:52
+#: build.go:53
 msgid "Path to the build script"
 msgstr "Путь к скрипту сборки"
 
-#: build.go:57
+#: build.go:58
 msgid "Specify subpackage in script (for multi package script only)"
 msgstr "Укажите подпакет в скрипте (только для многопакетного скрипта)"
 
-#: build.go:62
+#: build.go:63
 msgid "Name of the package to build and its repo (example: default/go-bin)"
 msgstr "Имя пакета для сборки и его репозиторий (пример: default/go-bin)"
 
-#: build.go:67
+#: build.go:68
 msgid ""
 "Build package from scratch even if there's an already built package available"
 msgstr "Создайте пакет с нуля, даже если уже имеется готовый пакет"
 
-#: build.go:78
+#: build.go:79
 msgid "Error getting working directory"
 msgstr "Ошибка при получении рабочего каталога"
 
-#: build.go:123
+#: build.go:120
 msgid "Cannot get absolute script path"
 msgstr "Невозможно получить абсолютный путь к скрипту"
 
-#: build.go:149
+#: build.go:146
 msgid "Package not found"
 msgstr "Пакет не найден"
 
-#: build.go:162
+#: build.go:159
 msgid "Nothing to build"
 msgstr "Нечего собирать"
 
-#: build.go:211
+#: build.go:227
 msgid "Error building package"
 msgstr "Ошибка при сборке пакета"
 
-#: build.go:218
+#: build.go:234
 msgid "Error moving the package"
 msgstr "Ошибка при перемещении пакета"
 
-#: build.go:222
+#: build.go:238
 msgid "Done"
 msgstr "Сделано"
 
@@ -262,11 +262,11 @@ msgstr "n/q/Esc - Отклонить"
 msgid "Full license available at: %s"
 msgstr "Полный текст лицензии доступен по адресу: %s"
 
-#: internal/build/script_executor.go:156
+#: internal/build/script_executor.go:157
 msgid "Building package metadata"
 msgstr "Сборка метаданных пакета"
 
-#: internal/build/script_executor.go:327 internal/build/script_executor.go:381
+#: internal/build/script_executor.go:328 internal/build/script_executor.go:382
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
 

@@ -28,7 +28,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"slices"
 	"strconv"
 	"strings"
@@ -46,7 +45,6 @@ import (
 	"go.stplr.dev/stplr/internal/cpu"
 	"go.stplr.dev/stplr/internal/manager"
 	"go.stplr.dev/stplr/internal/overrides"
-	"go.stplr.dev/stplr/pkg/distro"
 	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
 )
@@ -191,37 +189,6 @@ func GetPkgFormat(mgr manager.Manager) string {
 		pkgFormat = format
 	}
 	return pkgFormat
-}
-
-// Функция createBuildEnvVars создает переменные окружения, которые будут установлены
-// в скрипте сборки при его выполнении.
-func createBuildEnvVars(info *distro.OSRelease, dirs types.Directories) []string {
-	env := os.Environ()
-
-	env = append(
-		env,
-		"DISTRO_NAME="+info.Name,
-		"DISTRO_PRETTY_NAME="+info.PrettyName,
-		"DISTRO_ID="+info.ID,
-		"DISTRO_VERSION_ID="+info.VersionID,
-		"DISTRO_ID_LIKE="+strings.Join(info.Like, " "),
-		"ARCH="+cpu.Arch(),
-		"NCPU="+strconv.Itoa(runtime.NumCPU()),
-	)
-
-	if dirs.ScriptDir != "" {
-		env = append(env, "scriptdir="+dirs.ScriptDir)
-	}
-
-	if dirs.PkgDir != "" {
-		env = append(env, "pkgdir="+dirs.PkgDir)
-	}
-
-	if dirs.SrcDir != "" {
-		env = append(env, "srcdir="+dirs.SrcDir)
-	}
-
-	return env
 }
 
 // Функция setScripts добавляет скрипты-перехватчики к метаданным пакета.

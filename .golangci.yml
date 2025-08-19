@@ -20,40 +20,56 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-run:
-  timeout: 5m
-
-linters-settings:
-  goimports:
-    local-prefixes: "go.stplr.dev/stplr"
-  gofmt:
-    simplify: true
-  gofumpt:
-    extra-rules: true
-
+version: "2"
 linters:
+  enable:
+    - gocritic
+#    - gosec
+#    - testpackage
+    - wrapcheck
+  # settings:
+  #   testpackage:
+  #     skip-regexp: internal_test\.go
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - wrapcheck
+        path-except: internal/repos/find.go
+      - linters:
+          - errcheck
+        path: _test\.go
+      - linters:
+          - staticcheck
+        text: 'SA1019: interp.ExecHandler'
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+issues:
+  fix: true
+
+formatters:
   enable:
     - gofmt
     - gofumpt
     - goimports
-    - gocritic
-    - govet
-    - staticcheck
-    - unused
-    - errcheck
-    - typecheck
-    - wrapcheck
-
-issues:
-  fix: true
-  exclude-rules:
-    - linters:
-        - wrapcheck
-      path-except: "internal/repos/find.go"
-    - path: _test\.go
-      linters:
-        - errcheck
-    # TODO: remove
-    - linters:
-        - staticcheck
-      text: "SA1019: interp.ExecHandler"
+  settings:
+    gofmt:
+      simplify: true
+    gofumpt:
+      extra-rules: true
+    goimports:
+      local-prefixes:
+        - go.stplr.dev/stplr
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

@@ -92,8 +92,8 @@ func GetApp() *cli.App {
 			// Internal commands
 			InternalBuildCmd(),
 			InternalInstallCmd(),
-			InternalMountCmd(),
 			InternalReposCmd(),
+			InternalCoplyFiles(),
 		},
 		Before: func(c *cli.Context) error {
 			if trimmed := strings.TrimSpace(c.String("pm-args")); trimmed != "" {

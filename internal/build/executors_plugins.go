@@ -31,7 +31,7 @@ import (
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-//go:generate go run ../../generators/plugin-generator InstallerExecutor ScriptExecutor ReposExecutor ScriptReader PackagesParser
+//go:generate go run ../../generators/plugin-generator InstallerExecutor ScriptExecutor ReposExecutor ScriptReader PackagesParser ScriptCopier
 
 // The Executors interfaces must use context.Context as the first parameter,
 // because the plugin-generator cannot generate code without it.
@@ -41,6 +41,11 @@ type InstallerExecutor interface {
 	Install(ctx context.Context, pkgs []string, opts *manager.Opts) error
 	Remove(ctx context.Context, pkgs []string, opts *manager.Opts) error
 	RemoveAlreadyInstalled(ctx context.Context, pkgs []string) ([]string, error)
+}
+
+type ScriptCopier interface {
+	Copy(ctx context.Context, f *staplerfile.ScriptFile, info *distro.OSRelease) (string, error)
+	CopyOut(ctx context.Context, from, dest string, uid, gid int) error
 }
 
 type ScriptExecutor interface {

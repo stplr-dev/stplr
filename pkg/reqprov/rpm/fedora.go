@@ -39,43 +39,51 @@ import (
 
 type Fedora struct{}
 
+const fedoraRpmDeps = "/usr/lib/rpm/rpmdeps"
+
 func (o *Fedora) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+	args := []string{
+		"--define=_use_internal_dependency_generator 1",
+		"--provides",
+	}
+	if len(skiplist) > 0 {
+		args = append(args, fmt.Sprintf(
+			"--define=__provides_exclude_from %s\"",
+			strings.Join(skiplist, "|"),
+		))
+	}
 	return rpmFindDependenciesFedora(
 		ctx,
 		pkgInfo,
 		dirs,
-		"/usr/lib/rpm/rpmdeps",
-		[]string{
-			"--define=_use_internal_dependency_generator 1",
-			"--provides",
-			fmt.Sprintf(
-				"--define=__provides_exclude_from %s\"",
-				strings.Join(skiplist, "|"),
-			),
-		},
+		fedoraRpmDeps,
+		args,
 		func(dep string) {
 			slog.Info(gotext.Get("Provided dependency found"), "dep", dep)
-			pkgInfo.Overridables.Provides = append(pkgInfo.Overridables.Provides, dep)
+			pkgInfo.Provides = append(pkgInfo.Provides, dep)
 		})
 }
 
 func (o *Fedora) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+	args := []string{
+		"--define=_use_internal_dependency_generator 1",
+		"--requires",
+	}
+	if len(skiplist) > 0 {
+		args = append(args, fmt.Sprintf(
+			"--define=__requires_exclude_from %s",
+			strings.Join(skiplist, "|"),
+		))
+	}
 	return rpmFindDependenciesFedora(
 		ctx,
 		pkgInfo,
 		dirs,
-		"/usr/lib/rpm/rpmdeps",
-		[]string{
-			"--define=_use_internal_dependency_generator 1",
-			"--requires",
-			fmt.Sprintf(
-				"--define=__requires_exclude_from %s",
-				strings.Join(skiplist, "|"),
-			),
-		},
+		fedoraRpmDeps,
+		args,
 		func(dep string) {
 			slog.Info(gotext.Get("Required dependency found"), "dep", dep)
-			pkgInfo.Overridables.Depends = append(pkgInfo.Overridables.Depends, dep)
+			pkgInfo.Depends = append(pkgInfo.Depends, dep)
 		})
 }
 

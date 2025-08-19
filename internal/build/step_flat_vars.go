@@ -45,7 +45,7 @@ func (s *flatVarsStep) Run(ctx context.Context, state *BuildState) error {
 	}
 	if len(sources) != len(checksums) {
 		slog.Error(gotext.Get("The checksums array must be the same length as sources"))
-		return errors.New("exit...")
+		return errors.New("exit")
 	}
 	sources, checksums = removeDuplicatesSources(sources, checksums)
 

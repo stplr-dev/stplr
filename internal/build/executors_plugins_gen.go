@@ -135,6 +135,26 @@ func (p *PackagesParserPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
 	return &PackagesParserRPCServer{Impl: p.Impl}, nil
 }
 
+type ScriptCopierPlugin struct {
+	Impl ScriptCopier
+}
+
+type ScriptCopierRPCServer struct {
+	Impl ScriptCopier
+}
+
+type ScriptCopierRPC struct {
+	client *rpc.Client
+}
+
+func (p *ScriptCopierPlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
+	return &ScriptCopierRPC{client: c}, nil
+}
+
+func (p *ScriptCopierPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
+	return &ScriptCopierRPCServer{Impl: p.Impl}, nil
+}
+
 type InstallerExecutorInstallLocalArgs struct {
 	Paths []string
 	Opts  *manager.Opts
@@ -480,5 +500,70 @@ func (s *PackagesParserRPCServer) ParsePackages(args *PackagesParserParsePackage
 		Result0: result0,
 		Result1: result1,
 	}
+	return nil
+}
+
+type ScriptCopierCopyArgs struct {
+	F    *staplerfile.ScriptFile
+	Info *distro.OSRelease
+}
+
+type ScriptCopierCopyResp struct {
+	Result0 string
+}
+
+func (s *ScriptCopierRPC) Copy(ctx context.Context, f *staplerfile.ScriptFile, info *distro.OSRelease) (string, error) {
+	var resp *ScriptCopierCopyResp
+	err := s.client.Call("Plugin.Copy", &ScriptCopierCopyArgs{
+		F:    f,
+		Info: info,
+	}, &resp)
+	if err != nil {
+		return "", err
+	}
+	return resp.Result0, nil
+}
+
+func (s *ScriptCopierRPCServer) Copy(args *ScriptCopierCopyArgs, resp *ScriptCopierCopyResp) error {
+	result0, err := s.Impl.Copy(context.Background(), args.F, args.Info)
+	if err != nil {
+		return err
+	}
+	*resp = ScriptCopierCopyResp{
+		Result0: result0,
+	}
+	return nil
+}
+
+type ScriptCopierCopyOutArgs struct {
+	From string
+	Dest string
+	Uid  int
+	Gid  int
+}
+
+type ScriptCopierCopyOutResp struct {
+}
+
+func (s *ScriptCopierRPC) CopyOut(ctx context.Context, from string, dest string, uid int, gid int) error {
+	var resp *ScriptCopierCopyOutResp
+	err := s.client.Call("Plugin.CopyOut", &ScriptCopierCopyOutArgs{
+		From: from,
+		Dest: dest,
+		Uid:  uid,
+		Gid:  gid,
+	}, &resp)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *ScriptCopierRPCServer) CopyOut(args *ScriptCopierCopyOutArgs, resp *ScriptCopierCopyOutResp) error {
+	err := s.Impl.CopyOut(context.Background(), args.From, args.Dest, args.Uid, args.Gid)
+	if err != nil {
+		return err
+	}
+	*resp = ScriptCopierCopyOutResp{}
 	return nil
 }

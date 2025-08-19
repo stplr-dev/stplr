@@ -41,6 +41,7 @@ var pluginMap = map[string]plugin.Plugin{
 	"script-executor": &ScriptExecutorPlugin{},
 	"installer":       &InstallerExecutorPlugin{},
 	"repos":           &ReposExecutorPlugin{},
+	"script-copier":   &ScriptCopierPlugin{},
 }
 
 var HandshakeConfig = plugin.HandshakeConfig{
@@ -89,6 +90,10 @@ func GetSafeScriptExecutor() (ScriptExecutor, func(), error) {
 
 func GetSafeReposExecutor() (ReposExecutor, func(), error) {
 	return getSafeExecutor[ReposExecutor]("_internal-repos", "repos")
+}
+
+func GetSafeScriptCopier() (ScriptCopier, func(), error) {
+	return getSafeExecutor[ScriptCopier]("_internal-script-copier", "script-copier")
 }
 
 func getSafeExecutor[T any](subCommand, pluginName string) (T, func(), error) {

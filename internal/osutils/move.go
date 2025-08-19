@@ -114,3 +114,11 @@ func copyFile(sourcePath, destPath string, sourceInfo os.FileInfo) error {
 
 	return nil
 }
+
+func CopyFile(sourcePath, destPath string) error {
+	sourceInfo, err := os.Stat(sourcePath)
+	if err != nil {
+		return err
+	}
+	return copyFile(sourcePath, destPath, sourceInfo)
+}

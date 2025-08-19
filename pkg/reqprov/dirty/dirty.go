@@ -190,7 +190,7 @@ func formatDependencyString(f *elf.File, dep string) (string, error) {
 		suffix64bit = "()(64bit)"
 	)
 
-	switch f.FileHeader.Class {
+	switch f.Class {
 	case elf.ELFCLASS32:
 		return dep + suffix32bit, nil
 	case elf.ELFCLASS64:

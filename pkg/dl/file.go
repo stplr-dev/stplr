@@ -54,6 +54,8 @@ func (FileDownloader) MatchURL(string) bool {
 	return true
 }
 
+func IsLocalUrl(u *url.URL) bool { return u.Scheme == "local" }
+
 // Download загружает файл с использованием HTTP. Если файл
 // сжат в поддерживаемом формате, он будет распакован
 func (FileDownloader) Download(ctx context.Context, opts Options) (Type, string, error) {
@@ -80,8 +82,7 @@ func (FileDownloader) Download(ctx context.Context, opts Options) (Type, string,
 	var r io.ReadCloser
 	var size int64
 
-	// Проверка схемы URL на "local"
-	if u.Scheme == "local" {
+	if IsLocalUrl(u) {
 		localFl, err := os.Open(filepath.Join(opts.LocalDir, u.Path))
 		if err != nil {
 			return 0, "", err

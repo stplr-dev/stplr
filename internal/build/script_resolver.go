@@ -28,7 +28,6 @@ import (
 	"path/filepath"
 
 	"go.stplr.dev/stplr/pkg/staplerfile"
-	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
 )
 
 type ScriptResolverExecutor interface {
@@ -50,7 +49,7 @@ type ScriptInfo struct {
 
 func (s *ScriptResolver) ResolveScript(
 	ctx context.Context,
-	pkg *alrsh.Package,
+	pkg *staplerfile.Package,
 ) *ScriptInfo {
 	var repository, script string
 

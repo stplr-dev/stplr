@@ -330,7 +330,7 @@ func (rs *Repos) updatePkg(ctx context.Context, repo types.Repo, runner *interp.
 }
 
 func (rs *Repos) processRepoChangesRunner(repoDir, scriptDir string) (*interp.Runner, error) {
-	env := append(os.Environ(), "scriptdir="+scriptDir)
+	env := os.Environ()
 	return interp.New(
 		interp.Env(expand.ListEnviron(env...)),
 		interp.ExecHandler(handlers.NopExec),

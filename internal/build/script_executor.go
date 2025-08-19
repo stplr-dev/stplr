@@ -44,6 +44,7 @@ import (
 	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 
+	"go.stplr.dev/stplr/internal/build/common"
 	"go.stplr.dev/stplr/internal/shutils/decoder"
 	"go.stplr.dev/stplr/internal/shutils/handlers"
 	"go.stplr.dev/stplr/internal/shutils/helpers"
@@ -107,7 +108,7 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 	if err != nil {
 		return nil, err
 	}
-	env := createBuildEnvVars(input.OSRelease(), dirs)
+	env := common.CreateBuildEnvVars(input.OSRelease(), dirs)
 
 	fakeroot := handlers.FakerootExecHandler(2 * time.Second)
 	runner, err := interp.New(
@@ -233,7 +234,7 @@ func buildPkgMetadata(
 
 	if pkgFormat == "apk" {
 		// Alpine отказывается устанавливать пакеты, которые предоставляют сами себя, поэтому удаляем такие элементы
-		pkgInfo.Overridables.Provides = slices.DeleteFunc(pkgInfo.Overridables.Provides, func(s string) bool {
+		pkgInfo.Provides = slices.DeleteFunc(pkgInfo.Provides, func(s string) bool {
 			return s == pkgInfo.Name
 		})
 	}
@@ -274,7 +275,7 @@ func buildPkgMetadata(
 		pkgInfo.Depends = append(pkgInfo.Depends, "firejail")
 	}
 
-	pkgInfo.Overridables.Contents = contents
+	pkgInfo.Contents = contents
 
 	var f *reqprov.ReqProvService
 	initFinder := func() error {
