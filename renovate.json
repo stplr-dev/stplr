@@ -2,9 +2,11 @@
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
         "config:recommended", 
-        "security:only-security-updates",
         "security:openssf-scorecard",
-        ":automergeMinor",
-        ":automergePatch"
-    ]
+        "schedule:nonOfficeHours"
+    ],
+    "vulnerabilityAlerts": {
+        "labels": ["Kind/Security"],
+        "automerge": true
+    }
 }
