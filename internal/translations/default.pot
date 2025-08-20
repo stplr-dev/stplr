@@ -130,14 +130,6 @@ msgstr ""
 msgid "Unable to create new cache directory"
 msgstr ""
 
-#: gen.go:39
-msgid "Generate a Staplerfile from a template"
-msgstr ""
-
-#: gen.go:44
-msgid "Generate a Staplerfile for a pip module"
-msgstr ""
-
 #: helper.go:47
 msgid "List all the available helper commands"
 msgstr ""
@@ -297,6 +289,14 @@ msgstr ""
 msgid "Unable to detect a supported package manager on the system"
 msgstr ""
 
+#: internal/cliutils/localize.go:32
+msgid "Show help"
+msgstr ""
+
+#: internal/cliutils/localize.go:35
+msgid "Shows a list of commands or help for one command"
+msgstr ""
+
 #: internal/cliutils/prompt.go:66
 msgid "Would you like to view the build script for %s"
 msgstr ""
@@ -324,10 +324,12 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: internal/cliutils/template.go:80 internal/cliutils/template.go:99
+#: internal/cliutils/template.go:126
 msgid "NAME"
 msgstr ""
 
 #: internal/cliutils/template.go:80 internal/cliutils/template.go:100
+#: internal/cliutils/template.go:127
 msgid "USAGE"
 msgstr ""
 
@@ -335,15 +337,17 @@ msgstr ""
 msgid "global options"
 msgstr ""
 
-#: internal/cliutils/template.go:80
+#: internal/cliutils/template.go:80 internal/cliutils/template.go:128
 msgid "command"
 msgstr ""
 
 #: internal/cliutils/template.go:80 internal/cliutils/template.go:101
+#: internal/cliutils/template.go:129
 msgid "command options"
 msgstr ""
 
 #: internal/cliutils/template.go:80 internal/cliutils/template.go:102
+#: internal/cliutils/template.go:130
 msgid "arguments"
 msgstr ""
 
@@ -352,6 +356,7 @@ msgid "VERSION"
 msgstr ""
 
 #: internal/cliutils/template.go:80 internal/cliutils/template.go:104
+#: internal/cliutils/template.go:131
 msgid "DESCRIPTION"
 msgstr ""
 
@@ -359,7 +364,7 @@ msgstr ""
 msgid "AUTHOR"
 msgstr ""
 
-#: internal/cliutils/template.go:80
+#: internal/cliutils/template.go:80 internal/cliutils/template.go:132
 msgid "COMMANDS"
 msgstr ""
 
@@ -376,6 +381,7 @@ msgid "CATEGORY"
 msgstr ""
 
 #: internal/cliutils/template.go:105 internal/cliutils/template.go:106
+#: internal/cliutils/template.go:133 internal/cliutils/template.go:134
 msgid "OPTIONS"
 msgstr ""
 
@@ -468,6 +474,11 @@ msgstr ""
 msgid "Print the current Stapler version and exit"
 msgstr ""
 
+#: main.go:61
+msgid ""
+"Command-line interface for Stapler, a universal Linux package build system"
+msgstr ""
+
 #: main.go:66
 msgid "Arguments to be passed on to the package manager"
 msgstr ""
@@ -477,10 +488,6 @@ msgid "Enable interactive questions and prompts"
 msgstr ""
 
 #: main.go:153
-msgid "Show help"
-msgstr ""
-
-#: main.go:157
 msgid "Error while running app"
 msgstr ""
 

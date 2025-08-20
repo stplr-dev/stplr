@@ -26,7 +26,7 @@ package dlcache_test
 
 import (
 	"context"
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
 	"io"
 	"os"
@@ -79,7 +79,7 @@ func TestNew(t *testing.T) {
 		t.Errorf("Expected no error, got %s", err)
 	}
 
-	exp := filepath.Join(dc.BasePath(ctx), sha1sum(id))
+	exp := filepath.Join(dc.BasePath(ctx), sha256sum(id))
 	if dir != exp {
 		t.Errorf("Expected %s, got %s", exp, dir)
 	}
@@ -102,8 +102,8 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func sha1sum(id string) string {
-	h := sha1.New()
+func sha256sum(id string) string {
+	h := sha256.New()
 	_, _ = io.WriteString(h, id)
 	return hex.EncodeToString(h.Sum(nil))
 }

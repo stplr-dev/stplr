@@ -5,17 +5,16 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2025-08-06 07:15+0000\n"
-"Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
-"Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
-"stplr/ru/>\n"
+"PO-Revision-Date: 2025-08-20 10:49+0300\n"
+"Last-Translator: Maxim Slipenko <maks1ms@alt-gnome.ru>\n"
+"Language-Team: Russian\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.12.2\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Gtranslator 48.0\n"
 
 #: build.go:47
 msgid "Build a local package"
@@ -137,14 +136,6 @@ msgstr "Восстановление кэша"
 #: fix.go:95
 msgid "Unable to create new cache directory"
 msgstr "Не удалось создать новый каталог кэша"
-
-#: gen.go:39
-msgid "Generate a Staplerfile from a template"
-msgstr "Генерация Staplerfile из шаблона"
-
-#: gen.go:44
-msgid "Generate a Staplerfile for a pip module"
-msgstr "Генерация Staplerfile для модуля pip"
 
 #: helper.go:47
 msgid "List all the available helper commands"
@@ -309,6 +300,14 @@ msgstr "Ошибка при извлечении репозиториев"
 msgid "Unable to detect a supported package manager on the system"
 msgstr "Не удалось обнаружить поддерживаемый менеджер пакетов в системе"
 
+#: internal/cliutils/localize.go:32
+msgid "Show help"
+msgstr "Показать справку"
+
+#: internal/cliutils/localize.go:35
+msgid "Shows a list of commands or help for one command"
+msgstr "Показывает список команд или справку по одной команде"
+
 #: internal/cliutils/prompt.go:66
 msgid "Would you like to view the build script for %s"
 msgstr "Показать скрипт для пакета %s"
@@ -337,10 +336,12 @@ msgstr[1] "Выберите, какие дополнительные пакет�
 msgstr[2] "Выберите, какие дополнительные пакеты следует установить"
 
 #: internal/cliutils/template.go:80 internal/cliutils/template.go:99
+#: internal/cliutils/template.go:126
 msgid "NAME"
 msgstr "НАЗВАНИЕ"
 
 #: internal/cliutils/template.go:80 internal/cliutils/template.go:100
+#: internal/cliutils/template.go:127
 msgid "USAGE"
 msgstr "ИСПОЛЬЗОВАНИЕ"
 
@@ -348,15 +349,17 @@ msgstr "ИСПОЛЬЗОВАНИЕ"
 msgid "global options"
 msgstr "глобальные опции"
 
-#: internal/cliutils/template.go:80
+#: internal/cliutils/template.go:80 internal/cliutils/template.go:128
 msgid "command"
 msgstr "команда"
 
 #: internal/cliutils/template.go:80 internal/cliutils/template.go:101
+#: internal/cliutils/template.go:129
 msgid "command options"
 msgstr "опции команды"
 
 #: internal/cliutils/template.go:80 internal/cliutils/template.go:102
+#: internal/cliutils/template.go:130
 msgid "arguments"
 msgstr "аргументы"
 
@@ -365,6 +368,7 @@ msgid "VERSION"
 msgstr "ВЕРСИЯ"
 
 #: internal/cliutils/template.go:80 internal/cliutils/template.go:104
+#: internal/cliutils/template.go:131
 msgid "DESCRIPTION"
 msgstr "ОПИСАНИЕ"
 
@@ -372,7 +376,7 @@ msgstr "ОПИСАНИЕ"
 msgid "AUTHOR"
 msgstr "АВТОР"
 
-#: internal/cliutils/template.go:80
+#: internal/cliutils/template.go:80 internal/cliutils/template.go:132
 msgid "COMMANDS"
 msgstr "КОМАНДЫ"
 
@@ -389,6 +393,7 @@ msgid "CATEGORY"
 msgstr "КАТЕГОРИЯ"
 
 #: internal/cliutils/template.go:105 internal/cliutils/template.go:106
+#: internal/cliutils/template.go:133 internal/cliutils/template.go:134
 msgid "OPTIONS"
 msgstr "ПАРАМЕТРЫ"
 
@@ -397,8 +402,8 @@ msgid ""
 "This command is deprecated and would be removed in the future, use \"%s\" "
 "instead!"
 msgstr ""
-"Эта команда устарела и будет удалена в будущем, используйте вместо нее \"%s"
-"\"!"
+"Эта команда устарела и будет удалена в будущем, используйте вместо нее "
+"\"%s\"!"
 
 #: internal/db/db.go:82
 msgid "Database version mismatch; resetting"
@@ -487,6 +492,13 @@ msgstr "Не удалось разобрать релиз"
 msgid "Print the current Stapler version and exit"
 msgstr "Показать текущую версию Stapler и выйти"
 
+#: main.go:61
+msgid ""
+"Command-line interface for Stapler, a universal Linux package build system"
+msgstr ""
+"Интерфейс командной строки для Stapler, универсальной системы сборки пакетов "
+"Linux"
+
 #: main.go:66
 msgid "Arguments to be passed on to the package manager"
 msgstr "Аргументы, которые будут переданы менеджеру пакетов"
@@ -496,10 +508,6 @@ msgid "Enable interactive questions and prompts"
 msgstr "Включение интерактивных вопросов и запросов"
 
 #: main.go:153
-msgid "Show help"
-msgstr "Показать справку"
-
-#: main.go:157
 msgid "Error while running app"
 msgstr "Ошибка при запуске приложения"
 
@@ -684,6 +692,12 @@ msgstr "Ошибка при проверке обновлений"
 #: upgrade.go:142
 msgid "There is nothing to do."
 msgstr "Здесь нечего делать."
+
+#~ msgid "Generate a Staplerfile from a template"
+#~ msgstr "Генерация Staplerfile из шаблона"
+
+#~ msgid "Generate a Staplerfile for a pip module"
+#~ msgstr "Генерация Staplerfile для модуля pip"
 
 #~ msgid "Executing prepare()"
 #~ msgstr "Выполнение prepare()"

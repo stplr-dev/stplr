@@ -24,7 +24,7 @@ version: "2"
 linters:
   enable:
     - gocritic
-#    - gosec
+    - gosec
 #    - testpackage
     - wrapcheck
   # settings:
@@ -43,6 +43,7 @@ linters:
         path-except: internal/repos/find.go
       - linters:
           - errcheck
+          - gosec
         path: _test\.go
       - linters:
           - staticcheck

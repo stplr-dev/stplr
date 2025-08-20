@@ -28,8 +28,8 @@ package dl
 
 import (
 	"context"
-	"crypto/md5"
-	"crypto/sha1"
+	"crypto/md5"  //gosec:disable G501 -- Allowed hash for files
+	"crypto/sha1" //gosec:disable G505 -- Allowed hash for files
 	"crypto/sha256"
 	"crypto/sha512"
 	"errors"
@@ -116,9 +116,9 @@ func (opts Options) NewHash() (hash.Hash, error) {
 	case "sha384":
 		return sha512.New384(), nil
 	case "sha1":
-		return sha1.New(), nil
+		return sha1.New(), nil //gosec:disable G401 -- Allowed hash for files
 	case "md5":
-		return md5.New(), nil
+		return md5.New(), nil //gosec:disable G401 -- Allowed hash for files
 	case "blake2s-128":
 		return blake2s.New256(nil)
 	case "blake2s-256":

@@ -20,9 +20,10 @@ package build
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"log/slog"
-	"math/rand/v2"
 	"os"
 	"path/filepath"
 	"strings"
@@ -109,8 +110,19 @@ func (e *LocalScriptCopierExecutor) copy(srcfile, destfile string) error {
 	return nil
 }
 
+func generateID() (string, error) {
+	b := make([]byte, 4)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
+}
+
 func (e *LocalScriptCopierExecutor) tmpdir() (string, error) {
-	id := fmt.Sprintf("%08x", rand.Uint32())
+	id, err := generateID()
+	if err != nil {
+		return "", fmt.Errorf("failed to generate id: %w", err)
+	}
 	build := filepath.Join(constants.SystemCachePath, "build")
 	tmp := filepath.Join(build, id)
 	if err := os.MkdirAll(tmp, 0o755); err != nil {

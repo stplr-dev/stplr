@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// This file was originally part of the project "ALR - Any Linux Repository"
-// created by the ALR Authors.
-// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
-//
-// Copyright (C) 2025 The ALR Authors
+// Stapler
 // Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
@@ -20,19 +16,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package dlcache
+package cliutils
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"io"
+	"github.com/leonelquinteros/gotext"
+	"github.com/urfave/cli/v2"
 )
 
-func hashID(id string) (string, error) {
-	h := sha256.New()
-	_, err := io.WriteString(h, id)
-	if err != nil {
-		return "", err
+// Make the application more internationalized
+func Localize(app *cli.App) {
+	app.Setup()
+	cli.AppHelpTemplate = GetAppCliTemplate()
+	cli.CommandHelpTemplate = GetCommandHelpTemplate()
+	cli.SubcommandHelpTemplate = GetSubcommandHelpTemplate()
+	cli.HelpFlag.(*cli.BoolFlag).Usage = gotext.Get("Show help")
+	for _, cmd := range app.Commands {
+		if cmd.Name == "help" {
+			cmd.Usage = gotext.Get("Shows a list of commands or help for one command")
+		}
 	}
-	return hex.EncodeToString(h.Sum(nil)), nil
 }

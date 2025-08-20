@@ -219,6 +219,9 @@ func RootNeededAction(f cli.ActionFunc) cli.ActionFunc {
 				return cliutils.FormatCliExit("failed to get executable path", err)
 			}
 			args := append([]string{executable}, os.Args[1:]...)
+
+			// Looks like no risk of injection
+			//gosec:disable G204
 			cmd := exec.Command(deps.Cfg.RootCmd(), args...)
 			cmd.Stdin = os.Stdin
 			cmd.Stdout = os.Stdout

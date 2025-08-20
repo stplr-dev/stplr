@@ -58,7 +58,7 @@ func VersionCmd() *cli.Command {
 func GetApp() *cli.App {
 	return &cli.App{
 		Name:  "stplr",
-		Usage: "Command-line interface for Stapler, a universal Linux package build system",
+		Usage: gotext.Get("Command-line interface for Stapler, a universal Linux package build system"),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "pm-args",
@@ -83,7 +83,6 @@ func GetApp() *cli.App {
 			LegacyRemoveRepoCmd(),
 			RefreshCmd(),
 			FixCmd(),
-			GenCmd(),
 			HelperCmd(),
 			VersionCmd(),
 			SearchCmd(),
@@ -147,10 +146,7 @@ func main() {
 	ctx, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	// Make the application more internationalized
-	cli.AppHelpTemplate = cliutils.GetAppCliTemplate()
-	cli.CommandHelpTemplate = cliutils.GetCommandHelpTemplate()
-	cli.HelpFlag.(*cli.BoolFlag).Usage = gotext.Get("Show help")
+	cliutils.Localize(app)
 
 	err = app.RunContext(ctx, os.Args)
 	if err != nil {

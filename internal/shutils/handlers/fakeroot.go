@@ -98,8 +98,12 @@ func FakerootExecHandler(killTimeout time.Duration) interp.ExecHandlerFunc {
 					if ctx.Err() != nil {
 						return ctx.Err()
 					}
-					return interp.NewExitStatus(uint8(128 + status.Signal()))
+					sig := status.Signal()
+					// Clamp to 0–255 to avoid integer overflow (POSIX exit codes are 1 byte)
+					//gosec:disable G115
+					return interp.NewExitStatus(uint8((128 + int(sig)) & 0xFF))
 				}
+				//gosec:disable G115
 				return interp.NewExitStatus(uint8(status.ExitStatus()))
 			}
 			return interp.NewExitStatus(1)
