@@ -19,7 +19,7 @@ require (
 	github.com/goreleaser/nfpm/v2 v2.41.0
 	github.com/hashicorp/go-hclog v0.14.1
 	github.com/hashicorp/go-plugin v1.6.3
-	github.com/jeandeaual/go-locale v0.0.0-20241217141322-fcc2cadd6f08
+	github.com/jeandeaual/go-locale v0.0.0-20250612000132-0ef82f21eade
 	github.com/knadh/koanf/parsers/toml/v2 v2.2.0
 	github.com/knadh/koanf/providers/confmap v1.0.0
 	github.com/knadh/koanf/providers/env v1.1.0
