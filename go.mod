@@ -36,7 +36,7 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	go.alt-gnome.ru/capytest v0.0.3-0.20250706082755-f20413e052f9
 	go.alt-gnome.ru/capytest/providers/podman v0.0.3-0.20250706082755-f20413e052f9
-	go.elara.ws/vercmp v0.0.0-20230622214216-0b2b067575c4
+	go.elara.ws/vercmp v0.0.0-20231003203944-671892886053
 	golang.org/x/crypto v0.41.0
 	golang.org/x/exp v0.0.0-20250819193227-8b4c13bb791b
 	golang.org/x/sys v0.35.0
