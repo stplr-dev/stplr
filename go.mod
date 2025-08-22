@@ -37,10 +37,10 @@ require (
 	go.alt-gnome.ru/capytest v0.0.3-0.20250706082755-f20413e052f9
 	go.alt-gnome.ru/capytest/providers/podman v0.0.3-0.20250706082755-f20413e052f9
 	go.elara.ws/vercmp v0.0.0-20230622214216-0b2b067575c4
-	golang.org/x/crypto v0.36.0
-	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
-	golang.org/x/sys v0.33.0
-	golang.org/x/text v0.23.0
+	golang.org/x/crypto v0.41.0
+	golang.org/x/exp v0.0.0-20250819193227-8b4c13bb791b
+	golang.org/x/sys v0.35.0
+	golang.org/x/text v0.28.0
 	modernc.org/sqlite v1.25.0
 	mvdan.cc/sh/v3 v3.10.0
 	xorm.io/xorm v1.3.9
@@ -148,11 +148,11 @@ require (
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	gitlab.com/digitalxero/go-conventional-commit v1.0.7 // indirect
 	go4.org v0.0.0-20200411211856-f5505b9728dd // indirect
-	golang.org/x/mod v0.19.0 // indirect
-	golang.org/x/net v0.38.0 // indirect
-	golang.org/x/sync v0.15.0 // indirect
-	golang.org/x/term v0.30.0 // indirect
-	golang.org/x/tools v0.23.0 // indirect
+	golang.org/x/mod v0.27.0 // indirect
+	golang.org/x/net v0.43.0 // indirect
+	golang.org/x/sync v0.16.0 // indirect
+	golang.org/x/term v0.34.0 // indirect
+	golang.org/x/tools v0.36.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241223144023-3abc09e42ca8 // indirect
 	google.golang.org/grpc v1.67.3 // indirect
 	google.golang.org/protobuf v1.36.1 // indirect
