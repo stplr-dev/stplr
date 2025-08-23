@@ -43,7 +43,7 @@ require (
 	golang.org/x/text v0.28.0
 	modernc.org/sqlite v1.25.0
 	mvdan.cc/sh/v3 v3.10.0
-	xorm.io/xorm v1.3.9
+	xorm.io/xorm v1.3.10
 )
 
 require (
