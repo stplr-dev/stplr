@@ -42,12 +42,12 @@ var DefaultOpts = &Opts{
 
 var managers = []Manager{
 	NewPacman(),
+	NewAPTRpm(),
 	NewAPT(),
 	NewDNF(),
 	NewYUM(),
 	NewAPK(),
 	NewZypper(),
-	NewAPTRpm(),
 }
 
 // Register registers a new package manager

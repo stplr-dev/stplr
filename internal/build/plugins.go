@@ -55,7 +55,7 @@ func setCommonCmdEnv(cmd *exec.Cmd) {
 		fmt.Sprintf("HOME=%s", constants.SystemCachePath),
 		fmt.Sprintf("LOGNAME=%s", constants.BuilderUser),
 		fmt.Sprintf("USER=%s", constants.BuilderUser),
-		"PATH=/usr/bin:/bin:/usr/local/bin",
+		"PATH=/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin",
 	}
 	for _, env := range os.Environ() {
 		if strings.HasPrefix(env, "LANG=") ||

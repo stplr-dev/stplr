@@ -42,6 +42,10 @@ var ALL_SYSTEMS []string = []string{
 	// "redos-8",
 }
 
+var ALT_SISYPHUS = []string{
+	"alt-sisyphus",
+}
+
 var AUTOREQ_AUTOPROV_SYSTEMS []string = []string{
 	// "alt-sisyphus",
 	"fedora-41",
