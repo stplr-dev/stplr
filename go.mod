@@ -5,7 +5,7 @@ go 1.24.4
 require (
 	gitea.plemya-x.ru/Plemya-x/fakeroot v0.0.2-0.20250408104831-427aaa7713c3
 	github.com/AlecAivazis/survey/v2 v2.3.7
-	github.com/PuerkitoBio/purell v1.2.0
+	github.com/PuerkitoBio/purell v1.2.1
 	github.com/alecthomas/chroma/v2 v2.20.0
 	github.com/bmatcuk/doublestar/v4 v4.9.1
 	github.com/charmbracelet/bubbles v0.20.0
