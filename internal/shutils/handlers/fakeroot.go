@@ -35,13 +35,14 @@ import (
 	"time"
 
 	"gitea.plemya-x.ru/Plemya-x/fakeroot"
+	"golang.org/x/sys/unix"
 	"mvdan.cc/sh/v3/expand"
 	"mvdan.cc/sh/v3/interp"
 )
 
 // FakerootExecHandler was extracted from github.com/mvdan/sh/interp/handler.go
 // and modified to run commands in a fakeroot environent.
-func FakerootExecHandler(killTimeout time.Duration) interp.ExecHandlerFunc {
+func FakerootExecHandler(killTimeout time.Duration, srcDir, pkgDir, tmpDir string) interp.ExecHandlerFunc {
 	return func(ctx context.Context, args []string) error {
 		hc := interp.HandlerCtx(ctx)
 		path, err := interp.LookPathDir(hc.Dir, hc.Env, args[0])
@@ -49,9 +50,19 @@ func FakerootExecHandler(killTimeout time.Duration) interp.ExecHandlerFunc {
 			fmt.Fprintln(hc.Stderr, err)
 			return interp.NewExitStatus(127)
 		}
+
+		selfPath, err := os.Executable()
+		if err != nil {
+			return err
+		}
+
+		childArgs := []string{selfPath, "_internal-sandbox", srcDir, pkgDir, tmpDir}
+		childArgs = append(childArgs, path)
+		childArgs = append(childArgs, args[1:]...)
+
 		cmd := &exec.Cmd{
-			Path:   path,
-			Args:   args,
+			Path:   selfPath,
+			Args:   childArgs,
 			Env:    execEnv(hc.Env),
 			Dir:    hc.Dir,
 			Stdin:  hc.Stdin,
@@ -63,6 +74,8 @@ func FakerootExecHandler(killTimeout time.Duration) interp.ExecHandlerFunc {
 		if err != nil {
 			return err
 		}
+
+		cmd.SysProcAttr.Cloneflags |= unix.CLONE_NEWNS
 
 		err = cmd.Start()
 		if err == nil {

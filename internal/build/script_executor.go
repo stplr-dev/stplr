@@ -108,12 +108,39 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 	if err != nil {
 		return nil, err
 	}
+
+	tmpdir, err := os.MkdirTemp("", "stplr-tmpfs")
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err := os.RemoveAll(tmpdir); err != nil {
+			slog.Error(gotext.Get("Failed to remove temporary directory"), "path", tmpdir, "error", err)
+		}
+	}()
+
 	env := common.CreateBuildEnvVars(input.OSRelease(), dirs)
 
-	fakeroot := handlers.FakerootExecHandler(2 * time.Second)
+	options := []handlers.Option{
+		handlers.WithFilter(
+			handlers.RestrictSandbox(dirs.SrcDir, dirs.PkgDir),
+		),
+		handlers.WithPathRedirect("/tmp", tmpdir),
+	}
+
+	fakeroot := handlers.FakerootExecHandler(
+		2*time.Second,
+		dirs.SrcDir,
+		dirs.PkgDir,
+		tmpdir,
+	)
+
 	runner, err := interp.New(
 		interp.Env(expand.ListEnviron(env...)),       // Устанавливаем окружение
 		interp.StdIO(os.Stdin, os.Stderr, os.Stderr), // Устанавливаем стандартный ввод-вывод
+		interp.ReadDirHandler2(handlers.RestrictedReadDir(options...)),
+		interp.OpenHandler(handlers.RestrictedOpen(options...)),
+		interp.StatHandler(handlers.RestrictedStat(options...)),
 		interp.ExecHandlers(func(next interp.ExecHandlerFunc) interp.ExecHandlerFunc {
 			return helpers.Helpers.ExecHandler(fakeroot)
 		}), // Обрабатываем выполнение через fakeroot
@@ -323,7 +350,17 @@ func buildPkgMetadata(
 }
 
 func execFunc(ctx context.Context, d *decoder.Decoder, name string, dirs types.Directories) error {
-	fn, ok := d.GetFunc(name)
+	fn, ok := d.GetFuncP(name, func(ctx context.Context, r *interp.Runner) error {
+		// It should be done via interp.RunnerOption,
+		// but due to the issues below, it cannot be done.
+		// - https://github.com/mvdan/sh/issues/962
+		// - https://github.com/mvdan/sh/issues/1125
+		script, err := syntax.NewParser().Parse(strings.NewReader("cd $srcdir"), "")
+		if err != nil {
+			return err
+		}
+		return r.Run(ctx, script)
+	})
 	if ok {
 		slog.Info(gotext.Get("Executing %s()", name))
 		err := fn(ctx, interp.Dir(dirs.SrcDir))

@@ -23,6 +23,7 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"syscall"
@@ -38,6 +39,7 @@ import (
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/logger"
 	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/internal/sandbox"
 	"go.stplr.dev/stplr/internal/utils"
 )
 
@@ -189,5 +191,34 @@ func InternalCoplyFiles() *cli.Command {
 
 			return nil
 		}),
+	}
+}
+
+func InternalSandbox() *cli.Command {
+	return &cli.Command{
+		Name:     "_internal-sandbox",
+		HideHelp: true,
+		Hidden:   true,
+		Action: func(c *cli.Context) error {
+			if c.NArg() < 4 {
+				return fmt.Errorf("not enough arguments: need srcDir, pkgDir, command")
+			}
+
+			cmdArgs := c.Args().Slice()[3:]
+			if len(cmdArgs) == 0 {
+				return fmt.Errorf("no command specified")
+			}
+
+			if err := sandbox.Setup(c.Args().Get(0), c.Args().Get(1), c.Args().Get(2)); err != nil {
+				return fmt.Errorf("failed to setup sandbox: %w", err)
+			}
+
+			if err := utils.NoNewPrivs(); err != nil {
+				return fmt.Errorf("failed to drop privileges: %w", err)
+			}
+
+			//gosec:disable G204 -- Expected
+			return syscall.Exec(cmdArgs[0], cmdArgs, os.Environ())
+		},
 	}
 }

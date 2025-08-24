@@ -96,17 +96,39 @@ func GetSafeScriptCopier() (ScriptCopier, func(), error) {
 	return getSafeExecutor[ScriptCopier]("_internal-script-copier", "script-copier")
 }
 
+func PrepareSocketDirPath() error {
+	err := os.MkdirAll(constants.SocketDirPath, 0o777)
+	if err != nil {
+		return err
+	}
+
+	err = os.Chmod(constants.SocketDirPath, 0o777|os.ModeSticky)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func getSafeExecutor[T any](subCommand, pluginName string) (T, func(), error) {
 	var err error
+	var zero T
 
 	executable, err := os.Executable()
 	if err != nil {
-		var zero T
 		return zero, nil, err
+	}
+
+	if os.Getuid() == 0 {
+		if err := PrepareSocketDirPath(); err != nil {
+			return zero, nil, fmt.Errorf("failed to prepare socket dir: %w", err)
+		}
 	}
 
 	cmd := exec.Command(executable, subCommand)
 	setCommonCmdEnv(cmd)
+	// HACK
+	cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", plugin.EnvUnixSocketDir, constants.SocketDirPath))
 
 	client := plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig: HandshakeConfig,

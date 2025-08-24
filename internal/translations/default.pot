@@ -244,11 +244,15 @@ msgstr ""
 msgid "Full license available at: %s"
 msgstr ""
 
-#: internal/build/script_executor.go:157
+#: internal/build/script_executor.go:118
+msgid "Failed to remove temporary directory"
+msgstr ""
+
+#: internal/build/script_executor.go:184
 msgid "Building package metadata"
 msgstr ""
 
-#: internal/build/script_executor.go:328 internal/build/script_executor.go:382
+#: internal/build/script_executor.go:365 internal/build/script_executor.go:419
 msgid "Executing %s()"
 msgstr ""
 
@@ -487,7 +491,7 @@ msgstr ""
 msgid "Enable interactive questions and prompts"
 msgstr ""
 
-#: main.go:153
+#: main.go:154
 msgid "Error while running app"
 msgstr ""
 

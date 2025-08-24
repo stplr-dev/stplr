@@ -57,7 +57,7 @@ func TestGitDownloaderDownload(t *testing.T) {
 		dest := createTempDir(t, "simple")
 
 		dlType, name, err := d.Download(context.Background(), dl.Options{
-			URL:         "git+https://gitea.plemya-x.ru/Plemya-x/repo-for-tests.git",
+			URL:         "git+https://altlinux.space/stapler/repo-for-tests.git",
 			Destination: dest,
 		})
 
@@ -73,7 +73,7 @@ func TestGitDownloaderDownload(t *testing.T) {
 		assert.NoError(t, err)
 
 		dlType, name, err := d.Download(context.Background(), dl.Options{
-			URL:           "git+https://gitea.plemya-x.ru/Plemya-x/repo-for-tests.git?~rev=init&~name=test",
+			URL:           "git+https://altlinux.space/stapler/repo-for-tests.git?~rev=init&~name=test",
 			Destination:   dest,
 			Hash:          hsh,
 			HashAlgorithm: "sha256",
@@ -91,7 +91,7 @@ func TestGitDownloaderDownload(t *testing.T) {
 		assert.NoError(t, err)
 
 		_, _, err = d.Download(context.Background(), dl.Options{
-			URL:           "git+https://gitea.plemya-x.ru/Plemya-x/repo-for-tests.git",
+			URL:           "git+https://altlinux.space/stapler/repo-for-tests.git",
 			Destination:   dest,
 			Hash:          hsh,
 			HashAlgorithm: "sha256",
@@ -118,7 +118,7 @@ func TestGitDownloaderUpdate(t *testing.T) {
 	setupOldRepo := func(t *testing.T, dest string) {
 		t.Helper()
 
-		cmd := exec.Command("git", "clone", "https://gitea.plemya-x.ru/Plemya-x/repo-for-tests.git", dest)
+		cmd := exec.Command("git", "clone", "https://altlinux.space/stapler/repo-for-tests.git", dest)
 		err := cmd.Run()
 		assert.NoError(t, err)
 
@@ -137,7 +137,7 @@ func TestGitDownloaderUpdate(t *testing.T) {
 		assert.NoError(t, err)
 
 		updated, err := d.Update(dl.Options{
-			URL:         "git+https://gitea.plemya-x.ru/Plemya-x/repo-for-tests.git",
+			URL:         "git+https://altlinux.space/stapler/repo-for-tests.git",
 			Destination: dest,
 		})
 
@@ -159,7 +159,7 @@ func TestGitDownloaderUpdate(t *testing.T) {
 		assert.NoError(t, err)
 
 		updated, err := d.Update(dl.Options{
-			URL:           "git+https://gitea.plemya-x.ru/Plemya-x/repo-for-tests.git?~rev=test-update-git-downloader",
+			URL:           "git+https://altlinux.space/stapler/repo-for-tests.git?~rev=test-update-git-downloader",
 			Destination:   dest,
 			Hash:          hsh,
 			HashAlgorithm: "sha256",
@@ -178,7 +178,7 @@ func TestGitDownloaderUpdate(t *testing.T) {
 		assert.NoError(t, err)
 
 		_, err = d.Update(dl.Options{
-			URL:           "git+https://gitea.plemya-x.ru/Plemya-x/repo-for-tests.git?~rev=test-update-git-downloader",
+			URL:           "git+https://altlinux.space/stapler/repo-for-tests.git?~rev=test-update-git-downloader",
 			Destination:   dest,
 			Hash:          hsh,
 			HashAlgorithm: "sha256",

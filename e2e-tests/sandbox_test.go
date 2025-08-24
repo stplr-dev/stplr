@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// This file was originally part of the project "ALR - Any Linux Repository"
-// created by the ALR Authors.
-// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
-//
-// Copyright (C) 2025 The ALR Authors
+// Stapler
 // Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
@@ -20,15 +16,27 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package constants
+//go:build e2e
 
-const (
-	SystemConfigPath = "/etc/stplr/stplr.toml"
-	SystemCachePath  = "/var/cache/stplr"
-	SocketDirPath    = "/tmp/.stplr-socket"
-	PrivilegedGroup  = "wheel"
-	BuilderUser      = "stapler-builder"
-	BuilderGroup     = "stapler-builder"
-	RepoConfigFile   = "stapler-repo.toml"
-	FirejailedDir    = "/usr/lib/stplr/firejailed"
+package e2etests_test
+
+import (
+	"testing"
+
+	"go.alt-gnome.ru/capytest"
 )
+
+func TestE2ESandbox(t *testing.T) {
+	t.Parallel()
+
+	runMatrixSuite(
+		t,
+		"stplr install {repo}/{package}",
+		COMMON_SYSTEMS,
+		func(t *testing.T, r capytest.Runner) {
+			t.Parallel()
+			defaultPrepare(t, r)
+			execShouldError(t, r, "stplr", "build", "-p", "test-sandbox")
+		},
+	)
+}

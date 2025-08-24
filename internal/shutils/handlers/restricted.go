@@ -28,59 +28,139 @@ import (
 	"context"
 	"io"
 	"io/fs"
+	"log/slog"
+	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
-	"golang.org/x/exp/slices"
+	"github.com/spf13/afero"
 	"mvdan.cc/sh/v3/interp"
+
+	"go.stplr.dev/stplr/internal/constants"
+	"go.stplr.dev/stplr/internal/shutils/handlers/filter"
 )
 
-func RestrictedReadDir(allowedPrefixes ...string) interp.ReadDirHandlerFunc2 {
-	return func(ctx context.Context, s string) ([]fs.DirEntry, error) {
-		path := filepath.Clean(s)
-		for _, allowedPrefix := range allowedPrefixes {
-			if strings.HasPrefix(path, allowedPrefix) {
-				return interp.DefaultReadDirHandler2()(ctx, s)
-			}
-		}
+type options struct {
+	Filter          filter.Predicate
+	BlockedPrefixes []string
+	PathRedirects   map[string]string
+}
 
-		return nil, fs.ErrNotExist
+type Option func(*options)
+
+func WithFilter(f filter.Predicate) Option {
+	return func(o *options) {
+		o.Filter = f
 	}
 }
 
-func RestrictedStat(allowedPrefixes ...string) interp.StatHandlerFunc {
-	return func(ctx context.Context, s string, b bool) (fs.FileInfo, error) {
-		path := filepath.Clean(s)
-		for _, allowedPrefix := range allowedPrefixes {
-			if strings.HasPrefix(path, allowedPrefix) {
-				return interp.DefaultStatHandler()(ctx, s, b)
-			}
+func WithPathRedirect(from, to string) Option {
+	return func(o *options) {
+		if o.PathRedirects == nil {
+			o.PathRedirects = make(map[string]string)
 		}
-
-		return nil, fs.ErrNotExist
+		o.PathRedirects[filepath.Clean(from)] = filepath.Clean(to)
 	}
 }
 
-func RestrictedOpen(allowedPrefixes ...string) interp.OpenHandlerFunc {
-	return func(ctx context.Context, s string, i int, fm fs.FileMode) (io.ReadWriteCloser, error) {
-		path := filepath.Clean(s)
-		for _, allowedPrefix := range allowedPrefixes {
-			if strings.HasPrefix(path, allowedPrefix) {
-				return interp.DefaultOpenHandler()(ctx, s, i, fm)
+func hasPathPrefix(path, prefix string) bool {
+	path = filepath.Clean(path)
+	prefix = filepath.Clean(prefix)
+
+	if path == prefix {
+		return true
+	}
+
+	if strings.HasPrefix(path, prefix+string(os.PathSeparator)) {
+		return true
+	}
+
+	return false
+}
+
+func RestrictSandbox(allowedList ...string) filter.Predicate {
+	blacklisted := []string{
+		constants.SystemCachePath,
+		constants.SocketDirPath,
+	}
+	return func(path string) bool {
+		path = filepath.Clean(path)
+		ok := true
+		for _, blacklistedPath := range blacklisted {
+			if hasPathPrefix(path, blacklistedPath) {
+				ok = false
 			}
 		}
-
-		return NopRWC{}, nil
+		if ok {
+			return true
+		}
+		for _, allowed := range allowedList {
+			allowed = filepath.Clean(allowed)
+			if hasPathPrefix(path, allowed) || hasPathPrefix(allowed, path) {
+				return true
+			}
+		}
+		return false
 	}
 }
 
-func RestrictedExec(allowedCmds ...string) interp.ExecHandlerFunc {
-	return func(ctx context.Context, args []string) error {
-		if slices.Contains(allowedCmds, args[0]) {
-			return interp.DefaultExecHandler(2*time.Second)(ctx, args)
-		}
+func fsFromOpts(opts options) afero.Fs {
+	baseFs := afero.NewOsFs()
+	if opts.Filter != nil {
+		return filter.NewFs(baseFs, opts.Filter)
+	} else {
+		return baseFs
+	}
+}
 
-		return nil
+func RestrictedReadDir(opt ...Option) interp.ReadDirHandlerFunc2 {
+	opts := options{}
+	for _, o := range opt {
+		o(&opts)
+	}
+	f := fsFromOpts(opts)
+	return func(ctx context.Context, path string) ([]fs.DirEntry, error) {
+		infos, err := afero.ReadDir(f, path)
+		if err != nil {
+			return nil, err
+		}
+		entries := make([]fs.DirEntry, len(infos))
+		for i, info := range infos {
+			entries[i] = fs.FileInfoToDirEntry(info)
+		}
+		return entries, nil
+	}
+}
+
+func RestrictedStat(opt ...Option) interp.StatHandlerFunc {
+	opts := options{}
+	for _, o := range opt {
+		o(&opts)
+	}
+	f := fsFromOpts(opts)
+	return func(ctx context.Context, path string, followSymlinks bool) (fs.FileInfo, error) {
+		if !followSymlinks {
+			if lst, ok := f.(afero.Lstater); ok {
+				info, _, err := lst.LstatIfPossible(path)
+				return info, err
+			}
+		}
+		return f.Stat(path)
+	}
+}
+
+func RestrictedOpen(opt ...Option) interp.OpenHandlerFunc {
+	opts := options{}
+	for _, o := range opt {
+		o(&opts)
+	}
+	f := fsFromOpts(opts)
+	return func(ctx context.Context, path string, flag int, perm fs.FileMode) (io.ReadWriteCloser, error) {
+		mc := interp.HandlerCtx(ctx)
+		if path != "" && !filepath.IsAbs(path) {
+			path = filepath.Join(mc.Dir, path)
+		}
+		slog.Warn("open", "path", path, "flag", flag, "perm", perm)
+		return f.OpenFile(path, flag, perm)
 	}
 }

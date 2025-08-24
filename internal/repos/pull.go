@@ -334,9 +334,9 @@ func (rs *Repos) processRepoChangesRunner(repoDir, scriptDir string) (*interp.Ru
 	return interp.New(
 		interp.Env(expand.ListEnviron(env...)),
 		interp.ExecHandler(handlers.NopExec),
-		interp.ReadDirHandler2(handlers.RestrictedReadDir(repoDir)),
-		interp.StatHandler(handlers.RestrictedStat(repoDir)),
-		interp.OpenHandler(handlers.RestrictedOpen(repoDir)),
+		interp.ReadDirHandler2(handlers.RestrictedReadDir(handlers.WithFilter(handlers.RestrictSandbox(repoDir)))),
+		interp.StatHandler(handlers.RestrictedStat(handlers.WithFilter(handlers.RestrictSandbox(repoDir)))),
+		interp.OpenHandler(handlers.RestrictedOpen(handlers.WithFilter(handlers.RestrictSandbox(repoDir)))),
 		interp.StdIO(handlers.NopRWC{}, handlers.NopRWC{}, handlers.NopRWC{}),
 		// Use temp dir instead script dir because runner may be for deleted file
 		interp.Dir(os.TempDir()),

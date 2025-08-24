@@ -100,13 +100,17 @@ func (s *ScriptFile) createRunner(info *distro.OSRelease) (*interp.Runner, error
 	scriptDir := filepath.Dir(s.path)
 	env := common.CreateBuildEnvVars(info, types.Directories{})
 
+	restr := handlers.WithFilter(
+		handlers.RestrictSandbox(scriptDir),
+	)
+
 	return interp.New(
 		interp.Env(expand.ListEnviron(env...)),
 		interp.StdIO(os.Stdin, os.Stderr, os.Stderr),
 		interp.ExecHandler(helpers.Restricted.ExecHandler(handlers.NopExec)),
-		interp.ReadDirHandler2(handlers.RestrictedReadDir(scriptDir)),
-		interp.StatHandler(handlers.RestrictedStat(scriptDir)),
-		interp.OpenHandler(handlers.RestrictedOpen(scriptDir)),
+		interp.ReadDirHandler2(handlers.RestrictedReadDir(restr)),
+		interp.StatHandler(handlers.RestrictedStat(restr)),
+		interp.OpenHandler(handlers.RestrictedOpen(restr)),
 		interp.Dir(scriptDir),
 	)
 }
