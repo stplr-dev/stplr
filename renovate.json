@@ -1,12 +1,29 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
-        "config:recommended", 
+        "config:recommended",
         "security:openssf-scorecard",
         "schedule:nonOfficeHours"
     ],
+    "labels": [
+        "Kind/Dependencies"
+    ],
+    "packageRules": [
+        {
+            "groupName": "Capytest packages",
+            "matchPackagePatterns": [
+                "^go\\.alt-gnome\\.ru/capytest"
+            ],
+            "matchUpdateTypes": [
+                "minor",
+                "patch"
+            ]
+        }
+    ],
     "vulnerabilityAlerts": {
-        "labels": ["Kind/Security"],
+        "labels": [
+            "Kind/Security"
+        ],
         "automerge": true
     }
 }
