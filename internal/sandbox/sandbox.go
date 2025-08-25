@@ -105,7 +105,7 @@ func sandboxSocket() error {
 	return nil
 }
 
-func Setup(srcDir, pkgDir, tmpDir string) error {
+func Setup(srcDir, pkgDir string) error {
 	if err := sandboxSystemCacheDir(srcDir, pkgDir); err != nil {
 		return err
 	}

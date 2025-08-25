@@ -88,6 +88,8 @@ type Package struct {
 
 	FireJailed       OverridableField[bool]              `sh:"firejailed" xorm:"-" json:"firejailed"`
 	FireJailProfiles OverridableField[map[string]string] `sh:"firejail_profiles" xorm:"-" json:"firejail_profiles,omitempty"`
+
+	DisableNetwork OverridableField[bool] `sh:"disable_network" xorm:"-" json:"disable_network"`
 }
 
 type Scripts struct {

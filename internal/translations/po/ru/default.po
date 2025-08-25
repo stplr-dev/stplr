@@ -253,16 +253,11 @@ msgstr "n/q/Esc - Отклонить"
 msgid "Full license available at: %s"
 msgstr "Полный текст лицензии доступен по адресу: %s"
 
-#: internal/build/script_executor.go:118
-#, fuzzy
-msgid "Failed to remove temporary directory"
-msgstr "Ошибка при удалении каталога репозитория"
-
-#: internal/build/script_executor.go:184
+#: internal/build/script_executor.go:177
 msgid "Building package metadata"
 msgstr "Сборка метаданных пакета"
 
-#: internal/build/script_executor.go:365 internal/build/script_executor.go:419
+#: internal/build/script_executor.go:358 internal/build/script_executor.go:412
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
 
@@ -697,6 +692,10 @@ msgstr "Ошибка при проверке обновлений"
 #: upgrade.go:142
 msgid "There is nothing to do."
 msgstr "Здесь нечего делать."
+
+#, fuzzy
+#~ msgid "Failed to remove temporary directory"
+#~ msgstr "Ошибка при удалении каталога репозитория"
 
 #~ msgid "Generate a Staplerfile from a template"
 #~ msgstr "Генерация Staplerfile из шаблона"

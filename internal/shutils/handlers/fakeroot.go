@@ -42,7 +42,7 @@ import (
 
 // FakerootExecHandler was extracted from github.com/mvdan/sh/interp/handler.go
 // and modified to run commands in a fakeroot environent.
-func FakerootExecHandler(killTimeout time.Duration, srcDir, pkgDir, tmpDir string) interp.ExecHandlerFunc {
+func FakerootExecHandler(killTimeout time.Duration, srcDir, pkgDir string, disableNetwork bool) interp.ExecHandlerFunc {
 	return func(ctx context.Context, args []string) error {
 		hc := interp.HandlerCtx(ctx)
 		path, err := interp.LookPathDir(hc.Dir, hc.Env, args[0])
@@ -56,7 +56,7 @@ func FakerootExecHandler(killTimeout time.Duration, srcDir, pkgDir, tmpDir strin
 			return err
 		}
 
-		childArgs := []string{selfPath, "_internal-sandbox", srcDir, pkgDir, tmpDir}
+		childArgs := []string{selfPath, "_internal-sandbox", srcDir, pkgDir}
 		childArgs = append(childArgs, path)
 		childArgs = append(childArgs, args[1:]...)
 
@@ -76,6 +76,10 @@ func FakerootExecHandler(killTimeout time.Duration, srcDir, pkgDir, tmpDir strin
 		}
 
 		cmd.SysProcAttr.Cloneflags |= unix.CLONE_NEWNS
+
+		if disableNetwork {
+			cmd.SysProcAttr.Cloneflags |= unix.CLONE_NEWNET
+		}
 
 		err = cmd.Start()
 		if err == nil {

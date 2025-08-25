@@ -200,16 +200,16 @@ func InternalSandbox() *cli.Command {
 		HideHelp: true,
 		Hidden:   true,
 		Action: func(c *cli.Context) error {
-			if c.NArg() < 4 {
+			if c.NArg() < 3 {
 				return fmt.Errorf("not enough arguments: need srcDir, pkgDir, command")
 			}
 
-			cmdArgs := c.Args().Slice()[3:]
+			cmdArgs := c.Args().Slice()[2:]
 			if len(cmdArgs) == 0 {
 				return fmt.Errorf("no command specified")
 			}
 
-			if err := sandbox.Setup(c.Args().Get(0), c.Args().Get(1), c.Args().Get(2)); err != nil {
+			if err := sandbox.Setup(c.Args().Get(0), c.Args().Get(1)); err != nil {
 				return fmt.Errorf("failed to setup sandbox: %w", err)
 			}
 

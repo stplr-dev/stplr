@@ -28,7 +28,6 @@ import (
 	"context"
 	"io"
 	"io/fs"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -160,7 +159,6 @@ func RestrictedOpen(opt ...Option) interp.OpenHandlerFunc {
 		if path != "" && !filepath.IsAbs(path) {
 			path = filepath.Join(mc.Dir, path)
 		}
-		slog.Warn("open", "path", path, "flag", flag, "perm", perm)
 		return f.OpenFile(path, flag, perm)
 	}
 }

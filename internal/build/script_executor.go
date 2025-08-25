@@ -109,30 +109,23 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 		return nil, err
 	}
 
-	tmpdir, err := os.MkdirTemp("", "stplr-tmpfs")
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if err := os.RemoveAll(tmpdir); err != nil {
-			slog.Error(gotext.Get("Failed to remove temporary directory"), "path", tmpdir, "error", err)
-		}
-	}()
-
 	env := common.CreateBuildEnvVars(input.OSRelease(), dirs)
 
 	options := []handlers.Option{
 		handlers.WithFilter(
 			handlers.RestrictSandbox(dirs.SrcDir, dirs.PkgDir),
 		),
-		handlers.WithPathRedirect("/tmp", tmpdir),
 	}
+
+	disableNet := slices.ContainsFunc(varsOfPackages, func(pkg *staplerfile.Package) bool {
+		return pkg.DisableNetwork.Resolved()
+	})
 
 	fakeroot := handlers.FakerootExecHandler(
 		2*time.Second,
 		dirs.SrcDir,
 		dirs.PkgDir,
-		tmpdir,
+		disableNet,
 	)
 
 	runner, err := interp.New(

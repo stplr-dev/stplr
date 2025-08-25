@@ -56,6 +56,7 @@ type packageResolved struct {
 	AutoProvFilter    []string          `json:"auto_prov_filter,omitempty"`
 	FireJailed        bool              `json:"firejailed"`
 	FireJailProfiles  map[string]string `json:"firejail_profiles,omitempty"`
+	DisableNetwork    bool              `json:"disable_network"`
 }
 
 func PackageToResolved(src *Package) packageResolved {
@@ -96,6 +97,7 @@ func PackageToResolved(src *Package) packageResolved {
 		AutoProvFilter:    src.AutoProvFilter.Resolved(),
 		FireJailed:        src.FireJailed.Resolved(),
 		FireJailProfiles:  src.FireJailProfiles.Resolved(),
+		DisableNetwork:    src.DisableNetwork.Resolved(),
 	}
 }
 
@@ -124,4 +126,5 @@ func ResolvePackage(pkg *Package, overrides []string) {
 	pkg.AutoProvFilter.Resolve(overrides)
 	pkg.FireJailed.Resolve(overrides)
 	pkg.FireJailProfiles.Resolve(overrides)
+	pkg.DisableNetwork.Resolve(overrides)
 }
