@@ -48,7 +48,7 @@ func FakerootExecHandler(killTimeout time.Duration, srcDir, pkgDir string, disab
 		path, err := interp.LookPathDir(hc.Dir, hc.Env, args[0])
 		if err != nil {
 			fmt.Fprintln(hc.Stderr, err)
-			return interp.NewExitStatus(127)
+			return interp.ExitStatus(127)
 		}
 
 		selfPath, err := os.Executable()
@@ -123,16 +123,16 @@ func FakerootExecHandler(killTimeout time.Duration, srcDir, pkgDir string, disab
 					sig := status.Signal()
 					// Clamp to 0–255 to avoid integer overflow (POSIX exit codes are 1 byte)
 					//gosec:disable G115
-					return interp.NewExitStatus(uint8((128 + int(sig)) & 0xFF))
+					return interp.ExitStatus(uint8((128 + int(sig)) & 0xFF))
 				}
 				//gosec:disable G115
-				return interp.NewExitStatus(uint8(status.ExitStatus()))
+				return interp.ExitStatus(uint8(status.ExitStatus()))
 			}
-			return interp.NewExitStatus(1)
+			return interp.ExitStatus(1)
 		case *exec.Error:
 			// did not start
 			fmt.Fprintf(hc.Stderr, "%v\n", err)
-			return interp.NewExitStatus(127)
+			return interp.ExitStatus(127)
 		default:
 			return err
 		}
