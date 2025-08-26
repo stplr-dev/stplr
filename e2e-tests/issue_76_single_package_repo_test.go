@@ -48,7 +48,7 @@ func Test75SinglePackageRepo(t *testing.T) {
 			)
 			execShouldNoError(t, r, "sudo", "stplr", "ref")
 			execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", REPO_NAME_FOR_E2E_TESTS, "1546b4ed8a")
-			execShouldNoError(t, r, "stplr", "fix")
+			execShouldNoError(t, r, "sudo", "stplr", "fix")
 			execShouldNoError(t, r, "sudo", "stplr", "in", "test-single-repo")
 			execShouldNoError(t, r, "sh", "-c", "stplr list -U")
 			execShouldNoError(t, r, "sh", "-c", "test $(stplr list -U | wc -l) -eq 0 || exit 1")

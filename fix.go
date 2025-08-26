@@ -42,7 +42,7 @@ func FixCmd() *cli.Command {
 	return &cli.Command{
 		Name:  "fix",
 		Usage: gotext.Get("Attempt to fix problems with Stapler"),
-		Action: func(c *cli.Context) error {
+		Action: utils.RootNeededAction(func(c *cli.Context) error {
 			if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
 				return err
 			}
@@ -109,7 +109,7 @@ func FixCmd() *cli.Command {
 			slog.Info(gotext.Get("Done"))
 
 			return nil
-		},
+		}),
 	}
 }
 

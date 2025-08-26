@@ -82,6 +82,12 @@ func RestrictSandbox(allowedList ...string) filter.Predicate {
 		constants.SystemCachePath,
 		constants.SocketDirPath,
 	}
+
+	homedir, err := os.UserHomeDir()
+	if err == nil {
+		blacklisted = append(blacklisted, homedir)
+	}
+
 	return func(path string) bool {
 		path = filepath.Clean(path)
 		ok := true

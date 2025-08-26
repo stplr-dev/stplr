@@ -34,6 +34,8 @@ var Args []string
 type Opts struct {
 	NoConfirm bool
 	Args      []string
+	AsRoot    bool
+	RootCmd   string
 }
 
 var DefaultOpts = &Opts{

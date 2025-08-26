@@ -38,6 +38,7 @@ func TestE2EBashCompletion(t *testing.T) {
 		"bash-completion",
 		COMMON_SYSTEMS,
 		func(t *testing.T, r capytest.Runner) {
+			execShouldNoError(t, r, "stplr", "fix")
 			execShouldNoError(t, r, "stplr", "install", "--generate-bash-completion")
 		},
 	)

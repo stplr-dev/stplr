@@ -64,8 +64,8 @@ func ListCmd() *cli.Command {
 				Usage:   gotext.Get("Format output using a Go template"),
 			},
 		},
-		Action: func(c *cli.Context) error {
-			if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
+		Action: utils.ReadonlyAction(func(c *cli.Context) error {
+			if err := utils.ExitIfRootCantDropCapsNoPrivs(); err != nil {
 				return err
 			}
 
@@ -77,8 +77,6 @@ func ListCmd() *cli.Command {
 				WithDB().
 				WithManager().
 				WithDistroInfo().
-				// autoPull only
-				WithRepos().
 				Build()
 			if err != nil {
 				return err
@@ -212,6 +210,6 @@ func ListCmd() *cli.Command {
 			}
 
 			return nil
-		},
+		}),
 	}
 }

@@ -77,11 +77,7 @@ func SearchCmd() *cli.Command {
 				Usage:   gotext.Get("Format output using a Go template"),
 			},
 		},
-		Action: func(c *cli.Context) error {
-			if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
-				return err
-			}
-
+		Action: utils.ReadonlyAction(func(c *cli.Context) error {
 			ctx := c.Context
 
 			var names []string
@@ -159,6 +155,6 @@ func SearchCmd() *cli.Command {
 			}
 
 			return nil
-		},
+		}),
 	}
 }

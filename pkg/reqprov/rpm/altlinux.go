@@ -79,6 +79,7 @@ func rpmFindDependenciesALTLinux(ctx context.Context, pkgInfo *nfpm.Info, dirs t
 	cmd.Stdin = bytes.NewBufferString(strings.Join(paths, "\n") + "\n")
 	cmd.Env = append(cmd.Env,
 		"RPM_BUILD_ROOT="+dirs.PkgDir,
+		"RPM_BUILD_DIR="+dirs.SrcDir,
 		"RPM_FINDPROV_METHOD=",
 		"RPM_FINDREQ_METHOD=",
 		"RPM_DATADIR=",

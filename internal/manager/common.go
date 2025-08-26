@@ -29,7 +29,16 @@ type CommonPackageManager struct {
 }
 
 func (m *CommonPackageManager) getCmd(opts *Opts, mgrCmd string, args ...string) *exec.Cmd {
-	cmd := exec.Command(mgrCmd)
+	var cmd *exec.Cmd
+
+	if opts.AsRoot {
+		//gosec:disable G204 -- Expected
+		cmd = exec.Command(opts.RootCmd, mgrCmd)
+	} else {
+		//gosec:disable G204 -- Expected
+		cmd = exec.Command(mgrCmd)
+	}
+
 	cmd.Args = append(cmd.Args, opts.Args...)
 	cmd.Args = append(cmd.Args, args...)
 

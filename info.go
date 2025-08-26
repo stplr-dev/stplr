@@ -54,7 +54,7 @@ func InfoCmd() *cli.Command {
 			},
 		},
 		BashComplete: cliutils.BashCompleteWithError(func(c *cli.Context) error {
-			if err := utils.ExitIfCantDropCapsToAlrUser(); err != nil {
+			if err := utils.ExitIfRootCantDropCapsNoPrivs(); err != nil {
 				return err
 			}
 
@@ -80,7 +80,7 @@ func InfoCmd() *cli.Command {
 			return nil
 		}),
 		Action: func(c *cli.Context) error {
-			if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
+			if err := utils.ExitIfRootCantDropCapsNoPrivs(); err != nil {
 				return err
 			}
 
@@ -96,7 +96,7 @@ func InfoCmd() *cli.Command {
 				WithConfig().
 				WithDB().
 				WithDistroInfo().
-				WithRepos().
+				WithReposNoPull().
 				Build()
 			if err != nil {
 				return cli.Exit(err, 1)

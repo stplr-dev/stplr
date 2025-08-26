@@ -173,7 +173,7 @@ func GetConfig() *cli.Command {
 			}
 			return nil
 		}),
-		Action: func(c *cli.Context) error {
+		Action: utils.ReadonlyAction(func(c *cli.Context) error {
 			deps, err := appbuilder.
 				New(c.Context).
 				WithConfig().
@@ -228,6 +228,6 @@ func GetConfig() *cli.Command {
 			}
 
 			return nil
-		},
+		}),
 	}
 }

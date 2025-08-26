@@ -28,52 +28,37 @@ import (
 	"go.stplr.dev/stplr/internal/constants"
 )
 
-func sandboxSystemCacheDir(srcDir, pkgDir string) error {
-	tmpSrc := path.Join(os.TempDir(), "stplr-build-src")
-	tmpPkg := path.Join(os.TempDir(), "stplr-build-pkg")
+func sandboxDirs(keep, hide []string) error {
+	tmpKeep := make([]string, len(keep))
 
-	if err := os.MkdirAll(tmpSrc, 0o755); err != nil {
-		return fmt.Errorf("failed to create tmpSrc: %w", err)
+	for i, dir := range keep {
+		tmpKeep[i] = path.Join(os.TempDir(), fmt.Sprintf(".stplr-build-src-%d", i))
+
+		if err := os.MkdirAll(tmpKeep[i], 0o755); err != nil {
+			return fmt.Errorf("failed to create tmpDir: %w", err)
+		}
+
+		if err := unix.Mount(dir, tmpKeep[i], "", unix.MS_BIND, ""); err != nil {
+			return fmt.Errorf("failed to backup dir: %w", err)
+		}
 	}
 
-	if err := os.MkdirAll(tmpPkg, 0o755); err != nil {
-		return fmt.Errorf("failed to create tmpPkg: %w", err)
+	for _, dir := range hide {
+		if err := unix.Mount("tmpfs", dir, "tmpfs", 0, ""); err != nil {
+			return fmt.Errorf("failed to hide dir: %w", err)
+		}
 	}
 
-	if err := unix.Mount(srcDir, tmpSrc, "", unix.MS_BIND, ""); err != nil {
-		return fmt.Errorf("failed to backup srcDir: %w", err)
-	}
-
-	if err := unix.Mount(pkgDir, tmpPkg, "", unix.MS_BIND, ""); err != nil {
-		return fmt.Errorf("failed to backup pkgDir: %w", err)
-	}
-
-	if err := unix.Mount("tmpfs", constants.SystemCachePath, "tmpfs", 0, ""); err != nil {
-		return fmt.Errorf("failed to hide SystemCachePath: %w", err)
-	}
-
-	if err := os.MkdirAll(srcDir, 0o755); err != nil {
-		return fmt.Errorf("failed to create srcDir: %w", err)
-	}
-
-	if err := os.MkdirAll(pkgDir, 0o755); err != nil {
-		return fmt.Errorf("failed to create pkgDir: %w", err)
-	}
-
-	if err := unix.Mount(tmpSrc, srcDir, "", unix.MS_BIND, ""); err != nil {
-		return fmt.Errorf("failed to restore srcDir: %w", err)
-	}
-
-	if err := unix.Mount(tmpPkg, pkgDir, "", unix.MS_BIND, ""); err != nil {
-		return fmt.Errorf("failed to restore pkgDir: %w", err)
-	}
-
-	if err := unix.Unmount(tmpSrc, 0); err != nil {
-		return fmt.Errorf("failed to unmount tmpPkg: %w", err)
-	}
-
-	if err := unix.Unmount(tmpPkg, 0); err != nil {
-		return fmt.Errorf("failed to unmount tmpPkg: %w", err)
+	for i, dir := range keep {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return fmt.Errorf("failed to create dir: %w", err)
+		}
+		if err := unix.Mount(tmpKeep[i], dir, "", unix.MS_BIND, ""); err != nil {
+			return fmt.Errorf("failed to restore dir: %w", err)
+		}
+		if err := unix.Unmount(tmpKeep[i], 0); err != nil {
+			return fmt.Errorf("failed to unmount tmpKeep: %w", err)
+		}
 	}
 
 	return nil
@@ -105,8 +90,8 @@ func sandboxSocket() error {
 	return nil
 }
 
-func Setup(srcDir, pkgDir string) error {
-	if err := sandboxSystemCacheDir(srcDir, pkgDir); err != nil {
+func Setup(srcDir, pkgDir, homeDir string) error {
+	if err := sandboxDirs([]string{srcDir, pkgDir}, []string{constants.SystemCachePath, homeDir}); err != nil {
 		return err
 	}
 

@@ -26,6 +26,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/goccy/go-yaml"
@@ -126,3 +127,16 @@ func (c *ALRConfig) IgnorePkgUpdates() []string  { return c.cfg.IgnorePkgUpdates
 func (c *ALRConfig) LogLevel() string            { return c.cfg.LogLevel }
 func (c *ALRConfig) UseRootCmd() bool            { return c.cfg.UseRootCmd }
 func (c *ALRConfig) GetPaths() *Paths            { return c.paths }
+
+// TODO: refactor
+func PatchToUserDirs(c *ALRConfig) error {
+	paths := c.GetPaths()
+	userCacheDir, err := os.UserCacheDir()
+	if err != nil {
+		return err
+	}
+	paths.CacheDir = filepath.Join(userCacheDir, "stplr")
+	paths.PkgsDir = filepath.Join(paths.CacheDir, "pkgs")
+
+	return nil
+}

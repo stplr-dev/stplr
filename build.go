@@ -36,6 +36,7 @@ import (
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/cliutils"
 	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
+	"go.stplr.dev/stplr/internal/osutils"
 	"go.stplr.dev/stplr/internal/utils"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
@@ -69,7 +70,6 @@ func BuildCmd() *cli.Command {
 			},
 		},
 		Action: func(c *cli.Context) error {
-			// EscalateToRootUid is used lower
 			if err := utils.EnsureIsPrivilegedGroupMemberOrRoot(); err != nil {
 				return err
 			}
@@ -95,6 +95,8 @@ func BuildCmd() *cli.Command {
 				return cli.Exit(err, 1)
 			}
 			defer deps.Defer()
+
+			userMode := utils.IsNotRoot()
 
 			var script string
 			var packages []string
@@ -168,30 +170,31 @@ func BuildCmd() *cli.Command {
 				}
 			}
 
-			// EnsureIsPrivilegedGroupMemberOrRoot is used higher
-			err = utils.EscalateToRootUid()
-			if err != nil {
-				return cliutils.FormatCliExit("cannot escalate to root", err)
-			}
+			needCopier := utils.IsRoot()
 
-			copier, cleanup, err := build.GetSafeScriptCopier()
-			if err != nil {
-				return cliutils.FormatCliExit("failed to init copier", err)
-			}
-			defer cleanup()
+			var copier build.ScriptCopier
+			var cleanup func()
 
-			if scriptArgs != nil {
-				scriptArgs.Script, err = copier.Copy(ctx, file, deps.Info)
+			if needCopier {
+				copier, cleanup, err = build.GetSafeScriptCopier()
 				if err != nil {
-					cleanup()
-					return err
+					return cliutils.FormatCliExit("failed to init copier", err)
 				}
-				defer func() {
-					err = os.RemoveAll(filepath.Dir(scriptArgs.Script))
+				defer cleanup()
+
+				if scriptArgs != nil {
+					scriptArgs.Script, err = copier.Copy(ctx, file, deps.Info)
 					if err != nil {
-						panic(err)
+						cleanup()
+						return err
 					}
-				}()
+					defer func() {
+						err = os.RemoveAll(filepath.Dir(scriptArgs.Script))
+						if err != nil {
+							panic(err)
+						}
+					}()
+				}
 			}
 
 			installer, scripter, cleanup, err := prepareInstallerAndScripter()
@@ -199,6 +202,18 @@ func BuildCmd() *cli.Command {
 				return err
 			}
 			defer cleanup()
+
+			if userMode {
+				paths := deps.Cfg.GetPaths()
+
+				userCacheDir, err := os.UserCacheDir()
+				if err != nil {
+					return err
+				}
+
+				paths.CacheDir = filepath.Join(userCacheDir, "stplr")
+				paths.PkgsDir = filepath.Join(paths.CacheDir, "pkgs")
+			}
 
 			builder, err := build.NewMainBuilder(
 				deps.Cfg,
@@ -229,10 +244,16 @@ func BuildCmd() *cli.Command {
 
 			for _, pkg := range res {
 				name := filepath.Base(pkg.Path)
-
-				if err = copier.CopyOut(ctx, pkg.Path, filepath.Join(wd, name), origUid, origGid); err != nil {
-					return cliutils.FormatCliExit(gotext.Get("Error moving the package"), err)
+				if needCopier {
+					if err = copier.CopyOut(ctx, pkg.Path, filepath.Join(wd, name), origUid, origGid); err != nil {
+						return cliutils.FormatCliExit(gotext.Get("Error moving the package"), err)
+					}
+				} else {
+					if err = osutils.CopyFile(pkg.Path, filepath.Join(wd, name)); err != nil {
+						return cliutils.FormatCliExit(gotext.Get("Error moving the package"), err)
+					}
 				}
+
 			}
 
 			slog.Info(gotext.Get("Done"))

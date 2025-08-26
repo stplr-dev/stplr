@@ -28,24 +28,43 @@ import (
 	"go.stplr.dev/stplr/internal/manager"
 )
 
-func NewInstaller(mgr manager.Manager) *Installer {
+func NewInstaller(mgr manager.Manager, needRootCmd bool, rootCmd string) *Installer {
 	return &Installer{
-		mgr: mgr,
+		mgr:         mgr,
+		rootCmd:     rootCmd,
+		needRootCmd: needRootCmd,
 	}
 }
 
-type Installer struct{ mgr manager.Manager }
+type Installer struct {
+	mgr         manager.Manager
+	rootCmd     string
+	needRootCmd bool
+}
+
+func (i *Installer) modifyOpts(opts *manager.Opts) *manager.Opts {
+	if opts == nil {
+		opts = &manager.Opts{}
+	}
+	if i.needRootCmd {
+		opts.AsRoot = true
+		if opts.RootCmd == "" {
+			opts.RootCmd = i.rootCmd
+		}
+	}
+	return opts
+}
 
 func (i *Installer) InstallLocal(ctx context.Context, paths []string, opts *manager.Opts) error {
-	return i.mgr.InstallLocal(opts, paths...)
+	return i.mgr.InstallLocal(i.modifyOpts(opts), paths...)
 }
 
 func (i *Installer) Install(ctx context.Context, pkgs []string, opts *manager.Opts) error {
-	return i.mgr.Install(opts, pkgs...)
+	return i.mgr.Install(i.modifyOpts(opts), pkgs...)
 }
 
 func (i *Installer) Remove(ctx context.Context, pkgs []string, opts *manager.Opts) error {
-	return i.mgr.Remove(opts, pkgs...)
+	return i.mgr.Remove(i.modifyOpts(opts), pkgs...)
 }
 
 func (i *Installer) RemoveAlreadyInstalled(ctx context.Context, pkgs []string) ([]string, error) {

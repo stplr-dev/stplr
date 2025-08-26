@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/user"
 	"syscall"
 
 	"github.com/hashicorp/go-hclog"
@@ -48,20 +49,43 @@ func InternalBuildCmd() *cli.Command {
 		Name:     "_internal-safe-script-executor",
 		HideHelp: true,
 		Hidden:   true,
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name: "user-mode",
+			},
+		},
 		Action: func(c *cli.Context) error {
-			logger.SetupForGoPlugin()
-
-			slog.Debug("start _internal-safe-script-executor", "uid", syscall.Getuid(), "gid", syscall.Getgid())
-
-			if err := utils.ExitIfCantDropCapsToAlrUser(); err != nil {
-				return err
-			}
-
 			cfg := config.New()
 			err := cfg.Load()
 			if err != nil {
 				return cliutils.FormatCliExit(gotext.Get("Error loading config"), err)
 			}
+
+			slog.Debug("start _internal-safe-script-executor", "uid", syscall.Getuid(), "gid", syscall.Getgid())
+
+			if utils.IsRoot() {
+				if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
+					return err
+				}
+			} else {
+				u, err := user.Current()
+				if err != nil {
+					return err
+				}
+				uid, gid, err := utils.GetUidGidBuilderUserString()
+				if err != nil {
+					return err
+				}
+				// If we are in usermode (non builder user)
+				if u.Uid != uid || u.Gid != gid {
+					err = config.PatchToUserDirs(cfg)
+					if err != nil {
+						return err
+					}
+				}
+			}
+
+			logger.SetupForGoPlugin()
 
 			logger := hclog.New(&hclog.LoggerOptions{
 				Name:        "plugin",
@@ -93,7 +117,7 @@ func InternalReposCmd() *cli.Command {
 		Action: utils.RootNeededAction(func(ctx *cli.Context) error {
 			logger.SetupForGoPlugin()
 
-			if err := utils.ExitIfCantDropCapsToAlrUser(); err != nil {
+			if err := utils.ExitIfCantDropCapsToBuilderUser(); err != nil {
 				return err
 			}
 
@@ -127,7 +151,9 @@ func InternalInstallCmd() *cli.Command {
 		Name:     "_internal-installer",
 		HideHelp: true,
 		Hidden:   true,
-		Action: utils.RootNeededAction(func(c *cli.Context) error {
+		Action: func(c *cli.Context) error {
+			needRootCmd := utils.IsNotRoot()
+
 			logger.SetupForGoPlugin()
 
 			deps, err := appbuilder.
@@ -155,13 +181,15 @@ func InternalInstallCmd() *cli.Command {
 					"installer": &build.InstallerExecutorPlugin{
 						Impl: build.NewInstaller(
 							manager.Detect(),
+							needRootCmd,
+							deps.Cfg.RootCmd(),
 						),
 					},
 				},
 				Logger: logger,
 			})
 			return nil
-		}),
+		},
 	}
 }
 
@@ -200,16 +228,16 @@ func InternalSandbox() *cli.Command {
 		HideHelp: true,
 		Hidden:   true,
 		Action: func(c *cli.Context) error {
-			if c.NArg() < 3 {
+			if c.NArg() < 4 {
 				return fmt.Errorf("not enough arguments: need srcDir, pkgDir, command")
 			}
 
-			cmdArgs := c.Args().Slice()[2:]
+			cmdArgs := c.Args().Slice()[3:]
 			if len(cmdArgs) == 0 {
 				return fmt.Errorf("no command specified")
 			}
 
-			if err := sandbox.Setup(c.Args().Get(0), c.Args().Get(1)); err != nil {
+			if err := sandbox.Setup(c.Args().Get(0), c.Args().Get(1), c.Args().Get(2)); err != nil {
 				return fmt.Errorf("failed to setup sandbox: %w", err)
 			}
 

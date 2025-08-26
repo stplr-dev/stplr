@@ -40,7 +40,7 @@ func TestE2EIssue74Upgradable(t *testing.T) {
 		func(t *testing.T, r capytest.Runner) {
 			defaultPrepare(t, r)
 			execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", REPO_NAME_FOR_E2E_TESTS, "9889ee9375bdf9a6410c86dc00f225ca7eb78bac")
-			execShouldNoError(t, r, "stplr", "ref")
+			execShouldNoError(t, r, "sudo", "stplr", "ref")
 			execShouldNoError(t, r, "sudo", "stplr", "in", "bar-pkg")
 			execShouldNoError(t, r, "sh", "-c", "test $(stplr list -U | wc -l) -eq 0 || exit 1")
 			execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", REPO_NAME_FOR_E2E_TESTS, "2a0187ea1118a922124f7567aa4565034dc77517")

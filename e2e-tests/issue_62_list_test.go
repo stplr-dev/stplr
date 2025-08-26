@@ -40,7 +40,7 @@ func TestE2EIssue62List(t *testing.T) {
 		func(t *testing.T, r capytest.Runner) {
 			defaultPrepare(t, r)
 			execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", "alr-repo", "9889ee9375bdf9a6410c86dc00f225ca7eb78bac")
-			execShouldNoError(t, r, "stplr", "ref")
+			execShouldNoError(t, r, "sudo", "stplr", "ref")
 
 			r.Command("sudo", "stplr", "in", "foo-pkg").
 				ExpectSuccess().

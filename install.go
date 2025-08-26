@@ -107,10 +107,6 @@ func InstallCmd() *cli.Command {
 			return nil
 		}),
 		BashComplete: cliutils.BashCompleteWithError(func(c *cli.Context) error {
-			if err := utils.ExitIfCantDropCapsToAlrUser(); err != nil {
-				return err
-			}
-
 			ctx := c.Context
 			deps, err := appbuilder.
 				New(ctx).

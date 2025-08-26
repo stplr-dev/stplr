@@ -35,8 +35,8 @@ func RefreshCmd() *cli.Command {
 		Name:    "refresh",
 		Usage:   gotext.Get("Pull all repositories that have changed"),
 		Aliases: []string{"ref"},
-		Action: func(c *cli.Context) error {
-			if err := utils.ExitIfCantDropCapsToAlrUser(); err != nil {
+		Action: utils.RootNeededAction(func(c *cli.Context) error {
+			if err := utils.ExitIfCantDropCapsToBuilderUser(); err != nil {
 				return err
 			}
 
@@ -53,6 +53,6 @@ func RefreshCmd() *cli.Command {
 			}
 			defer deps.Defer()
 			return nil
-		},
+		}),
 	}
 }

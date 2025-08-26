@@ -39,8 +39,8 @@ import (
 	"go.stplr.dev/stplr/internal/constants"
 )
 
-func GetUidGidAlrUserString() (string, string, error) {
-	u, err := user.Lookup("stapler-builder")
+func GetUidGidBuilderUserString() (string, string, error) {
+	u, err := user.Lookup(constants.BuilderUser)
 	if err != nil {
 		return "", "", err
 	}
@@ -49,7 +49,7 @@ func GetUidGidAlrUserString() (string, string, error) {
 }
 
 func GetUidGidStaplerUser() (int, int, error) {
-	strUid, strGid, err := GetUidGidAlrUserString()
+	strUid, strGid, err := GetUidGidBuilderUserString()
 	if err != nil {
 		return 0, 0, err
 	}
@@ -66,7 +66,7 @@ func GetUidGidStaplerUser() (int, int, error) {
 	return uid, gid, nil
 }
 
-func DropCapsToAlrUser() error {
+func dropCapsToBuilderUser() error {
 	uid, gid, err := GetUidGidStaplerUser()
 	if err != nil {
 		return err
@@ -79,7 +79,7 @@ func DropCapsToAlrUser() error {
 	if err != nil {
 		return err
 	}
-	return EnsureIsAlrUser()
+	return EnsureIsBuilderUser()
 }
 
 func ExitIfCantDropGidToStapler() cli.ExitCoder {
@@ -94,12 +94,12 @@ func ExitIfCantDropGidToStapler() cli.ExitCoder {
 	return nil
 }
 
-// ExitIfCantDropCapsToAlrUser attempts to drop capabilities to the already
+// ExitIfCantDropCapsToBuilderUser attempts to drop capabilities to the already
 // running user. Returns a cli.ExitCoder with an error if the operation fails.
 // See also [ExitIfCantDropCapsToBuilderUserNoPrivs] for a version that also applies
 // no-new-privs.
-func ExitIfCantDropCapsToAlrUser() cli.ExitCoder {
-	err := DropCapsToAlrUser()
+func ExitIfCantDropCapsToBuilderUser() cli.ExitCoder {
+	err := dropCapsToBuilderUser()
 	if err != nil {
 		return cliutils.FormatCliExit(gotext.Get("Error on dropping capabilities"), err)
 	}
@@ -114,9 +114,25 @@ func ExitIfCantSetNoNewPrivs() cli.ExitCoder {
 	return nil
 }
 
-// ExitIfCantDropCapsToBuilderUserNoPrivs combines [ExitIfCantDropCapsToAlrUser] with [ExitIfCantSetNoNewPrivs]
+// ExitIfCantDropCapsToBuilderUserNoPrivs combines [ExitIfCantDropCapsToBuilderUser] with [ExitIfCantSetNoNewPrivs]
 func ExitIfCantDropCapsToBuilderUserNoPrivs() cli.ExitCoder {
-	if err := ExitIfCantDropCapsToAlrUser(); err != nil {
+	if err := ExitIfCantDropCapsToBuilderUser(); err != nil {
+		return err
+	}
+
+	if err := ExitIfCantSetNoNewPrivs(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ExitIfRootCantDropCapsNoPrivs() cli.ExitCoder {
+	if IsNotRoot() {
+		return nil
+	}
+
+	if err := ExitIfCantDropCapsToBuilderUser(); err != nil {
 		return err
 	}
 
@@ -131,7 +147,11 @@ func IsNotRoot() bool {
 	return os.Getuid() != 0
 }
 
-func EnsureIsAlrUser() error {
+func IsRoot() bool {
+	return !IsNotRoot()
+}
+
+func EnsureIsBuilderUser() error {
 	uid, gid, err := GetUidGidStaplerUser()
 	if err != nil {
 		return err
@@ -228,6 +248,20 @@ func RootNeededAction(f cli.ActionFunc) cli.ActionFunc {
 			cmd.Stderr = os.Stderr
 			return cmd.Run()
 		}
+		return f(ctx)
+	}
+}
+
+func ReadonlyAction(f cli.ActionFunc) cli.ActionFunc {
+	return func(ctx *cli.Context) error {
+		if IsNotRoot() {
+			// TODO: relaunch in userns with HOME hide
+		} else {
+			if err := ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
+				return err
+			}
+		}
+
 		return f(ctx)
 	}
 }

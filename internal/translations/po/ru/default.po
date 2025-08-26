@@ -16,23 +16,23 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: Gtranslator 48.0\n"
 
-#: build.go:47
+#: build.go:48
 msgid "Build a local package"
 msgstr "Сборка локального пакета"
 
-#: build.go:53
+#: build.go:54
 msgid "Path to the build script"
 msgstr "Путь к скрипту сборки"
 
-#: build.go:58
+#: build.go:59
 msgid "Specify subpackage in script (for multi package script only)"
 msgstr "Укажите подпакет в скрипте (только для многопакетного скрипта)"
 
-#: build.go:63
+#: build.go:64
 msgid "Name of the package to build and its repo (example: default/go-bin)"
 msgstr "Имя пакета для сборки и его репозиторий (пример: default/go-bin)"
 
-#: build.go:68
+#: build.go:69
 msgid ""
 "Build package from scratch even if there's an already built package available"
 msgstr "Создайте пакет с нуля, даже если уже имеется готовый пакет"
@@ -41,27 +41,27 @@ msgstr "Создайте пакет с нуля, даже если уже име
 msgid "Error getting working directory"
 msgstr "Ошибка при получении рабочего каталога"
 
-#: build.go:120
+#: build.go:122
 msgid "Cannot get absolute script path"
 msgstr "Невозможно получить абсолютный путь к скрипту"
 
-#: build.go:146
+#: build.go:148
 msgid "Package not found"
 msgstr "Пакет не найден"
 
-#: build.go:159
+#: build.go:161
 msgid "Nothing to build"
 msgstr "Нечего собирать"
 
-#: build.go:227
+#: build.go:242
 msgid "Error building package"
 msgstr "Ошибка при сборке пакета"
 
-#: build.go:234
+#: build.go:249 build.go:253
 msgid "Error moving the package"
 msgstr "Ошибка при перемещении пакета"
 
-#: build.go:238
+#: build.go:259
 msgid "Done"
 msgstr "Сделано"
 
@@ -201,19 +201,19 @@ msgstr "Для команды install ожидался хотя бы 1 аргу�
 msgid "Error when installing the package"
 msgstr "Ошибка при установке пакета"
 
-#: install.go:142
+#: install.go:138
 msgid "Remove an installed package"
 msgstr "Удалить установленный пакет"
 
-#: install.go:161
+#: install.go:157
 msgid "Error listing installed packages"
 msgstr "Ошибка при составлении списка установленных пакетов"
 
-#: install.go:190
+#: install.go:186
 msgid "Command remove expected at least 1 argument, got %d"
 msgstr "Для команды remove ожидался хотя бы 1 аргумент, получено %d"
 
-#: install.go:205
+#: install.go:201
 msgid "Error removing packages"
 msgstr "Ошибка при удалении пакетов"
 
@@ -397,7 +397,7 @@ msgstr "КАТЕГОРИЯ"
 msgid "OPTIONS"
 msgstr "ПАРАМЕТРЫ"
 
-#: internal/cliutils/utils.go:75
+#: internal/cliutils/utils.go:77
 msgid ""
 "This command is deprecated and would be removed in the future, use \"%s\" "
 "instead!"
@@ -452,11 +452,11 @@ msgstr ""
 msgid "Error on dropping capabilities"
 msgstr "Ошибка при понижении привилегий"
 
-#: internal/utils/cmd.go:177
+#: internal/utils/cmd.go:197
 msgid "You need to be a %s member or root to perform this action"
 msgstr "Вы должны быть членом %s или root чтобы выполнить это"
 
-#: internal/utils/cmd.go:215
+#: internal/utils/cmd.go:235
 msgid "You need to be root to perform this action"
 msgstr "Вы должны быть root чтобы выполнить это"
 
@@ -468,23 +468,23 @@ msgstr "Список пакетов репозитория Stapler"
 msgid "Format output using a Go template"
 msgstr "Формат выходных данных с использованием шаблона Go"
 
-#: list.go:96
+#: list.go:94
 msgid "Error getting packages for upgrade"
 msgstr "Ошибка при получении пакетов для обновления"
 
-#: list.go:99
+#: list.go:97
 msgid "No packages for upgrade"
 msgstr "Нет пакетов к обновлению"
 
-#: list.go:109 list.go:206
+#: list.go:107 list.go:204
 msgid "Error parsing format template"
 msgstr "Ошибка при разборе шаблона"
 
-#: list.go:115 list.go:210
+#: list.go:113 list.go:208
 msgid "Error executing template"
 msgstr "Ошибка при выполнении шаблона"
 
-#: list.go:169
+#: list.go:167
 msgid "Failed to parse release"
 msgstr "Не удалось разобрать релиз"
 
@@ -677,19 +677,19 @@ msgstr "Искать по репозиторию"
 msgid "Search by provides"
 msgstr "Иcкать по provides"
 
-#: search.go:136
+#: search.go:132
 msgid "Error while executing search"
 msgstr "Ошибка при выполнении поиска"
 
-#: upgrade.go:78
+#: upgrade.go:83
 msgid "Upgrade all installed packages"
 msgstr "Обновить все установленные пакеты"
 
-#: upgrade.go:122 upgrade.go:139
+#: upgrade.go:127 upgrade.go:144
 msgid "Error checking for updates"
 msgstr "Ошибка при проверке обновлений"
 
-#: upgrade.go:142
+#: upgrade.go:147
 msgid "There is nothing to do."
 msgstr "Здесь нечего делать."
 

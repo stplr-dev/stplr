@@ -119,7 +119,7 @@ func RemoveRepoCmd() *cli.Command {
 				return cliutils.FormatCliExit(gotext.Get("Error saving config"), err)
 			}
 
-			if err := utils.ExitIfCantDropCapsToAlrUser(); err != nil {
+			if err := utils.ExitIfCantDropCapsToBuilderUser(); err != nil {
 				return err
 			}
 

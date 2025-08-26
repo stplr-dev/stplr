@@ -56,7 +56,12 @@ func FakerootExecHandler(killTimeout time.Duration, srcDir, pkgDir string, disab
 			return err
 		}
 
-		childArgs := []string{selfPath, "_internal-sandbox", srcDir, pkgDir}
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return err
+		}
+
+		childArgs := []string{selfPath, "_internal-sandbox", srcDir, pkgDir, homeDir}
 		childArgs = append(childArgs, path)
 		childArgs = append(childArgs, args[1:]...)
 

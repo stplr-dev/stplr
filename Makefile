@@ -66,7 +66,6 @@ install-cachedir:
 
 install-post:
 	@echo "Running post-installation system setup..."
-	setcap cap_setuid,cap_setgid+ep $(DESTDIR)$(bindir)/$(NAME) || echo "Skipping setcap (insufficient permissions?)"
 	@if ! id stapler-builder >/dev/null 2>&1; then \
 		useradd -r -s /usr/sbin/nologin stapler-builder; \
 	else \

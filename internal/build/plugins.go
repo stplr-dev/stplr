@@ -35,6 +35,7 @@ import (
 
 	"go.stplr.dev/stplr/internal/constants"
 	"go.stplr.dev/stplr/internal/logger"
+	"go.stplr.dev/stplr/internal/utils"
 )
 
 var pluginMap = map[string]plugin.Plugin{
@@ -59,6 +60,23 @@ func setCommonCmdEnv(cmd *exec.Cmd) {
 	}
 	for _, env := range os.Environ() {
 		if strings.HasPrefix(env, "LANG=") ||
+			strings.HasPrefix(env, "LANGUAGE=") ||
+			strings.HasPrefix(env, "LC_") ||
+			strings.HasPrefix(env, "STPLR_LOG_LEVEL=") {
+			cmd.Env = append(cmd.Env, env)
+		}
+	}
+}
+
+func passCommonEnv(cmd *exec.Cmd) {
+	cmd.Env = []string{
+		"PATH=/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin",
+	}
+	for _, env := range os.Environ() {
+		if strings.HasPrefix(env, "HOME=") ||
+			strings.HasPrefix(env, "LOGNAME=") ||
+			strings.HasPrefix(env, "USER=") ||
+			strings.HasPrefix(env, "LANG=") ||
 			strings.HasPrefix(env, "LANGUAGE=") ||
 			strings.HasPrefix(env, "LC_") ||
 			strings.HasPrefix(env, "STPLR_LOG_LEVEL=") {
@@ -102,15 +120,23 @@ func PrepareSocketDirPath() error {
 		return err
 	}
 
-	err = os.Chmod(constants.SocketDirPath, 0o777|os.ModeSticky)
+	info, err := os.Stat(constants.SocketDirPath)
 	if err != nil {
 		return err
+	}
+
+	requiredMode := os.FileMode(0o777 | os.ModeSticky)
+
+	if info.Mode().Perm() != requiredMode.Perm() || info.Mode()&os.ModeSticky == 0 {
+		if err := os.Chmod(constants.SocketDirPath, requiredMode); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func getSafeExecutor[T any](subCommand, pluginName string) (T, func(), error) {
+func getSafeExecutor[T any](subCommand, pluginName string, extraArgs ...string) (T, func(), error) {
 	var err error
 	var zero T
 
@@ -119,27 +145,34 @@ func getSafeExecutor[T any](subCommand, pluginName string) (T, func(), error) {
 		return zero, nil, err
 	}
 
-	if os.Getuid() == 0 {
-		if err := PrepareSocketDirPath(); err != nil {
-			return zero, nil, fmt.Errorf("failed to prepare socket dir: %w", err)
-		}
+	if err := PrepareSocketDirPath(); err != nil {
+		return zero, nil, fmt.Errorf("failed to prepare socket dir: %w", err)
 	}
 
-	cmd := exec.Command(executable, subCommand)
-	setCommonCmdEnv(cmd)
+	unixSocketConfig := &plugin.UnixSocketConfig{}
+
+	args := []string{subCommand}
+	args = append(args, extraArgs...)
+	cmd := exec.Command(executable, args...)
+
+	if utils.IsRoot() {
+		unixSocketConfig.Group = constants.BuilderGroup
+		setCommonCmdEnv(cmd)
+	} else {
+		passCommonEnv(cmd)
+	}
+
 	// HACK
 	cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", plugin.EnvUnixSocketDir, constants.SocketDirPath))
 
 	client := plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig: HandshakeConfig,
-		Plugins:         pluginMap,
-		Cmd:             cmd,
-		Logger:          logger.GetHCLoggerAdapter(),
-		SkipHostEnv:     true,
-		UnixSocketConfig: &plugin.UnixSocketConfig{
-			Group: constants.BuilderGroup,
-		},
-		SyncStderr: os.Stderr,
+		HandshakeConfig:  HandshakeConfig,
+		Plugins:          pluginMap,
+		Cmd:              cmd,
+		Logger:           logger.GetHCLoggerAdapter(),
+		SkipHostEnv:      true,
+		UnixSocketConfig: unixSocketConfig,
+		SyncStderr:       os.Stderr,
 	})
 	rpcClient, err := client.Client()
 	if err != nil {

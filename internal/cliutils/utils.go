@@ -33,8 +33,10 @@ import (
 
 type BashCompleteWithErrorFunc func(c *cli.Context) error
 
-func BashCompleteWithError(f BashCompleteWithErrorFunc) cli.BashCompleteFunc {
-	return func(c *cli.Context) { HandleExitCoder(f(c)) }
+func BashCompleteWithError[F ~func(*cli.Context) T, T error](f F) cli.BashCompleteFunc {
+	return func(c *cli.Context) {
+		HandleExitCoder(f(c))
+	}
 }
 
 func HandleExitCoder(err error) {

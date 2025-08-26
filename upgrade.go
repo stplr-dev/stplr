@@ -48,17 +48,22 @@ import (
 )
 
 func prepareInstallerAndScripter() (installer build.InstallerExecutor, scripter build.ScriptExecutor, cleanup func(), err error) {
-	installer, installerClose, err := build.GetSafeInstaller()
+	var installerClose func()
+	var scripterClose func()
+
+	installer, installerClose, err = build.GetSafeInstaller()
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
-		installerClose()
-		return nil, nil, nil, err
+	if utils.IsRoot() {
+		if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
+			installerClose()
+			return nil, nil, nil, err
+		}
 	}
 
-	scripter, scripterClose, err := build.GetSafeScriptExecutor()
+	scripter, scripterClose, err = build.GetSafeScriptExecutor()
 	if err != nil {
 		installerClose()
 		return nil, nil, nil, err
