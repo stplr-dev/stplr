@@ -70,8 +70,12 @@ func (s *LocalSourceDownloader) DownloadSources(
 	return nil
 }
 
+func IsSkipChecksum(checksum string) bool {
+	return strings.EqualFold(checksum, "SKIP")
+}
+
 func (s *LocalSourceDownloader) setHashFromChecksum(checksum string, opts *dl.Options) error {
-	if !strings.EqualFold(checksum, "SKIP") {
+	if !IsSkipChecksum(checksum) {
 		// If the checksum contains a colon, use the part before the colon
 		// as the algorithm, and the part after as the actual checksum.
 		// Otherwise, use SHA-256 by default with the whole string as the checksum.

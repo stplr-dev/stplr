@@ -126,6 +126,8 @@ func (c *ALRConfig) SetRepos(repos []types.Repo) { c.System.SetRepos(repos) }
 func (c *ALRConfig) IgnorePkgUpdates() []string  { return c.cfg.IgnorePkgUpdates }
 func (c *ALRConfig) LogLevel() string            { return c.cfg.LogLevel }
 func (c *ALRConfig) UseRootCmd() bool            { return c.cfg.UseRootCmd }
+func (c *ALRConfig) ForbidSkipInChecksums() bool { return c.cfg.ForbidSkipInChecksums }
+func (c *ALRConfig) ForbidBuildCommand() bool    { return c.cfg.ForbidBuildCommand }
 func (c *ALRConfig) GetPaths() *Paths            { return c.paths }
 
 // TODO: refactor

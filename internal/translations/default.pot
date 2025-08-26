@@ -30,31 +30,35 @@ msgid ""
 "Build package from scratch even if there's an already built package available"
 msgstr ""
 
-#: build.go:79
+#: build.go:89
+msgid "Your settings do not allow build command"
+msgstr ""
+
+#: build.go:98
 msgid "Error getting working directory"
 msgstr ""
 
-#: build.go:122
+#: build.go:126
 msgid "Cannot get absolute script path"
 msgstr ""
 
-#: build.go:148
+#: build.go:152
 msgid "Package not found"
 msgstr ""
 
-#: build.go:161
+#: build.go:165
 msgid "Nothing to build"
 msgstr ""
 
-#: build.go:242
+#: build.go:246
 msgid "Error building package"
 msgstr ""
 
-#: build.go:249 build.go:253
+#: build.go:253 build.go:257
 msgid "Error moving the package"
 msgstr ""
 
-#: build.go:259
+#: build.go:263
 msgid "Done"
 msgstr ""
 
@@ -66,39 +70,39 @@ msgstr ""
 msgid "Show config"
 msgstr ""
 
-#: config.go:90
+#: config.go:92
 msgid "Set config value"
 msgstr ""
 
-#: config.go:91
+#: config.go:93
 msgid "<key> <value>"
 msgstr ""
 
-#: config.go:124 config.go:132
-msgid "invalid boolean value for %s: %s"
-msgstr ""
-
-#: config.go:147
+#: config.go:146
 msgid "use 'repo add/remove' commands to manage repositories"
 msgstr ""
 
-#: config.go:149 config.go:227
+#: config.go:155
+msgid "invalid boolean value for %s: %s"
+msgstr ""
+
+#: config.go:159 config.go:246
 msgid "unknown config key: %s"
 msgstr ""
 
-#: config.go:153
+#: config.go:164
 msgid "failed to save config"
 msgstr ""
 
-#: config.go:156
+#: config.go:167
 msgid "Successfully set %s = %s"
 msgstr ""
 
-#: config.go:165
+#: config.go:176
 msgid "Get config value"
 msgstr ""
 
-#: config.go:166
+#: config.go:177
 msgid "<key>"
 msgstr ""
 
@@ -214,13 +218,17 @@ msgstr ""
 msgid "Installing dependencies"
 msgstr ""
 
-#: internal/build/check_executor.go:45
+#: internal/build/check_executor.go:54
+msgid "Your settings do not allow SKIP in checksums"
+msgstr ""
+
+#: internal/build/check_executor.go:61
 msgid ""
 "Your system's CPU architecture doesn't match this package. Do you want to "
 "build anyway?"
 msgstr ""
 
-#: internal/build/check_executor.go:68
+#: internal/build/check_executor.go:84
 msgid "This package is already installed"
 msgstr ""
 

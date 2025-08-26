@@ -70,17 +70,6 @@ func BuildCmd() *cli.Command {
 			},
 		},
 		Action: func(c *cli.Context) error {
-			if err := utils.EnsureIsPrivilegedGroupMemberOrRoot(); err != nil {
-				return err
-			}
-
-			wd, err := os.Getwd()
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Error getting working directory"), err)
-			}
-
-			origUid, origGid := syscall.Getuid(), syscall.Getgid()
-
 			ctx := c.Context
 
 			deps, err := appbuilder.
@@ -95,6 +84,21 @@ func BuildCmd() *cli.Command {
 				return cli.Exit(err, 1)
 			}
 			defer deps.Defer()
+
+			if deps.Cfg.ForbidBuildCommand() {
+				return cliutils.FormatCliExit(gotext.Get("Your settings do not allow build command"), nil)
+			}
+
+			if err := utils.EnsureIsPrivilegedGroupMemberOrRoot(); err != nil {
+				return err
+			}
+
+			wd, err := os.Getwd()
+			if err != nil {
+				return cliutils.FormatCliExit(gotext.Get("Error getting working directory"), err)
+			}
+
+			origUid, origGid := syscall.Getuid(), syscall.Getgid()
 
 			userMode := utils.IsNotRoot()
 

@@ -26,8 +26,13 @@ import (
 	"go.stplr.dev/stplr/internal/manager"
 )
 
+type mainBuilderConfig interface {
+	Config
+	checksRunnerConfig
+}
+
 func NewMainBuilder(
-	cfg Config,
+	cfg mainBuilderConfig,
 	mgr manager.Manager,
 	repos PackageFinder,
 	scriptExecutor ScriptExecutor,
@@ -39,7 +44,7 @@ func NewMainBuilder(
 		NewLocalCacheExecutor(cfg),
 		installerExecutor,
 		NewLocalSourceDownloader(cfg),
-		NewChecksRunner(mgr),
+		NewChecksRunner(mgr, cfg),
 		NewNonFreeViewer(cfg),
 		repos,
 		NewScriptViewer(cfg),

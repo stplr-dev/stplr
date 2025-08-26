@@ -102,6 +102,22 @@ func runMatrixSuite(t *testing.T, name string, images []string, test func(t *tes
 			execShouldNoError(t, r, "/bin/stplr-test-setup", "stplr-install")
 			execShouldNoError(t, r, "/bin/stplr-test-setup", "passwordless-sudo-setup")
 		})
-		ts.Run(fmt.Sprintf("%s/%s", name, image), test)
+
+		testName := fmt.Sprintf("%s/%s", name, image)
+		if name == "" {
+			testName = image
+		}
+		ts.Run(testName, test)
+	}
+}
+
+func matrixSuite(images []string, test func(t *testing.T, r capytest.Runner)) func(t *testing.T) {
+	return func(t *testing.T) {
+		runMatrixSuite(
+			t,
+			"",
+			images,
+			test,
+		)
 	}
 }

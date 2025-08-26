@@ -21,6 +21,7 @@ package build
 import (
 	"context"
 	"log/slog"
+	"slices"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -32,13 +33,28 @@ import (
 
 type ChecksRunner struct {
 	mgr manager.Manager
+	cfg checksRunnerConfig
 }
 
-func NewChecksRunner(mgr manager.Manager) *ChecksRunner {
-	return &ChecksRunner{mgr: mgr}
+type checksRunnerConfig interface {
+	ForbidSkipInChecksums() bool
+}
+
+func NewChecksRunner(mgr manager.Manager, cfg checksRunnerConfig) *ChecksRunner {
+	return &ChecksRunner{
+		mgr: mgr,
+		cfg: cfg,
+	}
 }
 
 func (r *ChecksRunner) RunChecks(ctx context.Context, pkg *staplerfile.Package, input *BuildInput) (bool, error) {
+	if r.cfg.ForbidSkipInChecksums() {
+		checksums := pkg.Checksums.Resolved()
+		if slices.ContainsFunc(checksums, IsSkipChecksum) {
+			return false, cliutils.FormatCliExit(gotext.Get("Your settings do not allow SKIP in checksums"), nil)
+		}
+	}
+
 	if !cpu.IsCompatibleWith(cpu.Arch(), pkg.Architectures) {
 		cont, err := cliutils.YesNoPrompt(
 			ctx,

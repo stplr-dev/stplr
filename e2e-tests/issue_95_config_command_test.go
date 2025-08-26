@@ -25,6 +25,7 @@
 package e2etests_test
 
 import (
+	"fmt"
 	"testing"
 
 	"go.alt-gnome.ru/capytest"
@@ -33,23 +34,104 @@ import (
 func TestE2EIssue95ConfigCommand(t *testing.T) {
 	t.Parallel()
 
+	type testCase struct {
+		name         string
+		property     string
+		defaultValue string
+		newValue     string
+	}
+
+	cases := []testCase{
+		{
+			name:         "autoPull",
+			property:     "autoPull",
+			defaultValue: "true",
+			newValue:     "false",
+		},
+
+		{
+			name:         "useRootCmd",
+			property:     "useRootCmd",
+			defaultValue: "true",
+			newValue:     "false",
+		},
+		{
+			name:         "forbidSkipInChecksums",
+			property:     "forbidSkipInChecksums",
+			defaultValue: "false",
+			newValue:     "true",
+		},
+		{
+			name:         "forbidBuildCommand",
+			property:     "forbidBuildCommand",
+			defaultValue: "false",
+			newValue:     "true",
+		},
+		{
+			name:         "rootCmd",
+			property:     "rootCmd",
+			defaultValue: "sudo",
+			newValue:     "pkexec",
+		},
+		{
+			name:         "pagerStyle",
+			property:     "pagerStyle",
+			defaultValue: "native",
+			newValue:     "test",
+		},
+		{
+			name:         "logLevel",
+			property:     "logLevel",
+			defaultValue: "info",
+			newValue:     "ERROR",
+		},
+	}
+
 	runMatrixSuite(
 		t,
 		"issue-95-config-command",
 		COMMON_SYSTEMS,
 		func(t *testing.T, r capytest.Runner) {
 			defaultPrepare(t, r)
-			execShouldNoError(t, r, "sh", "-c", "stplr config show | grep \"autoPull: true\"")
-			execShouldNoError(t, r, "sh", "-c", "stplr config get | grep \"autoPull: true\"")
-			execShouldError(t, r, "sh", "-c", "cat /etc/stplr/stplr.toml | grep \"autoPull\"")
-			execShouldNoError(t, r, "stplr", "config", "get", "autoPull")
-			execShouldError(t, r, "stplr", "config", "set", "autoPull")
-			execShouldNoError(t, r, "sudo", "stplr", "config", "set", "autoPull", "false")
-			execShouldNoError(t, r, "sh", "-c", "stplr config show | grep \"autoPull: false\"")
-			execShouldNoError(t, r, "sh", "-c", "stplr config get | grep \"autoPull: false\"")
-			execShouldNoError(t, r, "sh", "-c", "cat /etc/stplr/stplr.toml | grep \"autoPull = false\"")
-			execShouldNoError(t, r, "stplr", "config", "set", "autoPull", "true")
-			execShouldNoError(t, r, "sh", "-c", "cat /etc/stplr/stplr.toml | grep \"autoPull = true\"")
+
+			for _, tc := range cases {
+				t.Run(tc.name, func(t *testing.T) {
+					r.Command("stplr", "config", "get", tc.property).
+						ExpectSuccess().
+						ExpectStdoutRegex(fmt.Sprintf("^%s\n$", tc.defaultValue)).
+						ExpectStderrEmpty().
+						Run(t)
+
+					execShouldError(t, r, "sudo", "stplr", "config", "set", tc.property)
+					execShouldNoError(t, r, "sudo", "stplr", "config", "set", tc.property, tc.newValue)
+
+					r.Command("stplr", "config", "show").
+						ExpectSuccess().
+						ExpectStdoutContains(fmt.Sprintf("%s: %s", tc.property, tc.newValue)).
+						ExpectStderrEmpty().
+						Run(t)
+
+					r.Command("stplr", "config", "get").
+						ExpectSuccess().
+						ExpectStdoutContains(fmt.Sprintf("%s: %s", tc.property, tc.newValue)).
+						ExpectStderrEmpty().
+						Run(t)
+
+					r.Command("stplr", "config", "get", tc.property).
+						ExpectSuccess().
+						ExpectStdoutRegex(fmt.Sprintf("^%s\n$", tc.newValue)).
+						ExpectStderrEmpty().
+						Run(t)
+
+					r.Command("stplr", "config", "get", tc.property).
+						ExpectSuccess().
+						ExpectStdoutRegex(fmt.Sprintf("^%s\n$", tc.newValue)).
+						ExpectStderrEmpty().
+						Run(t)
+
+					execShouldNoError(t, r, "sudo", "stplr", "config", "set", tc.property, tc.defaultValue)
+				})
+			}
 		},
 	)
 }

@@ -148,3 +148,17 @@ func (c *SystemConfig) SetRepos(v []types.Repo) {
 		panic(err)
 	}
 }
+
+func (c *SystemConfig) SetForbidSkipInChecksums(v bool) {
+	err := c.k.Set("forbidSkipInChecksums", v)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (c *SystemConfig) SetForbidBuildCommand(v bool) {
+	err := c.k.Set("forbidBuildCommand", v)
+	if err != nil {
+		panic(err)
+	}
+}

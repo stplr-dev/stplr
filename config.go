@@ -82,6 +82,8 @@ var configKeys = []string{
 	"autoPull",
 	"logLevel",
 	"ignorePkgUpdates",
+	"forbidSkipInChecksums",
+	"forbidBuildCommand",
 }
 
 func SetConfig() *cli.Command {
@@ -115,38 +117,47 @@ func SetConfig() *cli.Command {
 			}
 			defer deps.Defer()
 
+			stringSetters := map[string]func(string){
+				"rootCmd":    deps.Cfg.System.SetRootCmd,
+				"pagerStyle": deps.Cfg.System.SetPagerStyle,
+				"logLevel":   deps.Cfg.System.SetLogLevel,
+			}
+
+			boolSetters := map[string]func(bool){
+				"useRootCmd":            deps.Cfg.System.SetUseRootCmd,
+				"autoPull":              deps.Cfg.System.SetAutoPull,
+				"forbidSkipInChecksums": deps.Cfg.System.SetForbidSkipInChecksums,
+				"forbidBuildCommand":    deps.Cfg.System.SetForbidBuildCommand,
+			}
+
 			switch key {
-			case "rootCmd":
-				deps.Cfg.System.SetRootCmd(value)
-			case "useRootCmd":
-				boolValue, err := strconv.ParseBool(value)
-				if err != nil {
-					return cliutils.FormatCliExit(gotext.Get("invalid boolean value for %s: %s", key, value), err)
-				}
-				deps.Cfg.System.SetUseRootCmd(boolValue)
-			case "pagerStyle":
-				deps.Cfg.System.SetPagerStyle(value)
-			case "autoPull":
-				boolValue, err := strconv.ParseBool(value)
-				if err != nil {
-					return cliutils.FormatCliExit(gotext.Get("invalid boolean value for %s: %s", key, value), err)
-				}
-				deps.Cfg.System.SetAutoPull(boolValue)
-			case "logLevel":
-				deps.Cfg.System.SetLogLevel(value)
 			case "ignorePkgUpdates":
 				var updates []string
 				if value != "" {
 					updates = strings.Split(value, ",")
-					for i, update := range updates {
-						updates[i] = strings.TrimSpace(update)
+					for i := range updates {
+						updates[i] = strings.TrimSpace(updates[i])
 					}
 				}
 				deps.Cfg.System.SetIgnorePkgUpdates(updates)
+
 			case "repo", "repos":
-				return cliutils.FormatCliExit(gotext.Get("use 'repo add/remove' commands to manage repositories"), nil)
+				return cliutils.FormatCliExit(
+					gotext.Get("use 'repo add/remove' commands to manage repositories"), nil)
+
 			default:
-				return cliutils.FormatCliExit(gotext.Get("unknown config key: %s", key), nil)
+				if setter, ok := stringSetters[key]; ok {
+					setter(value)
+				} else if setter, ok := boolSetters[key]; ok {
+					boolValue, err := strconv.ParseBool(value)
+					if err != nil {
+						return cliutils.FormatCliExit(
+							gotext.Get("invalid boolean value for %s: %s", key, value), err)
+					}
+					setter(boolValue)
+				} else {
+					return cliutils.FormatCliExit(gotext.Get("unknown config key: %s", key), nil)
+				}
 			}
 
 			if err := deps.Cfg.System.Save(); err != nil {
@@ -194,17 +205,20 @@ func GetConfig() *cli.Command {
 
 			key := c.Args().Get(0)
 
+			stringGetters := map[string]func() string{
+				"rootCmd":    deps.Cfg.RootCmd,
+				"pagerStyle": deps.Cfg.PagerStyle,
+				"logLevel":   deps.Cfg.LogLevel,
+			}
+
+			boolGetters := map[string]func() bool{
+				"useRootCmd":            deps.Cfg.UseRootCmd,
+				"autoPull":              deps.Cfg.AutoPull,
+				"forbidSkipInChecksums": deps.Cfg.ForbidSkipInChecksums,
+				"forbidBuildCommand":    deps.Cfg.ForbidBuildCommand,
+			}
+
 			switch key {
-			case "rootCmd":
-				fmt.Println(deps.Cfg.RootCmd())
-			case "useRootCmd":
-				fmt.Println(deps.Cfg.UseRootCmd())
-			case "pagerStyle":
-				fmt.Println(deps.Cfg.PagerStyle())
-			case "autoPull":
-				fmt.Println(deps.Cfg.AutoPull())
-			case "logLevel":
-				fmt.Println(deps.Cfg.LogLevel())
 			case "ignorePkgUpdates":
 				updates := deps.Cfg.IgnorePkgUpdates()
 				if len(updates) == 0 {
@@ -224,7 +238,13 @@ func GetConfig() *cli.Command {
 					fmt.Print(string(repoData))
 				}
 			default:
-				return cliutils.FormatCliExit(gotext.Get("unknown config key: %s", key), nil)
+				if getter, ok := boolGetters[key]; ok {
+					fmt.Println(getter())
+				} else if getter, ok := stringGetters[key]; ok {
+					fmt.Println(getter())
+				} else {
+					return cliutils.FormatCliExit(gotext.Get("unknown config key: %s", key), nil)
+				}
 			}
 
 			return nil

@@ -37,31 +37,35 @@ msgid ""
 "Build package from scratch even if there's an already built package available"
 msgstr "Создайте пакет с нуля, даже если уже имеется готовый пакет"
 
-#: build.go:79
+#: build.go:89
+msgid "Your settings do not allow build command"
+msgstr ""
+
+#: build.go:98
 msgid "Error getting working directory"
 msgstr "Ошибка при получении рабочего каталога"
 
-#: build.go:122
+#: build.go:126
 msgid "Cannot get absolute script path"
 msgstr "Невозможно получить абсолютный путь к скрипту"
 
-#: build.go:148
+#: build.go:152
 msgid "Package not found"
 msgstr "Пакет не найден"
 
-#: build.go:161
+#: build.go:165
 msgid "Nothing to build"
 msgstr "Нечего собирать"
 
-#: build.go:242
+#: build.go:246
 msgid "Error building package"
 msgstr "Ошибка при сборке пакета"
 
-#: build.go:249 build.go:253
+#: build.go:253 build.go:257
 msgid "Error moving the package"
 msgstr "Ошибка при перемещении пакета"
 
-#: build.go:259
+#: build.go:263
 msgid "Done"
 msgstr "Сделано"
 
@@ -73,39 +77,39 @@ msgstr "Управление конфигурацией"
 msgid "Show config"
 msgstr "Показать конфигурацию"
 
-#: config.go:90
+#: config.go:92
 msgid "Set config value"
 msgstr "Установить значение в конфигурации"
 
-#: config.go:91
+#: config.go:93
 msgid "<key> <value>"
 msgstr "<ключ> <значение>"
 
-#: config.go:124 config.go:132
-msgid "invalid boolean value for %s: %s"
-msgstr "неверное булево значение для %s: %s"
-
-#: config.go:147
+#: config.go:146
 msgid "use 'repo add/remove' commands to manage repositories"
 msgstr "используйте команды 'repo add/remove' для управления репозиториями"
 
-#: config.go:149 config.go:227
+#: config.go:155
+msgid "invalid boolean value for %s: %s"
+msgstr "неверное булево значение для %s: %s"
+
+#: config.go:159 config.go:246
 msgid "unknown config key: %s"
 msgstr "неизвестный ключ конфигурации: %s"
 
-#: config.go:153
+#: config.go:164
 msgid "failed to save config"
 msgstr "не удалось сохранить конфигурацию"
 
-#: config.go:156
+#: config.go:167
 msgid "Successfully set %s = %s"
 msgstr "Успешно установлено %s = %s"
 
-#: config.go:165
+#: config.go:176
 msgid "Get config value"
 msgstr "Получить значение из конфигурации"
 
-#: config.go:166
+#: config.go:177
 msgid "<key>"
 msgstr "<ключ>"
 
@@ -221,7 +225,11 @@ msgstr "Ошибка при удалении пакетов"
 msgid "Installing dependencies"
 msgstr "Установка зависимостей"
 
-#: internal/build/check_executor.go:45
+#: internal/build/check_executor.go:54
+msgid "Your settings do not allow SKIP in checksums"
+msgstr ""
+
+#: internal/build/check_executor.go:61
 msgid ""
 "Your system's CPU architecture doesn't match this package. Do you want to "
 "build anyway?"
@@ -229,7 +237,7 @@ msgstr ""
 "Архитектура процессора вашей системы не соответствует этому пакету. Вы все "
 "равно хотите выполнить сборку?"
 
-#: internal/build/check_executor.go:68
+#: internal/build/check_executor.go:84
 msgid "This package is already installed"
 msgstr "Этот пакет уже установлен"
 

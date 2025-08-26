@@ -33,6 +33,9 @@ type Config struct {
 	Repos            []Repo   `json:"repo" koanf:"repo"`
 	AutoPull         bool     `json:"autoPull" koanf:"autoPull"`
 	LogLevel         string   `json:"logLevel" koanf:"logLevel"`
+
+	ForbidSkipInChecksums bool `json:"forbidSkipInChecksums" koanf:"forbidSkipInChecksums"`
+	ForbidBuildCommand    bool `json:"forbidBuildCommand" koanf:"forbidBuildCommand"`
 }
 
 // Repo represents a ALR repo within a configuration file
