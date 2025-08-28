@@ -1,10 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# This file was originally part of the project "ALR - Any Linux Repository"
-# created by the ALR Authors.
-# It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
-#
-# Copyright (C) 2025 The ALR Authors
+# Stapler
 # Copyright (C) 2025 The Stapler Authors
 #
 # This program is free software: you can redistribute it and/or modify
@@ -25,7 +21,10 @@ name: Create Release
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+'           # Stable releases
+      - 'v[0-9]+.[0-9]+.[0-9]+-rc[0-9]+'  # Release candidates
+      - 'v[0-9]+.[0-9]+.[0-9]+-beta[0-9]+' # Beta releases
+      - 'v[0-9]+.[0-9]+.[0-9]+-alpha[0-9]+' # Alpha releases
 
 jobs:
   changelog:
@@ -50,6 +49,12 @@ jobs:
           version=$(echo "${GITHUB_REF##*/}" | sed 's/^v//')
           echo "Version - $version"
           echo "VERSION=$version" >> $GITHUB_ENV
+          # Determine if the tag is a prerelease
+          if [[ $version =~ -(rc|beta|alpha)[0-9]+$ ]]; then
+            echo "IS_PRERELEASE=true" >> $GITHUB_ENV
+          else
+            echo "IS_PRERELEASE=false" >> $GITHUB_ENV
+          fi
 
       - name: Build
         env:
@@ -74,3 +79,4 @@ jobs:
           release-dir: ./dist
           token: ${{ secrets.TOKEN }}
           release-notes: ${{ steps.changes.outputs.changes }}
+          prerelease: ${{ env.IS_PRERELEASE }}
