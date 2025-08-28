@@ -26,7 +26,6 @@ package overrides_test
 
 import (
 	"os"
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -37,17 +36,22 @@ import (
 )
 
 var info = &distro.OSRelease{
-	ID:   "centos",
-	Like: []string{"rhel", "fedora"},
+	ID:        "centos",
+	Like:      []string{"rhel", "fedora"},
+	ReleaseID: "9",
 }
 
 func TestResolve(t *testing.T) {
 	names, err := overrides.Resolve(info, nil)
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	expected := []string{
+		"amd64_centos_9_en",
+		"centos_9_en",
+		"amd64_rhel_9_en",
+		"rhel_9_en",
+		"amd64_fedora_9_en",
+		"fedora_9_en",
 		"amd64_centos_en",
 		"centos_en",
 		"amd64_rhel_en",
@@ -56,6 +60,12 @@ func TestResolve(t *testing.T) {
 		"fedora_en",
 		"amd64_en",
 		"en",
+		"amd64_centos_9",
+		"centos_9",
+		"amd64_rhel_9",
+		"rhel_9",
+		"amd64_fedora_9",
+		"fedora_9",
 		"amd64_centos",
 		"centos",
 		"amd64_rhel",
@@ -66,9 +76,7 @@ func TestResolve(t *testing.T) {
 		"",
 	}
 
-	if !reflect.DeepEqual(names, expected) {
-		t.Errorf("expected %v, got %v", expected, names)
-	}
+	assert.Equal(t, expected, names)
 }
 
 func TestResolveName(t *testing.T) {
@@ -77,11 +85,15 @@ func TestResolveName(t *testing.T) {
 		Overrides:   true,
 		LikeDistros: true,
 	})
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	expected := []string{
+		"deps_amd64_centos_9",
+		"deps_centos_9",
+		"deps_amd64_rhel_9",
+		"deps_rhel_9",
+		"deps_amd64_fedora_9",
+		"deps_fedora_9",
 		"deps_amd64_centos",
 		"deps_centos",
 		"deps_amd64_rhel",
@@ -92,9 +104,7 @@ func TestResolveName(t *testing.T) {
 		"deps",
 	}
 
-	if !reflect.DeepEqual(names, expected) {
-		t.Errorf("expected %v, got %v", expected, names)
-	}
+	assert.Equal(t, expected, names)
 }
 
 func TestResolveArch(t *testing.T) {
@@ -106,11 +116,21 @@ func TestResolveArch(t *testing.T) {
 		Overrides:   true,
 		LikeDistros: true,
 	})
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	expected := []string{
+		"deps_arm7_centos_9",
+		"deps_arm6_centos_9",
+		"deps_arm5_centos_9",
+		"deps_centos_9",
+		"deps_arm7_rhel_9",
+		"deps_arm6_rhel_9",
+		"deps_arm5_rhel_9",
+		"deps_rhel_9",
+		"deps_arm7_fedora_9",
+		"deps_arm6_fedora_9",
+		"deps_arm5_fedora_9",
+		"deps_fedora_9",
 		"deps_arm7_centos",
 		"deps_arm6_centos",
 		"deps_arm5_centos",
@@ -129,9 +149,7 @@ func TestResolveArch(t *testing.T) {
 		"deps",
 	}
 
-	if !reflect.DeepEqual(names, expected) {
-		t.Errorf("expected %v, got %v", expected, names)
-	}
+	assert.Equal(t, expected, names)
 }
 
 func TestResolveNoLikeDistros(t *testing.T) {
@@ -139,20 +157,18 @@ func TestResolveNoLikeDistros(t *testing.T) {
 		Overrides:   true,
 		LikeDistros: false,
 	})
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	expected := []string{
+		"amd64_centos_9",
+		"centos_9",
 		"amd64_centos",
 		"centos",
 		"amd64",
 		"",
 	}
 
-	if !reflect.DeepEqual(names, expected) {
-		t.Errorf("expected %v, got %v", expected, names)
-	}
+	assert.Equal(t, names, expected)
 }
 
 func TestResolveNoOverrides(t *testing.T) {
@@ -161,15 +177,11 @@ func TestResolveNoOverrides(t *testing.T) {
 		Overrides:   false,
 		LikeDistros: false,
 	})
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	expected := []string{"deps"}
 
-	if !reflect.DeepEqual(names, expected) {
-		t.Errorf("expected %v, got %v", expected, names)
-	}
+	assert.Equal(t, expected, names)
 }
 
 func TestResolveLangs(t *testing.T) {
@@ -178,28 +190,30 @@ func TestResolveLangs(t *testing.T) {
 		Languages:    []string{"ru_RU", "en", "en_US"},
 		LanguageTags: []language.Tag{language.BritishEnglish},
 	})
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	expected := []string{
+		"amd64_centos_9_en",
+		"centos_9_en",
 		"amd64_centos_en",
 		"centos_en",
 		"amd64_en",
 		"en",
+		"amd64_centos_9_ru",
+		"centos_9_ru",
 		"amd64_centos_ru",
 		"centos_ru",
 		"amd64_ru",
 		"ru",
+		"amd64_centos_9",
+		"centos_9",
 		"amd64_centos",
 		"centos",
 		"amd64",
 		"",
 	}
 
-	if !reflect.DeepEqual(names, expected) {
-		t.Errorf("expected %v, got %v", expected, names)
-	}
+	assert.Equal(t, expected, names)
 }
 
 func TestReleasePlatformSpecific(t *testing.T) {

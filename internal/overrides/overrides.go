@@ -51,67 +51,84 @@ var DefaultOpts = &Opts{
 	Languages:   []string{"en"},
 }
 
+func genCombinations(variantsList ...[]string) []string {
+	var results []string
+	var dfs func(int, []string)
+	dfs = func(idx int, current []string) {
+		if idx == 0 {
+			slices.Reverse(current)
+			results = append(results, strings.Join(current, "_"))
+			return
+		}
+		for _, v := range variantsList[idx-1] {
+			dfs(idx-1, append(current, v))
+		}
+		dfs(idx-1, current)
+	}
+	dfs(len(variantsList), []string{})
+	return results
+}
+
 // Resolve generates a slice of possible override names in the order that they should be checked
 func Resolve(info *distro.OSRelease, opts *Opts) ([]string, error) {
+	// Validate inputs
+	if info == nil {
+		return nil, fmt.Errorf("OSRelease info cannot be nil")
+	}
 	if opts == nil {
 		opts = DefaultOpts
 	}
 
+	// If overrides are disabled, return only the base name
 	if !opts.Overrides {
 		return []string{opts.Name}, nil
 	}
 
+	// Parse languages
 	langs, err := parseLangs(opts.Languages, opts.LanguageTags)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse languages: %w", err)
 	}
 
-	architectures, err := cpu.CompatibleArches(cpu.Arch())
+	// Get compatible architectures
+	arches, err := cpu.CompatibleArches(cpu.Arch())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get compatible architectures: %w", err)
 	}
 
+	// Collect distributions
 	distros := []string{info.ID}
 	if opts.LikeDistros {
 		distros = append(distros, info.Like...)
 	}
 
-	var out []string
-	for _, lang := range langs {
-		for _, distro := range distros {
-			for _, arch := range architectures {
-				out = append(out, opts.Name+"_"+arch+"_"+distro+"_"+lang)
+	if info.ReleaseID != "" {
+		origDistros := distros
+		distros = []string{}
+		for _, d := range origDistros {
+			if d != "" {
+				distros = append(distros, strings.Join([]string{d, info.ReleaseID}, "_"))
 			}
-
-			out = append(out, opts.Name+"_"+distro+"_"+lang)
 		}
+		distros = append(distros, origDistros...)
+	}
 
-		for _, arch := range architectures {
-			out = append(out, opts.Name+"_"+arch+"_"+lang)
+	// comb := combGenerator{reverse: true}
+
+	var result []string
+	// for _, combination := range comb.Generate(arches, distros, langs) {
+	for _, combination := range genCombinations(arches, distros, langs) {
+		parts := []string{}
+		if opts.Name != "" {
+			parts = append(parts, opts.Name)
 		}
-
-		out = append(out, opts.Name+"_"+lang)
-	}
-
-	for _, distro := range distros {
-		for _, arch := range architectures {
-			out = append(out, opts.Name+"_"+arch+"_"+distro)
+		if combination != "" {
+			parts = append(parts, combination)
 		}
-
-		out = append(out, opts.Name+"_"+distro)
+		result = append(result, strings.Join(parts, "_"))
 	}
 
-	for _, arch := range architectures {
-		out = append(out, opts.Name+"_"+arch)
-	}
-
-	out = append(out, opts.Name)
-
-	for index, item := range out {
-		out[index] = strings.TrimPrefix(item, "_")
-	}
-
-	return out, nil
+	return result, nil
 }
 
 func (o *Opts) WithName(name string) *Opts {

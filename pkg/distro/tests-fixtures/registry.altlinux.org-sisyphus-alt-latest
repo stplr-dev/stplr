@@ -1,0 +1,12 @@
+NAME="ALT Linux"
+VERSION="20250612"
+ID=altlinux
+VERSION_ID=20250612
+PRETTY_NAME="ALT Regular"
+ANSI_COLOR="1;33"
+CPE_NAME="cpe:/o:alt:sisyphus:20250612"
+BUILD_ID="Sisyphus 20250612"
+ALT_BRANCH_ID="sisyphus"
+HOME_URL="http://en.altlinux.org"
+BUG_REPORT_URL="https://bugs.altlinux.org/"
+LOGO=altlinux

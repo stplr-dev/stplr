@@ -16,41 +16,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package common
+//go:build e2e
+
+package e2etests_test
 
 import (
-	"os"
-	"runtime"
-	"strconv"
-	"strings"
+	"testing"
 
-	"go.stplr.dev/stplr/internal/cpu"
-	"go.stplr.dev/stplr/pkg/distro"
-	"go.stplr.dev/stplr/pkg/types"
+	"go.alt-gnome.ru/capytest"
 )
 
-func CreateBuildEnvVars(info *distro.OSRelease, dirs types.Directories) []string {
-	env := os.Environ()
+func TestE2EIssue67ReleaseOverrides(t *testing.T) {
+	t.Parallel()
 
-	env = append(
-		env,
-		"DISTRO_NAME="+info.Name,
-		"DISTRO_PRETTY_NAME="+info.PrettyName,
-		"DISTRO_ID="+info.ID,
-		"DISTRO_VERSION_ID="+info.VersionID,
-		"DISTRO_ID_LIKE="+strings.Join(info.Like, " "),
-		"DISTRO_RELEASE_ID="+info.ReleaseID,
-		"ARCH="+cpu.Arch(),
-		"NCPU="+strconv.Itoa(runtime.NumCPU()),
-	)
+	t.Run("altlinux_sisyphus", matrixSuite(ALT_SISYPHUS, func(t *testing.T, r capytest.Runner) {
+		defaultPrepare(t, r)
 
-	if dirs.PkgDir != "" {
-		env = append(env, "pkgdir="+dirs.PkgDir)
-	}
+		r.Command("sudo", "stplr", "in", "test-overrides-release-id").
+			ExpectSuccess().
+			Run(t)
 
-	if dirs.SrcDir != "" {
-		env = append(env, "srcdir="+dirs.SrcDir)
-	}
-
-	return env
+		r.Command("cat", "/opt/distro").
+			ExpectSuccess().
+			ExpectStdoutContains("ALT Linux Sisyphus").
+			Run(t)
+	}))
 }

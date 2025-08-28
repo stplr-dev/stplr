@@ -26,7 +26,11 @@ package distro
 
 import (
 	"context"
+	"errors"
+	"io"
 	"os"
+	"regexp"
+	"slices"
 	"strings"
 
 	"mvdan.cc/sh/v3/expand"
@@ -50,6 +54,8 @@ type OSRelease struct {
 	BugReportURL     string
 	Logo             string
 	PlatformID       string
+
+	ReleaseID string // Major version (RHEL-like), codename (Ubuntu-like) or other
 }
 
 var parsed *OSRelease
@@ -59,36 +65,34 @@ var parsed *OSRelease
 // The first time it's called, it'll parse the os-release file.
 // Subsequent calls will return the same value.
 func ParseOSRelease(ctx context.Context) (*OSRelease, error) {
+	// NOTE: The use of the global `parsed` variable is not a clean architectural choice,
+	// but it has been this way historically. Keeping it as is for now to avoid breaking behavior.
 	if parsed != nil {
 		return parsed, nil
 	}
-
-	fl, err := os.Open("/usr/lib/os-release")
-	if err != nil {
-		fl, err = os.Open("/etc/os-release")
+	paths := []string{"/usr/lib/os-release", "/etc/os-release"}
+	for _, path := range paths {
+		f, err := os.Open(path)
 		if err != nil {
-			return nil, err
+			continue
+		}
+
+		out, err := parseOSReleaseFromFile(ctx, f)
+		if err == nil {
+			parsed = out
+			return out, nil
 		}
 	}
+	return nil, errors.New("couldn't open or find os-release file")
+}
 
-	file, err := syntax.NewParser().Parse(fl, "/usr/lib/os-release")
+func parseOSReleaseFromFile(ctx context.Context, f io.Reader) (*OSRelease, error) {
+	file, err := syntax.NewParser().Parse(f, "/usr/lib/os-release")
 	if err != nil {
 		return nil, err
 	}
 
-	fl.Close()
-
-	// Create new shell interpreter with nop open, exec, readdir, and stat handlers
-	// as well as no environment variables in order to prevent vulnerabilities
-	// caused by changing the os-release file.
-	runner, err := interp.New(
-		interp.OpenHandler(handlers.NopOpen),
-		interp.ExecHandler(handlers.NopExec),
-		interp.ReadDirHandler2(handlers.NopReadDir),
-		interp.StatHandler(handlers.NopStat),
-		interp.Env(expand.ListEnviron()),
-		interp.Dir("/"),
-	)
+	runner, err := newShellRunner()
 	if err != nil {
 		return nil, err
 	}
@@ -98,31 +102,86 @@ func ParseOSRelease(ctx context.Context) (*OSRelease, error) {
 		return nil, err
 	}
 
+	return parseOSReleaseFromRunner(runner)
+}
+
+func newShellRunner() (*interp.Runner, error) {
+	// Create new shell interpreter with nop open, exec, readdir, and stat handlers
+	// as well as no environment variables in order to prevent vulnerabilities
+	return interp.New(
+		interp.OpenHandler(handlers.NopOpen),
+		interp.ExecHandler(handlers.NopExec),
+		interp.ReadDirHandler2(handlers.NopReadDir),
+		interp.StatHandler(handlers.NopStat),
+		interp.Env(expand.ListEnviron()),
+		interp.Dir("/"),
+	)
+}
+
+func parseOSReleaseFromRunner(runner *interp.Runner) (*OSRelease, error) {
+	vars := runner.Vars
 	out := &OSRelease{
-		Name:             runner.Vars["NAME"].Str,
-		PrettyName:       runner.Vars["PRETTY_NAME"].Str,
-		ID:               runner.Vars["ID"].Str,
-		VersionID:        runner.Vars["VERSION_ID"].Str,
-		ANSIColor:        runner.Vars["ANSI_COLOR"].Str,
-		HomeURL:          runner.Vars["HOME_URL"].Str,
-		DocumentationURL: runner.Vars["DOCUMENTATION_URL"].Str,
-		SupportURL:       runner.Vars["SUPPORT_URL"].Str,
-		BugReportURL:     runner.Vars["BUG_REPORT_URL"].Str,
-		Logo:             runner.Vars["LOGO"].Str,
-		PlatformID:       runner.Vars["PLATFORM_ID"].Str,
+		Name:             vars["NAME"].Str,
+		PrettyName:       vars["PRETTY_NAME"].Str,
+		ID:               vars["ID"].Str,
+		VersionID:        vars["VERSION_ID"].Str,
+		ANSIColor:        vars["ANSI_COLOR"].Str,
+		HomeURL:          vars["HOME_URL"].Str,
+		DocumentationURL: vars["DOCUMENTATION_URL"].Str,
+		SupportURL:       vars["SUPPORT_URL"].Str,
+		BugReportURL:     vars["BUG_REPORT_URL"].Str,
+		Logo:             vars["LOGO"].Str,
+		PlatformID:       vars["PLATFORM_ID"].Str,
 	}
 
 	distroUpdated := false
 	if distID, ok := os.LookupEnv("STPLR_DISTRO"); ok {
 		out.ID = distID
+		distroUpdated = true
 	}
 
 	if distLike, ok := os.LookupEnv("STPLR_DISTRO_LIKE"); ok {
 		out.Like = strings.Split(distLike, " ")
-	} else if runner.Vars["ID_LIKE"].IsSet() && !distroUpdated {
-		out.Like = strings.Split(runner.Vars["ID_LIKE"].Str, " ")
+	} else if vars["ID_LIKE"].IsSet() && !distroUpdated {
+		out.Like = strings.Split(vars["ID_LIKE"].Str, " ")
 	}
 
-	parsed = out
+	setReleaseID(runner, out)
+
 	return out, nil
+}
+
+func isIdEqualOrLike(info *OSRelease, id string) bool {
+	return info.ID == id || slices.Contains(info.Like, id)
+}
+
+func parseRHELPlatfrom(platform string) string {
+	re := regexp.MustCompile(`\d+`)
+	return re.FindString(platform)
+}
+
+func setReleaseID(runner *interp.Runner, info *OSRelease) {
+	switch {
+	case info.ID == "altlinux":
+		info.ReleaseID = runner.Vars["ALT_BRANCH_ID"].Str
+
+	case isIdEqualOrLike(info, "rhel"), isIdEqualOrLike(info, "fedora"):
+		info.ReleaseID = parseRHELPlatfrom(runner.Vars["PLATFORM_ID"].Str)
+
+	case isIdEqualOrLike(info, "debian"), isIdEqualOrLike(info, "ubuntu"):
+		info.ReleaseID = runner.Vars["VERSION_CODENAME"].Str
+	}
+
+	if info.ReleaseID == "" {
+		if ver := runner.Vars["VERSION_ID"].Str; ver != "" {
+			if i := strings.Index(ver, "."); i > 0 {
+				info.ReleaseID = ver[:i]
+			} else {
+				info.ReleaseID = ver
+			}
+		}
+	}
+
+	re := regexp.MustCompile(`[^A-Za-z0-9_]`)
+	info.ReleaseID = re.ReplaceAllString(info.ReleaseID, "_")
 }
