@@ -21,10 +21,10 @@ name: Create Release
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'           # Stable releases
-      - 'v[0-9]+.[0-9]+.[0-9]+-rc[0-9]+'  # Release candidates
-      - 'v[0-9]+.[0-9]+.[0-9]+-beta[0-9]+' # Beta releases
-      - 'v[0-9]+.[0-9]+.[0-9]+-alpha[0-9]+' # Alpha releases
+      - 'v[0-9]+.[0-9]+.[0-9]+'               # Stable releases
+      - 'v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+'     # Release candidates
+      - 'v[0-9]+.[0-9]+.[0-9]+-beta.[0-9]+'   # Beta releases
+      - 'v[0-9]+.[0-9]+.[0-9]+-alpha.[0-9]+'  # Alpha releases
 
 jobs:
   changelog:
