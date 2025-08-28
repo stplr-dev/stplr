@@ -442,11 +442,11 @@ msgstr ""
 msgid "Error on dropping capabilities"
 msgstr ""
 
-#: internal/utils/cmd.go:197
+#: internal/utils/cmd.go:211
 msgid "You need to be a %s member or root to perform this action"
 msgstr ""
 
-#: internal/utils/cmd.go:235
+#: internal/utils/cmd.go:249
 msgid "You need to be root to perform this action"
 msgstr ""
 
@@ -527,15 +527,15 @@ msgstr ""
 msgid "AutoProv is not implemented for this package format, so it's skipped"
 msgstr ""
 
-#: pkg/reqprov/rpm/altlinux.go:43
+#: pkg/reqprov/rpm/altlinux.go:44
 msgid "Provided dependency found"
 msgstr ""
 
-#: pkg/reqprov/rpm/altlinux.go:50
+#: pkg/reqprov/rpm/altlinux.go:51
 msgid "Required dependency found"
 msgstr ""
 
-#: pkg/reqprov/rpm/altlinux.go:61
+#: pkg/reqprov/rpm/altlinux.go:62
 msgid "Command not found on the system"
 msgstr ""
 

@@ -151,6 +151,20 @@ func IsRoot() bool {
 	return !IsNotRoot()
 }
 
+func IsBuilderUser() (bool, error) {
+	uid, gid, err := GetUidGidStaplerUser()
+	if err != nil {
+		return false, err
+	}
+	newUid := syscall.Getuid()
+	newGid := syscall.Getgid()
+	if newUid != uid || newGid != gid {
+		return false, nil
+	}
+
+	return true, nil
+}
+
 func EnsureIsBuilderUser() error {
 	uid, gid, err := GetUidGidStaplerUser()
 	if err != nil {

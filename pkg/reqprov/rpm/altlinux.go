@@ -26,6 +26,7 @@ import (
 	"bytes"
 	"context"
 	"log/slog"
+	"os"
 	"os/exec"
 	"path"
 	"strings"
@@ -84,6 +85,7 @@ func rpmFindDependenciesALTLinux(ctx context.Context, pkgInfo *nfpm.Info, dirs t
 		"RPM_FINDREQ_METHOD=",
 		"RPM_DATADIR=",
 		"RPM_SUBPACKAGE_NAME=",
+		"HOME="+os.Getenv("HOME"),
 	)
 	cmd.Env = append(cmd.Env, envs...)
 	var out bytes.Buffer

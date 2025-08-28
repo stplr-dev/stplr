@@ -155,7 +155,12 @@ func getSafeExecutor[T any](subCommand, pluginName string, extraArgs ...string) 
 	args = append(args, extraArgs...)
 	cmd := exec.Command(executable, args...)
 
-	if utils.IsRoot() {
+	isBuildUser, err := utils.IsBuilderUser()
+	if err != nil {
+		return zero, nil, err
+	}
+
+	if utils.IsRoot() || isBuildUser {
 		unixSocketConfig.Group = constants.BuilderGroup
 		setCommonCmdEnv(cmd)
 	} else {
