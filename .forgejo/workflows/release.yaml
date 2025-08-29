@@ -51,10 +51,6 @@ jobs:
           cat CHANGELOG.md >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Get Changes between Tags
-        id: changes
-        uses: https://github.com/simbo/changes-between-tags-action@v1
-
       - name: Set version
         run: |
           version=$(echo "${GITHUB_REF##*/}" | sed 's/^v//')
