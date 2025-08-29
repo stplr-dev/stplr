@@ -3,10 +3,10 @@ GIT_VERSION ?= $(shell git describe --tags )
 IGNORE_ROOT_CHECK ?= 0
 DESTDIR ?=
 
-prefix = /usr/local
-datarootdir = $(prefix)/share
+PREFIX ?= /usr/local
+datarootdir = $(PREFIX)/share
 datadir = $(datarootdir)
-exec_prefix = $(prefix)
+exec_prefix = $(PREFIX)
 bindir = $(exec_prefix)/bin
 sysconfdir = /etc
 
