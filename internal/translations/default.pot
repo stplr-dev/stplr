@@ -214,6 +214,26 @@ msgstr ""
 msgid "Error removing packages"
 msgstr ""
 
+#: internal/app/tui/pager/code_pager.go:44
+msgid "q/Esc - Quit"
+msgstr ""
+
+#: internal/app/tui/pager/nonfree_pager.go:48
+msgid "y - Accept"
+msgstr ""
+
+#: internal/app/tui/pager/nonfree_pager.go:49
+msgid "n/q/Esc - Decline"
+msgstr ""
+
+#: internal/app/tui/pager/nonfree_pager.go:65
+msgid "NON-FREE SOFTWARE AGREEMENT"
+msgstr ""
+
+#: internal/app/tui/pager/nonfree_pager.go:81
+msgid "Full license available at: %s"
+msgstr ""
+
 #: internal/build/build.go:334
 msgid "Installing dependencies"
 msgstr ""
@@ -236,22 +256,6 @@ msgstr ""
 msgid "Applying FireJail integration"
 msgstr ""
 
-#: internal/build/nonfree_pager.go:161
-msgid "NON-FREE SOFTWARE AGREEMENT"
-msgstr ""
-
-#: internal/build/nonfree_pager.go:169
-msgid "y - Accept"
-msgstr ""
-
-#: internal/build/nonfree_pager.go:170
-msgid "n/q/Esc - Decline"
-msgstr ""
-
-#: internal/build/nonfree_pager.go:180
-msgid "Full license available at: %s"
-msgstr ""
-
 #: internal/build/script_executor.go:177
 msgid "Building package metadata"
 msgstr ""
@@ -268,7 +272,7 @@ msgstr ""
 msgid "The checksums array must be the same length as sources"
 msgstr ""
 
-#: internal/build/step_nonfree_view.go:62
+#: internal/build/step_nonfree_view.go:63
 msgid ""
 "This package contains non-free software that requires license acceptance."
 msgstr ""

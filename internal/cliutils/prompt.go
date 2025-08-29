@@ -35,7 +35,7 @@ import (
 
 	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
 
-	"go.stplr.dev/stplr/internal/pager"
+	"go.stplr.dev/stplr/internal/app/tui/pager"
 )
 
 // YesNoPrompt asks the user a yes or no question, using def as the default answer
@@ -102,7 +102,7 @@ func ShowScript(path, name, style string) error {
 		return err
 	}
 
-	pgr := pager.New(name, str)
+	pgr := pager.NewCode(name, str)
 	return pgr.Run()
 }
 

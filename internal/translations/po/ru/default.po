@@ -222,6 +222,27 @@ msgstr "Для команды remove ожидался хотя бы 1 аргум
 msgid "Error removing packages"
 msgstr "Ошибка при удалении пакетов"
 
+#: internal/app/tui/pager/code_pager.go:44
+#, fuzzy
+msgid "q/Esc - Quit"
+msgstr "n/q/Esc - Отклонить"
+
+#: internal/app/tui/pager/nonfree_pager.go:48
+msgid "y - Accept"
+msgstr "y - Принять"
+
+#: internal/app/tui/pager/nonfree_pager.go:49
+msgid "n/q/Esc - Decline"
+msgstr "n/q/Esc - Отклонить"
+
+#: internal/app/tui/pager/nonfree_pager.go:65
+msgid "NON-FREE SOFTWARE AGREEMENT"
+msgstr "СОГЛАШЕНИЕ О НЕСВОБОДНОМ ПО"
+
+#: internal/app/tui/pager/nonfree_pager.go:81
+msgid "Full license available at: %s"
+msgstr "Полный текст лицензии доступен по адресу: %s"
+
 #: internal/build/build.go:334
 msgid "Installing dependencies"
 msgstr "Установка зависимостей"
@@ -246,22 +267,6 @@ msgstr "Этот пакет уже установлен"
 msgid "Applying FireJail integration"
 msgstr "Применение интеграции FireJail"
 
-#: internal/build/nonfree_pager.go:161
-msgid "NON-FREE SOFTWARE AGREEMENT"
-msgstr "СОГЛАШЕНИЕ О НЕСВОБОДНОМ ПО"
-
-#: internal/build/nonfree_pager.go:169
-msgid "y - Accept"
-msgstr "y - Принять"
-
-#: internal/build/nonfree_pager.go:170
-msgid "n/q/Esc - Decline"
-msgstr "n/q/Esc - Отклонить"
-
-#: internal/build/nonfree_pager.go:180
-msgid "Full license available at: %s"
-msgstr "Полный текст лицензии доступен по адресу: %s"
-
 #: internal/build/script_executor.go:177
 msgid "Building package metadata"
 msgstr "Сборка метаданных пакета"
@@ -278,7 +283,7 @@ msgstr "Сборка пакета"
 msgid "The checksums array must be the same length as sources"
 msgstr "Массив контрольных сумм должен быть той же длины, что и источники"
 
-#: internal/build/step_nonfree_view.go:62
+#: internal/build/step_nonfree_view.go:63
 msgid ""
 "This package contains non-free software that requires license acceptance."
 msgstr ""

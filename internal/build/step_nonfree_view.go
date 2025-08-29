@@ -25,6 +25,7 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	"go.stplr.dev/stplr/internal/app/tui/pager"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
@@ -62,7 +63,7 @@ func (v *NonFreeViewer) ViewNonfree(ctx context.Context, pkg *staplerfile.Packag
 		content = gotext.Get("This package contains non-free software that requires license acceptance.")
 	}
 
-	pager := NewNonfree(pkg.Name, content, pkg.NonFreeUrl.Resolved())
+	pager := pager.NewNonfree(pkg.Name, content, pkg.NonFreeUrl.Resolved())
 	accepted, err := pager.Run()
 	if err != nil {
 		return fmt.Errorf("failed to display nonfree: %w", err)
