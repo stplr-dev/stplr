@@ -110,15 +110,17 @@ func (m GenericModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if !m.ready {
 			m.viewport = viewport.New(msg.Width, msg.Height-verticalMarginHeight)
-			m.viewport.HighPerformanceRendering = true
 			m.viewport.YPosition = headerHeight + 1
-			m.viewport.SetContent("\n" + m.cfg.Content)
+			m.viewport.SetHorizontalStep(0)
+			m.viewport.SetContent(lipgloss.NewStyle().Width(msg.Width).Render("\n" + m.cfg.Content))
 			m.ready = true
 		} else {
+			if msg.Width != m.viewport.Width {
+				m.viewport.SetContent(lipgloss.NewStyle().Width(msg.Width).Render("\n" + m.cfg.Content))
+			}
 			m.viewport.Width = msg.Width
 			m.viewport.Height = msg.Height - verticalMarginHeight
 		}
-		cmds = append(cmds, viewport.Sync(m.viewport))
 	}
 
 	m.viewport, cmd = m.viewport.Update(msg)
