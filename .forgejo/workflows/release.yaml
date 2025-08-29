@@ -40,6 +40,17 @@ jobs:
         with:
           go-version: '1.25'
 
+      - name: Install git-chglog
+        run: go install github.com/git-chglog/git-chglog/cmd/git-chglog@v0.15.4
+
+      - name: Generate changelog
+        id: changes
+        run: |
+          git-chglog ${{ github.ref_name }} > CHANGELOG.md
+          echo "changes<<EOF" >> $GITHUB_OUTPUT
+          cat CHANGELOG.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Get Changes between Tags
         id: changes
         uses: https://github.com/simbo/changes-between-tags-action@v1
