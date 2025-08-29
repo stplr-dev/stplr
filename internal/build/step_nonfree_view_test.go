@@ -20,6 +20,7 @@ package build_test
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -34,8 +35,8 @@ type MockNonFreeViewerExecutor struct {
 	mock.Mock
 }
 
-func (m *MockNonFreeViewerExecutor) ViewNonfree(ctx context.Context, pkg *staplerfile.Package, interactive bool) error {
-	args := m.Called(ctx, pkg, interactive)
+func (m *MockNonFreeViewerExecutor) ViewNonfree(ctx context.Context, pkg *staplerfile.Package, scriptPath string, interactive bool) error {
+	args := m.Called(ctx, pkg, scriptPath, interactive)
 	return args.Error(0)
 }
 
@@ -47,8 +48,8 @@ func TestNonfreeViewStepRun(t *testing.T) {
 	pkg1 := &staplerfile.Package{Name: "pkg1"}
 	pkg2 := &staplerfile.Package{Name: "pkg2"}
 
-	mockExecutor.On("ViewNonfree", ctx, pkg1, true).Return(nil)
-	mockExecutor.On("ViewNonfree", ctx, pkg2, true).Return(nil)
+	mockExecutor.On("ViewNonfree", ctx, pkg1, "", true).Return(nil)
+	mockExecutor.On("ViewNonfree", ctx, pkg2, "", true).Return(nil)
 
 	state := build.NewBuildState()
 	state.Packages = []*staplerfile.Package{
@@ -60,6 +61,7 @@ func TestNonfreeViewStepRun(t *testing.T) {
 			Interactive: true,
 		},
 	}
+	state.ScriptFile, _ = staplerfile.ReadFromIOReader(strings.NewReader(""), "")
 
 	step := build.NonfreeViewStep(mockExecutor)
 	err := step.Run(ctx, state)

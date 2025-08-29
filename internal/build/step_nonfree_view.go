@@ -22,6 +22,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -35,7 +37,37 @@ func NewNonFreeViewer(cfg Config) *NonFreeViewer {
 	return &NonFreeViewer{cfg: cfg}
 }
 
-func (v *NonFreeViewer) ViewNonfree(ctx context.Context, pkg *staplerfile.Package, interactive bool) error {
+func resolveUnderBase(baseDir, rel string) (string, error) {
+	joined := filepath.Join(baseDir, rel)
+
+	evaluated, err := filepath.EvalSymlinks(joined)
+	if err != nil {
+		return "", fmt.Errorf("failed to evaluate symlinks: %w", err)
+	}
+
+	absBase, err := filepath.Abs(baseDir)
+	if err != nil {
+		return "", fmt.Errorf("failed to resolve base path: %w", err)
+	}
+
+	absTarget, err := filepath.Abs(evaluated)
+	if err != nil {
+		return "", fmt.Errorf("failed to resolve target path: %w", err)
+	}
+
+	if !strings.HasPrefix(absTarget+string(os.PathSeparator), absBase+string(os.PathSeparator)) {
+		return "", fmt.Errorf("invalid path: %s is outside of base %s", absTarget, absBase)
+	}
+
+	return absTarget, nil
+}
+
+func (v *NonFreeViewer) ViewNonfree(
+	ctx context.Context,
+	pkg *staplerfile.Package,
+	scriptPath string,
+	interactive bool,
+) error {
 	if !interactive {
 		return nil
 	}
@@ -52,7 +84,11 @@ func (v *NonFreeViewer) ViewNonfree(ctx context.Context, pkg *staplerfile.Packag
 
 	switch {
 	case msgFile != "":
-		contentBytes, err := os.ReadFile(msgFile)
+		resolvedFile, err := resolveUnderBase(filepath.Dir(scriptPath), msgFile)
+		if err != nil {
+			return fmt.Errorf("invalid nonfree message file path: %w", err)
+		}
+		contentBytes, err := os.ReadFile(resolvedFile)
 		if err != nil {
 			return fmt.Errorf("failed to read nonfree message file: %w", err)
 		}
@@ -77,7 +113,7 @@ func (v *NonFreeViewer) ViewNonfree(ctx context.Context, pkg *staplerfile.Packag
 }
 
 type NonFreeViewerExecutor interface {
-	ViewNonfree(ctx context.Context, pkg *staplerfile.Package, interactive bool) error
+	ViewNonfree(ctx context.Context, pkg *staplerfile.Package, scriptPath string, interactive bool) error
 }
 
 type nonfreeViewStep struct {
@@ -93,6 +129,7 @@ func (s *nonfreeViewStep) Run(ctx context.Context, state *BuildState) error {
 		if err := s.e.ViewNonfree(
 			ctx,
 			pkg,
+			state.ScriptFile.Path(),
 			state.Input.Opts.Interactive,
 		); err != nil {
 			return err

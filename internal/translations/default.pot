@@ -272,7 +272,7 @@ msgstr ""
 msgid "The checksums array must be the same length as sources"
 msgstr ""
 
-#: internal/build/step_nonfree_view.go:63
+#: internal/build/step_nonfree_view.go:99
 msgid ""
 "This package contains non-free software that requires license acceptance."
 msgstr ""
