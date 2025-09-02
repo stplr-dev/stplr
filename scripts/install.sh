@@ -26,7 +26,7 @@
 
 set -euo pipefail
 
-VERSION="0.0.26"
+VERSION="0.0.27"
 ARCH="linux-x86_64"
 BASE_URL="https://altlinux.space/stapler/stplr/releases/download/v$VERSION"
 TAR_NAME="stplr-$VERSION-$ARCH.tar.gz"
@@ -101,19 +101,20 @@ if [ -d '$TMP_DIR/completions' ]; then
     fi
 fi
 
-# Set capabilities (required)
-if ! command -v setcap >/dev/null 2>&1; then
-    echo '❌ Error: setcap command not found. Please install libcap2-bin package.'
-    exit 1
-fi
+if [ "$VERSION" = "0.0.26" ]; then
+    if ! command -v setcap >/dev/null 2>&1; then
+        echo '❌ Error: setcap command not found. Please install libcap2-bin package.'
+        exit 1
+    fi
 
-echo '🔐 Setting capabilities...'
-if ! setcap cap_setuid,cap_setgid+ep '$STPLR_BIN'; then
-    echo '❌ Error: Failed to set capabilities on $STPLR_BIN'
-    echo 'This is required for stplr to function properly.'
-    exit 1
+    echo '🔐 Setting capabilities...'
+    if ! setcap cap_setuid,cap_setgid+ep '$STPLR_BIN'; then
+        echo '❌ Error: Failed to set capabilities on $STPLR_BIN'
+        echo 'This is required for stplr v0.0.26 to function properly.'
+        exit 1
+    fi
+    echo '✅ Capabilities set successfully'
 fi
-echo '✅ Capabilities set successfully'
 
 # Create system user
 if ! id '$SYSTEM_USER' >/dev/null 2>&1; then
