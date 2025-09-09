@@ -22,13 +22,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package commands
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/leonelquinteros/gotext"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/cliutils"
@@ -50,19 +51,18 @@ func InstallCmd() *cli.Command {
 				Usage:   gotext.Get("Build package from scratch even if there's an already built package available"),
 			},
 		},
-		Action: utils.RootNeededAction(func(c *cli.Context) error {
+		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			args := c.Args()
 			if args.Len() < 1 {
 				return cliutils.FormatCliExit(gotext.Get("Command install expected at least 1 argument, got %d", args.Len()), nil)
 			}
 
-			installer, scripter, cleanup, err := prepareInstallerAndScripter()
+			res, cleanup, err := build.PrepareInstallerAndScripter()
 			if err != nil {
 				return err
 			}
 			defer cleanup()
-
-			ctx := c.Context
+			installer, scripter := res.Installer, res.Scripter
 
 			deps, err := appbuilder.
 				New(ctx).
@@ -106,8 +106,7 @@ func InstallCmd() *cli.Command {
 
 			return nil
 		}),
-		BashComplete: cliutils.BashCompleteWithError(func(c *cli.Context) error {
-			ctx := c.Context
+		ShellComplete: cliutils.BashCompleteWithError(func(ctx context.Context, c *cli.Command) error {
 			deps, err := appbuilder.
 				New(ctx).
 				WithConfig().
@@ -118,7 +117,7 @@ func InstallCmd() *cli.Command {
 			}
 			defer deps.Defer()
 
-			result, err := deps.DB.GetPkgs(c.Context, "true")
+			result, err := deps.DB.GetPkgs(ctx, "true")
 			if err != nil {
 				return cliutils.FormatCliExit(gotext.Get("Error getting packages"), err)
 			}
@@ -137,9 +136,7 @@ func RemoveCmd() *cli.Command {
 		Name:    "remove",
 		Usage:   gotext.Get("Remove an installed package"),
 		Aliases: []string{"rm"},
-		BashComplete: cliutils.BashCompleteWithError(func(c *cli.Context) error {
-			ctx := c.Context
-
+		ShellComplete: cliutils.BashCompleteWithError(func(ctx context.Context, c *cli.Command) error {
 			deps, err := appbuilder.
 				New(ctx).
 				WithConfig().
@@ -165,7 +162,7 @@ func RemoveCmd() *cli.Command {
 				}
 			}
 
-			result, err := deps.DB.GetPkgs(c.Context, "true")
+			result, err := deps.DB.GetPkgs(ctx, "true")
 			if err != nil {
 				return cliutils.FormatCliExit(gotext.Get("Error getting packages"), err)
 			}
@@ -180,14 +177,14 @@ func RemoveCmd() *cli.Command {
 
 			return nil
 		}),
-		Action: utils.RootNeededAction(func(c *cli.Context) error {
+		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			args := c.Args()
 			if args.Len() < 1 {
 				return cliutils.FormatCliExit(gotext.Get("Command remove expected at least 1 argument, got %d", args.Len()), nil)
 			}
 
 			deps, err := appbuilder.
-				New(c.Context).
+				New(ctx).
 				WithManager().
 				Build()
 			if err != nil {

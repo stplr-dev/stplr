@@ -38,9 +38,9 @@ func TestE2EAlrAddRepo(t *testing.T) {
 		"add-repo-remove-repo",
 		COMMON_SYSTEMS,
 		func(t *testing.T, r capytest.Runner) {
-			execShouldNoError(t, r, "sudo", "stplr", "addrepo", "--name", "alr-repo", "--url", REPO_URL_FOR_E2E_TESTS)
+			execShouldNoError(t, r, "sudo", "stplr", "repo", "add", "alr-repo", REPO_URL_FOR_E2E_TESTS)
 			execShouldNoError(t, r, "bash", "-c", "cat /etc/stplr/stplr.toml")
-			execShouldNoError(t, r, "sudo", "stplr", "removerepo", "--name", "alr-repo")
+			execShouldNoError(t, r, "sudo", "stplr", "repo", "rm", "alr-repo")
 
 			r.Command("bash", "-c", "cat /etc/stplr/stplr.toml").
 				ExpectStdoutContains("repo = []").

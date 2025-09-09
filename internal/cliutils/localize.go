@@ -20,19 +20,16 @@ package cliutils
 
 import (
 	"github.com/leonelquinteros/gotext"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Make the application more internationalized
-func Localize(app *cli.App) {
-	app.Setup()
-	cli.AppHelpTemplate = GetAppCliTemplate()
+func Localize(app *cli.Command) {
+	cli.RootCommandHelpTemplate = GetAppCliTemplate()
 	cli.CommandHelpTemplate = GetCommandHelpTemplate()
 	cli.SubcommandHelpTemplate = GetSubcommandHelpTemplate()
+	cli.UsageCommandHelp = gotext.Get("Shows a list of commands or help for one command")
 	cli.HelpFlag.(*cli.BoolFlag).Usage = gotext.Get("Show help")
-	for _, cmd := range app.Commands {
-		if cmd.Name == "help" {
-			cmd.Usage = gotext.Get("Shows a list of commands or help for one command")
-		}
-	}
+
+	// modifyBefore(app)
 }

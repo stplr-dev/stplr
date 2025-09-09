@@ -20,16 +20,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package commands
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"text/template"
 
 	"github.com/jeandeaual/go-locale"
 	"github.com/leonelquinteros/gotext"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/cliutils"
 	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
@@ -77,9 +78,7 @@ func SearchCmd() *cli.Command {
 				Usage:   gotext.Get("Format output using a Go template"),
 			},
 		},
-		Action: utils.ReadonlyAction(func(c *cli.Context) error {
-			ctx := c.Context
-
+		Action: utils.ReadonlyAction(func(ctx context.Context, c *cli.Command) error {
 			var names []string
 			all := c.Bool("all")
 

@@ -20,7 +20,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package appbuilder
+package appBuilder
 
 import (
 	"context"
@@ -53,17 +53,29 @@ func (d *AppDeps) Defer() {
 	}
 }
 
-type AppBuilder struct {
+type appBuilder struct {
 	deps AppDeps
 	err  error
 	ctx  context.Context
 }
 
-func New(ctx context.Context) *AppBuilder {
-	return &AppBuilder{ctx: ctx}
+type AppBuilder interface {
+	UseConfig(cfg *config.ALRConfig) AppBuilder
+	WithConfig() AppBuilder
+	WithDB() AppBuilder
+	WithRepos() AppBuilder
+	WithReposForcePull() AppBuilder
+	WithReposNoPull() AppBuilder
+	WithManager() AppBuilder
+	WithDistroInfo() AppBuilder
+	Build() (*AppDeps, error)
 }
 
-func (b *AppBuilder) UseConfig(cfg *config.ALRConfig) *AppBuilder {
+func New(ctx context.Context) *appBuilder {
+	return &appBuilder{ctx: ctx}
+}
+
+func (b *appBuilder) UseConfig(cfg *config.ALRConfig) AppBuilder {
 	if b.err != nil {
 		return b
 	}
@@ -71,7 +83,7 @@ func (b *AppBuilder) UseConfig(cfg *config.ALRConfig) *AppBuilder {
 	return b
 }
 
-func (b *AppBuilder) WithConfig() *AppBuilder {
+func (b *appBuilder) WithConfig() AppBuilder {
 	if b.err != nil {
 		return b
 	}
@@ -86,7 +98,7 @@ func (b *AppBuilder) WithConfig() *AppBuilder {
 	return b
 }
 
-func (b *AppBuilder) WithDB() *AppBuilder {
+func (b *appBuilder) WithDB() AppBuilder {
 	if b.err != nil {
 		return b
 	}
@@ -107,22 +119,22 @@ func (b *AppBuilder) WithDB() *AppBuilder {
 	return b
 }
 
-func (b *AppBuilder) WithRepos() *AppBuilder {
+func (b *appBuilder) WithRepos() AppBuilder {
 	b.withRepos(true, false)
 	return b
 }
 
-func (b *AppBuilder) WithReposForcePull() *AppBuilder {
+func (b *appBuilder) WithReposForcePull() AppBuilder {
 	b.withRepos(true, true)
 	return b
 }
 
-func (b *AppBuilder) WithReposNoPull() *AppBuilder {
+func (b *appBuilder) WithReposNoPull() AppBuilder {
 	b.withRepos(false, false)
 	return b
 }
 
-func (b *AppBuilder) withRepos(enablePull, forcePull bool) *AppBuilder {
+func (b *appBuilder) withRepos(enablePull, forcePull bool) AppBuilder {
 	if b.err != nil {
 		return b
 	}
@@ -155,7 +167,7 @@ func (b *AppBuilder) withRepos(enablePull, forcePull bool) *AppBuilder {
 	return b
 }
 
-func (b *AppBuilder) WithDistroInfo() *AppBuilder {
+func (b *appBuilder) WithDistroInfo() AppBuilder {
 	if b.err != nil {
 		return b
 	}
@@ -168,7 +180,7 @@ func (b *AppBuilder) WithDistroInfo() *AppBuilder {
 	return b
 }
 
-func (b *AppBuilder) WithManager() *AppBuilder {
+func (b *appBuilder) WithManager() AppBuilder {
 	if b.err != nil {
 		return b
 	}
@@ -181,7 +193,7 @@ func (b *AppBuilder) WithManager() *AppBuilder {
 	return b
 }
 
-func (b *AppBuilder) Build() (*AppDeps, error) {
+func (b *appBuilder) Build() (*AppDeps, error) {
 	if b.err != nil {
 		return nil, b.err
 	}

@@ -34,29 +34,41 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/mattn/go-isatty"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
+	"go.stplr.dev/stplr/internal/app/commands"
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/i18n"
 	"go.stplr.dev/stplr/internal/manager"
-	"go.stplr.dev/stplr/internal/translations"
 
 	"go.stplr.dev/stplr/internal/logger"
 )
 
-func VersionCmd() *cli.Command {
-	return &cli.Command{
-		Name:  "version",
-		Usage: gotext.Get("Print the current Stapler version and exit"),
-		Action: func(ctx *cli.Context) error {
-			println(config.Version)
-			return nil
-		},
+func GetApp() *cli.Command {
+	cmds := []*cli.Command{
+		commands.InstallCmd(),
+		commands.RemoveCmd(),
+		commands.UpgradeCmd(),
+		commands.InfoCmd(),
+		commands.ListCmd(),
+		commands.BuildCmd(),
+		commands.RefreshCmd(),
+		commands.FixCmd(),
+		commands.HelperCmd(),
+		commands.VersionCmd(),
+		commands.SearchCmd(),
+		commands.RepoCmd(),
+		commands.ConfigCmd(),
+		// Internal commands
+		commands.InternalBuildCmd(),
+		commands.InternalInstallCmd(),
+		commands.InternalReposCmd(),
+		commands.InternalCoplyFiles(),
+		commands.InternalSandbox(),
 	}
-}
 
-func GetApp() *cli.App {
-	return &cli.App{
+	return &cli.Command{
 		Name:  "stplr",
 		Usage: gotext.Get("Command-line interface for Stapler, a universal Linux package build system"),
 		Flags: []cli.Flag{
@@ -72,38 +84,16 @@ func GetApp() *cli.App {
 				Usage:   gotext.Get("Enable interactive questions and prompts"),
 			},
 		},
-		Commands: []*cli.Command{
-			InstallCmd(),
-			RemoveCmd(),
-			UpgradeCmd(),
-			InfoCmd(),
-			ListCmd(),
-			BuildCmd(),
-			LegacyAddRepoCmd(),
-			LegacyRemoveRepoCmd(),
-			RefreshCmd(),
-			FixCmd(),
-			HelperCmd(),
-			VersionCmd(),
-			SearchCmd(),
-			RepoCmd(),
-			ConfigCmd(),
-			// Internal commands
-			InternalBuildCmd(),
-			InternalInstallCmd(),
-			InternalReposCmd(),
-			InternalCoplyFiles(),
-			InternalSandbox(),
-		},
-		Before: func(c *cli.Context) error {
+		Commands: cmds,
+		Before: func(ctx context.Context, c *cli.Command) (context.Context, error) {
 			if trimmed := strings.TrimSpace(c.String("pm-args")); trimmed != "" {
 				args := strings.Split(trimmed, " ")
 				manager.Args = append(manager.Args, args...)
 			}
-			return nil
+			return ctx, nil
 		},
-		EnableBashCompletion: true,
-		ExitErrHandler: func(cCtx *cli.Context, err error) {
+		EnableShellCompletion: true,
+		ExitErrHandler: func(ctx context.Context, c *cli.Command, err error) {
 			cliutils.HandleExitCoder(err)
 		},
 	}
@@ -131,7 +121,7 @@ func setLogLevel(newLevel string) {
 func main() {
 	logger.SetupDefault()
 	setLogLevel(os.Getenv("STPLR_LOG_LEVEL"))
-	translations.Setup()
+	i18n.Setup()
 
 	ctx := context.Background()
 
@@ -149,7 +139,7 @@ func main() {
 
 	cliutils.Localize(app)
 
-	err = app.RunContext(ctx, os.Args)
+	err = app.Run(ctx, os.Args)
 	if err != nil {
 		slog.Error(gotext.Get("Error while running app"), "err", err)
 	}

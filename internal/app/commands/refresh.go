@@ -20,11 +20,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package commands
 
 import (
+	"context"
+
 	"github.com/leonelquinteros/gotext"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
 	"go.stplr.dev/stplr/internal/utils"
@@ -35,12 +37,10 @@ func RefreshCmd() *cli.Command {
 		Name:    "refresh",
 		Usage:   gotext.Get("Pull all repositories that have changed"),
 		Aliases: []string{"ref"},
-		Action: utils.RootNeededAction(func(c *cli.Context) error {
+		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			if err := utils.ExitIfCantDropCapsToBuilderUser(); err != nil {
 				return err
 			}
-
-			ctx := c.Context
 
 			deps, err := appbuilder.
 				New(ctx).

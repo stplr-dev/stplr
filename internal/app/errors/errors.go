@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// This file was originally part of the project "ALR - Any Linux Repository"
-// created by the ALR Authors.
-// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
-//
-// Copyright (C) 2025 The ALR Authors
+// Stapler
 // Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
@@ -20,26 +16,35 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//go:build e2e
-
-package e2etests_test
+package errors
 
 import (
-	"testing"
-
-	"go.alt-gnome.ru/capytest"
+	"errors"
 )
 
-func TestE2EBashCompletion(t *testing.T) {
-	t.Parallel()
+type I18nError struct {
+	err     error
+	Message string
+}
 
-	runMatrixSuite(
-		t,
-		"bash-completion",
-		COMMON_SYSTEMS,
-		func(t *testing.T, r capytest.Runner) {
-			execShouldNoError(t, r, "stplr", "fix")
-			execShouldNoError(t, r, "stplr", "install", "--generate-shell-completion")
-		},
-	)
+func (e I18nError) Error() string {
+	return e.err.Error()
+}
+
+func (e I18nError) Unwrap() error {
+	return e.err
+}
+
+func NewI18nError(message string) error {
+	return &I18nError{
+		err:     errors.New(message),
+		Message: message,
+	}
+}
+
+func WrapIntoI18nError(err error, msg string) error {
+	return &I18nError{
+		err,
+		msg,
+	}
 }

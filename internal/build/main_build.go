@@ -24,6 +24,7 @@ package build
 
 import (
 	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/internal/utils"
 )
 
 type mainBuilderConfig interface {
@@ -51,4 +52,44 @@ func NewMainBuilder(
 	)
 
 	return builder, nil
+}
+
+type PrepareResult struct {
+	Installer InstallerExecutor
+	Scripter  ScriptExecutor
+}
+
+func PrepareInstallerAndScripter() (res *PrepareResult, cleanup func(), err error) {
+	var installerClose func()
+	var scripterClose func()
+
+	installer, installerClose, err := GetSafeInstaller()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if utils.IsRoot() {
+		if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
+			installerClose()
+			return nil, nil, err
+		}
+	}
+
+	scripter, scripterClose, err := GetSafeScriptExecutor()
+	if err != nil {
+		installerClose()
+		return nil, nil, err
+	}
+
+	cleanup = func() {
+		scripterClose()
+		installerClose()
+	}
+
+	res = &PrepareResult{
+		Installer: installer,
+		Scripter:  scripter,
+	}
+
+	return res, cleanup, nil
 }

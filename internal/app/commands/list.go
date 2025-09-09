@@ -22,9 +22,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package commands
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -33,7 +34,7 @@ import (
 	"text/template"
 
 	"github.com/leonelquinteros/gotext"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/cliutils"
@@ -64,12 +65,10 @@ func ListCmd() *cli.Command {
 				Usage:   gotext.Get("Format output using a Go template"),
 			},
 		},
-		Action: utils.ReadonlyAction(func(c *cli.Context) error {
+		Action: utils.ReadonlyAction(func(ctx context.Context, c *cli.Command) error {
 			if err := utils.ExitIfRootCantDropCapsNoPrivs(); err != nil {
 				return err
 			}
-
-			ctx := c.Context
 
 			deps, err := appbuilder.
 				New(ctx).

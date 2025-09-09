@@ -23,19 +23,20 @@
 package cliutils
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
 
 	"github.com/leonelquinteros/gotext"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
-type BashCompleteWithErrorFunc func(c *cli.Context) error
+type BashCompleteWithErrorFunc func(ctx context.Context, c *cli.Command) error
 
-func BashCompleteWithError[F ~func(*cli.Context) T, T error](f F) cli.BashCompleteFunc {
-	return func(c *cli.Context) {
-		HandleExitCoder(f(c))
+func BashCompleteWithError[F ~func(context.Context, *cli.Command) T, T error](f F) cli.ShellCompleteFunc {
+	return func(ctx context.Context, c *cli.Command) {
+		HandleExitCoder(f(ctx, c))
 	}
 }
 

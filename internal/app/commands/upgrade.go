@@ -22,7 +22,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package commands
 
 import (
 	"context"
@@ -30,7 +30,7 @@ import (
 	"log/slog"
 
 	"github.com/leonelquinteros/gotext"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"go.elara.ws/vercmp"
 	"golang.org/x/exp/maps"
 
@@ -47,36 +47,6 @@ import (
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-func prepareInstallerAndScripter() (installer build.InstallerExecutor, scripter build.ScriptExecutor, cleanup func(), err error) {
-	var installerClose func()
-	var scripterClose func()
-
-	installer, installerClose, err = build.GetSafeInstaller()
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	if utils.IsRoot() {
-		if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
-			installerClose()
-			return nil, nil, nil, err
-		}
-	}
-
-	scripter, scripterClose, err = build.GetSafeScriptExecutor()
-	if err != nil {
-		installerClose()
-		return nil, nil, nil, err
-	}
-
-	cleanup = func() {
-		scripterClose()
-		installerClose()
-	}
-
-	return installer, scripter, cleanup, nil
-}
-
 func UpgradeCmd() *cli.Command {
 	return &cli.Command{
 		Name:    "upgrade",
@@ -89,14 +59,13 @@ func UpgradeCmd() *cli.Command {
 				Usage:   gotext.Get("Build package from scratch even if there's an already built package available"),
 			},
 		},
-		Action: utils.RootNeededAction(func(c *cli.Context) error {
-			installer, scripter, cleanup, err := prepareInstallerAndScripter()
+		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+			res, cleanup, err := build.PrepareInstallerAndScripter()
 			if err != nil {
 				return err
 			}
 			defer cleanup()
-
-			ctx := c.Context
+			installer, scripter := res.Installer, res.Scripter
 
 			deps, err := appbuilder.
 				New(ctx).

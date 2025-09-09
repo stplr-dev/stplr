@@ -2,6 +2,9 @@ module go.stplr.dev/stplr
 
 go 1.24.4
 
+// see https://github.com/urfave/cli/pull/2196
+replace github.com/urfave/cli/v3 => github.com/Maks1mS/urfave-cli/v3 v3.0.0-20250902060525-3de689e94b58
+
 require (
 	gitea.plemya-x.ru/Plemya-x/fakeroot v0.0.2-0.20250408104831-427aaa7713c3
 	github.com/AlecAivazis/survey/v2 v2.3.7
@@ -32,7 +35,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/spf13/afero v1.14.0
 	github.com/stretchr/testify v1.11.1
-	github.com/urfave/cli/v2 v2.27.7
+	github.com/urfave/cli/v3 v3.4.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	go.alt-gnome.ru/capytest v0.0.3-0.20250706082755-f20413e052f9
 	go.alt-gnome.ru/capytest/providers/podman v0.0.3-0.20250706082755-f20413e052f9
@@ -68,7 +71,6 @@ require (
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/connesc/cipherio v0.2.1 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
@@ -127,7 +129,6 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
-	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/skeema/knownhosts v1.3.1 // indirect
@@ -143,8 +144,8 @@ require (
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
-	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	gitlab.com/digitalxero/go-conventional-commit v1.0.7 // indirect
+	go.uber.org/mock v0.6.0 // indirect
 	go4.org v0.0.0-20200411211856-f5505b9728dd // indirect
 	golang.org/x/mod v0.27.0 // indirect
 	golang.org/x/net v0.43.0 // indirect

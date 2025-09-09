@@ -22,16 +22,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package commands
 
 import (
+	"context"
 	"fmt"
 	"os"
 
 	"github.com/goccy/go-yaml"
 	"github.com/jeandeaual/go-locale"
 	"github.com/leonelquinteros/gotext"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/pkg/staplerfile"
 
@@ -53,12 +54,11 @@ func InfoCmd() *cli.Command {
 				Usage:   gotext.Get("Show all information, not just for the current distro"),
 			},
 		},
-		BashComplete: cliutils.BashCompleteWithError(func(c *cli.Context) error {
+		ShellComplete: cliutils.BashCompleteWithError(func(ctx context.Context, c *cli.Command) error {
 			if err := utils.ExitIfRootCantDropCapsNoPrivs(); err != nil {
 				return err
 			}
 
-			ctx := c.Context
 			deps, err := appbuilder.
 				New(ctx).
 				WithConfig().
@@ -69,7 +69,7 @@ func InfoCmd() *cli.Command {
 			}
 			defer deps.Defer()
 
-			result, err := deps.DB.GetPkgs(c.Context, "true")
+			result, err := deps.DB.GetPkgs(ctx, "true")
 			if err != nil {
 				return cliutils.FormatCliExit(gotext.Get("Error getting packages"), err)
 			}
@@ -79,7 +79,7 @@ func InfoCmd() *cli.Command {
 			}
 			return nil
 		}),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if err := utils.ExitIfRootCantDropCapsNoPrivs(); err != nil {
 				return err
 			}
@@ -88,8 +88,6 @@ func InfoCmd() *cli.Command {
 			if args.Len() < 1 {
 				return cli.Exit(gotext.Get("Command info expected at least 1 argument, got %d", args.Len()), 1)
 			}
-
-			ctx := c.Context
 
 			deps, err := appbuilder.
 				New(ctx).

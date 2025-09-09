@@ -58,7 +58,7 @@ func GetAppCliTemplate() string {
 	{{template "helpNameTemplate" .}}
 
 %s:
-	{{if .UsageText}}{{wrap .UsageText 3}}{{else}}{{.HelpName}} {{if .VisibleFlags}}[%s]{{end}}{{if .Commands}} %s [%s]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[%s...]{{end}}{{end}}{{if .Version}}{{if not .HideVersion}}
+	{{if .UsageText}}{{wrap .UsageText 3}}{{else}}{{.FullName}} {{if .VisibleFlags}}[%s]{{end}}{{if .Commands}} %s [%s]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[%s...]{{end}}{{end}}{{if .Version}}{{if not .HideVersion}}
 
 %s:
 	{{.Version}}{{end}}{{end}}{{if .Description}}
@@ -85,7 +85,7 @@ func GetCommandHelpTemplate() string {
    {{template "helpNameTemplate" .}}
 
 %s:
-   {{if .UsageText}}{{wrap .UsageText 3}}{{else}}{{.HelpName}}{{if .VisibleFlags}} [%s]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[%s...]{{end}}{{end}}{{if .Category}}
+   {{if .UsageText}}{{wrap .UsageText 3}}{{else}}{{.FullName}}{{if .VisibleFlags}} [%s]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[%s...]{{end}}{{end}}{{if .Category}}
 
 %s:
    {{.Category}}{{end}}{{if .Description}}
@@ -112,7 +112,7 @@ func GetSubcommandHelpTemplate() string {
    {{template "helpNameTemplate" .}}
 
 %s:
-   {{if .UsageText}}{{wrap .UsageText 3}}{{else}}{{.HelpName}} {{if .VisibleFlags}}%s [%s]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[%s...]{{end}}{{end}}{{if .Description}}
+   {{if .UsageText}}{{wrap .UsageText 3}}{{else}}{{.FullName}} {{if .VisibleFlags}}%s [%s]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[%s...]{{end}}{{end}}{{if .Description}}
 
 %s:
    {{template "descriptionTemplate" .}}{{end}}{{if .VisibleCommands}}

@@ -22,16 +22,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package commands
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
 	"strings"
 
 	"github.com/leonelquinteros/gotext"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"mvdan.cc/sh/v3/expand"
 	"mvdan.cc/sh/v3/interp"
 
@@ -46,7 +47,7 @@ func HelperCmd() *cli.Command {
 		Name:    "list",
 		Usage:   gotext.Get("List all the available helper commands"),
 		Aliases: []string{"ls"},
-		Action: func(ctx *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			for name := range helpers.Helpers {
 				fmt.Println(name)
 			}
@@ -55,10 +56,10 @@ func HelperCmd() *cli.Command {
 	}
 
 	return &cli.Command{
-		Name:        "helper",
-		Usage:       gotext.Get("Run a Stapler helper command"),
-		ArgsUsage:   `<helper_name|"list">`,
-		Subcommands: []*cli.Command{helperListCmd},
+		Name:      "helper",
+		Usage:     gotext.Get("Run a Stapler helper command"),
+		ArgsUsage: `<helper_name|"list">`,
+		Commands:  []*cli.Command{helperListCmd},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "dest-dir",
@@ -67,9 +68,7 @@ func HelperCmd() *cli.Command {
 				Value:   "dest",
 			},
 		},
-		Action: func(c *cli.Context) error {
-			ctx := c.Context
-
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() < 1 {
 				cli.ShowSubcommandHelpAndExit(c, 1)
 			}
@@ -106,7 +105,7 @@ func HelperCmd() *cli.Command {
 			return helper(hc, c.Args().First(), c.Args().Slice()[1:])
 		},
 		CustomHelpTemplate: cli.CommandHelpTemplate,
-		BashComplete: func(ctx *cli.Context) {
+		ShellComplete: func(ctx context.Context, c *cli.Command) {
 			for name := range helpers.Helpers {
 				fmt.Println(name)
 			}

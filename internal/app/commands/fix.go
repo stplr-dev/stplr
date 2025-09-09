@@ -22,16 +22,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package commands
 
 import (
+	"context"
 	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
 
 	"github.com/leonelquinteros/gotext"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/cliutils"
 	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
@@ -42,12 +43,10 @@ func FixCmd() *cli.Command {
 	return &cli.Command{
 		Name:  "fix",
 		Usage: gotext.Get("Attempt to fix problems with Stapler"),
-		Action: utils.RootNeededAction(func(c *cli.Context) error {
+		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
 				return err
 			}
-
-			ctx := c.Context
 
 			deps, err := appbuilder.
 				New(ctx).

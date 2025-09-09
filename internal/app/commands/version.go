@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// This file was originally part of the project "ALR - Any Linux Repository"
-// created by the ALR Authors.
-// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
-//
-// Copyright (C) 2025 The ALR Authors
+// Stapler
 // Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
@@ -20,26 +16,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//go:build e2e
-
-package e2etests_test
+package commands
 
 import (
-	"testing"
+	"context"
 
-	"go.alt-gnome.ru/capytest"
+	"github.com/leonelquinteros/gotext"
+	"github.com/urfave/cli/v3"
+
+	"go.stplr.dev/stplr/internal/config"
 )
 
-func TestE2EBashCompletion(t *testing.T) {
-	t.Parallel()
-
-	runMatrixSuite(
-		t,
-		"bash-completion",
-		COMMON_SYSTEMS,
-		func(t *testing.T, r capytest.Runner) {
-			execShouldNoError(t, r, "stplr", "fix")
-			execShouldNoError(t, r, "stplr", "install", "--generate-shell-completion")
+func VersionCmd() *cli.Command {
+	return &cli.Command{
+		Name:  "version",
+		Usage: gotext.Get("Print the current Stapler version and exit"),
+		Action: func(ctx context.Context, c *cli.Command) error {
+			println(config.Version)
+			return nil
 		},
-	)
+	}
 }

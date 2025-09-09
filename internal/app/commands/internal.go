@@ -20,9 +20,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package commands
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -32,7 +33,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	"github.com/leonelquinteros/gotext"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/cliutils"
@@ -54,7 +55,7 @@ func InternalBuildCmd() *cli.Command {
 				Name: "user-mode",
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			cfg := config.New()
 			err := cfg.Load()
 			if err != nil {
@@ -114,7 +115,7 @@ func InternalReposCmd() *cli.Command {
 		Name:     "_internal-repos",
 		HideHelp: true,
 		Hidden:   true,
-		Action: utils.RootNeededAction(func(ctx *cli.Context) error {
+		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			logger.SetupForGoPlugin()
 
 			if err := utils.ExitIfCantDropCapsToBuilderUser(); err != nil {
@@ -122,7 +123,7 @@ func InternalReposCmd() *cli.Command {
 			}
 
 			deps, err := appbuilder.
-				New(ctx.Context).
+				New(ctx).
 				WithConfig().
 				WithDB().
 				WithReposNoPull().
@@ -151,13 +152,13 @@ func InternalInstallCmd() *cli.Command {
 		Name:     "_internal-installer",
 		HideHelp: true,
 		Hidden:   true,
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			needRootCmd := utils.IsNotRoot()
 
 			logger.SetupForGoPlugin()
 
 			deps, err := appbuilder.
-				New(c.Context).
+				New(ctx).
 				WithConfig().
 				WithDB().
 				WithReposNoPull().
@@ -198,7 +199,7 @@ func InternalCoplyFiles() *cli.Command {
 		Name:     "_internal-script-copier",
 		HideHelp: true,
 		Hidden:   true,
-		Action: utils.RootNeededAction(func(c *cli.Context) error {
+		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			logger.SetupForGoPlugin()
 			logger := hclog.New(&hclog.LoggerOptions{
 				Name:        "plugin",
@@ -224,10 +225,12 @@ func InternalCoplyFiles() *cli.Command {
 
 func InternalSandbox() *cli.Command {
 	return &cli.Command{
-		Name:     "_internal-sandbox",
-		HideHelp: true,
-		Hidden:   true,
-		Action: func(c *cli.Context) error {
+		Name:                  "_internal-sandbox",
+		HideHelp:              true,
+		Hidden:                true,
+		SkipFlagParsing:       true,
+		EnableShellCompletion: false,
+		Action: func(ctx context.Context, c *cli.Command) error {
 			if c.NArg() < 4 {
 				return fmt.Errorf("not enough arguments: need srcDir, pkgDir, command")
 			}

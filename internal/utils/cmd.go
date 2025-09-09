@@ -23,6 +23,7 @@
 package utils
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -32,7 +33,7 @@ import (
 	"syscall"
 
 	"github.com/leonelquinteros/gotext"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/cliutils"
 	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
@@ -234,9 +235,9 @@ func EscalateToRoot() error {
 }
 
 func RootNeededAction(f cli.ActionFunc) cli.ActionFunc {
-	return func(ctx *cli.Context) error {
+	return func(ctx context.Context, c *cli.Command) error {
 		deps, err := appbuilder.
-			New(ctx.Context).
+			New(ctx).
 			WithConfig().
 			Build()
 		if err != nil {
@@ -262,12 +263,12 @@ func RootNeededAction(f cli.ActionFunc) cli.ActionFunc {
 			cmd.Stderr = os.Stderr
 			return cmd.Run()
 		}
-		return f(ctx)
+		return f(ctx, c)
 	}
 }
 
 func ReadonlyAction(f cli.ActionFunc) cli.ActionFunc {
-	return func(ctx *cli.Context) error {
+	return func(ctx context.Context, c *cli.Command) error {
 		if IsNotRoot() {
 			// TODO: relaunch in userns with HOME hide
 		} else {
@@ -276,6 +277,6 @@ func ReadonlyAction(f cli.ActionFunc) cli.ActionFunc {
 			}
 		}
 
-		return f(ctx)
+		return f(ctx, c)
 	}
 }

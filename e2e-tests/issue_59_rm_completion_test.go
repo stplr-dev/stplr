@@ -40,9 +40,9 @@ func TestE2EIssue59RmCompletion(t *testing.T) {
 		func(t *testing.T, r capytest.Runner) {
 			defaultPrepare(t, r)
 			execShouldNoError(t, r, "sudo", "stplr", "in", "foo-pkg", "bar-pkg")
-			execShouldNoError(t, r, "sh", "-c", "stplr rm --generate-bash-completion | grep ^foo-pkg$")
-			execShouldNoError(t, r, "sh", "-c", "stplr rm --generate-bash-completion | grep ^bar-pkg$")
-			execShouldError(t, r, "sh", "-c", "stplr rm --generate-bash-completion | grep ^test-autoreq-autoprov$")
+			execShouldNoError(t, r, "sh", "-c", "stplr rm --generate-shell-completion | grep ^foo-pkg$")
+			execShouldNoError(t, r, "sh", "-c", "stplr rm --generate-shell-completion | grep ^bar-pkg$")
+			execShouldError(t, r, "sh", "-c", "stplr rm --generate-shell-completion | grep ^test-autoreq-autoprov$")
 		},
 	)
 }

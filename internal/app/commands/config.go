@@ -20,16 +20,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package commands
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/leonelquinteros/gotext"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/cliutils"
 	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
@@ -40,7 +41,7 @@ func ConfigCmd() *cli.Command {
 	return &cli.Command{
 		Name:  "config",
 		Usage: gotext.Get("Manage config"),
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			ShowCmd(),
 			SetConfig(),
 			GetConfig(),
@@ -52,12 +53,12 @@ func ShowCmd() *cli.Command {
 	return &cli.Command{
 		Name:  "show",
 		Usage: gotext.Get("Show config"),
-		BashComplete: cliutils.BashCompleteWithError(func(c *cli.Context) error {
+		ShellComplete: cliutils.BashCompleteWithError(func(ctx context.Context, c *cli.Command) error {
 			return nil
 		}),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			deps, err := appbuilder.
-				New(c.Context).
+				New(ctx).
 				WithConfig().
 				Build()
 			if err != nil {
@@ -91,7 +92,7 @@ func SetConfig() *cli.Command {
 		Name:      "set",
 		Usage:     gotext.Get("Set config value"),
 		ArgsUsage: gotext.Get("<key> <value>"),
-		BashComplete: cliutils.BashCompleteWithError(func(c *cli.Context) error {
+		ShellComplete: cliutils.BashCompleteWithError(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() == 0 {
 				for _, key := range configKeys {
 					fmt.Println(key)
@@ -100,7 +101,7 @@ func SetConfig() *cli.Command {
 			}
 			return nil
 		}),
-		Action: utils.RootNeededAction(func(c *cli.Context) error {
+		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() < 2 {
 				return cliutils.FormatCliExit("missing args", nil)
 			}
@@ -109,7 +110,7 @@ func SetConfig() *cli.Command {
 			value := c.Args().Get(1)
 
 			deps, err := appbuilder.
-				New(c.Context).
+				New(ctx).
 				WithConfig().
 				Build()
 			if err != nil {
@@ -175,7 +176,7 @@ func GetConfig() *cli.Command {
 		Name:      "get",
 		Usage:     gotext.Get("Get config value"),
 		ArgsUsage: gotext.Get("<key>"),
-		BashComplete: cliutils.BashCompleteWithError(func(c *cli.Context) error {
+		ShellComplete: cliutils.BashCompleteWithError(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() == 0 {
 				for _, key := range configKeys {
 					fmt.Println(key)
@@ -184,9 +185,9 @@ func GetConfig() *cli.Command {
 			}
 			return nil
 		}),
-		Action: utils.ReadonlyAction(func(c *cli.Context) error {
+		Action: utils.ReadonlyAction(func(ctx context.Context, c *cli.Command) error {
 			deps, err := appbuilder.
-				New(c.Context).
+				New(ctx).
 				WithConfig().
 				Build()
 			if err != nil {

@@ -40,7 +40,7 @@ ifeq ($(GENERATE),1)
 else
 	@echo "Skipping go generate (GENERATE=0)"
 endif
-	go build -ldflags="-X 'go.stplr.dev/stplr/internal/config.Version=$(GIT_VERSION)'" -o $@
+	go build -ldflags="-X 'go.stplr.dev/stplr/internal/config.Version=$(GIT_VERSION)'" -o $@ ./cmd/stplr
 
 install: build install-config install-sysusers install-tmpfiles install-cachedir
 	install -Dm755 $(BIN) $(DESTDIR)$(bindir)/$(NAME)
@@ -88,9 +88,9 @@ fmt:
 	$(GOLANGCI_LINT_BIN) run --fix	
 
 i18n:
-	$(XGOTEXT_BIN) --output ./internal/translations/default.pot
-	msguniq --use-first -o ./internal/translations/default.pot ./internal/translations/default.pot
-	msgmerge --backup=off -U ./internal/translations/po/ru/default.po ./internal/translations/default.pot
+	$(XGOTEXT_BIN) --output ./internal/i18n/default.pot
+	msguniq --use-first -o ./internal/i18n/default.pot ./internal/i18n/default.pot
+	msgmerge --backup=off -U ./internal/i18n/po/ru/default.po ./internal/i18n/default.pot
 
 test: test-unit-coverage test-e2e
 	@echo "All tests completed successfully!"
@@ -114,3 +114,11 @@ update-license:
 
 update-deps-cve:
 	bash scripts/update-deps-cve.sh
+
+MOCKS_DESTINATION=mocks
+mocks: internal/services/builder/steps.go internal/build/executors_plugins.go
+	@echo "Generating mocks..."
+	@rm -rf $(MOCKS_DESTINATION)
+	@for file in $^; do \
+		mockgen -source=$$file -destination=$(MOCKS_DESTINATION)/$$(basename $$file) --package=mocks --exclude_interfaces=step; \
+	done

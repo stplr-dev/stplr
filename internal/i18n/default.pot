@@ -9,209 +9,383 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: build.go:48
+#: cmd/stplr/main.go:73
+msgid ""
+"Command-line interface for Stapler, a universal Linux package build system"
+msgstr ""
+
+#: cmd/stplr/main.go:78
+msgid "Arguments to be passed on to the package manager"
+msgstr ""
+
+#: cmd/stplr/main.go:84
+msgid "Enable interactive questions and prompts"
+msgstr ""
+
+#: cmd/stplr/main.go:132
+msgid "Error loading config"
+msgstr ""
+
+#: cmd/stplr/main.go:144
+msgid "Error while running app"
+msgstr ""
+
+#: internal/app/commands/build.go:40
 msgid "Build a local package"
 msgstr ""
 
-#: build.go:54
+#: internal/app/commands/build.go:46
 msgid "Path to the build script"
 msgstr ""
 
-#: build.go:59
+#: internal/app/commands/build.go:51
 msgid "Specify subpackage in script (for multi package script only)"
 msgstr ""
 
-#: build.go:64
+#: internal/app/commands/build.go:56
 msgid "Name of the package to build and its repo (example: default/go-bin)"
 msgstr ""
 
-#: build.go:69
+#: internal/app/commands/build.go:61
 msgid ""
 "Build package from scratch even if there's an already built package available"
 msgstr ""
 
-#: build.go:89
-msgid "Your settings do not allow build command"
-msgstr ""
-
-#: build.go:98
-msgid "Error getting working directory"
-msgstr ""
-
-#: build.go:126
-msgid "Cannot get absolute script path"
-msgstr ""
-
-#: build.go:152
-msgid "Package not found"
-msgstr ""
-
-#: build.go:165
-msgid "Nothing to build"
-msgstr ""
-
-#: build.go:246
-msgid "Error building package"
-msgstr ""
-
-#: build.go:253 build.go:257
-msgid "Error moving the package"
-msgstr ""
-
-#: build.go:263
-msgid "Done"
-msgstr ""
-
-#: config.go:42
+#: internal/app/commands/config.go:43
 msgid "Manage config"
 msgstr ""
 
-#: config.go:54
+#: internal/app/commands/config.go:55
 msgid "Show config"
 msgstr ""
 
-#: config.go:92
+#: internal/app/commands/config.go:93
 msgid "Set config value"
 msgstr ""
 
-#: config.go:93
+#: internal/app/commands/config.go:94
 msgid "<key> <value>"
 msgstr ""
 
-#: config.go:146
+#: internal/app/commands/config.go:147
 msgid "use 'repo add/remove' commands to manage repositories"
 msgstr ""
 
-#: config.go:155
+#: internal/app/commands/config.go:156
 msgid "invalid boolean value for %s: %s"
 msgstr ""
 
-#: config.go:159 config.go:246
+#: internal/app/commands/config.go:160 internal/app/commands/config.go:247
 msgid "unknown config key: %s"
 msgstr ""
 
-#: config.go:164
+#: internal/app/commands/config.go:165
 msgid "failed to save config"
 msgstr ""
 
-#: config.go:167
+#: internal/app/commands/config.go:168
 msgid "Successfully set %s = %s"
 msgstr ""
 
-#: config.go:176
+#: internal/app/commands/config.go:177
 msgid "Get config value"
 msgstr ""
 
-#: config.go:177
+#: internal/app/commands/config.go:178
 msgid "<key>"
 msgstr ""
 
-#: fix.go:44
+#: internal/app/commands/fix.go:45
 msgid "Attempt to fix problems with Stapler"
 msgstr ""
 
-#: fix.go:65
+#: internal/app/commands/fix.go:64
 msgid "Clearing cache directory"
 msgstr ""
 
-#: fix.go:69
+#: internal/app/commands/fix.go:68
 msgid "Unable to open cache directory"
 msgstr ""
 
-#: fix.go:75
+#: internal/app/commands/fix.go:74
 msgid "Unable to read cache directory contents"
 msgstr ""
 
-#: fix.go:87
+#: internal/app/commands/fix.go:86
 msgid "Unable to remove cache item (%s)"
 msgstr ""
 
-#: fix.go:91
+#: internal/app/commands/fix.go:90
 msgid "Rebuilding cache"
 msgstr ""
 
-#: fix.go:95
+#: internal/app/commands/fix.go:94
 msgid "Unable to create new cache directory"
 msgstr ""
 
-#: helper.go:47
+#: internal/app/commands/fix.go:108
+msgid "Done"
+msgstr ""
+
+#: internal/app/commands/helper.go:48
 msgid "List all the available helper commands"
 msgstr ""
 
-#: helper.go:59
+#: internal/app/commands/helper.go:60
 msgid "Run a Stapler helper command"
 msgstr ""
 
-#: helper.go:66
+#: internal/app/commands/helper.go:67
 msgid "The directory that the install commands will install to"
 msgstr ""
 
-#: helper.go:79 helper.go:80
+#: internal/app/commands/helper.go:78 internal/app/commands/helper.go:79
 msgid "No such helper command"
 msgstr ""
 
-#: helper.go:90
+#: internal/app/commands/helper.go:84
+msgid "Error getting working directory"
+msgstr ""
+
+#: internal/app/commands/helper.go:89
 msgid "Error parsing os-release file"
 msgstr ""
 
-#: info.go:48
+#: internal/app/commands/info.go:49
 msgid "Print information about a package"
 msgstr ""
 
-#: info.go:53
+#: internal/app/commands/info.go:54
 msgid "Show all information, not just for the current distro"
 msgstr ""
 
-#: info.go:74
+#: internal/app/commands/info.go:74
 msgid "Error getting packages"
 msgstr ""
 
-#: info.go:89
+#: internal/app/commands/info.go:89
 msgid "Command info expected at least 1 argument, got %d"
 msgstr ""
 
-#: info.go:110
+#: internal/app/commands/info.go:108
 msgid "Error finding packages"
 msgstr ""
 
-#: info.go:124
+#: internal/app/commands/info.go:112
+msgid "Package not found"
+msgstr ""
+
+#: internal/app/commands/info.go:122
 msgid "Can't detect system language"
 msgstr ""
 
-#: info.go:140
+#: internal/app/commands/info.go:138
 msgid "Error resolving overrides"
 msgstr ""
 
-#: info.go:149
+#: internal/app/commands/info.go:147
 msgid "Error encoding script variables"
 msgstr ""
 
-#: install.go:44
+#: internal/app/commands/install.go:45
 msgid "Install a new package"
 msgstr ""
 
-#: install.go:56
+#: internal/app/commands/install.go:57
 msgid "Command install expected at least 1 argument, got %d"
 msgstr ""
 
-#: install.go:104
+#: internal/app/commands/install.go:104
 msgid "Error when installing the package"
 msgstr ""
 
-#: install.go:138
+#: internal/app/commands/install.go:137
 msgid "Remove an installed package"
 msgstr ""
 
-#: install.go:157
+#: internal/app/commands/install.go:154
 msgid "Error listing installed packages"
 msgstr ""
 
-#: install.go:186
+#: internal/app/commands/install.go:183
 msgid "Command remove expected at least 1 argument, got %d"
 msgstr ""
 
-#: install.go:201
+#: internal/app/commands/install.go:198
 msgid "Error removing packages"
+msgstr ""
+
+#: internal/app/commands/list.go:51
+msgid "List Stapler repo packages"
+msgstr ""
+
+#: internal/app/commands/list.go:65
+msgid "Format output using a Go template"
+msgstr ""
+
+#: internal/app/commands/list.go:93
+msgid "Error getting packages for upgrade"
+msgstr ""
+
+#: internal/app/commands/list.go:96
+msgid "No packages for upgrade"
+msgstr ""
+
+#: internal/app/commands/list.go:106 internal/app/commands/list.go:203
+msgid "Error parsing format template"
+msgstr ""
+
+#: internal/app/commands/list.go:112 internal/app/commands/list.go:207
+msgid "Error executing template"
+msgstr ""
+
+#: internal/app/commands/list.go:142
+msgid "Unable to detect a supported package manager on the system"
+msgstr ""
+
+#: internal/app/commands/list.go:166
+msgid "Failed to parse release"
+msgstr ""
+
+#: internal/app/commands/refresh.go:38
+msgid "Pull all repositories that have changed"
+msgstr ""
+
+#: internal/app/commands/repo.go:48
+msgid "Manage repos"
+msgstr ""
+
+#: internal/app/commands/repo.go:62
+msgid "Remove an existing repository"
+msgstr ""
+
+#: internal/app/commands/repo.go:64 internal/app/commands/repo.go:518
+msgid "<name>"
+msgstr ""
+
+#: internal/app/commands/repo.go:106 internal/app/commands/repo.go:462
+#: internal/app/commands/repo.go:564
+msgid "Repo \"%s\" does not exist"
+msgstr ""
+
+#: internal/app/commands/repo.go:113
+msgid "Error removing repo directory"
+msgstr ""
+
+#: internal/app/commands/repo.go:117 internal/app/commands/repo.go:196
+#: internal/app/commands/repo.go:253 internal/app/commands/repo.go:315
+#: internal/app/commands/repo.go:387 internal/app/commands/repo.go:501
+#: internal/app/commands/repo.go:572
+msgid "Error saving config"
+msgstr ""
+
+#: internal/app/commands/repo.go:136
+msgid "Error removing packages from database"
+msgstr ""
+
+#: internal/app/commands/repo.go:147
+msgid "Add a new repository"
+msgstr ""
+
+#: internal/app/commands/repo.go:148 internal/app/commands/repo.go:270
+#: internal/app/commands/repo.go:344 internal/app/commands/repo.go:400
+msgid "<name> <url>"
+msgstr ""
+
+#: internal/app/commands/repo.go:171
+msgid "Repo \"%s\" already exists"
+msgstr ""
+
+#: internal/app/commands/repo.go:207
+msgid "Set the reference of the repository"
+msgstr ""
+
+#: internal/app/commands/repo.go:208
+msgid "<name> <ref>"
+msgstr ""
+
+#: internal/app/commands/repo.go:258 internal/app/commands/repo.go:320
+msgid "Error pulling repositories"
+msgstr ""
+
+#: internal/app/commands/repo.go:269
+msgid "Set the main url of the repository"
+msgstr ""
+
+#: internal/app/commands/repo.go:331
+msgid "Manage mirrors of repos"
+msgstr ""
+
+#: internal/app/commands/repo.go:343
+msgid "Add a mirror URL to repository"
+msgstr ""
+
+#: internal/app/commands/repo.go:399
+msgid "Remove mirror from the repository"
+msgstr ""
+
+#: internal/app/commands/repo.go:417
+msgid "Ignore if mirror does not exist"
+msgstr ""
+
+#: internal/app/commands/repo.go:422
+msgid "Match partial URL (e.g., github.com instead of full URL)"
+msgstr ""
+
+#: internal/app/commands/repo.go:487
+msgid "No mirrors containing \"%s\" found in repo \"%s\""
+msgstr ""
+
+#: internal/app/commands/repo.go:489
+msgid "URL \"%s\" does not exist in repo \"%s\""
+msgstr ""
+
+#: internal/app/commands/repo.go:505 internal/app/commands/repo.go:576
+msgid "Removed %d mirrors from repo \"%s\"\n"
+msgstr ""
+
+#: internal/app/commands/repo.go:517
+msgid "Remove all mirrors from the repository"
+msgstr ""
+
+#: internal/app/commands/search.go:47
+msgid "Search packages"
+msgstr ""
+
+#: internal/app/commands/search.go:58
+msgid "Search by name"
+msgstr ""
+
+#: internal/app/commands/search.go:63
+msgid "Search by description"
+msgstr ""
+
+#: internal/app/commands/search.go:68
+msgid "Search by repository"
+msgstr ""
+
+#: internal/app/commands/search.go:73
+msgid "Search by provides"
+msgstr ""
+
+#: internal/app/commands/search.go:131
+msgid "Error while executing search"
+msgstr ""
+
+#: internal/app/commands/upgrade.go:53
+msgid "Upgrade all installed packages"
+msgstr ""
+
+#: internal/app/commands/upgrade.go:96 internal/app/commands/upgrade.go:113
+msgid "Error checking for updates"
+msgstr ""
+
+#: internal/app/commands/upgrade.go:116
+msgid "There is nothing to do."
+msgstr ""
+
+#: internal/app/commands/version.go:33
+msgid "Print the current Stapler version and exit"
 msgstr ""
 
 #: internal/app/tui/pager/code_pager.go:44
@@ -285,28 +459,16 @@ msgstr ""
 msgid "Downloading sources"
 msgstr ""
 
-#: internal/cliutils/app_builder/builder.go:81
-msgid "Error loading config"
-msgstr ""
-
-#: internal/cliutils/app_builder/builder.go:102
+#: internal/cliutils/app_builder/builder.go:114
 msgid "Error initialization database"
 msgstr ""
 
-#: internal/cliutils/app_builder/builder.go:148
-msgid "Error pulling repositories"
-msgstr ""
-
-#: internal/cliutils/app_builder/builder.go:178
-msgid "Unable to detect a supported package manager on the system"
+#: internal/cliutils/localize.go:31
+msgid "Shows a list of commands or help for one command"
 msgstr ""
 
 #: internal/cliutils/localize.go:32
 msgid "Show help"
-msgstr ""
-
-#: internal/cliutils/localize.go:35
-msgid "Shows a list of commands or help for one command"
 msgstr ""
 
 #: internal/cliutils/prompt.go:66
@@ -397,7 +559,7 @@ msgstr ""
 msgid "OPTIONS"
 msgstr ""
 
-#: internal/cliutils/utils.go:77
+#: internal/cliutils/utils.go:78
 msgid ""
 "This command is deprecated and would be removed in the future, use \"%s\" "
 "instead!"
@@ -442,65 +604,32 @@ msgid ""
 "Try updating Stapler if something doesn't work."
 msgstr ""
 
-#: internal/utils/cmd.go:104
+#: internal/services/builder/service.go:57
+msgid "Nothing to build"
+msgstr ""
+
+#: internal/services/builder/service.go:71
+msgid "Error building package"
+msgstr ""
+
+#: internal/services/builder/steps.go:84
+msgid "Your settings do not allow build command"
+msgstr ""
+
+#: internal/services/builder/steps.go:285
+msgid "Error moving the package"
+msgstr ""
+
+#: internal/utils/cmd.go:105
 msgid "Error on dropping capabilities"
 msgstr ""
 
-#: internal/utils/cmd.go:211
+#: internal/utils/cmd.go:212
 msgid "You need to be a %s member or root to perform this action"
 msgstr ""
 
-#: internal/utils/cmd.go:249
+#: internal/utils/cmd.go:250
 msgid "You need to be root to perform this action"
-msgstr ""
-
-#: list.go:50
-msgid "List Stapler repo packages"
-msgstr ""
-
-#: list.go:64
-msgid "Format output using a Go template"
-msgstr ""
-
-#: list.go:94
-msgid "Error getting packages for upgrade"
-msgstr ""
-
-#: list.go:97
-msgid "No packages for upgrade"
-msgstr ""
-
-#: list.go:107 list.go:204
-msgid "Error parsing format template"
-msgstr ""
-
-#: list.go:113 list.go:208
-msgid "Error executing template"
-msgstr ""
-
-#: list.go:167
-msgid "Failed to parse release"
-msgstr ""
-
-#: main.go:50
-msgid "Print the current Stapler version and exit"
-msgstr ""
-
-#: main.go:61
-msgid ""
-"Command-line interface for Stapler, a universal Linux package build system"
-msgstr ""
-
-#: main.go:66
-msgid "Arguments to be passed on to the package manager"
-msgstr ""
-
-#: main.go:72
-msgid "Enable interactive questions and prompts"
-msgstr ""
-
-#: main.go:154
-msgid "Error while running app"
 msgstr ""
 
 #: pkg/dl/dl.go:175
@@ -541,145 +670,4 @@ msgstr ""
 
 #: pkg/reqprov/rpm/altlinux.go:62
 msgid "Command not found on the system"
-msgstr ""
-
-#: refresh.go:36
-msgid "Pull all repositories that have changed"
-msgstr ""
-
-#: repo.go:47
-msgid "Manage repos"
-msgstr ""
-
-#: repo.go:61 repo.go:630
-msgid "Remove an existing repository"
-msgstr ""
-
-#: repo.go:63 repo.go:526
-msgid "<name>"
-msgstr ""
-
-#: repo.go:108 repo.go:470 repo.go:573
-msgid "Repo \"%s\" does not exist"
-msgstr ""
-
-#: repo.go:115
-msgid "Error removing repo directory"
-msgstr ""
-
-#: repo.go:119 repo.go:200 repo.go:258 repo.go:321 repo.go:394 repo.go:509
-#: repo.go:581
-msgid "Error saving config"
-msgstr ""
-
-#: repo.go:138
-msgid "Error removing packages from database"
-msgstr ""
-
-#: repo.go:149 repo.go:600
-msgid "Add a new repository"
-msgstr ""
-
-#: repo.go:150 repo.go:275 repo.go:350 repo.go:407
-msgid "<name> <url>"
-msgstr ""
-
-#: repo.go:175
-msgid "Repo \"%s\" already exists"
-msgstr ""
-
-#: repo.go:211
-msgid "Set the reference of the repository"
-msgstr ""
-
-#: repo.go:212
-msgid "<name> <ref>"
-msgstr ""
-
-#: repo.go:274
-msgid "Set the main url of the repository"
-msgstr ""
-
-#: repo.go:337
-msgid "Manage mirrors of repos"
-msgstr ""
-
-#: repo.go:349
-msgid "Add a mirror URL to repository"
-msgstr ""
-
-#: repo.go:406
-msgid "Remove mirror from the repository"
-msgstr ""
-
-#: repo.go:425
-msgid "Ignore if mirror does not exist"
-msgstr ""
-
-#: repo.go:430
-msgid "Match partial URL (e.g., github.com instead of full URL)"
-msgstr ""
-
-#: repo.go:495
-msgid "No mirrors containing \"%s\" found in repo \"%s\""
-msgstr ""
-
-#: repo.go:497
-msgid "URL \"%s\" does not exist in repo \"%s\""
-msgstr ""
-
-#: repo.go:513 repo.go:585
-msgid "Removed %d mirrors from repo \"%s\"\n"
-msgstr ""
-
-#: repo.go:525
-msgid "Remove all mirrors from the repository"
-msgstr ""
-
-#: repo.go:607
-msgid "Name of the new repo"
-msgstr ""
-
-#: repo.go:613
-msgid "URL of the new repo"
-msgstr ""
-
-#: repo.go:637
-msgid "Name of the repo to be deleted"
-msgstr ""
-
-#: search.go:46
-msgid "Search packages"
-msgstr ""
-
-#: search.go:57
-msgid "Search by name"
-msgstr ""
-
-#: search.go:62
-msgid "Search by description"
-msgstr ""
-
-#: search.go:67
-msgid "Search by repository"
-msgstr ""
-
-#: search.go:72
-msgid "Search by provides"
-msgstr ""
-
-#: search.go:132
-msgid "Error while executing search"
-msgstr ""
-
-#: upgrade.go:83
-msgid "Upgrade all installed packages"
-msgstr ""
-
-#: upgrade.go:127 upgrade.go:144
-msgid "Error checking for updates"
-msgstr ""
-
-#: upgrade.go:147
-msgid "There is nothing to do."
 msgstr ""
