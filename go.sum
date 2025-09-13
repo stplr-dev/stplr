@@ -432,6 +432,8 @@ go.alt-gnome.ru/capytest/providers/podman v0.0.3-0.20250706082755-f20413e052f9 h
 go.alt-gnome.ru/capytest/providers/podman v0.0.3-0.20250706082755-f20413e052f9/go.mod h1:Wpq1Ny3eMzADJpMJArA2TZGZbsviUBmawtEPcxnoerg=
 go.elara.ws/vercmp v0.0.0-20231003203944-671892886053 h1:tQ6Kyq9I0Sw9bmXQ1MZdH5EVpEc5brXe8utBCTI5pr0=
 go.elara.ws/vercmp v0.0.0-20231003203944-671892886053/go.mod h1:/7PNW7nFnDR5W7UXZVc04gdVLR/wBNgkm33KgIz0OBk=
+go.elara.ws/vercmp v0.0.0-20250912200949-2e97859b8794 h1:IylaqCGvFp7pgC8tRHpd8yog8MwYR+wFOmRHccSAj34=
+go.elara.ws/vercmp v0.0.0-20250912200949-2e97859b8794/go.mod h1:yeUudQF6GQsZNDYl96NF1ONLrMt2A1Q+Y9uvCZP8aDU=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0/go.mod h1:+kGneAE2xo2IficOXnaByMWTGM9T73dGwxeWcUqIpI8=
 go.opencensus.io v0.22.2/go.mod h1:yxeiOL68Rb0Xd1ddK5vPZ/oVn4vY4Ynel7k9FzqtOIw=
