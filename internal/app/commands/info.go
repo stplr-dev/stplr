@@ -26,21 +26,15 @@ package commands
 
 import (
 	"context"
-	"fmt"
-	"os"
 
-	"github.com/goccy/go-yaml"
-	"github.com/jeandeaual/go-locale"
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
-	"go.stplr.dev/stplr/pkg/staplerfile"
-
+	"go.stplr.dev/stplr/internal/app/deps"
 	"go.stplr.dev/stplr/internal/cliutils"
-	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
-	"go.stplr.dev/stplr/internal/overrides"
+	"go.stplr.dev/stplr/internal/usecase/info"
+	"go.stplr.dev/stplr/internal/usecase/info/shell"
 	"go.stplr.dev/stplr/internal/utils"
-	"go.stplr.dev/stplr/pkg/distro"
 )
 
 func InfoCmd() *cli.Command {
@@ -59,97 +53,35 @@ func InfoCmd() *cli.Command {
 				return err
 			}
 
-			deps, err := appbuilder.
-				New(ctx).
-				WithConfig().
-				WithDB().
-				Build()
+			d, f, err := deps.ForInfoShellComp(ctx)
 			if err != nil {
 				return err
 			}
-			defer deps.Defer()
+			defer f()
 
-			result, err := deps.DB.GetPkgs(ctx, "true")
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Error getting packages"), err)
-			}
-
-			for _, pkg := range result {
-				fmt.Println(pkg.Name)
-			}
-			return nil
+			return shell.New(d.DB).Run(ctx)
 		}),
 		Action: func(ctx context.Context, c *cli.Command) error {
-			if err := utils.ExitIfRootCantDropCapsNoPrivs(); err != nil {
-				return err
-			}
-
 			args := c.Args()
 			if args.Len() < 1 {
 				return cli.Exit(gotext.Get("Command info expected at least 1 argument, got %d", args.Len()), 1)
 			}
 
-			deps, err := appbuilder.
-				New(ctx).
-				WithConfig().
-				WithDB().
-				WithDistroInfo().
-				WithReposNoPull().
-				Build()
+			if err := utils.ExitIfRootCantDropCapsNoPrivs(); err != nil {
+				return err
+			}
+
+			d, f, err := deps.ForInfoAction(ctx)
 			if err != nil {
-				return cli.Exit(err, 1)
+				return err
 			}
-			defer deps.Defer()
+			defer f()
 
-			rs := deps.Repos
-
-			found, _, err := rs.FindPkgs(ctx, args.Slice())
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Error finding packages"), err)
-			}
-
-			if len(found) == 0 {
-				return cliutils.FormatCliExit(gotext.Get("Package not found"), err)
-			}
-
-			pkgs := cliutils.FlattenPkgs(ctx, found, "show", c.Bool("interactive"))
-
-			var names []string
-			all := c.Bool("all")
-
-			systemLang, err := locale.GetLanguage()
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Can't detect system language"), err)
-			}
-			if systemLang == "" {
-				systemLang = "en"
-			}
-
-			info, err := distro.ParseOSRelease(ctx)
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Error parsing os-release file"), err)
-			}
-			names, err = overrides.Resolve(
-				info,
-				overrides.DefaultOpts.
-					WithLanguages([]string{systemLang}),
-			)
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Error resolving overrides"), err)
-			}
-
-			for _, pkg := range pkgs {
-				staplerfile.ResolvePackage(&pkg, names)
-				view := staplerfile.NewPackageView(pkg)
-				view.Resolved = !all
-				err = yaml.NewEncoder(os.Stdout, yaml.UseJSONMarshaler(), yaml.OmitEmpty()).Encode(view)
-				if err != nil {
-					return cliutils.FormatCliExit(gotext.Get("Error encoding script variables"), err)
-				}
-				fmt.Println("---")
-			}
-
-			return nil
+			return info.New(d.Repos, d.Info).Run(ctx, info.Options{
+				All:         c.Bool("all"),
+				Pkgs:        c.Args().Slice(),
+				Interactive: c.Bool("interactive"),
+			})
 		},
 	}
 }

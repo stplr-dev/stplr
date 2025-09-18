@@ -26,16 +26,12 @@ package commands
 
 import (
 	"context"
-	"io/fs"
-	"log/slog"
-	"os"
-	"path/filepath"
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
-	"go.stplr.dev/stplr/internal/cliutils"
-	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
+	"go.stplr.dev/stplr/internal/app/deps"
+	"go.stplr.dev/stplr/internal/usecase/fix"
 	"go.stplr.dev/stplr/internal/utils"
 )
 
@@ -48,86 +44,15 @@ func FixCmd() *cli.Command {
 				return err
 			}
 
-			deps, err := appbuilder.
-				New(ctx).
-				WithConfig().
-				Build()
+			d, f, err := deps.ForFixAction(ctx)
 			if err != nil {
-				return cli.Exit(err, 1)
+				return err
 			}
-			defer deps.Defer()
+			defer f()
 
-			cfg := deps.Cfg
-
-			paths := cfg.GetPaths()
-
-			slog.Info(gotext.Get("Clearing cache directory"))
-
-			dir, err := os.Open(paths.CacheDir)
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Unable to open cache directory"), err)
-			}
-			defer dir.Close()
-
-			entries, err := dir.Readdirnames(-1)
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Unable to read cache directory contents"), err)
-			}
-
-			for _, entry := range entries {
-				fullPath := filepath.Join(paths.CacheDir, entry)
-
-				if err := makeWritableRecursive(fullPath); err != nil {
-					slog.Debug("Failed to make path writable", "path", fullPath, "error", err)
-				}
-
-				err = os.RemoveAll(fullPath)
-				if err != nil {
-					return cliutils.FormatCliExit(gotext.Get("Unable to remove cache item (%s)", entry), err)
-				}
-			}
-
-			slog.Info(gotext.Get("Rebuilding cache"))
-
-			err = os.MkdirAll(paths.CacheDir, 0o755)
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Unable to create new cache directory"), err)
-			}
-
-			deps, err = appbuilder.
-				New(ctx).
-				WithConfig().
-				WithDB().
-				WithReposForcePull().
-				Build()
-			if err != nil {
-				return cli.Exit(err, 1)
-			}
-			defer deps.Defer()
-
-			slog.Info(gotext.Get("Done"))
-
-			return nil
+			return fix.New(d.Config,
+				func(ctx context.Context) (fix.ReposPuller, deps.Cleanup, error) { return deps.ReposGetter(ctx) },
+			).Run(ctx)
 		}),
 	}
-}
-
-func makeWritableRecursive(path string) error {
-	return filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		info, err := d.Info()
-		if err != nil {
-			return err
-		}
-
-		newMode := info.Mode() | 0o200
-		if d.IsDir() {
-			newMode |= 0o100
-		}
-
-		return os.Chmod(path, newMode)
-	})
 }

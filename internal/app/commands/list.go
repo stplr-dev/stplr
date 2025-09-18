@@ -26,23 +26,13 @@ package commands
 
 import (
 	"context"
-	"fmt"
-	"log/slog"
-	"os"
-	"slices"
-	"strings"
-	"text/template"
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
-	"go.stplr.dev/stplr/internal/build"
-	"go.stplr.dev/stplr/internal/cliutils"
-	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
-	"go.stplr.dev/stplr/internal/manager"
-	"go.stplr.dev/stplr/internal/overrides"
+	"go.stplr.dev/stplr/internal/app/deps"
+	"go.stplr.dev/stplr/internal/usecase/list"
 	"go.stplr.dev/stplr/internal/utils"
-	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
 )
 
 func ListCmd() *cli.Command {
@@ -70,145 +60,17 @@ func ListCmd() *cli.Command {
 				return err
 			}
 
-			deps, err := appbuilder.
-				New(ctx).
-				WithConfig().
-				WithDB().
-				WithManager().
-				WithDistroInfo().
-				Build()
+			d, f, err := deps.ForListAction(ctx)
 			if err != nil {
 				return err
 			}
-			defer deps.Defer()
+			defer f()
 
-			cfg := deps.Cfg
-			db := deps.DB
-			mgr := deps.Manager
-			info := deps.Info
-
-			if c.Bool("upgradable") {
-				updates, err := checkForUpdates(ctx, mgr, db, info)
-				if err != nil {
-					return cliutils.FormatCliExit(gotext.Get("Error getting packages for upgrade"), err)
-				}
-				if len(updates) == 0 {
-					slog.Info(gotext.Get("No packages for upgrade"))
-					return nil
-				}
-
-				format := c.String("format")
-				if format == "" {
-					format = "{{.Package.Repository}}/{{.Package.Name}} {{.FromVersion}} -> {{.ToVersion}}\n"
-				}
-				tmpl, err := template.New("format").Parse(format)
-				if err != nil {
-					return cliutils.FormatCliExit(gotext.Get("Error parsing format template"), err)
-				}
-
-				for _, updateInfo := range updates {
-					err = tmpl.Execute(os.Stdout, updateInfo)
-					if err != nil {
-						return cliutils.FormatCliExit(gotext.Get("Error executing template"), err)
-					}
-				}
-
-				return nil
-			}
-
-			// TODO: refactor code below
-
-			where := "true"
-			args := []any(nil)
-			if c.NArg() > 0 {
-				where = "name LIKE ? OR json_array_contains(provides, ?)"
-				args = []any{c.Args().First(), c.Args().First()}
-			}
-
-			result, err := db.GetPkgs(ctx, where, args...)
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Error getting packages"), err)
-			}
-
-			type verInfo struct {
-				Version string
-				Release int
-			}
-
-			installedAlrPackages := map[string]verInfo{}
-			if c.Bool("installed") {
-				mgr := manager.Detect()
-				if mgr == nil {
-					return cli.Exit(gotext.Get("Unable to detect a supported package manager on the system"), 1)
-				}
-
-				installed, err := mgr.ListInstalled(&manager.Opts{})
-				if err != nil {
-					slog.Error(gotext.Get("Error listing installed packages"), "err", err)
-					return cli.Exit(err, 1)
-				}
-
-				for pkgName, version := range installed {
-					matches := build.RegexpALRPackageName.FindStringSubmatch(pkgName)
-					if matches != nil {
-						packageName := matches[build.RegexpALRPackageName.SubexpIndex("package")]
-						repoName := matches[build.RegexpALRPackageName.SubexpIndex("repo")]
-
-						verInfo := verInfo{
-							Version: version,
-							Release: 0,
-						}
-
-						if i := strings.LastIndex(version, "-"); i != -1 {
-							verInfo.Version = version[:i]
-							verInfo.Release, err = overrides.ParseReleasePlatformSpecific(version[i+1:], info)
-							if err != nil {
-								slog.Error(gotext.Get("Failed to parse release"), "err", err)
-								return cli.Exit(err, 1)
-							}
-						}
-
-						installedAlrPackages[fmt.Sprintf("%s/%s", repoName, packageName)] = verInfo
-					}
-				}
-			}
-
-			for _, pkg := range result {
-				if slices.Contains(cfg.IgnorePkgUpdates(), pkg.Name) {
-					continue
-				}
-
-				type packageInfo struct {
-					Package *alrsh.Package
-				}
-
-				pkgInfo := &packageInfo{}
-				pkgInfo.Package = &pkg
-				if c.Bool("installed") {
-					instVersion, ok := installedAlrPackages[fmt.Sprintf("%s/%s", pkg.Repository, pkg.Name)]
-					if !ok {
-						continue
-					} else {
-						pkg.Version = instVersion.Version
-						pkg.Release = instVersion.Release
-					}
-				}
-
-				format := c.String("format")
-				if format == "" {
-					format = "{{.Package.Repository}}/{{.Package.Name}} {{.Package.Version}}-{{.Package.Release}}\n"
-				}
-				tmpl, err := template.New("format").Parse(format)
-				if err != nil {
-					return cliutils.FormatCliExit(gotext.Get("Error parsing format template"), err)
-				}
-				err = tmpl.Execute(os.Stdout, pkgInfo)
-				if err != nil {
-					return cliutils.FormatCliExit(gotext.Get("Error executing template"), err)
-				}
-			}
-
-			return nil
+			return list.New(d.Updater, d.DB, d.Config, d.Info).Run(ctx, list.Options{
+				Upgradable: c.Bool("upgradable"),
+				Installed:  c.Bool("installed"),
+				Format:     c.String("format"),
+			})
 		}),
 	}
 }

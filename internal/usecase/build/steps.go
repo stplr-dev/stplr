@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package builder
+package build
 
 import (
 	"context"
@@ -31,6 +31,7 @@ import (
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/cliutils"
 	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
+	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/osutils"
 	"go.stplr.dev/stplr/internal/utils"
 	"go.stplr.dev/stplr/pkg/staplerfile"
@@ -190,17 +191,7 @@ func (s *copyScript) Execute(ctx context.Context, state *stepState) error {
 type modifyCfgPaths struct{}
 
 func (s *modifyCfgPaths) Execute(ctx context.Context, state *stepState) error {
-	paths := state.input.deps.Cfg.GetPaths()
-
-	userCacheDir, err := os.UserCacheDir()
-	if err != nil {
-		return err
-	}
-
-	paths.CacheDir = filepath.Join(userCacheDir, "stplr")
-	paths.PkgsDir = filepath.Join(paths.CacheDir, "pkgs")
-
-	return nil
+	return config.PatchToUserDirs(state.input.deps.Cfg)
 }
 
 type buildStep struct{}

@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package builder
+package build
 
 import (
 	"context"
@@ -36,12 +36,12 @@ type system interface {
 	Getgid() int
 }
 
-type Service struct {
+type useCase struct {
 	sys system
 }
 
-func New(sys system) *Service {
-	return &Service{sys}
+func New(sys system) *useCase {
+	return &useCase{sys}
 }
 
 type Options struct {
@@ -52,7 +52,7 @@ type Options struct {
 	Interactive bool
 }
 
-func (s *Service) Run(ctx context.Context, opts Options) error {
+func (s *useCase) Run(ctx context.Context, opts Options) error {
 	if opts.Script == "" && opts.Package == "" {
 		return errors.NewI18nError(gotext.Get("Nothing to build"))
 	}
@@ -77,7 +77,7 @@ func (s *Service) Run(ctx context.Context, opts Options) error {
 	return nil
 }
 
-func (s *Service) getSteps(ctx context.Context, state *stepState, opts Options) []step {
+func (s *useCase) getSteps(ctx context.Context, state *stepState, opts Options) []step {
 	var steps []step
 
 	steps = append(steps, &checkStep{})
@@ -109,7 +109,7 @@ func (s *Service) getSteps(ctx context.Context, state *stepState, opts Options) 
 	return steps
 }
 
-func (s *Service) prepareState(ctx context.Context, opts Options) (*stepState, error) {
+func (s *useCase) prepareState(ctx context.Context, opts Options) (*stepState, error) {
 	state := &stepState{}
 	input := &state.input
 	runtime := &state.runtime

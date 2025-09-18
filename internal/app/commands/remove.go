@@ -1,12 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// This file was originally part of the project "LURE - Linux User REpository",
-// created by Elara Musayelyan.
-// It was later modified as part of "ALR - Any Linux Repository" by the ALR Authors.
-// This version has been further modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
-//
-// Copyright (C) Elara Musayelyan (LURE)
-// Copyright (C) 2025 The ALR Authors
+// Stapler
 // Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
@@ -31,31 +25,48 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app/deps"
-	"go.stplr.dev/stplr/internal/usecase/upgrade"
+	"go.stplr.dev/stplr/internal/app/errors"
+	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/usecase/remove/action"
+	"go.stplr.dev/stplr/internal/usecase/remove/shell"
 	"go.stplr.dev/stplr/internal/utils"
 )
 
-func UpgradeCmd() *cli.Command {
+func removeCmdActionChecks(_ context.Context, c *cli.Command) error {
+	args := c.Args()
+	if args.Len() < 1 {
+		return errors.NewI18nError(gotext.Get("Command remove expected at least 1 argument, got %d", args.Len()))
+	}
+	return nil
+}
+
+func RemoveCmd() *cli.Command {
 	return &cli.Command{
-		Name:    "upgrade",
-		Usage:   gotext.Get("Upgrade all installed packages"),
-		Aliases: []string{"up"},
-		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:    "clean",
-				Aliases: []string{"c"},
-				Usage:   gotext.Get("Build package from scratch even if there's an already built package available"),
-			},
-		},
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
-			d, f, err := deps.ForUpgradeAction(ctx)
+		Name:    "remove",
+		Usage:   gotext.Get("Remove an installed package"),
+		Aliases: []string{"rm"},
+		ShellComplete: cliutils.BashCompleteWithError(func(ctx context.Context, c *cli.Command) error {
+			d, f, err := deps.ForRemoveShellComp(ctx)
 			if err != nil {
 				return err
 			}
 			defer f()
 
-			return upgrade.New(d.Builder, d.Updater, d.Manager, d.DB, d.Info).Run(ctx, upgrade.Options{
-				Clean:       c.Bool("clean"),
+			return shell.New(d.Mgr, d.DB).Run(ctx)
+		}),
+		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+			if err := removeCmdActionChecks(ctx, c); err != nil {
+				return err
+			}
+
+			d, f, err := deps.ForRemoveAction(ctx)
+			if err != nil {
+				return err
+			}
+			defer f()
+
+			return action.New(d.Mgr).Run(ctx, action.Options{
+				Pkgs:        c.Args().Slice(),
 				Interactive: c.Bool("interactive"),
 			})
 		}),

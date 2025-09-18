@@ -24,21 +24,13 @@ package commands
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"text/template"
 
-	"github.com/jeandeaual/go-locale"
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
-	"go.stplr.dev/stplr/internal/cliutils"
-	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
-	"go.stplr.dev/stplr/internal/overrides"
-	"go.stplr.dev/stplr/internal/search"
+	"go.stplr.dev/stplr/internal/app/deps"
+	"go.stplr.dev/stplr/internal/usecase/search"
 	"go.stplr.dev/stplr/internal/utils"
-	"go.stplr.dev/stplr/pkg/distro"
-	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
 )
 
 func SearchCmd() *cli.Command {
@@ -79,81 +71,20 @@ func SearchCmd() *cli.Command {
 			},
 		},
 		Action: utils.ReadonlyAction(func(ctx context.Context, c *cli.Command) error {
-			var names []string
-			all := c.Bool("all")
-
-			systemLang, err := locale.GetLanguage()
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Can't detect system language"), err)
-			}
-			if systemLang == "" {
-				systemLang = "en"
-			}
-			if !all {
-				info, err := distro.ParseOSRelease(ctx)
-				if err != nil {
-					return cliutils.FormatCliExit(gotext.Get("Error parsing os-release file"), err)
-				}
-				names, err = overrides.Resolve(
-					info,
-					overrides.DefaultOpts.
-						WithLanguages([]string{systemLang}),
-				)
-				if err != nil {
-					return cliutils.FormatCliExit(gotext.Get("Error resolving overrides"), err)
-				}
-			}
-
-			deps, err := appbuilder.
-				New(ctx).
-				WithConfig().
-				WithDB().
-				Build()
+			d, f, err := deps.ForSearchAction(ctx)
 			if err != nil {
 				return err
 			}
-			defer deps.Defer()
+			defer f()
 
-			database := deps.DB
-
-			s := search.New(database)
-
-			packages, err := s.Search(
-				ctx,
-				search.NewSearchOptions().
-					WithName(c.String("name")).
-					WithDescription(c.String("description")).
-					WithRepository(c.String("repository")).
-					WithProvides(c.String("provides")).
-					Build(),
-			)
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Error while executing search"), err)
-			}
-
-			format := c.String("format")
-			var tmpl *template.Template
-			if format != "" {
-				tmpl, err = template.New("format").Parse(format)
-				if err != nil {
-					return cliutils.FormatCliExit(gotext.Get("Error parsing format template"), err)
-				}
-			}
-
-			for _, pkg := range packages {
-				alrsh.ResolvePackage(&pkg, names)
-				if tmpl != nil {
-					err = tmpl.Execute(os.Stdout, &pkg)
-					if err != nil {
-						return cliutils.FormatCliExit(gotext.Get("Error executing template"), err)
-					}
-					fmt.Println()
-				} else {
-					fmt.Println(pkg.Name)
-				}
-			}
-
-			return nil
+			return search.New(d.Searcher, d.Info).Run(ctx, search.Options{
+				Name:        c.String("name"),
+				Description: c.String("description"),
+				Repository:  c.String("repository"),
+				Provides:    c.String("provides"),
+				Format:      c.String("format"),
+				All:         c.Bool("all"),
+			})
 		}),
 	}
 }

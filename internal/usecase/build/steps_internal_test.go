@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package builder
+package build
 
 import (
 	"context"
@@ -98,6 +98,8 @@ func TestPrepareDbArgsExecute(t *testing.T) {
 }
 
 func TestCopyOutStepExecute(t *testing.T) {
+	const wd = "/test/dir"
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -106,7 +108,7 @@ func TestCopyOutStepExecute(t *testing.T) {
 	ctx := context.Background()
 	state := &stepState{
 		input: stepInputState{
-			wd:      "/test/dir",
+			wd:      wd,
 			origUid: 1000,
 			origGid: 1000,
 		},

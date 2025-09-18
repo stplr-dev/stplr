@@ -26,18 +26,25 @@ package commands
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
-	"go.stplr.dev/stplr/internal/build"
+	"go.stplr.dev/stplr/internal/app/deps"
+	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/cliutils"
-	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
-	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/internal/usecase/install/action"
+	"go.stplr.dev/stplr/internal/usecase/install/shell"
 	"go.stplr.dev/stplr/internal/utils"
-	"go.stplr.dev/stplr/pkg/types"
 )
+
+func installCmdActionChecks(_ context.Context, c *cli.Command) error {
+	args := c.Args()
+	if args.Len() < 1 {
+		return errors.NewI18nError(gotext.Get("Command remove expected at least 1 argument, got %d", args.Len()))
+	}
+	return nil
+}
 
 func InstallCmd() *cli.Command {
 	return &cli.Command{
@@ -51,154 +58,30 @@ func InstallCmd() *cli.Command {
 				Usage:   gotext.Get("Build package from scratch even if there's an already built package available"),
 			},
 		},
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
-			args := c.Args()
-			if args.Len() < 1 {
-				return cliutils.FormatCliExit(gotext.Get("Command install expected at least 1 argument, got %d", args.Len()), nil)
-			}
-
-			res, cleanup, err := build.PrepareInstallerAndScripter()
-			if err != nil {
-				return err
-			}
-			defer cleanup()
-			installer, scripter := res.Installer, res.Scripter
-
-			deps, err := appbuilder.
-				New(ctx).
-				WithConfig().
-				WithDB().
-				WithRepos().
-				WithDistroInfo().
-				WithManager().
-				Build()
-			if err != nil {
-				return err
-			}
-			defer deps.Defer()
-
-			builder, err := build.NewMainBuilder(
-				deps.Cfg,
-				deps.Manager,
-				deps.Repos,
-				scripter,
-				installer,
-			)
-			if err != nil {
-				return err
-			}
-
-			_, err = builder.InstallPkgs(
-				ctx,
-				&build.BuildArgs{
-					Opts: &types.BuildOpts{
-						Clean:       c.Bool("clean"),
-						Interactive: c.Bool("interactive"),
-					},
-					Info:       deps.Info,
-					PkgFormat_: build.GetPkgFormat(deps.Manager),
-				},
-				args.Slice(),
-			)
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Error when installing the package"), err)
-			}
-
-			return nil
-		}),
 		ShellComplete: cliutils.BashCompleteWithError(func(ctx context.Context, c *cli.Command) error {
-			deps, err := appbuilder.
-				New(ctx).
-				WithConfig().
-				WithDB().
-				Build()
+			d, f, err := deps.ForInstallShellComp(ctx)
 			if err != nil {
 				return err
 			}
-			defer deps.Defer()
+			defer f()
 
-			result, err := deps.DB.GetPkgs(ctx, "true")
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Error getting packages"), err)
-			}
-
-			for _, pkg := range result {
-				fmt.Println(pkg.Name)
-			}
-
-			return nil
-		}),
-	}
-}
-
-func RemoveCmd() *cli.Command {
-	return &cli.Command{
-		Name:    "remove",
-		Usage:   gotext.Get("Remove an installed package"),
-		Aliases: []string{"rm"},
-		ShellComplete: cliutils.BashCompleteWithError(func(ctx context.Context, c *cli.Command) error {
-			deps, err := appbuilder.
-				New(ctx).
-				WithConfig().
-				WithDB().
-				WithManager().
-				Build()
-			if err != nil {
-				return cli.Exit(err, 1)
-			}
-			defer deps.Defer()
-
-			installedAlrPackages := map[string]string{}
-			installed, err := deps.Manager.ListInstalled(&manager.Opts{})
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Error listing installed packages"), err)
-			}
-			for pkgName, version := range installed {
-				matches := build.RegexpALRPackageName.FindStringSubmatch(pkgName)
-				if matches != nil {
-					packageName := matches[build.RegexpALRPackageName.SubexpIndex("package")]
-					repoName := matches[build.RegexpALRPackageName.SubexpIndex("repo")]
-					installedAlrPackages[fmt.Sprintf("%s/%s", repoName, packageName)] = version
-				}
-			}
-
-			result, err := deps.DB.GetPkgs(ctx, "true")
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Error getting packages"), err)
-			}
-
-			for _, pkg := range result {
-				_, ok := installedAlrPackages[fmt.Sprintf("%s/%s", pkg.Repository, pkg.Name)]
-				if !ok {
-					continue
-				}
-				fmt.Println(pkg.Name)
-			}
-
-			return nil
+			return shell.New(d.DB).Run(ctx)
 		}),
 		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
-			args := c.Args()
-			if args.Len() < 1 {
-				return cliutils.FormatCliExit(gotext.Get("Command remove expected at least 1 argument, got %d", args.Len()), nil)
+			if err := installCmdActionChecks(ctx, c); err != nil {
+				return err
 			}
 
-			deps, err := appbuilder.
-				New(ctx).
-				WithManager().
-				Build()
+			d, f, err := deps.ForInstallAction(ctx)
 			if err != nil {
 				return err
 			}
-			defer deps.Defer()
+			defer f()
 
-			if err := deps.Manager.Remove(&manager.Opts{
-				NoConfirm: !c.Bool("interactive"),
-			}, c.Args().Slice()...); err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Error removing packages"), err)
-			}
-
-			return nil
+			return action.New(d.Builder, d.Manager, d.Info).Run(ctx, action.Options{
+				Pkgs:        c.Args().Slice(),
+				Interactive: c.Bool("interactive"),
+			})
 		}),
 	}
 }

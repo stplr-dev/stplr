@@ -30,8 +30,8 @@ import (
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
-	"go.stplr.dev/stplr/internal/services/builder"
 	"go.stplr.dev/stplr/internal/sys"
+	"go.stplr.dev/stplr/internal/usecase/build"
 )
 
 func BuildCmd() *cli.Command {
@@ -62,9 +62,9 @@ func BuildCmd() *cli.Command {
 			},
 		},
 		Action: func(ctx context.Context, c *cli.Command) error {
-			return builder.
+			return build.
 				New(sys.Sys{}).
-				Run(ctx, builder.Options{
+				Run(ctx, build.Options{
 					Script:      c.String("script"),
 					Subpackage:  c.String("subpackage"),
 					Package:     c.String("package"),

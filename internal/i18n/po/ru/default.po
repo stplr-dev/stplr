@@ -69,73 +69,25 @@ msgstr "Управление конфигурацией"
 msgid "Show config"
 msgstr "Показать конфигурацию"
 
-#: internal/app/commands/config.go:93
+#: internal/app/commands/config.go:81
 msgid "Set config value"
 msgstr "Установить значение в конфигурации"
 
-#: internal/app/commands/config.go:94
+#: internal/app/commands/config.go:82
 msgid "<key> <value>"
 msgstr "<ключ> <значение>"
 
-#: internal/app/commands/config.go:147
-msgid "use 'repo add/remove' commands to manage repositories"
-msgstr "используйте команды 'repo add/remove' для управления репозиториями"
-
-#: internal/app/commands/config.go:156
-msgid "invalid boolean value for %s: %s"
-msgstr "неверное булево значение для %s: %s"
-
-#: internal/app/commands/config.go:160 internal/app/commands/config.go:247
-msgid "unknown config key: %s"
-msgstr "неизвестный ключ конфигурации: %s"
-
-#: internal/app/commands/config.go:165
-msgid "failed to save config"
-msgstr "не удалось сохранить конфигурацию"
-
-#: internal/app/commands/config.go:168
-msgid "Successfully set %s = %s"
-msgstr "Успешно установлено %s = %s"
-
-#: internal/app/commands/config.go:177
+#: internal/app/commands/config.go:112
 msgid "Get config value"
 msgstr "Получить значение из конфигурации"
 
-#: internal/app/commands/config.go:178
+#: internal/app/commands/config.go:113
 msgid "<key>"
 msgstr "<ключ>"
 
-#: internal/app/commands/fix.go:45
+#: internal/app/commands/fix.go:41
 msgid "Attempt to fix problems with Stapler"
 msgstr "Попытка устранить проблемы с Stapler"
-
-#: internal/app/commands/fix.go:64
-msgid "Clearing cache directory"
-msgstr "Очистка каталога кэша"
-
-#: internal/app/commands/fix.go:68
-msgid "Unable to open cache directory"
-msgstr "Невозможно открыть каталог кэша"
-
-#: internal/app/commands/fix.go:74
-msgid "Unable to read cache directory contents"
-msgstr "Невозможно прочитать содержимое каталога кэша"
-
-#: internal/app/commands/fix.go:86
-msgid "Unable to remove cache item (%s)"
-msgstr "Невозможно удалить элемент кэша (%s)"
-
-#: internal/app/commands/fix.go:90
-msgid "Rebuilding cache"
-msgstr "Восстановление кэша"
-
-#: internal/app/commands/fix.go:94
-msgid "Unable to create new cache directory"
-msgstr "Не удалось создать новый каталог кэша"
-
-#: internal/app/commands/fix.go:108
-msgid "Done"
-msgstr "Сделано"
 
 #: internal/app/commands/helper.go:48
 msgid "List all the available helper commands"
@@ -161,242 +113,133 @@ msgstr "Ошибка при получении рабочего каталога
 msgid "Error parsing os-release file"
 msgstr "Ошибка при разборе файла выпуска операционной системы"
 
-#: internal/app/commands/info.go:49
+#: internal/app/commands/info.go:43
 msgid "Print information about a package"
 msgstr "Отобразить информацию о пакете"
 
-#: internal/app/commands/info.go:54
+#: internal/app/commands/info.go:48
 msgid "Show all information, not just for the current distro"
 msgstr "Показывать всю информацию, не только для текущего дистрибутива"
 
-#: internal/app/commands/info.go:74
-msgid "Error getting packages"
-msgstr "Ошибка при получении пакетов"
-
-#: internal/app/commands/info.go:89
+#: internal/app/commands/info.go:67
 msgid "Command info expected at least 1 argument, got %d"
 msgstr "Для команды info ожидался хотя бы 1 аргумент, получено %d"
 
-#: internal/app/commands/info.go:108
-msgid "Error finding packages"
-msgstr "Ошибка при поиске пакетов"
-
-#: internal/app/commands/info.go:112
-msgid "Package not found"
-msgstr "Пакет не найден"
-
-#: internal/app/commands/info.go:122
-msgid "Can't detect system language"
-msgstr "Ошибка при определении языка системы"
-
-#: internal/app/commands/info.go:138
-msgid "Error resolving overrides"
-msgstr "Ошибка устранения переорпеделений"
-
-#: internal/app/commands/info.go:147
-msgid "Error encoding script variables"
-msgstr "Ошибка кодирования переменных скрита"
-
-#: internal/app/commands/install.go:45
-msgid "Install a new package"
-msgstr "Установить новый пакет"
-
-#: internal/app/commands/install.go:57
-msgid "Command install expected at least 1 argument, got %d"
-msgstr "Для команды install ожидался хотя бы 1 аргумент, получено %d"
-
-#: internal/app/commands/install.go:104
-msgid "Error when installing the package"
-msgstr "Ошибка при установке пакета"
-
-#: internal/app/commands/install.go:137
-msgid "Remove an installed package"
-msgstr "Удалить установленный пакет"
-
-#: internal/app/commands/install.go:154
-msgid "Error listing installed packages"
-msgstr "Ошибка при составлении списка установленных пакетов"
-
-#: internal/app/commands/install.go:183
+#: internal/app/commands/install.go:44
 msgid "Command remove expected at least 1 argument, got %d"
 msgstr "Для команды remove ожидался хотя бы 1 аргумент, получено %d"
 
-#: internal/app/commands/install.go:198
-msgid "Error removing packages"
-msgstr "Ошибка при удалении пакетов"
+#: internal/app/commands/install.go:52
+msgid "Install a new package"
+msgstr "Установить новый пакет"
 
-#: internal/app/commands/list.go:51
+#: internal/app/commands/list.go:41
 msgid "List Stapler repo packages"
 msgstr "Список пакетов репозитория Stapler"
 
-#: internal/app/commands/list.go:65
+#: internal/app/commands/list.go:55
 msgid "Format output using a Go template"
 msgstr "Формат выходных данных с использованием шаблона Go"
-
-#: internal/app/commands/list.go:93
-msgid "Error getting packages for upgrade"
-msgstr "Ошибка при получении пакетов для обновления"
-
-#: internal/app/commands/list.go:96
-msgid "No packages for upgrade"
-msgstr "Нет пакетов к обновлению"
-
-#: internal/app/commands/list.go:106 internal/app/commands/list.go:203
-msgid "Error parsing format template"
-msgstr "Ошибка при разборе шаблона"
-
-#: internal/app/commands/list.go:112 internal/app/commands/list.go:207
-msgid "Error executing template"
-msgstr "Ошибка при выполнении шаблона"
-
-#: internal/app/commands/list.go:142
-msgid "Unable to detect a supported package manager on the system"
-msgstr "Не удалось обнаружить поддерживаемый менеджер пакетов в системе"
-
-#: internal/app/commands/list.go:166
-msgid "Failed to parse release"
-msgstr "Не удалось разобрать релиз"
 
 #: internal/app/commands/refresh.go:38
 msgid "Pull all repositories that have changed"
 msgstr "Скачать все изменённые репозитории"
 
-#: internal/app/commands/repo.go:48
+#: internal/app/commands/remove.go:46
+msgid "Remove an installed package"
+msgstr "Удалить установленный пакет"
+
+#: internal/app/commands/repo.go:49
 msgid "Manage repos"
 msgstr "Управление репозиториями"
 
-#: internal/app/commands/repo.go:62
+#: internal/app/commands/repo.go:63
 msgid "Remove an existing repository"
 msgstr "Удалить существующий репозиторий"
 
-#: internal/app/commands/repo.go:64 internal/app/commands/repo.go:518
+#: internal/app/commands/repo.go:65
 msgid "<name>"
 msgstr "<имя>"
 
-#: internal/app/commands/repo.go:106 internal/app/commands/repo.go:462
-#: internal/app/commands/repo.go:564
-msgid "Repo \"%s\" does not exist"
-msgstr "Репозитория \"%s\" не существует"
-
-#: internal/app/commands/repo.go:113
-msgid "Error removing repo directory"
-msgstr "Ошибка при удалении каталога репозитория"
-
-#: internal/app/commands/repo.go:117 internal/app/commands/repo.go:196
-#: internal/app/commands/repo.go:253 internal/app/commands/repo.go:315
-#: internal/app/commands/repo.go:387 internal/app/commands/repo.go:501
-#: internal/app/commands/repo.go:572
-msgid "Error saving config"
-msgstr "Ошибка при сохранении конфигурации"
-
-#: internal/app/commands/repo.go:136
-msgid "Error removing packages from database"
-msgstr "Ошибка при удалении пакетов из базы данных"
-
-#: internal/app/commands/repo.go:147
+#: internal/app/commands/repo.go:99
 msgid "Add a new repository"
 msgstr "Добавить новый репозиторий"
 
-#: internal/app/commands/repo.go:148 internal/app/commands/repo.go:270
-#: internal/app/commands/repo.go:344 internal/app/commands/repo.go:400
+#: internal/app/commands/repo.go:100 internal/app/commands/repo.go:164
 msgid "<name> <url>"
 msgstr "<имя> <url>"
 
-#: internal/app/commands/repo.go:171
-msgid "Repo \"%s\" already exists"
-msgstr "Репозиторий \"%s\" уже существует"
-
-#: internal/app/commands/repo.go:207
+#: internal/app/commands/repo.go:123
 msgid "Set the reference of the repository"
 msgstr "Установить ссылку на версию репозитория"
 
-#: internal/app/commands/repo.go:208
+#: internal/app/commands/repo.go:124
 msgid "<name> <ref>"
 msgstr "<имя> <ссылка_на_версию>"
 
-#: internal/app/commands/repo.go:258 internal/app/commands/repo.go:320
-msgid "Error pulling repositories"
-msgstr "Ошибка при извлечении репозиториев"
-
-#: internal/app/commands/repo.go:269
+#: internal/app/commands/repo.go:163
 msgid "Set the main url of the repository"
 msgstr "Установить главный URL репозитория"
 
-#: internal/app/commands/repo.go:331
+#: internal/app/commands/repo_mirror.go:39
 msgid "Manage mirrors of repos"
 msgstr "Управление зеркалами репозитория"
 
-#: internal/app/commands/repo.go:343
+#: internal/app/commands/repo_mirror.go:51
 msgid "Add a mirror URL to repository"
 msgstr "Добавить зеркало репозитория"
 
-#: internal/app/commands/repo.go:399
+#: internal/app/commands/repo_mirror.go:89
 msgid "Remove mirror from the repository"
 msgstr "Удалить зеркало из репозитория"
 
-#: internal/app/commands/repo.go:417
+#: internal/app/commands/repo_mirror.go:107
 msgid "Ignore if mirror does not exist"
 msgstr "Игнорировать, если зеркала не существует"
 
-#: internal/app/commands/repo.go:422
+#: internal/app/commands/repo_mirror.go:112
 msgid "Match partial URL (e.g., github.com instead of full URL)"
 msgstr "Соответствует частичному URL (например, github.com вместо полного URL)"
 
-#: internal/app/commands/repo.go:487
-msgid "No mirrors containing \"%s\" found in repo \"%s\""
-msgstr "В репозитории \"%s\" не найдено зеркал, содержащих \"%s\""
-
-#: internal/app/commands/repo.go:489
-msgid "URL \"%s\" does not exist in repo \"%s\""
-msgstr "URL \"%s\" не существует в репозитории \"%s\""
-
-#: internal/app/commands/repo.go:505 internal/app/commands/repo.go:576
-msgid "Removed %d mirrors from repo \"%s\"\n"
-msgstr "Удалены зеркала %d из репозитория \"%s\"\n"
-
-#: internal/app/commands/repo.go:517
+#: internal/app/commands/repo_mirror.go:140
 msgid "Remove all mirrors from the repository"
 msgstr "Удалить все зеркала из репозитория"
 
-#: internal/app/commands/search.go:47
+#: internal/app/commands/search.go:39
 msgid "Search packages"
 msgstr "Поиск пакетов"
 
-#: internal/app/commands/search.go:58
+#: internal/app/commands/search.go:50
 msgid "Search by name"
 msgstr "Искать по имени"
 
-#: internal/app/commands/search.go:63
+#: internal/app/commands/search.go:55
 msgid "Search by description"
 msgstr "Искать по описанию"
 
-#: internal/app/commands/search.go:68
+#: internal/app/commands/search.go:60
 msgid "Search by repository"
 msgstr "Искать по репозиторию"
 
-#: internal/app/commands/search.go:73
+#: internal/app/commands/search.go:65
 msgid "Search by provides"
 msgstr "Иcкать по provides"
 
-#: internal/app/commands/search.go:131
-msgid "Error while executing search"
-msgstr "Ошибка при выполнении поиска"
-
-#: internal/app/commands/upgrade.go:53
+#: internal/app/commands/upgrade.go:41
 msgid "Upgrade all installed packages"
 msgstr "Обновить все установленные пакеты"
-
-#: internal/app/commands/upgrade.go:96 internal/app/commands/upgrade.go:113
-msgid "Error checking for updates"
-msgstr "Ошибка при проверке обновлений"
-
-#: internal/app/commands/upgrade.go:116
-msgid "There is nothing to do."
-msgstr "Здесь нечего делать."
 
 #: internal/app/commands/version.go:33
 msgid "Print the current Stapler version and exit"
 msgstr "Показать текущую версию Stapler и выйти"
+
+#: internal/app/deps/internal/builder/builder.go:102
+msgid "Unable to detect a supported package manager on the system"
+msgstr "Не удалось обнаружить поддерживаемый менеджер пакетов в системе"
+
+#: internal/app/deps/internal/builder/builder.go:121
+msgid "Error initialization database"
+msgstr "Ошибка инициализации базы данных"
 
 #: internal/app/tui/pager/code_pager.go:44
 msgid "q/Esc - Quit"
@@ -473,9 +316,9 @@ msgstr "Хотели бы вы удалить зависимости сборк�
 msgid "Downloading sources"
 msgstr "Скачивание источников"
 
-#: internal/cliutils/app_builder/builder.go:114
-msgid "Error initialization database"
-msgstr "Ошибка инициализации базы данных"
+#: internal/cliutils/app_builder/builder.go:160
+msgid "Error pulling repositories"
+msgstr "Ошибка при извлечении репозиториев"
 
 #: internal/cliutils/localize.go:31
 msgid "Shows a list of commands or help for one command"
@@ -574,7 +417,7 @@ msgstr "КАТЕГОРИЯ"
 msgid "OPTIONS"
 msgstr "ПАРАМЕТРЫ"
 
-#: internal/cliutils/utils.go:78
+#: internal/cliutils/utils.go:90
 msgid ""
 "This command is deprecated and would be removed in the future, use \"%s\" "
 "instead!"
@@ -625,21 +468,170 @@ msgstr ""
 "Минимальная версия Stapler для репозитория выше текущей версии. Попробуйте "
 "обновить Stapler, если что-то не работает."
 
-#: internal/services/builder/service.go:57
+#: internal/service/repos/repos.go:87
+msgid "Error saving config"
+msgstr "Ошибка при сохранении конфигурации"
+
+#: internal/usecase/build/build.go:57
 msgid "Nothing to build"
 msgstr "Нечего собирать"
 
-#: internal/services/builder/service.go:71
+#: internal/usecase/build/build.go:71
 msgid "Error building package"
 msgstr "Ошибка при сборке пакета"
 
-#: internal/services/builder/steps.go:84
+#: internal/usecase/build/build.go:75
+msgid "Done"
+msgstr "Сделано"
+
+#: internal/usecase/build/steps.go:85
 msgid "Your settings do not allow build command"
 msgstr "Ваши настройки не позволяют использовать команду build"
 
-#: internal/services/builder/steps.go:285
+#: internal/usecase/build/steps.go:276
 msgid "Error moving the package"
 msgstr "Ошибка при перемещении пакета"
+
+#: internal/usecase/config/get/get.go:82
+msgid "unknown config key: %s"
+msgstr "неизвестный ключ конфигурации: %s"
+
+#: internal/usecase/config/set/set.go:77
+msgid "use 'repo add/remove' commands to manage repositories"
+msgstr "используйте команды 'repo add/remove' для управления репозиториями"
+
+#: internal/usecase/config/set/set.go:85
+msgid "invalid boolean value for %s: %s"
+msgstr "неверное булево значение для %s: %s"
+
+#: internal/usecase/config/set/set.go:94
+msgid "failed to save config"
+msgstr "не удалось сохранить конфигурацию"
+
+#: internal/usecase/config/set/set.go:97
+msgid "Successfully set %s = %s"
+msgstr "Успешно установлено %s = %s"
+
+#: internal/usecase/fix/fix.go:68
+msgid "Clearing cache directory"
+msgstr "Очистка каталога кэша"
+
+#: internal/usecase/fix/fix.go:72
+msgid "Unable to open cache directory"
+msgstr "Невозможно открыть каталог кэша"
+
+#: internal/usecase/fix/fix.go:78
+msgid "Unable to read cache directory contents"
+msgstr "Невозможно прочитать содержимое каталога кэша"
+
+#: internal/usecase/fix/fix.go:90
+msgid "Unable to remove cache item (%s)"
+msgstr "Невозможно удалить элемент кэша (%s)"
+
+#: internal/usecase/fix/fix.go:94
+msgid "Rebuilding cache"
+msgstr "Восстановление кэша"
+
+#: internal/usecase/fix/fix.go:98
+msgid "Unable to create new cache directory"
+msgstr "Не удалось создать новый каталог кэша"
+
+#: internal/usecase/info/info.go:70
+msgid "Error finding packages"
+msgstr "Ошибка при поиске пакетов"
+
+#: internal/usecase/info/info.go:74
+msgid "Package not found"
+msgstr "Пакет не найден"
+
+#: internal/usecase/info/info.go:81
+msgid "Can't detect system language"
+msgstr "Ошибка при определении языка системы"
+
+#: internal/usecase/info/info.go:93
+msgid "Error resolving overrides"
+msgstr "Ошибка устранения переорпеделений"
+
+#: internal/usecase/info/info.go:102
+msgid "Error encoding script variables"
+msgstr "Ошибка кодирования переменных скрита"
+
+#: internal/usecase/info/shell/shell.go:53
+msgid "Error getting packages"
+msgstr "Ошибка при получении пакетов"
+
+#: internal/usecase/install/action/install.go:71
+msgid "Error when installing the package"
+msgstr "Ошибка при установке пакета"
+
+#: internal/usecase/list/list.go:85
+msgid "Error getting packages for upgrade"
+msgstr "Ошибка при получении пакетов для обновления"
+
+#: internal/usecase/list/list.go:88
+msgid "No packages for upgrade"
+msgstr "Нет пакетов к обновлению"
+
+#: internal/usecase/list/list.go:98 internal/usecase/list/list.go:187
+msgid "Error parsing format template"
+msgstr "Ошибка при разборе шаблона"
+
+#: internal/usecase/list/list.go:104 internal/usecase/list/list.go:206
+msgid "Error executing template"
+msgstr "Ошибка при выполнении шаблона"
+
+#: internal/usecase/list/list.go:152
+msgid "Failed to parse release"
+msgstr "Не удалось разобрать релиз"
+
+#: internal/usecase/list/list.go:173
+msgid "Error listing installed packages"
+msgstr "Ошибка при составлении списка установленных пакетов"
+
+#: internal/usecase/remove/action/remove.go:47
+msgid "Error removing packages"
+msgstr "Ошибка при удалении пакетов"
+
+#: internal/usecase/repo/add/add.go:49
+msgid "Repo \"%s\" already exists"
+msgstr "Репозиторий \"%s\" уже существует"
+
+#: internal/usecase/repo/mirrors/remove/remove.go:111
+msgid "No mirrors containing \"%s\" found in repo \"%s\""
+msgstr "В репозитории \"%s\" не найдено зеркал, содержащих \"%s\""
+
+#: internal/usecase/repo/mirrors/remove/remove.go:113
+msgid "URL \"%s\" does not exist in repo \"%s\""
+msgstr "URL \"%s\" не существует в репозитории \"%s\""
+
+#: internal/usecase/repo/mirrors/remove/remove.go:119
+msgid "Removed %d mirrors from repo \"%s\"\n"
+msgstr "Удалены зеркала %d из репозитория \"%s\"\n"
+
+#: internal/usecase/repo/remove/remove.go:64
+msgid "Repo \"%s\" does not exist"
+msgstr "Репозитория \"%s\" не существует"
+
+#: internal/usecase/repo/remove/remove.go:71
+msgid "Error removing repo directory"
+msgstr "Ошибка при удалении каталога репозитория"
+
+#: internal/usecase/repo/remove/remove.go:84
+msgid "Error removing packages from database"
+msgstr "Ошибка при удалении пакетов из базы данных"
+
+#: internal/usecase/search/search.go:97
+msgid "Error while executing search"
+msgstr "Ошибка при выполнении поиска"
+
+#: internal/usecase/upgrade/upgrade.go:72
+#: internal/usecase/upgrade/upgrade.go:89
+msgid "Error checking for updates"
+msgstr "Ошибка при проверке обновлений"
+
+#: internal/usecase/upgrade/upgrade.go:92
+msgid "There is nothing to do."
+msgstr "Здесь нечего делать."
 
 #: internal/utils/cmd.go:105
 msgid "Error on dropping capabilities"
@@ -693,6 +685,9 @@ msgstr "Найдена требуемая зависимость"
 #: pkg/reqprov/rpm/altlinux.go:62
 msgid "Command not found on the system"
 msgstr "Команда не найдена в системе"
+
+#~ msgid "Command install expected at least 1 argument, got %d"
+#~ msgstr "Для команды install ожидался хотя бы 1 аргумент, получено %d"
 
 #~ msgid "Cannot get absolute script path"
 #~ msgstr "Невозможно получить абсолютный путь к скрипту"

@@ -1,12 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// This file was originally part of the project "LURE - Linux User REpository",
-// created by Elara Musayelyan.
-// It was later modified as part of "ALR - Any Linux Repository" by the ALR Authors.
-// This version has been further modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
-//
-// Copyright (C) Elara Musayelyan (LURE)
-// Copyright (C) 2025 The ALR Authors
+// Stapler
 // Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
@@ -26,7 +20,6 @@ package commands
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/leonelquinteros/gotext"
@@ -34,34 +27,117 @@ import (
 
 	"go.stplr.dev/stplr/internal/app/deps"
 	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
-	"go.stplr.dev/stplr/internal/usecase/repo/add"
-	"go.stplr.dev/stplr/internal/usecase/repo/remove"
-	"go.stplr.dev/stplr/internal/usecase/repo/setref"
-	"go.stplr.dev/stplr/internal/usecase/repo/seturl"
+	"go.stplr.dev/stplr/internal/usecase/repo/mirrors/add"
+	mirrorsClear "go.stplr.dev/stplr/internal/usecase/repo/mirrors/clear"
+	"go.stplr.dev/stplr/internal/usecase/repo/mirrors/remove"
 	"go.stplr.dev/stplr/internal/utils"
 )
 
-var errMissingArgs = errors.New("missing args")
-
-func RepoCmd() *cli.Command {
+func RepoMirrorCmd() *cli.Command {
 	return &cli.Command{
-		Name:  "repo",
-		Usage: gotext.Get("Manage repos"),
+		Name:  "mirror",
+		Usage: gotext.Get("Manage mirrors of repos"),
 		Commands: []*cli.Command{
-			RemoveRepoCmd(),
-			AddRepoCmd(),
-			SetRepoRefCmd(),
-			RepoMirrorCmd(),
-			SetUrlCmd(),
+			AddMirror(),
+			RemoveMirror(),
+			ClearMirrors(),
 		},
 	}
 }
 
-func RemoveRepoCmd() *cli.Command {
+func AddMirror() *cli.Command {
+	return &cli.Command{
+		Name:      "add",
+		Usage:     gotext.Get("Add a mirror URL to repository"),
+		ArgsUsage: gotext.Get("<name> <url>"),
+		ShellComplete: func(ctx context.Context, c *cli.Command) {
+			if c.NArg() == 0 {
+				deps, err := appbuilder.New(ctx).WithConfig().Build()
+				if err != nil {
+					return
+				}
+				defer deps.Defer()
+
+				for _, repo := range deps.Cfg.Repos() {
+					fmt.Println(repo.Name)
+				}
+			}
+		},
+		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+			if c.Args().Len() < 2 {
+				return errMissingArgs
+			}
+
+			d, f, err := deps.ForUniversalReposModificationActionDeps(ctx)
+			if err != nil {
+				return err
+			}
+			defer f()
+
+			return add.New(d.Repos).Run(ctx, add.Options{
+				Name: c.Args().Get(0),
+				URL:  c.Args().Get(1),
+			})
+		}),
+	}
+}
+
+func RemoveMirror() *cli.Command {
 	return &cli.Command{
 		Name:      "remove",
-		Usage:     gotext.Get("Remove an existing repository"),
 		Aliases:   []string{"rm"},
+		Usage:     gotext.Get("Remove mirror from the repository"),
+		ArgsUsage: gotext.Get("<name> <url>"),
+		ShellComplete: func(ctx context.Context, c *cli.Command) {
+			deps, err := appbuilder.New(ctx).WithConfig().Build()
+			if err != nil {
+				return
+			}
+			defer deps.Defer()
+
+			if c.NArg() == 0 {
+				for _, repo := range deps.Cfg.Repos() {
+					fmt.Println(repo.Name)
+				}
+			}
+		},
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:  "ignore-missing",
+				Usage: gotext.Get("Ignore if mirror does not exist"),
+			},
+			&cli.BoolFlag{
+				Name:    "partial",
+				Aliases: []string{"p"},
+				Usage:   gotext.Get("Match partial URL (e.g., github.com instead of full URL)"),
+			},
+		},
+		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+			if c.Args().Len() < 2 {
+				return errMissingArgs
+			}
+
+			d, f, err := deps.ForUniversalReposModificationActionDeps(ctx)
+			if err != nil {
+				return err
+			}
+			defer f()
+
+			return remove.New(d.Repos).Run(ctx, remove.Options{
+				Name:          c.Args().Get(0),
+				URL:           c.Args().Get(1),
+				IgnoreMissing: c.Bool("ignore-missing"),
+				PartialMatch:  c.Bool("partial"),
+			})
+		}),
+	}
+}
+
+func ClearMirrors() *cli.Command {
+	return &cli.Command{
+		Name:      "clear",
+		Aliases:   []string{"rm-all"},
+		Usage:     gotext.Get("Remove all mirrors from the repository"),
 		ArgsUsage: gotext.Get("<name>"),
 		ShellComplete: func(ctx context.Context, c *cli.Command) {
 			if c.NArg() == 0 {
@@ -82,64 +158,7 @@ func RemoveRepoCmd() *cli.Command {
 				return errMissingArgs
 			}
 
-			d, f, err := deps.ForRepoRemoveAction(ctx)
-			if err != nil {
-				return err
-			}
-			defer f()
-
-			return remove.New(d.Config, d.DB).Run(ctx, remove.Options{Name: c.Args().Get(0)})
-		}),
-	}
-}
-
-func AddRepoCmd() *cli.Command {
-	return &cli.Command{
-		Name:      "add",
-		Usage:     gotext.Get("Add a new repository"),
-		ArgsUsage: gotext.Get("<name> <url>"),
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
-			if c.Args().Len() < 2 {
-				return errMissingArgs
-			}
-
-			d, f, err := deps.ForRepoAddAction(ctx)
-			if err != nil {
-				return err
-			}
-			defer f()
-
-			return add.New(d.Config).Run(ctx, add.Options{
-				Name: c.Args().Get(0),
-				URL:  c.Args().Get(1),
-			})
-		}),
-	}
-}
-
-func SetRepoRefCmd() *cli.Command {
-	return &cli.Command{
-		Name:      "set-ref",
-		Usage:     gotext.Get("Set the reference of the repository"),
-		ArgsUsage: gotext.Get("<name> <ref>"),
-		ShellComplete: func(ctx context.Context, c *cli.Command) {
-			if c.NArg() == 0 {
-				// Get repo names from config
-				deps, err := appbuilder.New(ctx).WithConfig().Build()
-				if err != nil {
-					return
-				}
-				defer deps.Defer()
-
-				for _, repo := range deps.Cfg.Repos() {
-					fmt.Println(repo.Name)
-				}
-			}
-		},
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
-			if c.Args().Len() < 2 {
-				return errMissingArgs
-			}
+			name := c.Args().Get(0)
 
 			d, f, err := deps.ForUniversalReposModificationActionDeps(ctx)
 			if err != nil {
@@ -147,49 +166,8 @@ func SetRepoRefCmd() *cli.Command {
 			}
 			defer f()
 
-			return setref.
-				New(d.Repos).
-				Run(ctx, setref.Options{
-					Name: c.Args().Get(0),
-					Ref:  c.Args().Get(1),
-				})
-		}),
-	}
-}
-
-func SetUrlCmd() *cli.Command {
-	return &cli.Command{
-		Name:      "set-url",
-		Usage:     gotext.Get("Set the main url of the repository"),
-		ArgsUsage: gotext.Get("<name> <url>"),
-		ShellComplete: func(ctx context.Context, c *cli.Command) {
-			if c.NArg() == 0 {
-				// Get repo names from config
-				deps, err := appbuilder.New(ctx).WithConfig().Build()
-				if err != nil {
-					return
-				}
-				defer deps.Defer()
-
-				for _, repo := range deps.Cfg.Repos() {
-					fmt.Println(repo.Name)
-				}
-			}
-		},
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
-			if c.Args().Len() < 2 {
-				return errMissingArgs
-			}
-
-			d, f, err := deps.ForUniversalReposModificationActionDeps(ctx)
-			if err != nil {
-				return err
-			}
-			defer f()
-
-			return seturl.New(d.Repos).Run(ctx, seturl.Options{
-				Name: c.Args().Get(0),
-				URL:  c.Args().Get(1),
+			return mirrorsClear.New(d.Repos).Run(ctx, mirrorsClear.Options{
+				Name: name,
 			})
 		}),
 	}

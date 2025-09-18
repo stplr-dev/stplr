@@ -18,7 +18,15 @@
 
 package sys
 
-import "os"
+import (
+	"fmt"
+	"os"
+	"os/user"
+	"strconv"
+	"syscall"
+
+	"go.stplr.dev/stplr/internal/constants"
+)
 
 type Sys struct{}
 
@@ -32,4 +40,50 @@ func (s Sys) Getuid() int {
 
 func (s Sys) Getgid() int {
 	return os.Getgid()
+}
+
+func mustInt(s string) int {
+	if i, err := strconv.Atoi(s); err != nil {
+		panic(err)
+	} else {
+		return i
+	}
+}
+
+func (s Sys) getBuilderUser() (*user.User, error) {
+	return user.Lookup(constants.BuilderUser)
+}
+
+func (s Sys) DropCapsToBuilderUser() error {
+	u, err := s.getBuilderUser()
+	if err != nil {
+		return fmt.Errorf("failed get builder user: %w", err)
+	}
+
+	err = syscall.Setgid(mustInt(u.Gid))
+	if err != nil {
+		return err
+	}
+	err = syscall.Setuid(mustInt(u.Uid))
+	if err != nil {
+		return err
+	}
+
+	u, err = s.getBuilderUser()
+	if err != nil {
+		return fmt.Errorf("failed get builder user after drop: %w", err)
+	}
+
+	uid := s.Getuid()
+	gid := s.Getgid()
+
+	if uid != mustInt(u.Uid) || gid != mustInt(u.Gid) {
+		return fmt.Errorf(
+			"failed to drop caps to builder user: %s:%s != %d:%d",
+			u.Uid, u.Gid,
+			uid, gid,
+		)
+	}
+
+	return nil
 }
