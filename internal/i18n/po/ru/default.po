@@ -440,33 +440,33 @@ msgstr ""
 msgid "ERROR"
 msgstr "ОШИБКА"
 
-#: internal/repos/pull.go:103
+#: internal/repos/pull.go:97
 msgid "Trying mirror"
 msgstr "Пробую зеркало"
 
-#: internal/repos/pull.go:109
+#: internal/repos/pull.go:103
 msgid "Failed to pull from URL"
 msgstr "Не удалось извлечь из URL"
 
-#: internal/repos/pull.go:173
+#: internal/repos/pull.go:120
 msgid "Pulling repository"
 msgstr "Скачивание репозитория"
 
-#: internal/repos/pull.go:210
-msgid "Repository up to date"
-msgstr "Репозиторий уже обновлён"
-
-#: internal/repos/pull.go:245
+#: internal/repos/pull.go:158
 msgid "Git repository does not appear to be a valid Stapler repo"
 msgstr "Репозиторий Git не поддерживается репозиторием Stapler"
 
-#: internal/repos/pull.go:261
+#: internal/repos/pull.go:206
 msgid ""
 "Stapler repo's minimum Stapler version is greater than the current version. "
 "Try updating Stapler if something doesn't work."
 msgstr ""
 "Минимальная версия Stapler для репозитория выше текущей версии. Попробуйте "
 "обновить Stapler, если что-то не работает."
+
+#: internal/repos/pull.go:227
+msgid "Repository up to date"
+msgstr "Репозиторий уже обновлён"
 
 #: internal/service/repos/repos.go:87
 msgid "Error saving config"

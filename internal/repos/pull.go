@@ -26,12 +26,9 @@ package repos
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"io"
 	"log/slog"
 	"net/url"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -42,26 +39,23 @@ import (
 	"github.com/leonelquinteros/gotext"
 	"github.com/pelletier/go-toml/v2"
 	"go.elara.ws/vercmp"
-	"mvdan.cc/sh/v3/expand"
-	"mvdan.cc/sh/v3/interp"
-	"mvdan.cc/sh/v3/syntax"
 
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/constants"
-	"go.stplr.dev/stplr/internal/shutils/handlers"
+	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-type actionType uint8
+type PackageActionType uint8
 
 const (
-	actionDelete actionType = iota
-	actionUpdate
+	ActionDelete PackageActionType = iota
+	ActionUpsert
 )
 
-type action struct {
-	Type actionType
-	File string
+type PackageAction struct {
+	Type PackageActionType
+	Pkg  *staplerfile.Package
 }
 
 // Pull pulls the provided repositories. If a repo doesn't exist, it will be cloned
@@ -117,53 +111,6 @@ func (rs *Repos) pullRepo(ctx context.Context, repo *types.Repo, updateRepoFromT
 	return fmt.Errorf("failed to pull repository %s from any URL: %w", repo.Name, lastErr)
 }
 
-func readGitRepo(repoDir, repoUrl string) (*git.Repository, bool, error) {
-	gitDir := filepath.Join(repoDir, ".git")
-	if fi, err := os.Stat(gitDir); err == nil && fi.IsDir() {
-		r, err := git.PlainOpen(repoDir)
-		if err == nil {
-			err = updateRemoteURL(r, repoUrl)
-			if err == nil {
-				_, err := r.Head()
-				if err == nil {
-					return r, false, nil
-				}
-
-				if errors.Is(err, plumbing.ErrReferenceNotFound) {
-					return r, true, nil
-				}
-
-				slog.Debug("error getting HEAD, reinitializing...", "err", err)
-			}
-		}
-
-		slog.Debug("error while reading repo, reinitializing...", "err", err)
-	}
-
-	if err := os.RemoveAll(repoDir); err != nil {
-		return nil, false, fmt.Errorf("failed to remove repo directory: %w", err)
-	}
-
-	if err := os.MkdirAll(repoDir, 0o755); err != nil {
-		return nil, false, fmt.Errorf("failed to create repo directory: %w", err)
-	}
-
-	r, err := git.PlainInit(repoDir, false)
-	if err != nil {
-		return nil, false, fmt.Errorf("failed to initialize git repo: %w", err)
-	}
-
-	_, err = r.CreateRemote(&gitConfig.RemoteConfig{
-		Name: git.DefaultRemoteName,
-		URLs: []string{repoUrl},
-	})
-	if err != nil {
-		return nil, false, err
-	}
-
-	return r, true, nil
-}
-
 func (rs *Repos) pullRepoFromURL(ctx context.Context, rawRepoUrl string, repo *types.Repo, update bool) error {
 	repoURL, err := url.Parse(rawRepoUrl)
 	if err != nil {
@@ -173,94 +120,52 @@ func (rs *Repos) pullRepoFromURL(ctx context.Context, rawRepoUrl string, repo *t
 	slog.Info(gotext.Get("Pulling repository"), "name", repo.Name)
 	repoDir := filepath.Join(rs.cfg.GetPaths().RepoDir, repo.Name)
 
-	var repoFS billy.Filesystem
-
-	r, freshGit, err := readGitRepo(repoDir, repoURL.String())
+	r, freshGit, err := rs.gm.ReadGitRepo(repoDir, repoURL.String())
 	if err != nil {
 		return fmt.Errorf("failed to open repo")
 	}
 
-	err = r.FetchContext(ctx, &git.FetchOptions{
-		Progress: os.Stderr,
-		Force:    true,
-	})
-	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
-		return err
-	}
-
-	var old *plumbing.Reference
-
-	w, err := r.Worktree()
+	err = rs.gm.FetchRepo(ctx, r)
 	if err != nil {
 		return err
 	}
 
-	revHash, err := resolveHash(r, repo.Ref)
-	if err != nil {
-		return fmt.Errorf("error resolving hash: %w", err)
-	}
-
-	if !freshGit {
-		old, err = r.Head()
-		if err != nil {
-			return err
-		}
-
-		if old.Hash() == *revHash {
-			slog.Info(gotext.Get("Repository up to date"), "name", repo.Name)
-		}
-	}
-
-	err = w.Checkout(&git.CheckoutOptions{
-		Hash:  plumbing.NewHash(revHash.String()),
-		Force: true,
-	})
-	if err != nil {
-		return err
-	}
-	repoFS = w.Filesystem
-
-	new, err := r.Head()
+	old, revHash, err := resolveRevision(r, repo, freshGit)
 	if err != nil {
 		return err
 	}
 
-	// If the DB was not present at startup, that means it's
-	// empty. In this case, we need to update the DB fully
-	// rather than just incrementally.
-	if rs.db.IsEmpty() || freshGit {
-		err = rs.processRepoFull(ctx, *repo, repoDir)
-		if err != nil {
-			return err
-		}
-	} else {
-		err = rs.processRepoChanges(ctx, *repo, r, w, old, new)
-		if err != nil {
-			return err
-		}
+	repoFS, err := rs.gm.CheckoutRevision(r, revHash)
+	if err != nil {
+		return err
 	}
 
+	newRef, err := r.Head()
+	if err != nil {
+		return err
+	}
+
+	if err := rs.processRepoChanges(ctx, repo, repoDir, r, old, newRef, freshGit); err != nil {
+		return err
+	}
+
+	return rs.loadAndUpdateConfig(repoFS, repo, update)
+}
+
+func (rs *Repos) loadAndUpdateConfig(repoFS billy.Filesystem, repo *types.Repo, update bool) error {
 	fl, err := repoFS.Open(constants.RepoConfigFile)
 	if err != nil {
 		slog.Warn(gotext.Get("Git repository does not appear to be a valid Stapler repo"), "repo", repo.Name)
 		return nil
 	}
+	defer fl.Close()
 
 	var repoCfg types.RepoConfig
-	err = toml.NewDecoder(fl).Decode(&repoCfg)
-	if err != nil {
+	if err := toml.NewDecoder(fl).Decode(&repoCfg); err != nil {
 		return err
 	}
-	fl.Close()
 
-	// If the version doesn't have a "v" prefix, it's not a standard version.
-	// It may be "unknown" or a git version, but either way, there's no way
-	// to compare it to the repo version, so only compare versions with the "v".
-	if strings.HasPrefix(config.Version, "v") {
-		if vercmp.Compare(config.Version, repoCfg.Repo.MinVersion) == -1 {
-			slog.Warn(gotext.Get("Stapler repo's minimum Stapler version is greater than the current version. Try updating Stapler if something doesn't work."), "repo", repo.Name)
-		}
-	}
+	warnAboutVersion(*repo, repoCfg)
 
 	if update {
 		if repoCfg.Repo.URL != "" {
@@ -271,6 +176,73 @@ func (rs *Repos) pullRepoFromURL(ctx context.Context, rawRepoUrl string, repo *t
 		}
 		if len(repoCfg.Repo.Mirrors) > 0 {
 			repo.Mirrors = repoCfg.Repo.Mirrors
+		}
+	}
+	return nil
+}
+
+func (rs *Repos) processRepoChanges(ctx context.Context, repo *types.Repo, repoDir string, r *git.Repository, old, new *plumbing.Reference, freshGit bool) error {
+	var actions []PackageAction
+	var err error
+
+	if rs.db.IsEmpty() || freshGit {
+		actions, err = rs.rp.ProcessFull(ctx, *repo, repoDir)
+	} else {
+		actions, err = rs.rp.ProcessChanges(ctx, *repo, r, old, new)
+	}
+	if err != nil {
+		return err
+	}
+
+	return rs.processActions(ctx, *repo, actions)
+}
+
+func warnAboutVersion(repo types.Repo, cfg types.RepoConfig) {
+	// If the version doesn't have a "v" prefix, it's not a standard version.
+	// It may be "unknown" or a git version, but either way, there's no way
+	// to compare it to the repo version, so only compare versions with the "v".
+	if strings.HasPrefix(config.Version, "v") {
+		if vercmp.Compare(config.Version, cfg.Repo.MinVersion) == -1 {
+			slog.Warn(gotext.Get("Stapler repo's minimum Stapler version is greater than the current version. Try updating Stapler if something doesn't work."), "repo", repo.Name)
+		}
+	}
+}
+
+func resolveRevision(r *git.Repository, repo *types.Repo, freshGit bool) (*plumbing.Reference, *plumbing.Hash, error) {
+	revHash, err := resolveHash(r, repo.Ref)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error resolving hash: %w", err)
+	}
+
+	if freshGit {
+		return nil, revHash, nil
+	}
+
+	old, err := r.Head()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if old.Hash() == *revHash {
+		slog.Info(gotext.Get("Repository up to date"), "name", repo.Name)
+	}
+
+	return old, revHash, nil
+}
+
+func (rs *Repos) processActions(ctx context.Context, repo types.Repo, actions []PackageAction) error {
+	for _, action := range actions {
+		switch action.Type {
+		case ActionUpsert:
+			err := rs.db.InsertPackage(ctx, *action.Pkg)
+			if err != nil {
+				return err
+			}
+		case ActionDelete:
+			err := rs.db.DeletePkgs(ctx, "name = ? AND repository = ?", action.Pkg.Name, repo.Name)
+			if err != nil {
+				return fmt.Errorf("error deleting package %s: %w", action.Pkg.Name, err)
+			}
 		}
 	}
 
@@ -311,166 +283,6 @@ func updateRemoteURL(r *git.Repository, newURL string) error {
 	return nil
 }
 
-func (rs *Repos) updatePkg(ctx context.Context, repo types.Repo, runner *interp.Runner, scriptFl io.ReadCloser) error {
-	parser := syntax.NewParser()
-
-	pkgs, err := parseScript(ctx, repo, parser, runner, scriptFl)
-	if err != nil {
-		return err
-	}
-
-	for _, pkg := range pkgs {
-		err = rs.db.InsertPackage(ctx, *pkg)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (rs *Repos) processRepoChangesRunner(repoDir, scriptDir string) (*interp.Runner, error) {
-	env := os.Environ()
-	return interp.New(
-		interp.Env(expand.ListEnviron(env...)),
-		interp.ExecHandler(handlers.NopExec),
-		interp.ReadDirHandler2(handlers.RestrictedReadDir(handlers.WithFilter(handlers.RestrictSandbox(repoDir)))),
-		interp.StatHandler(handlers.RestrictedStat(handlers.WithFilter(handlers.RestrictSandbox(repoDir)))),
-		interp.OpenHandler(handlers.RestrictedOpen(handlers.WithFilter(handlers.RestrictSandbox(repoDir)))),
-		interp.StdIO(handlers.NopRWC{}, handlers.NopRWC{}, handlers.NopRWC{}),
-		// Use temp dir instead script dir because runner may be for deleted file
-		interp.Dir(os.TempDir()),
-	)
-}
-
-func (rs *Repos) processRepoChanges(ctx context.Context, repo types.Repo, r *git.Repository, w *git.Worktree, old, new *plumbing.Reference) error {
-	oldCommit, err := r.CommitObject(old.Hash())
-	if err != nil {
-		return err
-	}
-
-	newCommit, err := r.CommitObject(new.Hash())
-	if err != nil {
-		return err
-	}
-
-	patch, err := oldCommit.Patch(newCommit)
-	if err != nil {
-		return fmt.Errorf("error to create patch: %w", err)
-	}
-
-	var actions []action
-	for _, fp := range patch.FilePatches() {
-		from, to := fp.Files()
-
-		var isValidPath bool
-		if from != nil {
-			isValidPath = isValidScriptPath(from.Path())
-		}
-		if to != nil {
-			isValidPath = isValidPath || isValidScriptPath(to.Path())
-		}
-
-		if !isValidPath {
-			continue
-		}
-
-		switch {
-		case to == nil:
-			actions = append(actions, action{
-				Type: actionDelete,
-				File: from.Path(),
-			})
-		case from == nil:
-			actions = append(actions, action{
-				Type: actionUpdate,
-				File: to.Path(),
-			})
-		case from.Path() != to.Path():
-			actions = append(actions,
-				action{
-					Type: actionDelete,
-					File: from.Path(),
-				},
-				action{
-					Type: actionUpdate,
-					File: to.Path(),
-				},
-			)
-		default:
-			slog.Debug("unexpected, but I'll try to do")
-			actions = append(actions, action{
-				Type: actionUpdate,
-				File: to.Path(),
-			})
-		}
-	}
-
-	repoDir := w.Filesystem.Root()
-	parser := syntax.NewParser()
-
-	for _, action := range actions {
-		var scriptDir string
-		if filepath.Dir(action.File) == "." {
-			scriptDir = repoDir
-		} else {
-			scriptDir = filepath.Dir(filepath.Join(repoDir, action.File))
-		}
-
-		runner, err := rs.processRepoChangesRunner(repoDir, scriptDir)
-		if err != nil {
-			return fmt.Errorf("error creating process repo changes runner: %w", err)
-		}
-
-		switch action.Type {
-		case actionDelete:
-			scriptFl, err := oldCommit.File(action.File)
-			if err != nil {
-				slog.Warn("Failed to get deleted file from old commit", "file", action.File, "error", err)
-				continue
-			}
-
-			r, err := scriptFl.Reader()
-			if err != nil {
-				slog.Warn("Failed to read deleted file", "file", action.File, "error", err)
-				continue
-			}
-
-			pkgs, err := parseScript(ctx, repo, parser, runner, r)
-			if err != nil {
-				return fmt.Errorf("error parsing deleted script %s: %w", action.File, err)
-			}
-
-			for _, pkg := range pkgs {
-				err = rs.db.DeletePkgs(ctx, "name = ? AND repository = ?", pkg.Name, repo.Name)
-				if err != nil {
-					return fmt.Errorf("error deleting package %s: %w", pkg.Name, err)
-				}
-			}
-
-		case actionUpdate:
-			scriptFl, err := newCommit.File(action.File)
-			if err != nil {
-				slog.Warn("Failed to get updated file from new commit", "file", action.File, "error", err)
-				continue
-			}
-
-			r, err := scriptFl.Reader()
-			if err != nil {
-				slog.Warn("Failed to read updated file", "file", action.File, "error", err)
-				continue
-			}
-
-			err = rs.updatePkg(ctx, repo, runner, r)
-			if err != nil {
-				return fmt.Errorf("error updating package from %s: %w", action.File, err)
-			}
-		}
-	}
-
-	return nil
-}
-
 func isValidScriptPath(path string) bool {
 	if filepath.Base(path) != "Staplerfile" {
 		return false
@@ -478,63 +290,4 @@ func isValidScriptPath(path string) bool {
 
 	dir := filepath.Dir(path)
 	return dir == "." || !strings.Contains(strings.TrimPrefix(dir, "./"), "/")
-}
-
-func (rs *Repos) processRepoFull(ctx context.Context, repo types.Repo, repoDir string) error {
-	rootScript := filepath.Join(repoDir, "Staplerfile")
-	if fi, err := os.Stat(rootScript); err == nil && !fi.IsDir() {
-		slog.Debug("Found root Staplerfile, processing single-script repository", "repo", repo.Name)
-
-		runner, err := rs.processRepoChangesRunner(repoDir, repoDir)
-		if err != nil {
-			return fmt.Errorf("error creating runner for root Staplerfile: %w", err)
-		}
-
-		scriptFl, err := os.Open(rootScript)
-		if err != nil {
-			return fmt.Errorf("error opening root Staplerfile: %w", err)
-		}
-		defer scriptFl.Close()
-
-		err = rs.updatePkg(ctx, repo, runner, scriptFl)
-		if err != nil {
-			return fmt.Errorf("error processing root Staplerfile: %w", err)
-		}
-
-		return nil
-	}
-
-	glob := filepath.Join(repoDir, "*/Staplerfile")
-	matches, err := filepath.Glob(glob)
-	if err != nil {
-		return fmt.Errorf("error globbing for Staplerfile files: %w", err)
-	}
-
-	if len(matches) == 0 {
-		slog.Warn("No Staplerfile files found in repository", "repo", repo.Name)
-		return nil
-	}
-
-	slog.Debug("Found multiple Staplerfile files, processing multi-package repository",
-		"repo", repo.Name, "count", len(matches))
-
-	for _, match := range matches {
-		runner, err := rs.processRepoChangesRunner(repoDir, filepath.Dir(match))
-		if err != nil {
-			return fmt.Errorf("error creating runner for %s: %w", match, err)
-		}
-
-		scriptFl, err := os.Open(match)
-		if err != nil {
-			return fmt.Errorf("error opening %s: %w", match, err)
-		}
-
-		err = rs.updatePkg(ctx, repo, runner, scriptFl)
-		scriptFl.Close()
-		if err != nil {
-			return fmt.Errorf("error processing %s: %w", match, err)
-		}
-	}
-
-	return nil
 }

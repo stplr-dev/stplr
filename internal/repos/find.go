@@ -29,11 +29,11 @@ import (
 	"fmt"
 	"strings"
 
-	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
+	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
-func (rs *Repos) FindPkgs(ctx context.Context, pkgs []string) (map[string][]alrsh.Package, []string, error) {
-	found := make(map[string][]alrsh.Package)
+func (rs *Repos) FindPkgs(ctx context.Context, pkgs []string) (map[string][]staplerfile.Package, []string, error) {
+	found := make(map[string][]staplerfile.Package)
 	var notFound []string
 
 	for _, pkgName := range pkgs {
@@ -41,35 +41,7 @@ func (rs *Repos) FindPkgs(ctx context.Context, pkgs []string) (map[string][]alrs
 			continue
 		}
 
-		var result []alrsh.Package
-		var err error
-
-		switch {
-		case strings.Contains(pkgName, "/"):
-			// repo/pkg
-			parts := strings.SplitN(pkgName, "/", 2)
-			repo := parts[0]
-			name := parts[1]
-			result, err = rs.db.GetPkgs(ctx, "name = ? AND repository = ?", name, repo)
-
-		case strings.Contains(pkgName, "+stplr-"):
-			// pkg+alr-repo
-			parts := strings.SplitN(pkgName, "+stplr-", 2)
-			name := parts[0]
-			repo := parts[1]
-			result, err = rs.db.GetPkgs(ctx, "name = ? AND repository = ?", name, repo)
-
-		default:
-			result, err = rs.db.GetPkgs(ctx, "json_array_contains(provides, ?)", pkgName)
-			if err != nil {
-				return nil, nil, fmt.Errorf("FindPkgs: get by provides: %w", err)
-			}
-
-			if len(result) == 0 {
-				result, err = rs.db.GetPkgs(ctx, "name LIKE ?", pkgName)
-			}
-		}
-
+		result, err := rs.lookupPkg(ctx, pkgName)
 		if err != nil {
 			return nil, nil, fmt.Errorf("FindPkgs: lookup for %q failed: %w", pkgName, err)
 		}
@@ -82,4 +54,45 @@ func (rs *Repos) FindPkgs(ctx context.Context, pkgs []string) (map[string][]alrs
 	}
 
 	return found, notFound, nil
+}
+
+func (rs *Repos) lookupPkg(ctx context.Context, pkgName string) ([]staplerfile.Package, error) {
+	var result []staplerfile.Package
+	var err error
+
+	if name, repo, ok := extractNameAndRepo(pkgName); ok {
+		result, err = rs.db.GetPkgs(ctx, "name = ? AND repository = ?", name, repo)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get by name and repo: %w", err)
+		}
+	} else {
+		result, err = rs.db.GetPkgs(ctx, "json_array_contains(provides, ?)", pkgName)
+		if err != nil {
+			return nil, fmt.Errorf("get by provides: %w", err)
+		}
+
+		if len(result) == 0 {
+			result, err = rs.db.GetPkgs(ctx, "name LIKE ?", pkgName)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get by name: %w", err)
+			}
+		}
+	}
+
+	return result, nil
+}
+
+func extractNameAndRepo(pkgName string) (string, string, bool) {
+	switch {
+	case strings.Contains(pkgName, "/"):
+		// repo/pkg
+		parts := strings.SplitN(pkgName, "/", 2)
+		return parts[1], parts[0], true
+	case strings.Contains(pkgName, "+stplr-"):
+		// pkg+stplr-repo
+		parts := strings.SplitN(pkgName, "+stplr-", 2)
+		return parts[0], parts[1], true
+	default:
+		return "", "", false
+	}
 }

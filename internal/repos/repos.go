@@ -36,14 +36,22 @@ type Config interface {
 type Repos struct {
 	cfg Config
 	db  *database.Database
+
+	rp *RepoProcessor
+	gm *GitManager
 }
 
 func New(
 	cfg Config,
 	db *database.Database,
 ) *Repos {
+	gm := &GitManager{}
 	return &Repos{
 		cfg,
 		db,
+		&RepoProcessor{
+			gm,
+		},
+		gm,
 	}
 }

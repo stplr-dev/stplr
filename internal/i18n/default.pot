@@ -421,30 +421,30 @@ msgstr ""
 msgid "ERROR"
 msgstr ""
 
-#: internal/repos/pull.go:103
+#: internal/repos/pull.go:97
 msgid "Trying mirror"
 msgstr ""
 
-#: internal/repos/pull.go:109
+#: internal/repos/pull.go:103
 msgid "Failed to pull from URL"
 msgstr ""
 
-#: internal/repos/pull.go:173
+#: internal/repos/pull.go:120
 msgid "Pulling repository"
 msgstr ""
 
-#: internal/repos/pull.go:210
-msgid "Repository up to date"
-msgstr ""
-
-#: internal/repos/pull.go:245
+#: internal/repos/pull.go:158
 msgid "Git repository does not appear to be a valid Stapler repo"
 msgstr ""
 
-#: internal/repos/pull.go:261
+#: internal/repos/pull.go:206
 msgid ""
 "Stapler repo's minimum Stapler version is greater than the current version. "
 "Try updating Stapler if something doesn't work."
+msgstr ""
+
+#: internal/repos/pull.go:227
+msgid "Repository up to date"
 msgstr ""
 
 #: internal/service/repos/repos.go:87

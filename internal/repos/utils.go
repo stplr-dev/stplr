@@ -32,23 +32,17 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/client"
 
-	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
-
-	"mvdan.cc/sh/v3/interp"
-	"mvdan.cc/sh/v3/syntax"
-
 	"go.stplr.dev/stplr/pkg/distro"
+	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
 func parseScript(
 	ctx context.Context,
 	repo types.Repo,
-	syntaxParser *syntax.Parser,
-	runner *interp.Runner,
 	r io.ReadCloser,
-) ([]*alrsh.Package, error) {
-	f, err := alrsh.ReadFromIOReader(r, "/tmp")
+) ([]*staplerfile.Package, error) {
+	f, err := staplerfile.ReadFromIOReader(r, "/tmp")
 	if err != nil {
 		return nil, err
 	}

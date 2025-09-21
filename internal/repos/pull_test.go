@@ -30,6 +30,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"go.stplr.dev/stplr/internal/config"
 	database "go.stplr.dev/stplr/internal/db"
 	"go.stplr.dev/stplr/internal/repos"
@@ -65,21 +67,15 @@ func prepare(t *testing.T) *TestEnv {
 	t.Helper()
 
 	cacheDir, err := os.MkdirTemp("/tmp", "alr-pull-test.*")
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	repoDir := filepath.Join(cacheDir, "repo")
 	err = os.MkdirAll(repoDir, 0o755)
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	pkgsDir := filepath.Join(cacheDir, "pkgs")
 	err = os.MkdirAll(pkgsDir, 0o755)
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	cfg := &TestALRConfig{
 		CacheDir: cacheDir,
@@ -103,9 +99,7 @@ func cleanup(t *testing.T, e *TestEnv) {
 	t.Helper()
 
 	err := os.RemoveAll(e.Cfg.CacheDir)
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 	e.Db.Close()
 }
 
@@ -124,18 +118,9 @@ func TestPull(t *testing.T) {
 			URL:  "https://altlinux.space/stapler/repo-for-tests.git",
 		},
 	})
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
+	assert.NoError(t, err)
 
 	result, err := e.Db.GetPkgs(e.Ctx, "true")
-	if err != nil {
-		t.Fatalf("Expected no error, got %s", err)
-	}
-
-	pkgAmt := len(result)
-
-	if pkgAmt == 0 {
-		t.Errorf("Expected at least 1 matching package, but got %d", pkgAmt)
-	}
+	assert.NoError(t, err)
+	assert.NotEmpty(t, result)
 }
