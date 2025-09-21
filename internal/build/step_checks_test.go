@@ -23,45 +23,42 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"go.uber.org/mock/gomock"
 
 	"go.stplr.dev/stplr/internal/build"
+	"go.stplr.dev/stplr/mocks"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-type MockChecksExecutor struct {
-	mock.Mock
-}
-
-func (m *MockChecksExecutor) RunChecks(ctx context.Context, pkg *staplerfile.Package, input *build.BuildInput) (bool, error) {
-	args := m.Called(ctx, pkg, input)
-	return args.Bool(0), args.Error(1)
-}
-
 func TestChecksStepRun(t *testing.T) {
 	ctx := context.Background()
 
+	type result struct {
+		name  string
+		value bool
+	}
+
 	type testCase struct {
 		name        string
-		runResults  map[string]bool
+		runResults  []result
 		expectedErr bool
 	}
 
 	tests := []testCase{
 		{
 			name: "all checks pass",
-			runResults: map[string]bool{
-				"pkg1": true,
-				"pkg2": true,
+			runResults: []result{
+				{"pkg1", true},
+				{"pkg2", true},
 			},
 			expectedErr: false,
 		},
 		{
 			name: "one check fails",
-			runResults: map[string]bool{
-				"pkg1": true,
-				"pkg2": false,
+			runResults: []result{
+				{"pkg1", true},
+				{"pkg2", false},
 			},
 			expectedErr: true,
 		},
@@ -69,13 +66,30 @@ func TestChecksStepRun(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			mockExecutor := new(MockChecksExecutor)
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockExecutor := mocks.NewMockChecksExecutor(ctrl)
 
 			var pkgs []*staplerfile.Package
-			for name, result := range tc.runResults {
-				pkg := &staplerfile.Package{Name: name}
+			for _, r := range tc.runResults {
+				pkg := &staplerfile.Package{Name: r.name}
 				pkgs = append(pkgs, pkg)
-				mockExecutor.On("RunChecks", ctx, pkg, mock.Anything).Return(result, nil)
+			}
+
+			for _, r := range tc.runResults {
+				mockExecutor.EXPECT().
+					RunChecks(gomock.Any(), gomock.Any(), gomock.Any()).
+					DoAndReturn(func(_ context.Context, p *staplerfile.Package, _ *build.BuildInput) (bool, error) {
+						if p.Name == r.name {
+							return r.value, nil
+						}
+						return true, nil
+					})
+
+				if !r.value {
+					break
+				}
 			}
 
 			input := &build.BuildInput{
@@ -95,8 +109,6 @@ func TestChecksStepRun(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 			}
-
-			mockExecutor.AssertExpectations(t)
 		})
 	}
 }
