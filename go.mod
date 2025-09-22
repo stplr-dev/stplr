@@ -46,7 +46,7 @@ require (
 	golang.org/x/sys v0.36.0
 	golang.org/x/text v0.29.0
 	modernc.org/sqlite v1.39.0
-	mvdan.cc/sh/v3 v3.12.1-0.20250818095552-5fb4f3991b6b
+	mvdan.cc/sh/v3 v3.12.1-0.20250921194925-171492585d48
 	xorm.io/xorm v1.3.10
 )
 
