@@ -43,9 +43,14 @@ endif
 	go build -ldflags="-X 'go.stplr.dev/stplr/internal/config.Version=$(GIT_VERSION)'" -o $@ ./cmd/stplr
 
 install: build install-config install-sysusers install-tmpfiles install-cachedir
-	install -Dm755 $(BIN) $(DESTDIR)$(bindir)/$(NAME)
-	install -Dm755 $(BASH_COMPLETION) $(DESTDIR)$(datadir)/bash-completion/completions/$(NAME)
-	install -Dm755 $(ZSH_COMPLETION) $(DESTDIR)$(datadir)/zsh/site-functions/_$(NAME)
+	@mkdir -p $(DESTDIR)$(datadir)/bash-completion/completions
+	@$(BIN) completion bash > $(DESTDIR)$(datadir)/bash-completion/completions/$(NAME)
+	
+	@mkdir -p $(DESTDIR)$(datadir)/zsh/site-functions
+	@$(BIN) completion zsh > $(DESTDIR)$(datadir)/zsh/site-functions/_$(NAME)
+
+	install -Dm755 packaging/stplr.fish $(DESTDIR)$(datadir)/fish/vendor_completions.d/$(NAME).fish
+
 ifeq ($(POST_INSTALL),1)
 	$(MAKE) install-post
 endif	
