@@ -58,44 +58,44 @@ func VerifyHashFromLocal(path string, opts Options) error {
 	return nil
 }
 
+// hashFile hashes a single file using the provided hash function.
+func hashFile(path string, h hash.Hash) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	_, err = io.Copy(h, f)
+	return err
+}
+
+// hashDir walks a directory and hashes all regular files, skipping ".git" directories.
+func hashDir(path string, h hash.Hash) error {
+	return filepath.Walk(path, func(p string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() && info.Name() == ".git" {
+			return filepath.SkipDir
+		}
+		if !info.Mode().IsRegular() {
+			return nil
+		}
+		return hashFile(p, h)
+	})
+}
+
+// HashLocal hashes a file or directory using the provided hash function.
 func HashLocal(path string, h hash.Hash) error {
 	info, err := os.Stat(path)
 	if err != nil {
 		return err
 	}
-
 	if info.Mode().IsRegular() {
-		// Single file
-		f, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		_, err = io.Copy(h, f)
-		return err
+		return hashFile(path, h)
 	}
-
 	if info.IsDir() {
-		// Walk directory
-		return filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if info.IsDir() && info.Name() == ".git" {
-				return filepath.SkipDir
-			}
-			if !info.Mode().IsRegular() {
-				return nil
-			}
-			f, err := os.Open(path)
-			if err != nil {
-				return err
-			}
-			defer f.Close()
-			_, err = io.Copy(h, f)
-			return err
-		})
+		return hashDir(path, h)
 	}
-
 	return fmt.Errorf("unsupported file type: %s", path)
 }

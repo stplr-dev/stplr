@@ -28,6 +28,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"hash"
 	"io"
 	"mime"
 	"net/http"
@@ -56,120 +57,80 @@ func (FileDownloader) MatchURL(string) bool {
 
 func IsLocalUrl(u *url.URL) bool { return u.Scheme == "local" }
 
-// Download загружает файл с использованием HTTP. Если файл
-// сжат в поддерживаемом формате, он будет распакован
-func (FileDownloader) Download(ctx context.Context, opts Options) (Type, string, error) {
-	// Разбор URL
+// parseURLAndParams parses the URL and extracts special query parameters.
+func (fd FileDownloader) parseURLAndParams(opts Options) (*url.URL, string, string, error) {
 	u, err := url.Parse(opts.URL)
 	if err != nil {
-		return 0, "", err
+		return nil, "", "", err
 	}
 
-	// Получение параметров запроса
 	query := u.Query()
 
-	// Получение имени файла из параметров запроса
 	name := query.Get("~name")
 	query.Del("~name")
 
-	// Получение параметра архивации
 	archive := query.Get("~archive")
 	query.Del("~archive")
 
-	// Кодирование измененных параметров запроса обратно в URL
 	u.RawQuery = query.Encode()
 
-	var r io.ReadCloser
-	var size int64
+	return u, name, archive, nil
+}
 
+// getSource retrieves the source reader, size, and filename based on whether the URL is local or remote.
+func (fd FileDownloader) getSource(ctx context.Context, u *url.URL, opts Options, name string) (io.ReadCloser, int64, string, error) {
 	if IsLocalUrl(u) {
-		localFl, err := os.Open(filepath.Join(opts.LocalDir, u.Path))
+		localPath := filepath.Join(opts.LocalDir, u.Path)
+		localFl, err := os.Open(localPath)
 		if err != nil {
-			return 0, "", err
+			return nil, 0, "", err
 		}
 		fi, err := localFl.Stat()
 		if err != nil {
-			return 0, "", err
+			localFl.Close()
+			return nil, 0, "", err
 		}
-		size = fi.Size()
+		size := fi.Size()
 		if name == "" {
 			name = fi.Name()
 		}
-		r = localFl
+		return localFl, size, name, nil
 	} else {
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 		if err != nil {
-			return 0, "", fmt.Errorf("failed to create request: %w", err)
+			return nil, 0, "", fmt.Errorf("failed to create request: %w", err)
 		}
-		// Выполнение HTTP GET запроса
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
-			return 0, "", err
+			return nil, 0, "", err
 		}
-		size = res.ContentLength
+		size := res.ContentLength
 		if name == "" {
 			name = getFilename(res)
 		}
-		r = res.Body
+		return res.Body, size, name, nil
 	}
-	defer r.Close()
+}
 
-	postprocDisabled := opts.PostprocDisabled || archive == "false"
-
-	path := filepath.Join(opts.Destination, name)
-	fl, err := os.Create(path)
-	if err != nil {
-		return 0, "", err
-	}
-
-	var out io.WriteCloser
-	// Настройка индикатора прогресса
+// setupOutput configures the output writer, using a progress writer if applicable.
+func (fd FileDownloader) setupOutput(fl *os.File, opts Options, size int64, name string) io.WriteCloser {
 	if opts.Progress != nil {
-		out = NewProgressWriter(fl, size, name, opts.Progress)
-	} else {
-		out = fl
+		return NewProgressWriter(fl, size, name, opts.Progress)
 	}
-	defer out.Close()
+	return fl
+}
 
-	h, err := opts.NewHash()
-	if err != nil {
-		return 0, "", err
-	}
-
-	var w io.Writer
-	// Настройка MultiWriter для записи в файл, хеш и индикатор прогресса
-	if opts.Hash != nil {
-		w = io.MultiWriter(h, out)
-	} else {
-		w = io.MultiWriter(out)
-	}
-
-	// Копирование содержимого из источника в файл назначения
-	_, err = io.Copy(w, r)
-	if err != nil {
-		return 0, "", err
-	}
-	r.Close()
-
-	// Проверка контрольной суммы
-	if opts.Hash != nil {
-		sum := h.Sum(nil)
-		if !bytes.Equal(sum, opts.Hash) {
-			return 0, "", ErrChecksumMismatch
-		}
-	}
-
-	// Проверка необходимости постобработки
+// postProcess handles archive detection and extraction if post-processing is enabled.
+func (fd FileDownloader) postProcess(path string, fl *os.File, name string, opts Options, postprocDisabled bool) (Type, string, error) {
 	if postprocDisabled {
 		return TypeFile, name, nil
 	}
 
-	_, err = fl.Seek(0, io.SeekStart)
+	_, err := fl.Seek(0, io.SeekStart)
 	if err != nil {
 		return 0, "", err
 	}
 
-	// Идентификация формата архива
 	format, ar, err := archiver.Identify(name, fl)
 	if err == archiver.ErrNoMatch {
 		return TypeFile, name, nil
@@ -177,87 +138,142 @@ func (FileDownloader) Download(ctx context.Context, opts Options) (Type, string,
 		return 0, "", err
 	}
 
-	// Распаковка архива
 	err = extractFile(ar, format, name, opts)
 	if err != nil {
 		return 0, "", err
 	}
 
-	// Удаление исходного архива
 	err = os.Remove(path)
 	return TypeDir, "", err
 }
 
-// extractFile извлекает архив или распаковывает файл
-func extractFile(r io.Reader, format archiver.Format, name string, opts Options) (err error) {
-	fname := format.Name()
+// Download downloads a file using HTTP. If the file is compressed in a supported format, it will be unpacked.
+func (fd FileDownloader) Download(ctx context.Context, opts Options) (Type, string, error) {
+	u, name, archive, err := fd.parseURLAndParams(opts)
+	if err != nil {
+		return 0, "", err
+	}
 
-	// Проверка типа формата архива
-	switch format := format.(type) {
-	case archiver.Extractor:
-		// Извлечение файлов из архива
-		err = format.Extract(context.Background(), r, nil, func(ctx context.Context, f archiver.File) error {
-			fr, err := f.Open()
-			if err != nil {
-				return err
-			}
-			defer fr.Close()
-			fi, err := f.Stat()
-			if err != nil {
-				return err
-			}
-			fm := fi.Mode()
+	postprocDisabled := opts.PostprocDisabled || archive == "false"
 
-			path := filepath.Join(opts.Destination, f.NameInArchive)
+	r, size, name, err := fd.getSource(ctx, u, opts, name)
+	if err != nil {
+		return 0, "", err
+	}
+	defer r.Close()
 
-			err = os.MkdirAll(filepath.Dir(path), 0o755)
-			if err != nil {
-				return err
-			}
+	path := filepath.Join(opts.Destination, name)
+	fl, err := os.Create(path)
+	if err != nil {
+		return 0, "", err
+	}
 
-			if f.IsDir() {
-				err = os.MkdirAll(path, 0o755)
-				if err != nil {
-					return err
-				}
-			} else {
-				outFl, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, fm.Perm())
-				if err != nil {
-					return err
-				}
-				defer outFl.Close()
+	out := fd.setupOutput(fl, opts, size, name)
+	defer out.Close()
 
-				_, err = io.Copy(outFl, fr)
-				return err
-			}
-			return nil
-		})
+	var h hash.Hash
+	w := io.Writer(out)
+	if opts.Hash != nil {
+		h, err = opts.NewHash()
 		if err != nil {
-			return err
+			return 0, "", err
 		}
-	case archiver.Decompressor:
-		// Распаковка сжатого файла
-		rc, err := format.OpenReader(r)
-		if err != nil {
-			return err
-		}
-		defer rc.Close()
+		w = io.MultiWriter(out, h)
+	}
 
-		path := filepath.Join(opts.Destination, name)
-		path = strings.TrimSuffix(path, fname)
+	_, err = io.Copy(w, r)
+	if err != nil {
+		return 0, "", err
+	}
+	r.Close()
 
-		outFl, err := os.Create(path)
-		if err != nil {
-			return err
-		}
-
-		_, err = io.Copy(outFl, rc)
-		if err != nil {
-			return err
+	if opts.Hash != nil {
+		sum := h.Sum(nil)
+		if !bytes.Equal(sum, opts.Hash) {
+			return 0, "", ErrChecksumMismatch
 		}
 	}
 
-	return nil
+	return fd.postProcess(path, fl, name, opts, postprocDisabled)
+}
+
+// extractFile extracts an archive or decompresses a file based on the format.
+func extractFile(r io.Reader, format archiver.Format, name string, opts Options) error {
+	fname := format.Name()
+	switch format := format.(type) {
+	case archiver.Extractor:
+		return extractArchive(r, format, opts)
+	case archiver.Decompressor:
+		return decompressFile(r, format, name, fname, opts)
+	default:
+		return nil
+	}
+}
+
+// extractArchive handles extraction of archived files.
+func extractArchive(r io.Reader, format archiver.Extractor, opts Options) error {
+	return format.Extract(context.Background(), r, nil, func(ctx context.Context, f archiver.File) error {
+		return processArchiveFile(f, opts)
+	})
+}
+
+// processArchiveFile processes a single file or directory from an archive.
+func processArchiveFile(f archiver.File, opts Options) error {
+	fr, err := f.Open()
+	if err != nil {
+		return err
+	}
+	defer fr.Close()
+
+	path := filepath.Join(opts.Destination, f.NameInArchive)
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+
+	if f.IsDir() {
+		return os.MkdirAll(path, 0o755)
+	}
+	return writeExtractedFile(fr, path, f)
+}
+
+// writeExtractedFile writes an extracted file to disk.
+func writeExtractedFile(fr io.Reader, path string, f archiver.File) error {
+	fi, err := f.Stat()
+	if err != nil {
+		return err
+	}
+	outFl, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, fi.Mode().Perm())
+	if err != nil {
+		return err
+	}
+	defer outFl.Close()
+
+	_, err = io.Copy(outFl, fr)
+	return err
+}
+
+// decompressFile handles decompression of a single file.
+func decompressFile(r io.Reader, format archiver.Decompressor, name, fname string, opts Options) error {
+	rc, err := format.OpenReader(r)
+	if err != nil {
+		return err
+	}
+	defer rc.Close()
+
+	path := filepath.Join(opts.Destination, strings.TrimSuffix(name, fname))
+	return writeDecompressedFile(rc, path)
+}
+
+// writeDecompressedFile writes a decompressed file to disk.
+func writeDecompressedFile(rc io.Reader, path string) error {
+	outFl, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer outFl.Close()
+
+	_, err = io.Copy(outFl, rc)
+	return err
 }
 
 // getFilename пытается разобрать заголовок Content-Disposition

@@ -624,20 +624,20 @@ msgstr ""
 msgid "You need to be root to perform this action"
 msgstr ""
 
-#: pkg/dl/dl.go:175
+#: pkg/dl/dl.go:215
 msgid "Source can be updated, updating if required"
 msgstr ""
 
-#: pkg/dl/dl.go:201
+#: pkg/dl/dl.go:229
+msgid "Downloading source"
+msgstr ""
+
+#: pkg/dl/dl.go:259
 msgid "Source found in cache and linked to destination"
 msgstr ""
 
-#: pkg/dl/dl.go:208
+#: pkg/dl/dl.go:261
 msgid "Source updated and linked to destination"
-msgstr ""
-
-#: pkg/dl/dl.go:222
-msgid "Downloading source"
 msgstr ""
 
 #: pkg/dl/progress_tui.go:106

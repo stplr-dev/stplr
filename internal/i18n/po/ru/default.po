@@ -645,21 +645,21 @@ msgstr "Вы должны быть членом %s или root чтобы вып
 msgid "You need to be root to perform this action"
 msgstr "Вы должны быть root чтобы выполнить это"
 
-#: pkg/dl/dl.go:175
+#: pkg/dl/dl.go:215
 msgid "Source can be updated, updating if required"
 msgstr "Исходный код можно обновлять, обновляя при необходимости"
 
-#: pkg/dl/dl.go:201
+#: pkg/dl/dl.go:229
+msgid "Downloading source"
+msgstr "Скачивание источника"
+
+#: pkg/dl/dl.go:259
 msgid "Source found in cache and linked to destination"
 msgstr "Источник найден в кэше и связан с пунктом назначения"
 
-#: pkg/dl/dl.go:208
+#: pkg/dl/dl.go:261
 msgid "Source updated and linked to destination"
 msgstr "Источник обновлён и связан с пунктом назначения"
-
-#: pkg/dl/dl.go:222
-msgid "Downloading source"
-msgstr "Скачивание источника"
 
 #: pkg/dl/progress_tui.go:106
 msgid "%s: done!\n"

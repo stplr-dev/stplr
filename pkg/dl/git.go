@@ -28,13 +28,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/url"
 	"path"
 	"strconv"
 	"strings"
 
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
@@ -51,42 +51,120 @@ func (GitDownloader) MatchURL(u string) bool {
 	return strings.HasPrefix(u, "git+")
 }
 
-// Download uses git to clone the repository from the specified URL.
-// It allows specifying the revision, depth and recursion options
-// via query string
-func (d *GitDownloader) Download(ctx context.Context, opts Options) (Type, string, error) {
-	u, err := url.Parse(opts.URL)
+// parseGitURL parses the URL and extracts query parameters
+func parseGitURL(rawURL string) (*url.URL, string, int, bool, error) {
+	u, err := url.Parse(rawURL)
 	if err != nil {
-		return 0, "", err
+		return nil, "", 0, false, err
 	}
 	u.Scheme = strings.TrimPrefix(u.Scheme, "git+")
 
 	query := u.Query()
-
 	rev := query.Get("~rev")
 	query.Del("~rev")
-
-	// Right now, this only affects the return value of name,
-	// which will be used by dl_cache.
-	// It seems wrong, but for now it's better to leave it as it is.
-	name := query.Get("~name")
-	query.Del("~name")
-
 	depthStr := query.Get("~depth")
 	query.Del("~depth")
-
-	recursive := query.Get("~recursive")
+	recursive := query.Get("~recursive") == "true"
 	query.Del("~recursive")
-
 	u.RawQuery = query.Encode()
 
 	depth := 0
 	if depthStr != "" {
 		depth, err = strconv.Atoi(depthStr)
 		if err != nil {
-			return 0, "", err
+			return nil, "", 0, false, err
 		}
 	}
+
+	return u, rev, depth, recursive, nil
+}
+
+// performFetch executes a git fetch operation
+func performFetch(repo *git.Repository, depth int, progress io.Writer) error {
+	fo := &git.FetchOptions{
+		Depth:    depth,
+		Progress: progress,
+		// RefSpecs: []config.RefSpec{"+refs/*:refs/*"},
+	}
+	err := repo.Fetch(fo)
+	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
+		return err
+	}
+	return nil
+}
+
+func checkoutRevision(repo *git.Repository, rev string, recursive bool) error {
+	if rev == "" {
+		return nil
+	}
+
+	hash, err := repo.ResolveRevision(plumbing.Revision(rev))
+	if err != nil {
+		return fmt.Errorf("failed to resolve revision %s: %w", rev, err)
+	}
+
+	w, err := repo.Worktree()
+	if err != nil {
+		return err
+	}
+
+	err = w.Checkout(&git.CheckoutOptions{
+		Hash: *hash,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to checkout revision %s: %w", rev, err)
+	}
+
+	if recursive {
+		submodules, err := w.Submodules()
+		if err != nil {
+			return nil // Ignore submodule errors
+		}
+		err = submodules.Update(&git.SubmoduleUpdateOptions{
+			Init: true,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to update submodules %s: %w", rev, err)
+		}
+	}
+
+	return nil
+}
+
+// performPull executes a git pull operation
+func performPull(w *git.Worktree, depth int, recursive bool, progress io.Writer) (bool, error) {
+	po := &git.PullOptions{
+		Depth:             depth,
+		Progress:          progress,
+		RecurseSubmodules: git.NoRecurseSubmodules,
+	}
+	if recursive {
+		po.RecurseSubmodules = git.DefaultSubmoduleRecursionDepth
+	}
+
+	err := w.Pull(po)
+	if err != nil {
+		if errors.Is(err, git.NoErrAlreadyUpToDate) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
+// Download uses git to clone the repository from the specified URL.
+// It allows specifying the revision, depth and recursion options
+// via query string
+func (d *GitDownloader) Download(ctx context.Context, opts Options) (Type, string, error) {
+	u, rev, depth, recursive, err := parseGitURL(opts.URL)
+	if err != nil {
+		return 0, "", err
+	}
+
+	query := u.Query()
+	name := query.Get("~name")
+	query.Del("~name")
+	u.RawQuery = query.Encode()
 
 	co := &git.CloneOptions{
 		URL:               u.String(),
@@ -94,8 +172,7 @@ func (d *GitDownloader) Download(ctx context.Context, opts Options) (Type, strin
 		Progress:          opts.Progress,
 		RecurseSubmodules: git.NoRecurseSubmodules,
 	}
-
-	if recursive == "true" {
+	if recursive {
 		co.RecurseSubmodules = git.DefaultSubmoduleRecursionDepth
 	}
 
@@ -104,27 +181,13 @@ func (d *GitDownloader) Download(ctx context.Context, opts Options) (Type, strin
 		return 0, "", err
 	}
 
-	err = r.Fetch(&git.FetchOptions{
-		RefSpecs: []config.RefSpec{"+refs/*:refs/*"},
-	})
-	if err != git.NoErrAlreadyUpToDate && err != nil {
+	err = performFetch(r, depth, opts.Progress)
+	if err != nil {
 		return 0, "", err
 	}
 
 	if rev != "" {
-		h, err := r.ResolveRevision(plumbing.Revision(rev))
-		if err != nil {
-			return 0, "", err
-		}
-
-		w, err := r.Worktree()
-		if err != nil {
-			return 0, "", err
-		}
-
-		err = w.Checkout(&git.CheckoutOptions{
-			Hash: *h,
-		})
+		err = checkoutRevision(r, rev, recursive)
 		if err != nil {
 			return 0, "", err
 		}
@@ -148,23 +211,10 @@ func (d *GitDownloader) Download(ctx context.Context, opts Options) (Type, strin
 // true if update was successful and false if the
 // repository is already up-to-date
 func (d *GitDownloader) Update(opts Options) (bool, error) {
-	u, err := url.Parse(opts.URL)
+	_, rev, depth, recursive, err := parseGitURL(opts.URL)
 	if err != nil {
 		return false, err
 	}
-	u.Scheme = strings.TrimPrefix(u.Scheme, "git+")
-
-	query := u.Query()
-	rev := query.Get("~rev")
-	query.Del("~rev")
-
-	depthStr := query.Get("~depth")
-	query.Del("~depth")
-
-	recursive := query.Get("~recursive")
-	query.Del("~recursive")
-
-	u.RawQuery = query.Encode()
 
 	r, err := git.PlainOpen(opts.Destination)
 	if err != nil {
@@ -176,71 +226,24 @@ func (d *GitDownloader) Update(opts Options) (bool, error) {
 		return false, err
 	}
 
-	depth := 0
-	if depthStr != "" {
-		depth, err = strconv.Atoi(depthStr)
-		if err != nil {
-			return false, err
-		}
-	}
-
-	// First, we do a fetch to get all the revisions.
-	fo := &git.FetchOptions{
-		Depth:    depth,
-		Progress: opts.Progress,
-	}
-
 	m, err := getManifest(opts.Destination)
 	manifestOK := err == nil
 
-	err = r.Fetch(fo)
-	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
+	err = performFetch(r, depth, opts.Progress)
+	if err != nil {
 		return false, err
 	}
 
-	// If a revision is specified, switch to it.
+	var updated bool
 	if rev != "" {
-		// We are trying to find the revision as a hash of the commit
-		hash, err := r.ResolveRevision(plumbing.Revision(rev))
+		err = checkoutRevision(r, rev, recursive)
 		if err != nil {
-			return false, fmt.Errorf("failed to resolve revision %s: %w", rev, err)
+			return false, err
 		}
-
-		err = w.Checkout(&git.CheckoutOptions{
-			Hash: *hash,
-		})
-		if err != nil {
-			return false, fmt.Errorf("failed to checkout revision %s: %w", rev, err)
-		}
-
-		if recursive == "true" {
-			submodules, err := w.Submodules()
-			if err == nil {
-				err = submodules.Update(&git.SubmoduleUpdateOptions{
-					Init: true,
-				})
-				if err != nil {
-					return false, fmt.Errorf("failed to update submodules %s: %w", rev, err)
-				}
-			}
-		}
+		updated = true // Assume checkout changes the state
 	} else {
-		// If the revision is not specified, we do a regular pull.
-		po := &git.PullOptions{
-			Depth:             depth,
-			Progress:          opts.Progress,
-			RecurseSubmodules: git.NoRecurseSubmodules,
-		}
-
-		if recursive == "true" {
-			po.RecurseSubmodules = git.DefaultSubmoduleRecursionDepth
-		}
-
-		err = w.Pull(po)
+		updated, err = performPull(w, depth, recursive, opts.Progress)
 		if err != nil {
-			if errors.Is(err, git.NoErrAlreadyUpToDate) {
-				return false, nil
-			}
 			return false, err
 		}
 	}
@@ -254,5 +257,5 @@ func (d *GitDownloader) Update(opts Options) (bool, error) {
 		err = writeManifest(opts.Destination, m)
 	}
 
-	return true, err
+	return updated, err
 }

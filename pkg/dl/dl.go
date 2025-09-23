@@ -151,7 +151,7 @@ type UpdatingDownloader interface {
 	Update(Options) (bool, error)
 }
 
-// Функция Download загружает файл или каталог с использованием указанных параметров
+// Download handles downloading a file or directory with the given options.
 func Download(ctx context.Context, opts Options) (err error) {
 	normalized, err := normalizeURL(opts.URL)
 	if err != nil {
@@ -166,62 +166,73 @@ func Download(ctx context.Context, opts Options) (err error) {
 		return err
 	}
 
-	var t Type
-	cacheDir, ok := opts.DlCache.Get(ctx, opts.URL)
-	if ok {
-		var updated bool
-		if d, ok := d.(UpdatingDownloader); ok {
-			slog.Info(
-				gotext.Get("Source can be updated, updating if required"),
-				"source", opts.Name,
-				"downloader", d.Name(),
-			)
+	return downloadWithCache(ctx, opts, d)
+}
 
-			newOpts := opts
-			newOpts.Destination = cacheDir
-
-			updated, err = d.Update(newOpts)
-			if err != nil {
-				return err
-			}
-		}
-
-		m, err := getManifest(cacheDir)
-		if err == nil {
-			t = m.Type
-
-			dest := filepath.Join(opts.Destination, m.Name)
-			ok, err := handleCache(cacheDir, dest, m.Name, t)
-			if err != nil {
-				return err
-			}
-
-			if ok && !updated {
-				slog.Info(
-					gotext.Get("Source found in cache and linked to destination"),
-					"source", opts.Name,
-					"type", t,
-				)
-				return nil
-			} else if ok {
-				slog.Info(
-					gotext.Get("Source updated and linked to destination"),
-					"source", opts.Name,
-					"type", t,
-				)
-				return nil
-			}
-		} else {
-			err = os.RemoveAll(cacheDir)
-			if err != nil {
-				return err
-			}
-		}
+// downloadWithCache handles downloading with cache logic.
+func downloadWithCache(ctx context.Context, opts Options, d Downloader) error {
+	cacheDir, cached := opts.DlCache.Get(ctx, opts.URL)
+	if !cached {
+		return performDownload(ctx, opts, d)
 	}
 
-	slog.Info(gotext.Get("Downloading source"), "source", opts.Name, "url", opts.URL, "downloader", d.Name())
+	return handleCachedSource(ctx, opts, d, cacheDir)
+}
 
-	cacheDir, err = opts.DlCache.New(ctx, opts.URL)
+// handleCachedSource processes a cached source, updating it if necessary.
+func handleCachedSource(ctx context.Context, opts Options, d Downloader, cacheDir string) error {
+	manifest, err := getManifest(cacheDir)
+	if err != nil {
+		if removeErr := os.RemoveAll(cacheDir); removeErr != nil {
+			return removeErr
+		}
+		return performDownload(ctx, opts, d)
+	}
+
+	updated, err := updateSourceIfNeeded(ctx, opts, d, cacheDir)
+	if err != nil {
+		return err
+	}
+
+	dest := filepath.Join(opts.Destination, manifest.Name)
+	ok, err := handleCache(cacheDir, dest, manifest.Name, manifest.Type)
+	if err != nil {
+		return err
+	}
+
+	if ok {
+		logCacheHit(opts.Name, manifest.Type, updated)
+		return nil
+	}
+
+	return performDownload(ctx, opts, d)
+}
+
+// updateSourceIfNeeded updates the source if the downloader supports updates.
+func updateSourceIfNeeded(ctx context.Context, opts Options, d Downloader, cacheDir string) (bool, error) {
+	if updater, ok := d.(UpdatingDownloader); ok {
+		slog.Info(
+			gotext.Get("Source can be updated, updating if required"),
+			"source", opts.Name,
+			"downloader", d.Name(),
+		)
+		newOpts := opts
+		newOpts.Destination = cacheDir
+		return updater.Update(newOpts)
+	}
+	return false, nil
+}
+
+// performDownload executes the download and writes the manifest.
+func performDownload(ctx context.Context, opts Options, d Downloader) error {
+	slog.Info(
+		gotext.Get("Downloading source"),
+		"source", opts.Name,
+		"url", opts.URL,
+		"downloader", d.Name(),
+	)
+
+	cacheDir, err := opts.DlCache.New(ctx, opts.URL)
 	if err != nil {
 		return err
 	}
@@ -234,14 +245,22 @@ func Download(ctx context.Context, opts Options) (err error) {
 		return err
 	}
 
-	err = writeManifest(cacheDir, Manifest{t, name})
-	if err != nil {
+	if err = writeManifest(cacheDir, Manifest{t, name}); err != nil {
 		return err
 	}
 
 	dest := filepath.Join(opts.Destination, name)
 	_, err = handleCache(cacheDir, dest, name, t)
 	return err
+}
+
+// logCacheHit logs when a cached source is used or updated.
+func logCacheHit(source string, t Type, updated bool) {
+	msg := gotext.Get("Source found in cache and linked to destination")
+	if updated {
+		msg = gotext.Get("Source updated and linked to destination")
+	}
+	slog.Info(msg, "source", source, "type", t)
 }
 
 // Функция writeManifest записывает манифест в указанный каталог кэша
