@@ -43,6 +43,8 @@ endif
 	go build -ldflags="-X 'go.stplr.dev/stplr/internal/config.Version=$(GIT_VERSION)'" -o $@ ./cmd/stplr
 
 install: build install-config install-sysusers install-tmpfiles install-cachedir
+	install -Dm755 $(BIN) $(DESTDIR)$(bindir)/$(NAME)
+	
 	@mkdir -p $(DESTDIR)$(datadir)/bash-completion/completions
 	@$(BIN) completion bash > $(DESTDIR)$(datadir)/bash-completion/completions/$(NAME)
 	
@@ -121,9 +123,19 @@ update-deps-cve:
 	bash scripts/update-deps-cve.sh
 
 MOCKS_DESTINATION=mocks
-mocks: internal/usecase/build/steps.go internal/build/executors_plugins.go internal/build/check_executor.go
+mocks: \
+	internal/usecase/build/steps.go \
+	internal/build/executors_plugins.go \
+	internal/repos/git_manager.go \
+	internal/build/check_executor.go
 	@echo "Generating mocks..."
 	@rm -rf $(MOCKS_DESTINATION)
 	@for file in $^; do \
 		mockgen -source=$$file -destination=$(MOCKS_DESTINATION)/$$(basename $$file) --package=mocks --exclude_interfaces=step; \
 	done
+
+mocks2: internal/repos/git_manager.go
+	@echo "Generating mocks..."
+	@for file in $^; do \
+		mockgen -source=$$file -destination=$$(dirname $$file)/mock_$$(basename $$file .go)_test.go -package=$$(basename $$(dirname $$file)); \
+	done	

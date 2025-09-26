@@ -26,11 +26,13 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/client"
+	"github.com/go-git/go-git/v5/storage/memory"
 
 	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/staplerfile"
@@ -56,33 +58,44 @@ func parseScript(
 	return dbPkgs, nil
 }
 
-func getHeadReference(r *git.Repository) (plumbing.ReferenceName, error) {
+func getRefs(r *git.Repository) (memory.ReferenceStorage, error) {
+	var zero memory.ReferenceStorage
+
 	remote, err := r.Remote(git.DefaultRemoteName)
 	if err != nil {
-		return "", err
+		return zero, err
 	}
 
 	endpoint, err := transport.NewEndpoint(remote.Config().URLs[0])
 	if err != nil {
-		return "", err
+		return zero, err
 	}
 
 	gitClient, err := client.NewClient(endpoint)
 	if err != nil {
-		return "", err
+		return zero, err
 	}
 
 	session, err := gitClient.NewUploadPackSession(endpoint, nil)
 	if err != nil {
-		return "", err
+		return zero, err
 	}
 
 	info, err := session.AdvertisedReferences()
 	if err != nil {
-		return "", err
+		return zero, err
 	}
 
 	refs, err := info.AllReferences()
+	if err != nil {
+		return zero, err
+	}
+
+	return refs, nil
+}
+
+func getHeadReference(r *git.Repository) (plumbing.ReferenceName, error) {
+	refs, err := getRefs(r)
 	if err != nil {
 		return "", err
 	}
@@ -93,7 +106,7 @@ func getHeadReference(r *git.Repository) (plumbing.ReferenceName, error) {
 func resolveHash(r *git.Repository, ref string) (*plumbing.Hash, error) {
 	var err error
 
-	if ref == "" {
+	if ref == "" || ref == "HEAD" {
 		reference, err := getHeadReference(r)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get head reference %w", err)
@@ -101,12 +114,25 @@ func resolveHash(r *git.Repository, ref string) (*plumbing.Hash, error) {
 		ref = reference.Short()
 	}
 
-	hsh, err := r.ResolveRevision(git.DefaultRemoteName + "/" + plumbing.Revision(ref))
-	if err != nil {
-		hsh, err = r.ResolveRevision(plumbing.Revision(ref))
+	if strings.HasPrefix(ref, "refs/") {
+		refs, err := getRefs(r)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to get refs %w", err)
 		}
+		if r, ok := refs[plumbing.ReferenceName(ref)]; ok {
+			hsh := r.Hash()
+			return &hsh, nil
+		}
+	}
+
+	hsh, err := r.ResolveRevision(plumbing.Revision(git.DefaultRemoteName + "/" + ref))
+	if err == nil {
+		return hsh, nil
+	}
+
+	hsh, err = r.ResolveRevision(plumbing.Revision(ref))
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve reference %s: %w", ref, err)
 	}
 
 	return hsh, nil

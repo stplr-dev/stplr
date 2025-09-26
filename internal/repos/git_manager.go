@@ -22,6 +22,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -32,6 +33,13 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
+type gitRepository interface {
+	FetchContext(context.Context, *git.FetchOptions) error
+	DeleteTag(string) error
+	CommitObject(h plumbing.Hash) (*object.Commit, error)
+	Worktree() (*git.Worktree, error)
+}
+
 type GitManager struct{}
 
 type GitChanges struct {
@@ -40,7 +48,7 @@ type GitChanges struct {
 	New   *object.Commit
 }
 
-func (gm *GitManager) GetChanges(r *git.Repository, old, new *plumbing.Reference) (GitChanges, error) {
+func (gm *GitManager) GetChanges(r gitRepository, old, new *plumbing.Reference) (GitChanges, error) {
 	var changes GitChanges
 	var err error
 
@@ -131,18 +139,55 @@ func (gm *GitManager) initAndConfigureRepo(repoDir, repoUrl string) (*git.Reposi
 	return r, true, nil
 }
 
-func (gm *GitManager) FetchRepo(ctx context.Context, r *git.Repository) error {
-	err := r.FetchContext(ctx, &git.FetchOptions{
+func (gm *GitManager) defaultFetchOptions() *git.FetchOptions {
+	return &git.FetchOptions{
 		Progress: os.Stderr,
 		Force:    true,
-	})
+		RefSpecs: []gitConfig.RefSpec{
+			gitConfig.RefSpec(gitConfig.DefaultPushRefSpec),
+		},
+	}
+}
+
+func (gm *GitManager) fetch(ctx context.Context, r gitRepository, opts *git.FetchOptions) error {
+	err := r.FetchContext(ctx, opts)
 	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
 		return err
 	}
 	return nil
 }
 
-func (gm *GitManager) CheckoutRevision(r *git.Repository, revHash *plumbing.Hash) (billy.Filesystem, error) {
+func (gm *GitManager) fetchRepoByRef(ctx context.Context, r gitRepository, ref string) error {
+	tempTag := fmt.Sprintf("stplr-temp-tag-%s", ref)
+	gitref := gitConfig.RefSpec(fmt.Sprintf("%s:refs/tags/%s", ref, tempTag))
+	err := gitref.Validate()
+	if err != nil {
+		return err
+	}
+
+	opts := gm.defaultFetchOptions()
+	opts.RefSpecs = append(opts.RefSpecs, gitref)
+	defer func() {
+		if err := r.DeleteTag(tempTag); err != nil {
+			slog.Debug("failed to delete temp tag", "tag", tempTag, "err", err)
+		}
+	}()
+
+	return gm.fetch(ctx, r, opts)
+}
+
+func (gm *GitManager) FetchRepo(ctx context.Context, r gitRepository, ref string) error {
+	if ref != "" {
+		err := gm.fetchRepoByRef(ctx, r, ref)
+		if err == nil {
+			return nil
+		}
+		slog.Debug("fetch by ref failed, fallback to default", "ref", ref, "err", err)
+	}
+	return gm.fetch(ctx, r, gm.defaultFetchOptions())
+}
+
+func (gm *GitManager) CheckoutRevision(r gitRepository, revHash *plumbing.Hash) (billy.Filesystem, error) {
 	w, err := r.Worktree()
 	if err != nil {
 		return nil, err

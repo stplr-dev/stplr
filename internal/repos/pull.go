@@ -125,7 +125,7 @@ func (rs *Repos) pullRepoFromURL(ctx context.Context, rawRepoUrl string, repo *t
 		return fmt.Errorf("failed to open repo")
 	}
 
-	err = rs.gm.FetchRepo(ctx, r)
+	err = rs.gm.FetchRepo(ctx, r, repo.Ref)
 	if err != nil {
 		return err
 	}
