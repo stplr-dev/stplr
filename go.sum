@@ -436,8 +436,12 @@ gitlab.com/digitalxero/go-conventional-commit v1.0.7 h1:8/dO6WWG+98PMhlZowt/Yjui
 gitlab.com/digitalxero/go-conventional-commit v1.0.7/go.mod h1:05Xc2BFsSyC5tKhK0y+P3bs0AwUtNuTp+mTpbCU/DZ0=
 go.alt-gnome.ru/capytest v0.0.3-0.20250706082755-f20413e052f9 h1:NST+V5LV/eLgs0p6PsuvfHiZ4UrIWqftCdifO8zgg0g=
 go.alt-gnome.ru/capytest v0.0.3-0.20250706082755-f20413e052f9/go.mod h1:qiM8LARP+JBZr5mrDoVylOoqjrN0MAzvZ21NR9qMc0Y=
+go.alt-gnome.ru/capytest v0.0.3 h1:FAJBPreFlypKVvjvMHR7MZjVHAOb2pmbx9Bm78DNgwI=
+go.alt-gnome.ru/capytest v0.0.3/go.mod h1:50z3Kl0Srk4YsKC6GX6mOW0nGedxTM1hYuvObRFr7ks=
 go.alt-gnome.ru/capytest/providers/podman v0.0.3-0.20250706082755-f20413e052f9 h1:VZclgdJxARvhZ6PIWWW2hQ6Ge4XeE36pzUr/U/y62bE=
 go.alt-gnome.ru/capytest/providers/podman v0.0.3-0.20250706082755-f20413e052f9/go.mod h1:Wpq1Ny3eMzADJpMJArA2TZGZbsviUBmawtEPcxnoerg=
+go.alt-gnome.ru/capytest/providers/podman v0.0.3 h1:3jcePLs3Mc9yNaAcI3qc76FyZR0sfBMgZeeHEwmShtU=
+go.alt-gnome.ru/capytest/providers/podman v0.0.3/go.mod h1:4dipJNdGLD63It+P99KNhKvG+SIxzu/rpvWzY+LCuFg=
 go.elara.ws/vercmp v0.0.0-20231003203944-671892886053 h1:tQ6Kyq9I0Sw9bmXQ1MZdH5EVpEc5brXe8utBCTI5pr0=
 go.elara.ws/vercmp v0.0.0-20231003203944-671892886053/go.mod h1:/7PNW7nFnDR5W7UXZVc04gdVLR/wBNgkm33KgIz0OBk=
 go.elara.ws/vercmp v0.0.0-20250912200949-2e97859b8794 h1:IylaqCGvFp7pgC8tRHpd8yog8MwYR+wFOmRHccSAj34=
