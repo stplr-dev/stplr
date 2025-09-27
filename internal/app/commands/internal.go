@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"os/exec"
 	"os/user"
 	"syscall"
 
@@ -249,7 +250,15 @@ func InternalSandbox() *cli.Command {
 			}
 
 			//gosec:disable G204 -- Expected
-			return syscall.Exec(cmdArgs[0], cmdArgs, os.Environ())
+			cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			cmd.Env = os.Environ()
+			cmd.SysProcAttr = &syscall.SysProcAttr{
+				Cloneflags: syscall.CLONE_NEWUSER | syscall.CLONE_NEWNS | syscall.CLONE_NEWPID,
+			}
+			return cmd.Run()
 		},
 	}
 }

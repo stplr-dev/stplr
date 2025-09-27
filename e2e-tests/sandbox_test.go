@@ -39,4 +39,10 @@ func TestE2ESandbox(t *testing.T) {
 			execShouldError(t, r, "stplr", "build", "-p", "test-sandbox")
 		},
 	)
+
+	t.Run("stplr install test-sandbox-2", matrixSuite(COMMON_SYSTEMS, func(t *testing.T, r capytest.Runner) {
+		t.Parallel()
+		defaultPrepare(t, r)
+		execShouldNoError(t, r, "stplr", "install", "test-sandbox-2")
+	}))
 }

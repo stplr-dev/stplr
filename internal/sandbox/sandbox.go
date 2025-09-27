@@ -90,6 +90,15 @@ func sandboxSocket() error {
 	return nil
 }
 
+func hideProc() error {
+	err := unix.Mount("proc", "/proc", "proc", 0, "")
+	if err != nil {
+		return fmt.Errorf("failed to hide /proc: %w", err)
+	}
+
+	return nil
+}
+
 func Setup(srcDir, pkgDir, homeDir string) error {
 	if err := sandboxDirs([]string{srcDir, pkgDir}, []string{constants.SystemCachePath, homeDir}); err != nil {
 		return err
@@ -100,6 +109,10 @@ func Setup(srcDir, pkgDir, homeDir string) error {
 	}
 
 	if err := hideExecutable(); err != nil {
+		return err
+	}
+
+	if err := hideProc(); err != nil {
 		return err
 	}
 

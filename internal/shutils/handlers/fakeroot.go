@@ -80,7 +80,7 @@ func FakerootExecHandler(killTimeout time.Duration, srcDir, pkgDir string, disab
 			return err
 		}
 
-		cmd.SysProcAttr.Cloneflags |= unix.CLONE_NEWNS
+		cmd.SysProcAttr.Cloneflags |= unix.CLONE_NEWNS | unix.CLONE_NEWPID
 
 		if disableNetwork {
 			cmd.SysProcAttr.Cloneflags |= unix.CLONE_NEWNET
