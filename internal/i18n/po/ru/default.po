@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2025-09-28 15:01+0000\n"
+"PO-Revision-Date: 2025-09-28 15:03+0000\n"
 "Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
 "stplr/ru/>\n"
@@ -63,7 +63,7 @@ msgstr "Создайте пакет с нуля, даже если уже име
 
 #: internal/app/commands/build.go:65
 msgid "Do not add suffix to package name"
-msgstr "Не добавляйте суффикс к имени пакета"
+msgstr "Не добавлять суффикс к имени пакета"
 
 #: internal/app/commands/config.go:43
 msgid "Manage config"
