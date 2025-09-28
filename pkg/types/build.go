@@ -27,6 +27,7 @@ package types
 type BuildOpts struct {
 	Clean       bool
 	Interactive bool
+	NoSuffix    bool
 }
 
 type Scripts struct {

@@ -134,7 +134,9 @@ mocks: \
 		mockgen -source=$$file -destination=$(MOCKS_DESTINATION)/$$(basename $$file) --package=mocks --exclude_interfaces=step; \
 	done
 
-mocks2: internal/repos/git_manager.go
+mocks2: \
+	internal/repos/git_manager.go \
+	internal/build/utils.go
 	@echo "Generating mocks..."
 	@for file in $^; do \
 		mockgen -source=$$file -destination=$$(dirname $$file)/mock_$$(basename $$file .go)_test.go -package=$$(basename $$(dirname $$file)); \

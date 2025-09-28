@@ -51,6 +51,10 @@ msgid ""
 "Build package from scratch even if there's an already built package available"
 msgstr ""
 
+#: internal/app/commands/build.go:65
+msgid "Do not add suffix to package name"
+msgstr ""
+
 #: internal/app/commands/config.go:43
 msgid "Manage config"
 msgstr ""
@@ -451,15 +455,15 @@ msgstr ""
 msgid "Error saving config"
 msgstr ""
 
-#: internal/usecase/build/build.go:57
+#: internal/usecase/build/build.go:58
 msgid "Nothing to build"
 msgstr ""
 
-#: internal/usecase/build/build.go:71
+#: internal/usecase/build/build.go:72
 msgid "Error building package"
 msgstr ""
 
-#: internal/usecase/build/build.go:75
+#: internal/usecase/build/build.go:76
 msgid "Done"
 msgstr ""
 

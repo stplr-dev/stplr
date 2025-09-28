@@ -61,6 +61,10 @@ msgid ""
 "Build package from scratch even if there's an already built package available"
 msgstr "Создайте пакет с нуля, даже если уже имеется готовый пакет"
 
+#: internal/app/commands/build.go:65
+msgid "Do not add suffix to package name"
+msgstr ""
+
 #: internal/app/commands/config.go:43
 msgid "Manage config"
 msgstr "Управление конфигурацией"
@@ -472,15 +476,15 @@ msgstr "Репозиторий уже обновлён"
 msgid "Error saving config"
 msgstr "Ошибка при сохранении конфигурации"
 
-#: internal/usecase/build/build.go:57
+#: internal/usecase/build/build.go:58
 msgid "Nothing to build"
 msgstr "Нечего собирать"
 
-#: internal/usecase/build/build.go:71
+#: internal/usecase/build/build.go:72
 msgid "Error building package"
 msgstr "Ошибка при сборке пакета"
 
-#: internal/usecase/build/build.go:75
+#: internal/usecase/build/build.go:76
 msgid "Done"
 msgstr "Сделано"
 

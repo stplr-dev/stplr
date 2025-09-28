@@ -169,15 +169,22 @@ var RegexpALRPackageName = regexp.MustCompile(`^(?P<package>[^+]+)\+stplr-(?P<re
 type getBasePkgInfoInput interface {
 	OSReleaser
 	RepositoryGetter
+	BuildOptsProvider
 }
 
-func getBasePkgInfo(vars *alrsh.Package, input getBasePkgInfoInput) *nfpm.Info {
+func getBasePkgInfo(pkg *alrsh.Package, input getBasePkgInfoInput) *nfpm.Info {
+	var name string
+	if input.BuildOpts().NoSuffix {
+		name = pkg.Name
+	} else {
+		name = fmt.Sprintf("%s+stplr-%s", pkg.Name, input.Repository())
+	}
 	return &nfpm.Info{
-		Name:    fmt.Sprintf("%s+stplr-%s", vars.Name, input.Repository()),
+		Name:    name,
 		Arch:    cpu.Arch(),
-		Version: vars.Version,
-		Release: overrides.ReleasePlatformSpecific(vars.Release, input.OSRelease()),
-		Epoch:   strconv.FormatUint(uint64(vars.Epoch), 10),
+		Version: pkg.Version,
+		Release: overrides.ReleasePlatformSpecific(pkg.Release, input.OSRelease()),
+		Epoch:   strconv.FormatUint(uint64(pkg.Epoch), 10),
 	}
 }
 

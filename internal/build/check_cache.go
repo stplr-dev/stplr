@@ -38,6 +38,7 @@ type CheckForBuiltPackageInput interface {
 	OSReleaser
 	PkgFormatter
 	RepositoryGetter
+	BuildOptsProvider
 }
 
 func (c *LocalCacheExecutor) CheckForBuiltPackage(

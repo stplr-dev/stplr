@@ -50,6 +50,7 @@ type Options struct {
 	Package     string
 	Clean       bool
 	Interactive bool
+	NoSuffix    bool
 }
 
 func (s *useCase) Run(ctx context.Context, opts Options) error {

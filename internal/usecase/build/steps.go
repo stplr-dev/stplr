@@ -284,6 +284,7 @@ func buildArgsFromOptions(opts Options, deps *appbuilder.AppDeps) build.BuildArg
 		Opts: &types.BuildOpts{
 			Clean:       opts.Clean,
 			Interactive: opts.Interactive,
+			NoSuffix:    opts.NoSuffix,
 		},
 		PkgFormat_: build.GetPkgFormat(deps.Manager),
 		Info:       deps.Info,

@@ -60,6 +60,10 @@ func BuildCmd() *cli.Command {
 				Aliases: []string{"c"},
 				Usage:   gotext.Get("Build package from scratch even if there's an already built package available"),
 			},
+			&cli.BoolFlag{
+				Name:  "no-suffix",
+				Usage: gotext.Get("Do not add suffix to package name"),
+			},
 		},
 		Action: func(ctx context.Context, c *cli.Command) error {
 			return build.
@@ -70,6 +74,7 @@ func BuildCmd() *cli.Command {
 					Package:     c.String("package"),
 					Clean:       c.Bool("clean"),
 					Interactive: c.Bool("interactive"),
+					NoSuffix:    c.Bool("no-suffix"),
 				})
 		},
 	}
