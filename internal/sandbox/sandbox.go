@@ -19,9 +19,11 @@
 package sandbox
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
+	"syscall"
 
 	"golang.org/x/sys/unix"
 
@@ -71,6 +73,9 @@ func hideExecutable() error {
 	}
 
 	if err := unix.Mount("/dev/null", execPath, "", unix.MS_BIND, ""); err != nil {
+		if errors.Is(err, syscall.ENOENT) {
+			return nil
+		}
 		return fmt.Errorf("failed to hide %s: %w", execPath, err)
 	}
 
