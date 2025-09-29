@@ -140,4 +140,7 @@ mocks2: \
 	@echo "Generating mocks..."
 	@for file in $^; do \
 		mockgen -source=$$file -destination=$$(dirname $$file)/mock_$$(basename $$file .go)_test.go -package=$$(basename $$(dirname $$file)); \
-	done	
+	done
+
+create-release-artifacts: clean build
+	bash scripts/create-release-artifacts.sh

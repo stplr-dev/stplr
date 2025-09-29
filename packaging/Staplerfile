@@ -1,0 +1,60 @@
+name=stplr
+version="0.0.27"
+release=1
+summary="Universal package build and management system for Linux"
+group="System/Configuration/Packaging"
+homepage="https://stplr.dev"
+license="GPL-3.0-or-later"
+maintainer="Maxim Slipenko <maxim@slipenko.com>"
+architectures=("amd64" "aarch64")
+
+desc="""Stapler is a universal package build and management system for Linux
+that makes installing programs easier and more convenient. It is a
+fork of the ALR project, which, in turn, is based on LURE. Stapler
+allows you to install packages from your own repositories, as well
+as use the system package manager to work with packages that are
+not in its repositories."""
+
+sources=(
+    "local:///stplr"
+    "local:///stplr.toml"
+    "local:///stplr.sysusers"
+    "local:///stplr.tmpfiles"
+    "local:///stplr.fish"
+)
+
+checksums=(
+    SKIP
+    SKIP
+    SKIP
+    SKIP
+    SKIP
+)
+
+scripts=(
+    ['postinstall']='postinstall.sh'
+)
+
+package() {
+    install-binary stplr
+    install-config stplr.toml "stplr/stplr.toml"
+
+    install -Dm644 stplr.sysusers "${pkgdir}/usr/lib/sysusers.d/stplr.conf"
+    install -Dm644 stplr.tmpfiles "${pkgdir}/usr/lib/tmpfiles.d/stplr.conf"
+
+    "${pkgdir}/usr/bin/stplr" completion bash | install-completion bash stplr
+    "${pkgdir}/usr/bin/stplr" completion zsh | install-completion zsh stplr
+    install-completion fish stplr < stplr.fish
+
+    mkdir -p "${pkgdir}/var/cache/stplr"
+}
+
+files() {
+    files-find-binary stplr
+    files-find-config "stplr/stplr.toml"
+
+    files-find \
+        "/usr/lib/sysusers.d/stplr.conf" \
+        "/usr/lib/tmpfiles.d/stplr.conf" \
+        "/var/cache/stplr"
+}
