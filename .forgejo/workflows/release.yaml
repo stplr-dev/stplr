@@ -80,7 +80,7 @@ jobs:
           ( cd out && tar -czvf ../dist/stplr-${{ env.VERSION }}-linux-x86_64.tar.gz * )
 
       - name: Release
-        uses: actions/forgejo-release@v2.6.0
+        uses: actions/forgejo-release@v2.7.3
         with:
           direction: upload
           release-dir: ./dist
