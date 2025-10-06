@@ -319,7 +319,7 @@ type {{.EntityName}}{{.Name}}Resp struct {
 
 func (s *{{.EntityName}}RPC) {{.Name}}(ctx context.Context, {{range $i, $p := .Params}}{{if $i}}, {{end}}{{lowerFirst $p.Name}} {{$p.Type}}{{end}}) ({{range $i, $r := .Results}}{{if $i}}, {{end}}{{$r.Type}}{{end}}{{if .Results}}, {{end}}error) {
 	var resp *{{.EntityName}}{{.Name}}Resp
-	err := s.client.Call("Plugin.{{.Name}}", &{{.EntityName}}{{.Name}}Args{
+	err := s.client.Call(ctx, "Plugin.{{.Name}}", &{{.EntityName}}{{.Name}}Args{
 {{range .Params}}		{{.Name}}: {{lowerFirst .Name}},
 {{end}}	}, &resp)
 	if err != nil {
@@ -328,8 +328,8 @@ func (s *{{.EntityName}}RPC) {{.Name}}(ctx context.Context, {{range $i, $p := .P
 	return {{range $i, $r := .Results}}{{if $i}}, {{end}}resp.{{$r.Name}}{{end}}{{if .Results}}, {{end}}nil
 }
 
-func (s *{{.EntityName}}RPCServer) {{.Name}}(args *{{.EntityName}}{{.Name}}Args, resp *{{.EntityName}}{{.Name}}Resp) error {
-	{{if .Results}}{{range $i, $r := .Results}}{{if $i}}, {{end}}{{lowerFirst $r.Name}}{{end}}, err := {{else}}err := {{end}}s.Impl.{{.Name}}(context.Background(),{{range $i, $p := .Params}}{{if $i}}, {{end}}args.{{$p.Name}}{{end}})
+func (s *{{.EntityName}}RPCServer) {{.Name}}(ctx context.Context, args *{{.EntityName}}{{.Name}}Args, resp *{{.EntityName}}{{.Name}}Resp) error {
+	{{if .Results}}{{range $i, $r := .Results}}{{if $i}}, {{end}}{{lowerFirst $r.Name}}{{end}}, err := {{else}}err := {{end}}s.Impl.{{.Name}}(ctx,{{range $i, $p := .Params}}{{if $i}}, {{end}}args.{{$p.Name}}{{end}})
 	if err != nil {
 		return err
 	}
@@ -385,7 +385,7 @@ func baseStructs(buf *bytes.Buffer, entityNames, imports []string) {
 
 	contentTemplate := template.Must(template.New("").Parse(`
 import (
-	"net/rpc"
+	"github.com/keegancsmith/rpc"
 
 	"github.com/hashicorp/go-plugin"
 {{range .Imports}}	{{.}}

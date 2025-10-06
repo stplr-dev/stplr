@@ -23,6 +23,8 @@
 package build
 
 import (
+	"context"
+
 	"go.stplr.dev/stplr/internal/manager"
 	"go.stplr.dev/stplr/internal/utils"
 )
@@ -59,11 +61,11 @@ type PrepareResult struct {
 	Scripter  ScriptExecutor
 }
 
-func PrepareInstallerAndScripter() (res *PrepareResult, cleanup func(), err error) {
+func PrepareInstallerAndScripter(ctx context.Context) (res *PrepareResult, cleanup func(), err error) {
 	var installerClose func()
 	var scripterClose func()
 
-	installer, installerClose, err := GetSafeInstaller()
+	installer, installerClose, err := GetSafeInstaller(ctx)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -75,7 +77,7 @@ func PrepareInstallerAndScripter() (res *PrepareResult, cleanup func(), err erro
 		}
 	}
 
-	scripter, scripterClose, err := GetSafeScriptExecutor()
+	scripter, scripterClose, err := GetSafeScriptExecutor(ctx)
 	if err != nil {
 		installerClose()
 		return nil, nil, err

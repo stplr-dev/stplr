@@ -151,7 +151,7 @@ type setupCopier struct{}
 
 func (s *setupCopier) Execute(ctx context.Context, state *stepState) error {
 	runtime := &state.runtime
-	copier, cleanup, err := build.GetSafeScriptCopier()
+	copier, cleanup, err := build.GetSafeScriptCopier(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to init copier: %w", err)
 	}
@@ -236,7 +236,7 @@ func (s *buildStep) Execute(ctx context.Context, state *stepState) error {
 type prepareInstallerAndScripterStep struct{}
 
 func (s *prepareInstallerAndScripterStep) Execute(ctx context.Context, state *stepState) error {
-	res, cleanup, err := build.PrepareInstallerAndScripter()
+	res, cleanup, err := build.PrepareInstallerAndScripter(ctx)
 	if err != nil {
 		return err
 	}

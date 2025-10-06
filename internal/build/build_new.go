@@ -66,7 +66,7 @@ type BuildStep interface {
 func runSteps(ctx context.Context, state *BuildState, steps []BuildStep) ([]*BuiltDep, error) {
 	for _, step := range steps {
 		if err := step.Run(ctx, state); err != nil {
-			return nil, fmt.Errorf("step failed: %w", err)
+			return nil, fmt.Errorf("step (%T) failed: %w", step, err)
 		}
 
 		if state.ShouldExit {

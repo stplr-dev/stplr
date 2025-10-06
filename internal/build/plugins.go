@@ -23,6 +23,7 @@
 package build
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -98,20 +99,20 @@ func GetPluginServeCommonConfig() *plugin.ServeConfig {
 	}
 }
 
-func GetSafeInstaller() (InstallerExecutor, func(), error) {
-	return getSafeExecutor[InstallerExecutor]("_internal-installer", "installer")
+func GetSafeInstaller(ctx context.Context) (InstallerExecutor, func(), error) {
+	return getSafeExecutor[InstallerExecutor](ctx, "_internal-installer", "installer")
 }
 
-func GetSafeScriptExecutor() (ScriptExecutor, func(), error) {
-	return getSafeExecutor[ScriptExecutor]("_internal-safe-script-executor", "script-executor")
+func GetSafeScriptExecutor(ctx context.Context) (ScriptExecutor, func(), error) {
+	return getSafeExecutor[ScriptExecutor](ctx, "_internal-safe-script-executor", "script-executor")
 }
 
-func GetSafeReposExecutor() (ReposExecutor, func(), error) {
-	return getSafeExecutor[ReposExecutor]("_internal-repos", "repos")
+func GetSafeReposExecutor(ctx context.Context) (ReposExecutor, func(), error) {
+	return getSafeExecutor[ReposExecutor](ctx, "_internal-repos", "repos")
 }
 
-func GetSafeScriptCopier() (ScriptCopier, func(), error) {
-	return getSafeExecutor[ScriptCopier]("_internal-script-copier", "script-copier")
+func GetSafeScriptCopier(ctx context.Context) (ScriptCopier, func(), error) {
+	return getSafeExecutor[ScriptCopier](ctx, "_internal-script-copier", "script-copier")
 }
 
 func PrepareSocketDirPath() error {
@@ -136,7 +137,7 @@ func PrepareSocketDirPath() error {
 	return nil
 }
 
-func getSafeExecutor[T any](subCommand, pluginName string, extraArgs ...string) (T, func(), error) {
+func getSafeExecutor[T any](ctx context.Context, subCommand, pluginName string, extraArgs ...string) (T, func(), error) {
 	var err error
 	var zero T
 
@@ -199,7 +200,7 @@ func getSafeExecutor[T any](subCommand, pluginName string, extraArgs ...string) 
 		}
 	}()
 
-	raw, err := rpcClient.Dispense(pluginName)
+	raw, err := rpcClient.Dispense(ctx, pluginName)
 	if err != nil {
 		var zero T
 		return zero, nil, err

@@ -136,7 +136,7 @@ func (b *builder) InstallerAndScripter() *builder {
 		return b
 	}
 
-	res, cleanup, err := build.PrepareInstallerAndScripter()
+	res, cleanup, err := build.PrepareInstallerAndScripter(b.ctx)
 	if err != nil {
 		b.err = err
 		return b

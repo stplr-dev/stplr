@@ -71,8 +71,9 @@ func (a *HCLoggerAdapter) Log(level hclog.Level, msg string, args ...interface{}
 	var chLogLevel chLog.Level
 	if msg == "plugin process exited" ||
 		strings.HasPrefix(msg, "[ERR] plugin: stream copy 'stderr' error") ||
-		strings.HasPrefix(msg, "[WARN] error closing client during Kill") ||
-		strings.HasPrefix(msg, "[WARN] plugin failed to exit gracefully") ||
+		strings.Contains(msg, "error closing client during Kill") ||
+		strings.Contains(msg, "plugin failed to exit gracefully") ||
+		strings.Contains(msg, "plugin received interrupt signal") ||
 		strings.HasPrefix(msg, "[DEBUG] plugin") {
 		chLogLevel = chLog.DebugLevel
 	} else {
@@ -140,6 +141,10 @@ func (a *HCLoggerAdapter) Named(name string) hclog.Logger {
 
 func (a *HCLoggerAdapter) ResetNamed(name string) hclog.Logger {
 	return a
+}
+
+func (a *HCLoggerAdapter) GetLevel() hclog.Level {
+	return hclog.NoLevel
 }
 
 func (a *HCLoggerAdapter) SetLevel(level hclog.Level) {

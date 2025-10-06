@@ -55,7 +55,7 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		URL:  opts.URL,
 	}
 
-	r, close, err := build.GetSafeReposExecutor()
+	r, close, err := build.GetSafeReposExecutor(ctx)
 	if err != nil {
 		return err
 	}

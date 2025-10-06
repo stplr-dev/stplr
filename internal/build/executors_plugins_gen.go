@@ -25,7 +25,7 @@
 package build
 
 import (
-	"net/rpc"
+	"github.com/keegancsmith/rpc"
 
 	"context"
 	"github.com/hashicorp/go-plugin"
@@ -165,7 +165,7 @@ type InstallerExecutorInstallLocalResp struct {
 
 func (s *InstallerExecutorRPC) InstallLocal(ctx context.Context, paths []string, opts *manager.Opts) error {
 	var resp *InstallerExecutorInstallLocalResp
-	err := s.client.Call("Plugin.InstallLocal", &InstallerExecutorInstallLocalArgs{
+	err := s.client.Call(ctx, "Plugin.InstallLocal", &InstallerExecutorInstallLocalArgs{
 		Paths: paths,
 		Opts:  opts,
 	}, &resp)
@@ -175,8 +175,8 @@ func (s *InstallerExecutorRPC) InstallLocal(ctx context.Context, paths []string,
 	return nil
 }
 
-func (s *InstallerExecutorRPCServer) InstallLocal(args *InstallerExecutorInstallLocalArgs, resp *InstallerExecutorInstallLocalResp) error {
-	err := s.Impl.InstallLocal(context.Background(), args.Paths, args.Opts)
+func (s *InstallerExecutorRPCServer) InstallLocal(ctx context.Context, args *InstallerExecutorInstallLocalArgs, resp *InstallerExecutorInstallLocalResp) error {
+	err := s.Impl.InstallLocal(ctx, args.Paths, args.Opts)
 	if err != nil {
 		return err
 	}
@@ -194,7 +194,7 @@ type InstallerExecutorInstallResp struct {
 
 func (s *InstallerExecutorRPC) Install(ctx context.Context, pkgs []string, opts *manager.Opts) error {
 	var resp *InstallerExecutorInstallResp
-	err := s.client.Call("Plugin.Install", &InstallerExecutorInstallArgs{
+	err := s.client.Call(ctx, "Plugin.Install", &InstallerExecutorInstallArgs{
 		Pkgs: pkgs,
 		Opts: opts,
 	}, &resp)
@@ -204,8 +204,8 @@ func (s *InstallerExecutorRPC) Install(ctx context.Context, pkgs []string, opts 
 	return nil
 }
 
-func (s *InstallerExecutorRPCServer) Install(args *InstallerExecutorInstallArgs, resp *InstallerExecutorInstallResp) error {
-	err := s.Impl.Install(context.Background(), args.Pkgs, args.Opts)
+func (s *InstallerExecutorRPCServer) Install(ctx context.Context, args *InstallerExecutorInstallArgs, resp *InstallerExecutorInstallResp) error {
+	err := s.Impl.Install(ctx, args.Pkgs, args.Opts)
 	if err != nil {
 		return err
 	}
@@ -223,7 +223,7 @@ type InstallerExecutorRemoveResp struct {
 
 func (s *InstallerExecutorRPC) Remove(ctx context.Context, pkgs []string, opts *manager.Opts) error {
 	var resp *InstallerExecutorRemoveResp
-	err := s.client.Call("Plugin.Remove", &InstallerExecutorRemoveArgs{
+	err := s.client.Call(ctx, "Plugin.Remove", &InstallerExecutorRemoveArgs{
 		Pkgs: pkgs,
 		Opts: opts,
 	}, &resp)
@@ -233,8 +233,8 @@ func (s *InstallerExecutorRPC) Remove(ctx context.Context, pkgs []string, opts *
 	return nil
 }
 
-func (s *InstallerExecutorRPCServer) Remove(args *InstallerExecutorRemoveArgs, resp *InstallerExecutorRemoveResp) error {
-	err := s.Impl.Remove(context.Background(), args.Pkgs, args.Opts)
+func (s *InstallerExecutorRPCServer) Remove(ctx context.Context, args *InstallerExecutorRemoveArgs, resp *InstallerExecutorRemoveResp) error {
+	err := s.Impl.Remove(ctx, args.Pkgs, args.Opts)
 	if err != nil {
 		return err
 	}
@@ -252,7 +252,7 @@ type InstallerExecutorRemoveAlreadyInstalledResp struct {
 
 func (s *InstallerExecutorRPC) RemoveAlreadyInstalled(ctx context.Context, pkgs []string) ([]string, error) {
 	var resp *InstallerExecutorRemoveAlreadyInstalledResp
-	err := s.client.Call("Plugin.RemoveAlreadyInstalled", &InstallerExecutorRemoveAlreadyInstalledArgs{
+	err := s.client.Call(ctx, "Plugin.RemoveAlreadyInstalled", &InstallerExecutorRemoveAlreadyInstalledArgs{
 		Pkgs: pkgs,
 	}, &resp)
 	if err != nil {
@@ -261,8 +261,8 @@ func (s *InstallerExecutorRPC) RemoveAlreadyInstalled(ctx context.Context, pkgs 
 	return resp.Result0, nil
 }
 
-func (s *InstallerExecutorRPCServer) RemoveAlreadyInstalled(args *InstallerExecutorRemoveAlreadyInstalledArgs, resp *InstallerExecutorRemoveAlreadyInstalledResp) error {
-	result0, err := s.Impl.RemoveAlreadyInstalled(context.Background(), args.Pkgs)
+func (s *InstallerExecutorRPCServer) RemoveAlreadyInstalled(ctx context.Context, args *InstallerExecutorRemoveAlreadyInstalledArgs, resp *InstallerExecutorRemoveAlreadyInstalledResp) error {
+	result0, err := s.Impl.RemoveAlreadyInstalled(ctx, args.Pkgs)
 	if err != nil {
 		return err
 	}
@@ -282,7 +282,7 @@ type ScriptExecutorReadResp struct {
 
 func (s *ScriptExecutorRPC) Read(ctx context.Context, scriptPath string) (*staplerfile.ScriptFile, error) {
 	var resp *ScriptExecutorReadResp
-	err := s.client.Call("Plugin.Read", &ScriptExecutorReadArgs{
+	err := s.client.Call(ctx, "Plugin.Read", &ScriptExecutorReadArgs{
 		ScriptPath: scriptPath,
 	}, &resp)
 	if err != nil {
@@ -291,8 +291,8 @@ func (s *ScriptExecutorRPC) Read(ctx context.Context, scriptPath string) (*stapl
 	return resp.Result0, nil
 }
 
-func (s *ScriptExecutorRPCServer) Read(args *ScriptExecutorReadArgs, resp *ScriptExecutorReadResp) error {
-	result0, err := s.Impl.Read(context.Background(), args.ScriptPath)
+func (s *ScriptExecutorRPCServer) Read(ctx context.Context, args *ScriptExecutorReadArgs, resp *ScriptExecutorReadResp) error {
+	result0, err := s.Impl.Read(ctx, args.ScriptPath)
 	if err != nil {
 		return err
 	}
@@ -315,7 +315,7 @@ type ScriptExecutorParsePackagesResp struct {
 
 func (s *ScriptExecutorRPC) ParsePackages(ctx context.Context, file *staplerfile.ScriptFile, packages []string, info distro.OSRelease) (string, []*staplerfile.Package, error) {
 	var resp *ScriptExecutorParsePackagesResp
-	err := s.client.Call("Plugin.ParsePackages", &ScriptExecutorParsePackagesArgs{
+	err := s.client.Call(ctx, "Plugin.ParsePackages", &ScriptExecutorParsePackagesArgs{
 		File:     file,
 		Packages: packages,
 		Info:     info,
@@ -326,8 +326,8 @@ func (s *ScriptExecutorRPC) ParsePackages(ctx context.Context, file *staplerfile
 	return resp.Result0, resp.Result1, nil
 }
 
-func (s *ScriptExecutorRPCServer) ParsePackages(args *ScriptExecutorParsePackagesArgs, resp *ScriptExecutorParsePackagesResp) error {
-	result0, result1, err := s.Impl.ParsePackages(context.Background(), args.File, args.Packages, args.Info)
+func (s *ScriptExecutorRPCServer) ParsePackages(ctx context.Context, args *ScriptExecutorParsePackagesArgs, resp *ScriptExecutorParsePackagesResp) error {
+	result0, result1, err := s.Impl.ParsePackages(ctx, args.File, args.Packages, args.Info)
 	if err != nil {
 		return err
 	}
@@ -348,7 +348,7 @@ type ScriptExecutorPrepareDirsResp struct {
 
 func (s *ScriptExecutorRPC) PrepareDirs(ctx context.Context, input *BuildInput, basePkg string) error {
 	var resp *ScriptExecutorPrepareDirsResp
-	err := s.client.Call("Plugin.PrepareDirs", &ScriptExecutorPrepareDirsArgs{
+	err := s.client.Call(ctx, "Plugin.PrepareDirs", &ScriptExecutorPrepareDirsArgs{
 		Input:   input,
 		BasePkg: basePkg,
 	}, &resp)
@@ -358,8 +358,8 @@ func (s *ScriptExecutorRPC) PrepareDirs(ctx context.Context, input *BuildInput, 
 	return nil
 }
 
-func (s *ScriptExecutorRPCServer) PrepareDirs(args *ScriptExecutorPrepareDirsArgs, resp *ScriptExecutorPrepareDirsResp) error {
-	err := s.Impl.PrepareDirs(context.Background(), args.Input, args.BasePkg)
+func (s *ScriptExecutorRPCServer) PrepareDirs(ctx context.Context, args *ScriptExecutorPrepareDirsArgs, resp *ScriptExecutorPrepareDirsResp) error {
+	err := s.Impl.PrepareDirs(ctx, args.Input, args.BasePkg)
 	if err != nil {
 		return err
 	}
@@ -382,7 +382,7 @@ type ScriptExecutorExecuteSecondPassResp struct {
 
 func (s *ScriptExecutorRPC) ExecuteSecondPass(ctx context.Context, input *BuildInput, sf *staplerfile.ScriptFile, varsOfPackages []*staplerfile.Package, repoDeps []string, builtDeps []*BuiltDep, basePkg string) ([]*BuiltDep, error) {
 	var resp *ScriptExecutorExecuteSecondPassResp
-	err := s.client.Call("Plugin.ExecuteSecondPass", &ScriptExecutorExecuteSecondPassArgs{
+	err := s.client.Call(ctx, "Plugin.ExecuteSecondPass", &ScriptExecutorExecuteSecondPassArgs{
 		Input:          input,
 		Sf:             sf,
 		VarsOfPackages: varsOfPackages,
@@ -396,8 +396,8 @@ func (s *ScriptExecutorRPC) ExecuteSecondPass(ctx context.Context, input *BuildI
 	return resp.Result0, nil
 }
 
-func (s *ScriptExecutorRPCServer) ExecuteSecondPass(args *ScriptExecutorExecuteSecondPassArgs, resp *ScriptExecutorExecuteSecondPassResp) error {
-	result0, err := s.Impl.ExecuteSecondPass(context.Background(), args.Input, args.Sf, args.VarsOfPackages, args.RepoDeps, args.BuiltDeps, args.BasePkg)
+func (s *ScriptExecutorRPCServer) ExecuteSecondPass(ctx context.Context, args *ScriptExecutorExecuteSecondPassArgs, resp *ScriptExecutorExecuteSecondPassResp) error {
+	result0, err := s.Impl.ExecuteSecondPass(ctx, args.Input, args.Sf, args.VarsOfPackages, args.RepoDeps, args.BuiltDeps, args.BasePkg)
 	if err != nil {
 		return err
 	}
@@ -417,7 +417,7 @@ type ReposExecutorPullOneAndUpdateFromConfigResp struct {
 
 func (s *ReposExecutorRPC) PullOneAndUpdateFromConfig(ctx context.Context, repo *types.Repo) (types.Repo, error) {
 	var resp *ReposExecutorPullOneAndUpdateFromConfigResp
-	err := s.client.Call("Plugin.PullOneAndUpdateFromConfig", &ReposExecutorPullOneAndUpdateFromConfigArgs{
+	err := s.client.Call(ctx, "Plugin.PullOneAndUpdateFromConfig", &ReposExecutorPullOneAndUpdateFromConfigArgs{
 		Repo: repo,
 	}, &resp)
 	if err != nil {
@@ -426,8 +426,8 @@ func (s *ReposExecutorRPC) PullOneAndUpdateFromConfig(ctx context.Context, repo 
 	return resp.Result0, nil
 }
 
-func (s *ReposExecutorRPCServer) PullOneAndUpdateFromConfig(args *ReposExecutorPullOneAndUpdateFromConfigArgs, resp *ReposExecutorPullOneAndUpdateFromConfigResp) error {
-	result0, err := s.Impl.PullOneAndUpdateFromConfig(context.Background(), args.Repo)
+func (s *ReposExecutorRPCServer) PullOneAndUpdateFromConfig(ctx context.Context, args *ReposExecutorPullOneAndUpdateFromConfigArgs, resp *ReposExecutorPullOneAndUpdateFromConfigResp) error {
+	result0, err := s.Impl.PullOneAndUpdateFromConfig(ctx, args.Repo)
 	if err != nil {
 		return err
 	}
@@ -447,7 +447,7 @@ type ScriptReaderReadResp struct {
 
 func (s *ScriptReaderRPC) Read(ctx context.Context, path string) (*staplerfile.ScriptFile, error) {
 	var resp *ScriptReaderReadResp
-	err := s.client.Call("Plugin.Read", &ScriptReaderReadArgs{
+	err := s.client.Call(ctx, "Plugin.Read", &ScriptReaderReadArgs{
 		Path: path,
 	}, &resp)
 	if err != nil {
@@ -456,8 +456,8 @@ func (s *ScriptReaderRPC) Read(ctx context.Context, path string) (*staplerfile.S
 	return resp.Result0, nil
 }
 
-func (s *ScriptReaderRPCServer) Read(args *ScriptReaderReadArgs, resp *ScriptReaderReadResp) error {
-	result0, err := s.Impl.Read(context.Background(), args.Path)
+func (s *ScriptReaderRPCServer) Read(ctx context.Context, args *ScriptReaderReadArgs, resp *ScriptReaderReadResp) error {
+	result0, err := s.Impl.Read(ctx, args.Path)
 	if err != nil {
 		return err
 	}
@@ -480,7 +480,7 @@ type PackagesParserParsePackagesResp struct {
 
 func (s *PackagesParserRPC) ParsePackages(ctx context.Context, file *staplerfile.ScriptFile, packages []string, info distro.OSRelease) (string, []*staplerfile.Package, error) {
 	var resp *PackagesParserParsePackagesResp
-	err := s.client.Call("Plugin.ParsePackages", &PackagesParserParsePackagesArgs{
+	err := s.client.Call(ctx, "Plugin.ParsePackages", &PackagesParserParsePackagesArgs{
 		File:     file,
 		Packages: packages,
 		Info:     info,
@@ -491,8 +491,8 @@ func (s *PackagesParserRPC) ParsePackages(ctx context.Context, file *staplerfile
 	return resp.Result0, resp.Result1, nil
 }
 
-func (s *PackagesParserRPCServer) ParsePackages(args *PackagesParserParsePackagesArgs, resp *PackagesParserParsePackagesResp) error {
-	result0, result1, err := s.Impl.ParsePackages(context.Background(), args.File, args.Packages, args.Info)
+func (s *PackagesParserRPCServer) ParsePackages(ctx context.Context, args *PackagesParserParsePackagesArgs, resp *PackagesParserParsePackagesResp) error {
+	result0, result1, err := s.Impl.ParsePackages(ctx, args.File, args.Packages, args.Info)
 	if err != nil {
 		return err
 	}
@@ -514,7 +514,7 @@ type ScriptCopierCopyResp struct {
 
 func (s *ScriptCopierRPC) Copy(ctx context.Context, f *staplerfile.ScriptFile, info *distro.OSRelease) (string, error) {
 	var resp *ScriptCopierCopyResp
-	err := s.client.Call("Plugin.Copy", &ScriptCopierCopyArgs{
+	err := s.client.Call(ctx, "Plugin.Copy", &ScriptCopierCopyArgs{
 		F:    f,
 		Info: info,
 	}, &resp)
@@ -524,8 +524,8 @@ func (s *ScriptCopierRPC) Copy(ctx context.Context, f *staplerfile.ScriptFile, i
 	return resp.Result0, nil
 }
 
-func (s *ScriptCopierRPCServer) Copy(args *ScriptCopierCopyArgs, resp *ScriptCopierCopyResp) error {
-	result0, err := s.Impl.Copy(context.Background(), args.F, args.Info)
+func (s *ScriptCopierRPCServer) Copy(ctx context.Context, args *ScriptCopierCopyArgs, resp *ScriptCopierCopyResp) error {
+	result0, err := s.Impl.Copy(ctx, args.F, args.Info)
 	if err != nil {
 		return err
 	}
@@ -547,7 +547,7 @@ type ScriptCopierCopyOutResp struct {
 
 func (s *ScriptCopierRPC) CopyOut(ctx context.Context, from string, dest string, uid int, gid int) error {
 	var resp *ScriptCopierCopyOutResp
-	err := s.client.Call("Plugin.CopyOut", &ScriptCopierCopyOutArgs{
+	err := s.client.Call(ctx, "Plugin.CopyOut", &ScriptCopierCopyOutArgs{
 		From: from,
 		Dest: dest,
 		Uid:  uid,
@@ -559,8 +559,8 @@ func (s *ScriptCopierRPC) CopyOut(ctx context.Context, from string, dest string,
 	return nil
 }
 
-func (s *ScriptCopierRPCServer) CopyOut(args *ScriptCopierCopyOutArgs, resp *ScriptCopierCopyOutResp) error {
-	err := s.Impl.CopyOut(context.Background(), args.From, args.Dest, args.Uid, args.Gid)
+func (s *ScriptCopierRPCServer) CopyOut(ctx context.Context, args *ScriptCopierCopyOutArgs, resp *ScriptCopierCopyOutResp) error {
+	err := s.Impl.CopyOut(ctx, args.From, args.Dest, args.Uid, args.Gid)
 	if err != nil {
 		return err
 	}
