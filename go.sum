@@ -732,6 +732,8 @@ mvdan.cc/sh/v3 v3.12.1-0.20250922151819-e168aaf6d5bc h1:ZV7zaSuF2R7FaxfhWIvi2QkQ
 mvdan.cc/sh/v3 v3.12.1-0.20250922151819-e168aaf6d5bc/go.mod h1:P21wo2gLLe3426sP+CmANLBaixSEbRtPl35w3YlM6dg=
 mvdan.cc/sh/v3 v3.12.1-0.20251004091725-f711f8b47de6 h1:AKPiO6DOpr32I+W4cC1hc08a0kKFmenEmjeAnm4o2W4=
 mvdan.cc/sh/v3 v3.12.1-0.20251004091725-f711f8b47de6/go.mod h1:P21wo2gLLe3426sP+CmANLBaixSEbRtPl35w3YlM6dg=
+mvdan.cc/sh/v3 v3.12.1-0.20251005234102-d3ff6f655a6a h1:u9ftImvs6PoWki1CWuf0xhgOtARCwcqwZAfBfm9K8Xc=
+mvdan.cc/sh/v3 v3.12.1-0.20251005234102-d3ff6f655a6a/go.mod h1:P21wo2gLLe3426sP+CmANLBaixSEbRtPl35w3YlM6dg=
 rsc.io/binaryregexp v0.2.0/go.mod h1:qTv7/COck+e2FymRvadv62gMdZztPaShugOCi3I+8D8=
 rsc.io/quote/v3 v3.1.0/go.mod h1:yEA65RcK8LyAZtP9Kv3t0HmxON59tX3rD+tICJqUlj0=
 rsc.io/sampler v1.3.0/go.mod h1:T1hPZKmBbMNahiBKFy5HrXp6adAjACjK9JXDnKaTXpA=
