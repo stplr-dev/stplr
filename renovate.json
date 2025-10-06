@@ -18,6 +18,12 @@
                 "minor",
                 "patch"
             ]
+        },
+        {
+            "matchPackageNames": [
+                "mvdan.cc/sh/v3"
+            ],
+            "enabled": false
         }
     ],
     "vulnerabilityAlerts": {
