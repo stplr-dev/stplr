@@ -26,6 +26,7 @@ package cliutils
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"os"
 	"strings"
@@ -55,6 +56,8 @@ func YesNoPrompt(ctx context.Context, msg string, interactive, def bool) (bool, 
 	}
 }
 
+var ErrUserChoseNotContinue = errors.New("user chose not to continue after reading script")
+
 // PromptViewScript asks the user if they'd like to see a script,
 // shows it if they answer yes, then asks if they'd still like to
 // continue, and exits if they answer no.
@@ -80,8 +83,7 @@ func PromptViewScript(ctx context.Context, script, name, style string, interacti
 		}
 
 		if !cont {
-			slog.Error(gotext.Get("User chose not to continue after reading script"))
-			os.Exit(1)
+			return ErrUserChoseNotContinue
 		}
 	}
 

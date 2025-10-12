@@ -23,8 +23,11 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	stdErrors "errors"
+
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/build"
+	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/manager"
 	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/types"
@@ -67,6 +70,12 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		},
 		opts.Pkgs,
 	)
+	if stdErrors.Is(err, build.ErrLicenseAgreementWasDeclined) {
+		return errors.NewI18nError(gotext.Get("License agreement was declined"))
+	}
+	if stdErrors.Is(err, cliutils.ErrUserChoseNotContinue) {
+		return errors.NewI18nError(gotext.Get("User chose not to continue after reading script"))
+	}
 	if err != nil {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error when installing the package"))
 	}

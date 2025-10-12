@@ -20,6 +20,7 @@ package build
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -30,6 +31,8 @@ import (
 	"go.stplr.dev/stplr/internal/app/tui/pager"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
+
+var ErrLicenseAgreementWasDeclined = errors.New("license agreement was declined")
 
 type NonFreeViewer struct{ cfg Config }
 
@@ -106,7 +109,7 @@ func (v *NonFreeViewer) ViewNonfree(
 	}
 
 	if !accepted {
-		return fmt.Errorf("license agreement was declined")
+		return ErrLicenseAgreementWasDeclined
 	}
 
 	return nil

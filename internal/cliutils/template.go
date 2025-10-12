@@ -134,3 +134,31 @@ func GetSubcommandHelpTemplate() string {
 		gotext.Get("OPTIONS"),
 	)
 }
+
+func GetMultiSelectQuestionTemplate() string {
+	return fmt.Sprintf(`{{- define "option"}}
+    {{- if eq .SelectedIndex .CurrentIndex }}{{color .Config.Icons.SelectFocus.Format }}{{ .Config.Icons.SelectFocus.Text }}{{color "reset"}}{{else}} {{end}}
+    {{- if index .Checked .CurrentOpt.Index }}{{color .Config.Icons.MarkedOption.Format }} {{ .Config.Icons.MarkedOption.Text }} {{else}}{{color .Config.Icons.UnmarkedOption.Format }} {{ .Config.Icons.UnmarkedOption.Text }} {{end}}
+    {{- color "reset"}}
+    {{- " "}}{{- .CurrentOpt.Value}}{{ if ne ($.GetDescription .CurrentOpt) "" }} - {{color "cyan"}}{{ $.GetDescription .CurrentOpt }}{{color "reset"}}{{end}}
+{{end}}
+{{- if .ShowHelp }}{{- color .Config.Icons.Help.Format }}{{ .Config.Icons.Help.Text }} %s{{color "reset"}}{{"\n"}}{{end}}
+{{- color .Config.Icons.Question.Format }}{{ .Config.Icons.Question.Text }} {{color "reset"}}
+{{- color "default+hb"}}{{ .Message }}{{ .FilterMessage }}{{color "reset"}}
+{{- if .ShowAnswer}}{{color "cyan"}} {{.Answer}}{{color "reset"}}{{"\n"}}
+{{- else }}
+	{{- "  "}}{{- color "cyan"}}[%s, %s,{{- if not .Config.RemoveSelectAll }} %s,{{end}}{{- if not .Config.RemoveSelectNone }} %s,{{end}} %s{{- if and .Help (not .ShowHelp)}}, {{ .Config.HelpInput }} %s{{end}}]{{color "reset"}}
+  {{- "\n"}}
+  {{- range $ix, $option := .PageEntries}}
+    {{- template "option" $.IterateOption $ix $option}}
+  {{- end}}
+{{- end}}`,
+		gotext.Get("Help"),
+		gotext.Get("Use arrows to move"),
+		gotext.Get("space to select"),
+		gotext.Get("<right> to all"),
+		gotext.Get("<left> to none"),
+		gotext.Get("type to filter"),
+		gotext.Get("for more help"),
+	)
+}

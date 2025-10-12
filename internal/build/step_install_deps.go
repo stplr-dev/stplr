@@ -20,7 +20,9 @@ package build
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
+	"strings"
 
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/manager"
@@ -107,32 +109,64 @@ func (s *installDepsStep) installBuildDeps(ctx context.Context, input InstallInp
 	return builtDeps, deps, nil
 }
 
+func splitPkgAndDesc(pkgs []string) (names []string, mapping map[string]string) {
+	mapping = make(map[string]string)
+	for _, p := range pkgs {
+		parts := strings.SplitN(p, ":", 2)
+		name := strings.TrimSpace(parts[0])
+		desc := ""
+		if len(parts) > 1 {
+			desc = strings.TrimSpace(parts[1])
+		}
+		names = append(names, name)
+		mapping[name] = desc
+	}
+	return
+}
+
 func (i *installDepsStep) installOptDeps(ctx context.Context, input InstallInput, pkgs []string) ([]*BuiltDep, error) {
 	var builtDeps []*BuiltDep
-	optDeps, err := i.installerExecutor.RemoveAlreadyInstalled(ctx, pkgs)
+
+	namesOnly, descMap := splitPkgAndDesc(pkgs)
+
+	optDeps, err := i.installerExecutor.RemoveAlreadyInstalled(ctx, namesOnly)
 	if err != nil {
 		return nil, err
 	}
-	if len(optDeps) > 0 {
-		optDeps, err := cliutils.ChooseOptDepends(
-			ctx,
-			optDeps,
-			"install",
-			input.BuildOpts().Interactive,
-		)
-		if err != nil {
-			return nil, err
-		}
 
-		if len(optDeps) == 0 {
-			return builtDeps, nil
-		}
+	if len(optDeps) == 0 {
+		return builtDeps, nil
+	}
 
-		builtDeps, err = i.installPkgs(ctx, input, optDeps)
-		if err != nil {
-			return nil, err
+	var optDepsWithDesc []string
+	for _, name := range optDeps {
+		desc := descMap[name]
+		if desc != "" {
+			optDepsWithDesc = append(optDepsWithDesc, fmt.Sprintf("%s: %s", name, desc))
+		} else {
+			optDepsWithDesc = append(optDepsWithDesc, name)
 		}
 	}
+
+	optDeps, err = cliutils.ChooseOptDepends(
+		ctx,
+		optDepsWithDesc,
+		"install",
+		input.BuildOpts().Interactive,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(optDeps) == 0 {
+		return builtDeps, nil
+	}
+
+	builtDeps, err = i.installPkgs(ctx, input, optDeps)
+	if err != nil {
+		return nil, err
+	}
+
 	return builtDeps, nil
 }
 

@@ -293,7 +293,7 @@ msgstr ""
 msgid "The checksums array must be the same length as sources"
 msgstr ""
 
-#: internal/build/step_nonfree_view.go:99
+#: internal/build/step_nonfree_view.go:102
 msgid ""
 "This package contains non-free software that requires license acceptance."
 msgstr ""
@@ -310,35 +310,31 @@ msgstr ""
 msgid "Error pulling repositories"
 msgstr ""
 
-#: internal/cliutils/localize.go:31
+#: internal/cliutils/localize.go:32
 msgid "Shows a list of commands or help for one command"
 msgstr ""
 
-#: internal/cliutils/localize.go:32
+#: internal/cliutils/localize.go:33
 msgid "Show help"
 msgstr ""
 
-#: internal/cliutils/prompt.go:66
+#: internal/cliutils/prompt.go:69
 msgid "Would you like to view the build script for %s"
 msgstr ""
 
-#: internal/cliutils/prompt.go:77
+#: internal/cliutils/prompt.go:80
 msgid "Would you still like to continue?"
 msgstr ""
 
-#: internal/cliutils/prompt.go:83
-msgid "User chose not to continue after reading script"
-msgstr ""
-
-#: internal/cliutils/prompt.go:117
+#: internal/cliutils/prompt.go:119
 msgid "Error prompting for choice of package"
 msgstr ""
 
-#: internal/cliutils/prompt.go:141
+#: internal/cliutils/prompt.go:143
 msgid "Choose which package to %s"
 msgstr ""
 
-#: internal/cliutils/prompt.go:162
+#: internal/cliutils/prompt.go:164
 msgid "Choose which optional package to install"
 msgid_plural "Choose which optional packages to install"
 msgstr[0] ""
@@ -406,7 +402,35 @@ msgstr ""
 msgid "OPTIONS"
 msgstr ""
 
-#: internal/cliutils/utils.go:90
+#: internal/cliutils/template.go:156
+msgid "Help"
+msgstr ""
+
+#: internal/cliutils/template.go:157
+msgid "Use arrows to move"
+msgstr ""
+
+#: internal/cliutils/template.go:158
+msgid "space to select"
+msgstr ""
+
+#: internal/cliutils/template.go:159
+msgid "<right> to all"
+msgstr ""
+
+#: internal/cliutils/template.go:160
+msgid "<left> to none"
+msgstr ""
+
+#: internal/cliutils/template.go:161
+msgid "type to filter"
+msgstr ""
+
+#: internal/cliutils/template.go:162
+msgid "for more help"
+msgstr ""
+
+#: internal/cliutils/utils.go:78
 msgid ""
 "This command is deprecated and would be removed in the future, use \"%s\" "
 "instead!"
@@ -543,7 +567,15 @@ msgstr ""
 msgid "Error getting packages"
 msgstr ""
 
-#: internal/usecase/install/action/install.go:71
+#: internal/usecase/install/action/install.go:74
+msgid "License agreement was declined"
+msgstr ""
+
+#: internal/usecase/install/action/install.go:77
+msgid "User chose not to continue after reading script"
+msgstr ""
+
+#: internal/usecase/install/action/install.go:80
 msgid "Error when installing the package"
 msgstr ""
 
@@ -616,16 +648,22 @@ msgstr ""
 msgid "There is nothing to do."
 msgstr ""
 
-#: internal/utils/cmd.go:105
+#: internal/utils/cmd.go:107
 msgid "Error on dropping capabilities"
 msgstr ""
 
-#: internal/utils/cmd.go:212
+#: internal/utils/cmd.go:214
 msgid "You need to be a %s member or root to perform this action"
 msgstr ""
 
-#: internal/utils/cmd.go:250
+#: internal/utils/cmd.go:257
 msgid "You need to be root to perform this action"
+msgstr ""
+
+#: internal/utils/cmd.go:265
+msgid ""
+"⚠️  This action requires elevated privileges. Attempting to run as root using "
+"'%s'..."
 msgstr ""
 
 #: pkg/dl/dl.go:215

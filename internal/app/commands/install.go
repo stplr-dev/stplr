@@ -80,6 +80,7 @@ func InstallCmd() *cli.Command {
 
 			return action.New(d.Builder, d.Manager, d.Info).Run(ctx, action.Options{
 				Pkgs:        c.Args().Slice(),
+				Clean:       c.Bool("clean"),
 				Interactive: c.Bool("interactive"),
 			})
 		}),

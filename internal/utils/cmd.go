@@ -26,6 +26,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"os/user"
@@ -37,6 +38,7 @@ import (
 
 	"go.stplr.dev/stplr/internal/cliutils"
 	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
+	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/constants"
 )
 
@@ -234,35 +236,49 @@ func EscalateToRoot() error {
 	return nil
 }
 
+func runAsRoot(rootCmd string, args []string) error {
+	// gosec:disable G204
+	cmd := exec.Command(rootCmd, args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			cli.OsExiter(exitErr.ExitCode())
+		}
+	}
+	return nil
+}
+
+func handleNonRoot(cfg *config.ALRConfig) error {
+	if !cfg.UseRootCmd() {
+		return cli.Exit(gotext.Get("You need to be root to perform this action"), 1)
+	}
+
+	executable, err := os.Executable()
+	if err != nil {
+		return cliutils.FormatCliExit("failed to get executable path", err)
+	}
+
+	slog.Warn(gotext.Get("⚠️  This action requires elevated privileges. Attempting to run as root using '%s'...", cfg.RootCmd()))
+	args := append([]string{executable}, os.Args[1:]...)
+	return runAsRoot(cfg.RootCmd(), args)
+}
+
 func RootNeededAction(f cli.ActionFunc) cli.ActionFunc {
 	return func(ctx context.Context, c *cli.Command) error {
-		deps, err := appbuilder.
-			New(ctx).
-			WithConfig().
-			Build()
+		deps, err := appbuilder.New(ctx).WithConfig().Build()
 		if err != nil {
 			return err
 		}
 		defer deps.Defer()
 
 		if IsNotRoot() {
-			if !deps.Cfg.UseRootCmd() {
-				return cli.Exit(gotext.Get("You need to be root to perform this action"), 1)
-			}
-			executable, err := os.Executable()
-			if err != nil {
-				return cliutils.FormatCliExit("failed to get executable path", err)
-			}
-			args := append([]string{executable}, os.Args[1:]...)
-
-			// Looks like no risk of injection
-			//gosec:disable G204
-			cmd := exec.Command(deps.Cfg.RootCmd(), args...)
-			cmd.Stdin = os.Stdin
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			return cmd.Run()
+			return handleNonRoot(deps.Cfg)
 		}
+
 		return f(ctx, c)
 	}
 }

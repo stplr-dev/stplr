@@ -19,25 +19,27 @@
 package errors
 
 import (
-	"errors"
+	"fmt"
 )
 
 type I18nError struct {
-	err     error
+	Cause   error
 	Message string
 }
 
-func (e I18nError) Error() string {
-	return e.err.Error()
+func (e *I18nError) Error() string {
+	if e.Cause != nil {
+		return fmt.Sprintf("%s: %v", e.Message, e.Cause)
+	}
+	return e.Message
 }
 
 func (e I18nError) Unwrap() error {
-	return e.err
+	return e.Cause
 }
 
 func NewI18nError(message string) error {
 	return &I18nError{
-		err:     errors.New(message),
 		Message: message,
 	}
 }
