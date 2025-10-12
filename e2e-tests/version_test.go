@@ -33,8 +33,8 @@ import (
 func TestE2EAlrVersion(t *testing.T) {
 	runMatrixSuite(t, "version", COMMON_SYSTEMS, func(t *testing.T, r capytest.Runner) {
 		r.Command("stplr", "version").
-			ExpectStderrRegex(`^v\d+\.\d+\.\d+(?:-(?:rc|beta|alpha)\.\d+)?(?:-\d+-g[a-f0-9]+)?\n$`).
-			ExpectStdoutEmpty().
+			ExpectStderrEmpty().
+			ExpectStdoutRegex(`^v\d+\.\d+\.\d+(?:-(?:rc|beta|alpha)\.\d+)?(?:-\d+-g[a-f0-9]+)?\n$`).
 			ExpectSuccess().
 			Run(t)
 	})

@@ -223,7 +223,7 @@ msgstr ""
 msgid "Upgrade all installed packages"
 msgstr ""
 
-#: internal/app/commands/version.go:33
+#: internal/app/commands/version.go:34
 msgid "Print the current Stapler version and exit"
 msgstr ""
 

@@ -233,7 +233,7 @@ msgstr "Иcкать по provides"
 msgid "Upgrade all installed packages"
 msgstr "Обновить все установленные пакеты"
 
-#: internal/app/commands/version.go:33
+#: internal/app/commands/version.go:34
 msgid "Print the current Stapler version and exit"
 msgstr "Показать текущую версию Stapler и выйти"
 

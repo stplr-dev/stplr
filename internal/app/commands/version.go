@@ -20,6 +20,7 @@ package commands
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
@@ -32,7 +33,7 @@ func VersionCmd() *cli.Command {
 		Name:  "version",
 		Usage: gotext.Get("Print the current Stapler version and exit"),
 		Action: func(ctx context.Context, c *cli.Command) error {
-			println(config.Version)
+			fmt.Println(config.Version)
 			return nil
 		},
 	}
