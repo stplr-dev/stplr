@@ -50,7 +50,7 @@ require (
 	golang.org/x/exp v0.0.0-20251002181428-27f1f14c8bb9
 	golang.org/x/sys v0.37.0
 	golang.org/x/text v0.30.0
-	modernc.org/sqlite v1.39.0
+	modernc.org/sqlite v1.39.1
 	mvdan.cc/sh/v3 v3.12.1-0.20251005234102-d3ff6f655a6a
 	xorm.io/xorm v1.3.10
 )
@@ -161,7 +161,7 @@ require (
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/libc v1.66.3 // indirect
+	modernc.org/libc v1.66.10 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 	xorm.io/builder v0.3.11-0.20220531020008-1bd24a7dc978 // indirect
