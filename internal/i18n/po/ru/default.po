@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2025-09-28 15:03+0000\n"
+"PO-Revision-Date: 2025-10-15 20:46+0000\n"
 "Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
 "stplr/ru/>\n"
@@ -13,9 +13,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.13.2\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Weblate 5.13.3\n"
 
 #: cmd/stplr/main.go:73
 msgid ""
@@ -590,7 +590,7 @@ msgstr "Ошибка при получении пакетов"
 
 #: internal/usecase/install/action/install.go:74
 msgid "License agreement was declined"
-msgstr ""
+msgstr "Лицензионное соглашение было отклонено"
 
 #: internal/usecase/install/action/install.go:77
 msgid "User chose not to continue after reading script"
@@ -686,6 +686,8 @@ msgid ""
 "⚠️  This action requires elevated privileges. Attempting to run as root using "
 "'%s'..."
 msgstr ""
+"⚠️  Для выполнения этого действия требуются повышенные привилегии. Попытка "
+"запуска от имени пользователя root с использованием '%s'..."
 
 #: pkg/dl/dl.go:215
 msgid "Source can be updated, updating if required"
