@@ -31,6 +31,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app/deps"
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/usecase/list"
 	"go.stplr.dev/stplr/internal/utils"
 )
@@ -66,7 +67,7 @@ func ListCmd() *cli.Command {
 			}
 			defer f()
 
-			return list.New(d.Updater, d.DB, d.Config, d.Info).Run(ctx, list.Options{
+			return list.New(d.Updater, d.DB, d.Config, d.Info, output.FromContext(ctx)).Run(ctx, list.Options{
 				Upgradable: c.Bool("upgradable"),
 				Installed:  c.Bool("installed"),
 				Format:     c.String("format"),

@@ -26,7 +26,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"slices"
@@ -44,6 +43,7 @@ import (
 	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/build/common"
 	"go.stplr.dev/stplr/internal/shutils/decoder"
 	"go.stplr.dev/stplr/internal/shutils/handlers"
@@ -52,11 +52,15 @@ import (
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-type LocalScriptExecutor struct{ cfg Config }
+type LocalScriptExecutor struct {
+	cfg Config
+	out output.Output
+}
 
-func NewLocalScriptExecutor(cfg Config) *LocalScriptExecutor {
+func NewLocalScriptExecutor(cfg Config, out output.Output) *LocalScriptExecutor {
 	return &LocalScriptExecutor{
 		cfg,
+		out,
 	}
 }
 
@@ -174,10 +178,13 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 			return nil, err
 		}
 
-		slog.Info(gotext.Get("Building package metadata"), "name", basePkg)
+		// slog.Info(gotext.Get("Building metadata for package %q", basePkg), "name", basePkg)
+
+		e.out.Info(gotext.Get("Building metadata for package %q", basePkg))
 
 		pkgInfo, err := buildPkgMetadata(
 			ctx,
+			e.out,
 			input,
 			vars,
 			dirs,
@@ -224,6 +231,7 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 
 func buildPkgMetadata(
 	ctx context.Context,
+	out output.Output,
 	input interface {
 		OsInfoProvider
 		BuildOptsProvider
@@ -288,7 +296,7 @@ func buildPkgMetadata(
 	normalizeContents(contents)
 
 	if vars.FireJailed.Resolved() {
-		contents, err = applyFirejailIntegration(vars, dirs, contents)
+		contents, err = applyFirejailIntegration(out, vars, dirs, contents)
 		if err != nil {
 			return nil, err
 		}
@@ -314,6 +322,7 @@ func buildPkgMetadata(
 		}
 		if err := f.FindProvides(
 			ctx,
+			out,
 			pkgInfo,
 			dirs,
 			vars.AutoProvSkipList.Resolved(),
@@ -330,6 +339,7 @@ func buildPkgMetadata(
 		}
 		if err := f.FindRequires(
 			ctx,
+			out,
 			pkgInfo,
 			dirs,
 			vars.AutoReqSkipList.Resolved(),
@@ -342,7 +352,7 @@ func buildPkgMetadata(
 	return pkgInfo, nil
 }
 
-func execFunc(ctx context.Context, d *decoder.Decoder, name string, dirs types.Directories) error {
+func execFunc(ctx context.Context, out output.Output, d *decoder.Decoder, name string, dirs types.Directories) error {
 	fn, ok := d.GetFuncP(name, func(ctx context.Context, r *interp.Runner) error {
 		// It should be done via interp.RunnerOption,
 		// but due to the issues below, it cannot be done.
@@ -355,7 +365,8 @@ func execFunc(ctx context.Context, d *decoder.Decoder, name string, dirs types.D
 		return r.Run(ctx, script)
 	})
 	if ok {
-		slog.Info(gotext.Get("Executing %s()", name))
+		out.Info(gotext.Get("Executing %s()", name))
+		// slog.Info(gotext.Get("Executing %s()", name))
 		err := fn(ctx, interp.Dir(dirs.SrcDir))
 		if err != nil {
 			return err
@@ -365,10 +376,10 @@ func execFunc(ctx context.Context, d *decoder.Decoder, name string, dirs types.D
 }
 
 func (e *LocalScriptExecutor) ExecuteFunctions(ctx context.Context, dirs types.Directories, dec *decoder.Decoder) error {
-	if err := execFunc(ctx, dec, "prepare", dirs); err != nil {
+	if err := execFunc(ctx, e.out, dec, "prepare", dirs); err != nil {
 		return err
 	}
-	if err := execFunc(ctx, dec, "build", dirs); err != nil {
+	if err := execFunc(ctx, e.out, dec, "build", dirs); err != nil {
 		return err
 	}
 
@@ -381,7 +392,7 @@ func (e *LocalScriptExecutor) ExecutePackageFunctions(
 	dirs types.Directories,
 	packageName string,
 ) (*FunctionsOutput, error) {
-	output := &FunctionsOutput{}
+	fOutput := &FunctionsOutput{}
 	var packageFuncName string
 	var filesFuncName string
 
@@ -392,7 +403,7 @@ func (e *LocalScriptExecutor) ExecutePackageFunctions(
 		packageFuncName = fmt.Sprintf("package_%s", packageName)
 		filesFuncName = fmt.Sprintf("files_%s", packageName)
 	}
-	if err := execFunc(ctx, dec, packageFuncName, dirs); err != nil {
+	if err := execFunc(ctx, e.out, dec, packageFuncName, dirs); err != nil {
 		return nil, err
 	}
 
@@ -409,7 +420,8 @@ func (e *LocalScriptExecutor) ExecutePackageFunctions(
 	})
 
 	if ok {
-		slog.Info(gotext.Get("Executing %s()", filesFuncName))
+		// slog.Info(gotext.Get("Executing %s()", filesFuncName))
+		e.out.Info("%s", gotext.Get("Executing %s()", filesFuncName))
 
 		buf := &bytes.Buffer{}
 
@@ -426,8 +438,8 @@ func (e *LocalScriptExecutor) ExecutePackageFunctions(
 		if err != nil {
 			return nil, err
 		}
-		output.Contents = &contents
+		fOutput.Contents = &contents
 	}
 
-	return output, nil
+	return fOutput, nil
 }

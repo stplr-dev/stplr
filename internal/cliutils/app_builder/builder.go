@@ -29,6 +29,7 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/db"
@@ -153,7 +154,7 @@ func (b *appBuilder) withRepos(enablePull, forcePull bool) AppBuilder {
 		return b
 	}
 
-	rs := repos.New(cfg, db)
+	rs := repos.New(cfg, db, output.FromContext(b.ctx))
 
 	if enablePull && (forcePull || cfg.AutoPull()) {
 		if err := rs.Pull(b.ctx, cfg.Repos()); err != nil {

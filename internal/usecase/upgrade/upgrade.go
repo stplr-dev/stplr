@@ -20,11 +20,11 @@ package upgrade
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/db"
 	"go.stplr.dev/stplr/internal/manager"
@@ -48,15 +48,18 @@ type useCase struct {
 	db      *db.Database
 	info    *distro.OSRelease
 	upd     *updater.Updater
+
+	out output.Output
 }
 
-func New(builder builder, upd *updater.Updater, manager manager.Manager, db *db.Database, info *distro.OSRelease) *useCase {
+func New(builder builder, upd *updater.Updater, manager manager.Manager, db *db.Database, info *distro.OSRelease, out output.Output) *useCase {
 	return &useCase{
 		builder: builder,
 		mgr:     manager,
 		db:      db,
 		info:    info,
 		upd:     upd,
+		out:     out,
 	}
 }
 
@@ -89,7 +92,7 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 			return errors.WrapIntoI18nError(err, gotext.Get("Error checking for updates"))
 		}
 	} else {
-		slog.Info(gotext.Get("There is nothing to do."))
+		u.out.Info(gotext.Get("There is nothing to do."))
 	}
 
 	return nil

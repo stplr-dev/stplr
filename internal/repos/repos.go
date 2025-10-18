@@ -23,6 +23,7 @@
 package repos
 
 import (
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/config"
 	database "go.stplr.dev/stplr/internal/db"
 	"go.stplr.dev/stplr/pkg/types"
@@ -39,11 +40,14 @@ type Repos struct {
 
 	rp *RepoProcessor
 	gm *GitManager
+
+	out output.Output
 }
 
 func New(
 	cfg Config,
 	db *database.Database,
+	out output.Output,
 ) *Repos {
 	gm := &GitManager{}
 	return &Repos{
@@ -53,5 +57,6 @@ func New(
 			gm,
 		},
 		gm,
+		out,
 	}
 }

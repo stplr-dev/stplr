@@ -16,39 +16,46 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package build
+package output
 
 import (
-	"context"
-	"errors"
 	"fmt"
+	"os"
 
-	"github.com/leonelquinteros/gotext"
-
-	"go.stplr.dev/stplr/internal/app/output"
+	"github.com/hashicorp/go-hclog"
 )
 
-type checksStep struct {
-	e   ChecksExecutor
-	out output.Output
+type pluginOutput struct {
+	logger hclog.Logger
 }
 
-func ChecksStep(e ChecksExecutor) *checksStep {
-	return &checksStep{e: e, out: output.NewConsoleOutput()}
-}
-
-func (s *checksStep) Run(ctx context.Context, state *BuildState) error {
-	// slog.Info(gotext.Get("Building package"), "name", state.BasePackage)
-	s.out.Info(gotext.Get("Building the %q package", state.BasePackage))
-
-	for _, pkg := range state.Packages {
-		cont, err := s.e.RunChecks(ctx, pkg, state.Input)
-		if err != nil {
-			return fmt.Errorf("RunChecks failed: %w", err)
-		}
-		if !cont {
-			return errors.New("check step declined continuation")
-		}
+func NewPluginOutput() *pluginOutput {
+	return &pluginOutput{
+		logger: hclog.New(&hclog.LoggerOptions{
+			Output:      os.Stderr,
+			Level:       hclog.Trace,
+			JSONFormat:  true,
+			DisableTime: true,
+		}),
 	}
-	return nil
+}
+
+func (out *pluginOutput) print(level hclog.Level, msg string, args ...any) {
+	out.logger.Log(
+		level,
+		fmt.Sprintf(msg, args...),
+		"@_type", "user",
+	)
+}
+
+func (out *pluginOutput) Info(msg string, args ...any) {
+	out.print(hclog.Info, msg, args...)
+}
+
+func (out *pluginOutput) Warn(msg string, args ...any) {
+	out.print(hclog.Warn, msg, args...)
+}
+
+func (out *pluginOutput) Error(msg string, args ...any) {
+	out.print(hclog.Error, msg, args...)
 }

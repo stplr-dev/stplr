@@ -29,6 +29,7 @@ import (
 
 	"go.stplr.dev/stplr/internal/app/deps"
 	"go.stplr.dev/stplr/internal/app/errors"
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/pkg/types"
 )
@@ -46,10 +47,11 @@ type Config interface {
 type useCase struct {
 	config Config
 	init   ReposPullerGetter
+	out    output.Output
 }
 
-func New(config Config, init ReposPullerGetter) *useCase {
-	return &useCase{config: config, init: init}
+func New(config Config, init ReposPullerGetter, out output.Output) *useCase {
+	return &useCase{config: config, init: init, out: out}
 }
 
 func (u *useCase) reinit(ctx context.Context) error {
@@ -58,6 +60,7 @@ func (u *useCase) reinit(ctx context.Context) error {
 		return err
 	}
 	defer f()
+
 	// TODO: replace with rereader
 	return r.Pull(ctx, nil)
 }
@@ -65,7 +68,7 @@ func (u *useCase) reinit(ctx context.Context) error {
 func (u *useCase) Run(ctx context.Context) error {
 	paths := u.config.GetPaths()
 
-	slog.Info(gotext.Get("Clearing cache directory"))
+	u.out.Info(gotext.Get("Clearing cache directory"))
 
 	dir, err := os.Open(paths.CacheDir)
 	if err != nil {
@@ -91,7 +94,7 @@ func (u *useCase) Run(ctx context.Context) error {
 		}
 	}
 
-	slog.Info(gotext.Get("Rebuilding cache"))
+	u.out.Info(gotext.Get("Rebuilding cache"))
 
 	err = os.MkdirAll(paths.CacheDir, 0o755)
 	if err != nil {
@@ -102,7 +105,7 @@ func (u *useCase) Run(ctx context.Context) error {
 		return err
 	}
 
-	slog.Info(gotext.Get("Done"))
+	u.out.Info(gotext.Get("Done"))
 
 	return nil
 }

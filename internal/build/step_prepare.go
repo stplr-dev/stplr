@@ -23,11 +23,14 @@ import (
 	"log/slog"
 
 	"github.com/leonelquinteros/gotext"
+
+	"go.stplr.dev/stplr/internal/app/output"
 )
 
 type prepareStep struct {
 	scriptExecutor   ScriptExecutor
 	sourceDownloader SourceDownloaderExecutor
+	out              output.Output
 }
 
 func PrepareStep(
@@ -37,6 +40,7 @@ func PrepareStep(
 	return &prepareStep{
 		scriptExecutor:   scriptExecutor,
 		sourceDownloader: sourceDownloader,
+		out:              output.NewConsoleOutput(),
 	}
 }
 
@@ -47,7 +51,9 @@ func (b *prepareStep) Run(ctx context.Context, state *BuildState) error {
 		return err
 	}
 
-	slog.Info(gotext.Get("Downloading sources"))
+	// slog.Info(gotext.Get("Downloading sources"))
+	b.out.Info(gotext.Get("Downloading sources"))
+
 	err = b.sourceDownloader.DownloadSources(
 		ctx,
 		state.Input,

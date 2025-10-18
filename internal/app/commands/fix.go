@@ -31,6 +31,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app/deps"
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/usecase/fix"
 	"go.stplr.dev/stplr/internal/utils"
 )
@@ -52,6 +53,7 @@ func FixCmd() *cli.Command {
 
 			return fix.New(d.Config,
 				func(ctx context.Context) (fix.ReposPuller, deps.Cleanup, error) { return deps.ReposGetter(ctx) },
+				output.FromContext(ctx),
 			).Run(ctx)
 		}),
 	}

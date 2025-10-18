@@ -34,14 +34,19 @@ import (
 	"github.com/goreleaser/nfpm/v2"
 	"github.com/leonelquinteros/gotext"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
 type Fedora struct{}
 
+func NewFedora() *Fedora {
+	return &Fedora{}
+}
+
 const fedoraRpmDeps = "/usr/lib/rpm/rpmdeps"
 
-func (o *Fedora) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+func (o *Fedora) FindProvides(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	args := []string{
 		"--define=_use_internal_dependency_generator 1",
 		"--provides",
@@ -54,17 +59,19 @@ func (o *Fedora) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs type
 	}
 	return rpmFindDependenciesFedora(
 		ctx,
+		out,
 		pkgInfo,
 		dirs,
 		fedoraRpmDeps,
 		args,
 		func(dep string) {
-			slog.Info(gotext.Get("Provided dependency found"), "dep", dep)
+			out.Info(gotext.Get("Provided dependency found: %s", dep))
+			// slog.Info(gotext.Get("Provided dependency found"), "dep", dep)
 			pkgInfo.Provides = append(pkgInfo.Provides, dep)
 		})
 }
 
-func (o *Fedora) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+func (o *Fedora) FindRequires(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	args := []string{
 		"--define=_use_internal_dependency_generator 1",
 		"--requires",
@@ -77,12 +84,14 @@ func (o *Fedora) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs type
 	}
 	return rpmFindDependenciesFedora(
 		ctx,
+		out,
 		pkgInfo,
 		dirs,
 		fedoraRpmDeps,
 		args,
 		func(dep string) {
-			slog.Info(gotext.Get("Required dependency found"), "dep", dep)
+			out.Info(gotext.Get("Required dependency found: %s", dep))
+			// slog.Info(gotext.Get("Required dependency found"), "dep", dep)
 			pkgInfo.Depends = append(pkgInfo.Depends, dep)
 		})
 }
@@ -91,9 +100,10 @@ func (o *Fedora) BuildDepends(ctx context.Context) ([]string, error) {
 	return []string{"rpm-build"}, nil
 }
 
-func rpmFindDependenciesFedora(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, command string, args []string, updateFunc func(string)) error {
+func rpmFindDependenciesFedora(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, command string, args []string, updateFunc func(string)) error {
 	if _, err := exec.LookPath(command); err != nil {
-		slog.Info(gotext.Get("Command not found on the system"), "command", command)
+		out.Warn(gotext.Get("Command %q not found on the system", command))
+		// slog.Info(gotext.Get("Command not found on the system"), "command", command)
 		return nil
 	}
 
@@ -115,9 +125,9 @@ func rpmFindDependenciesFedora(ctx context.Context, pkgInfo *nfpm.Info, dirs typ
 	cmd.Env = append(cmd.Env,
 		"RPM_BUILD_ROOT="+dirs.PkgDir,
 	)
-	var out bytes.Buffer
+	var stdout bytes.Buffer
 	var stderr bytes.Buffer
-	cmd.Stdout = &out
+	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
 		slog.Error(stderr.String())
@@ -125,7 +135,7 @@ func rpmFindDependenciesFedora(ctx context.Context, pkgInfo *nfpm.Info, dirs typ
 	}
 	slog.Debug(stderr.String())
 
-	dependencies := strings.Split(strings.TrimSpace(out.String()), "\n")
+	dependencies := strings.Split(strings.TrimSpace(stdout.String()), "\n")
 	for _, dep := range dependencies {
 		if dep != "" {
 			updateFunc(dep)

@@ -34,21 +34,28 @@ import (
 	"github.com/goreleaser/nfpm/v2"
 	"github.com/leonelquinteros/gotext"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
 type ALTLinux struct{}
 
-func (o *ALTLinux) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
-	return rpmFindDependenciesALTLinux(ctx, pkgInfo, dirs, "/usr/lib/rpm/find-provides", []string{"RPM_FINDPROV_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
-		slog.Info(gotext.Get("Provided dependency found"), "dep", dep)
+func NewALTLinux() *ALTLinux {
+	return &ALTLinux{}
+}
+
+func (o *ALTLinux) FindProvides(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+	return o.rpmFindDependenciesALTLinux(ctx, out, pkgInfo, dirs, "/usr/lib/rpm/find-provides", []string{"RPM_FINDPROV_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
+		// slog.Info(gotext.Get("Provided dependency found"), "dep", dep)
+		out.Info(gotext.Get("Provided dependency found: %s", dep))
 		pkgInfo.Provides = append(pkgInfo.Provides, dep)
 	})
 }
 
-func (o *ALTLinux) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
-	return rpmFindDependenciesALTLinux(ctx, pkgInfo, dirs, "/usr/lib/rpm/find-requires", []string{"RPM_FINDREQ_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
-		slog.Info(gotext.Get("Required dependency found"), "dep", dep)
+func (o *ALTLinux) FindRequires(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+	return o.rpmFindDependenciesALTLinux(ctx, out, pkgInfo, dirs, "/usr/lib/rpm/find-requires", []string{"RPM_FINDREQ_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
+		// slog.Info(gotext.Get("Required dependency found"), "dep", dep)
+		out.Info(gotext.Get("Required dependency found: %s", dep))
 		pkgInfo.Depends = append(pkgInfo.Depends, dep)
 	})
 }
@@ -57,9 +64,10 @@ func (o *ALTLinux) BuildDepends(ctx context.Context) ([]string, error) {
 	return []string{"rpm-build"}, nil
 }
 
-func rpmFindDependenciesALTLinux(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, command string, envs []string, updateFunc func(string)) error {
+func (o *ALTLinux) rpmFindDependenciesALTLinux(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, command string, envs []string, updateFunc func(string)) error {
 	if _, err := exec.LookPath(command); err != nil {
-		slog.Info(gotext.Get("Command not found on the system"), "command", command)
+		out.Warn(gotext.Get("Command %q not found on the system", command))
+		// slog.Info(gotext.Get("Command %q not found on the system"), "command", command)
 		return nil
 	}
 
@@ -88,9 +96,9 @@ func rpmFindDependenciesALTLinux(ctx context.Context, pkgInfo *nfpm.Info, dirs t
 		"HOME="+os.Getenv("HOME"),
 	)
 	cmd.Env = append(cmd.Env, envs...)
-	var out bytes.Buffer
+	var stdout bytes.Buffer
 	var stderr bytes.Buffer
-	cmd.Stdout = &out
+	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
 		filteredStderr := []string{}
@@ -104,7 +112,7 @@ func rpmFindDependenciesALTLinux(ctx context.Context, pkgInfo *nfpm.Info, dirs t
 		return err
 	}
 
-	dependencies := strings.Split(strings.TrimSpace(out.String()), "\n")
+	dependencies := strings.Split(strings.TrimSpace(stdout.String()), "\n")
 	for _, dep := range dependencies {
 		if dep != "" {
 			updateFunc(dep)

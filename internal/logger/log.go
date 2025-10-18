@@ -27,10 +27,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/charmbracelet/lipgloss"
-
 	chLog "github.com/charmbracelet/log"
-	"github.com/leonelquinteros/gotext"
 )
 
 type Logger struct {
@@ -38,17 +35,17 @@ type Logger struct {
 }
 
 func setupLogger() *chLog.Logger {
-	styles := chLog.DefaultStyles()
+	// styles := chLog.DefaultStyles()
 	logger := chLog.New(os.Stderr)
-	styles.Levels[chLog.InfoLevel] = lipgloss.NewStyle().
-		SetString("-->").
-		Foreground(lipgloss.Color("35"))
-	styles.Levels[chLog.ErrorLevel] = lipgloss.NewStyle().
-		SetString(gotext.Get("ERROR")).
-		Padding(0, 1, 0, 1).
-		Background(lipgloss.Color("204")).
-		Foreground(lipgloss.Color("0"))
-	logger.SetStyles(styles)
+	// styles.Levels[chLog.InfoLevel] = lipgloss.NewStyle().
+	// 	SetString("-->").
+	// 	Foreground(lipgloss.Color("35"))
+	// styles.Levels[chLog.ErrorLevel] = lipgloss.NewStyle().
+	// 	SetString(gotext.Get("ERROR")).
+	// 	Padding(0, 1, 0, 1).
+	// 	Background(lipgloss.Color("204")).
+	// 	Foreground(lipgloss.Color("0"))
+	// logger.SetStyles(styles)
 	return logger
 }
 

@@ -28,6 +28,7 @@ import (
 	"reflect"
 	"testing"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/repos"
 	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
@@ -40,6 +41,7 @@ func TestFindPkgs(t *testing.T) {
 	rs := repos.New(
 		e.Cfg,
 		e.Db,
+		output.NewConsoleOutput(),
 	)
 
 	err := rs.Pull(e.Ctx, []types.Repo{
@@ -93,6 +95,7 @@ func TestFindPkgsEmpty(t *testing.T) {
 	rs := repos.New(
 		e.Cfg,
 		e.Db,
+		output.NewConsoleOutput(),
 	)
 
 	err := e.Db.InsertPackage(e.Ctx, alrsh.Package{

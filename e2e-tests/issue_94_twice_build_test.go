@@ -50,7 +50,7 @@ func TestE2EIssue94TwiceBuild(t *testing.T) {
 				ExpectSuccess().
 				Run(t)
 
-			assert.Equal(t, 1, strings.Count(stderr.String(), "Building package name=test-94-dep"))
+			assert.Equal(t, 1, strings.Count(stderr.String(), "Building the \"test-94-dep\" package"))
 		},
 	)
 }

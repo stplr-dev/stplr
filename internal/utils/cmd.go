@@ -26,7 +26,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"os"
 	"os/exec"
 	"os/user"
@@ -36,6 +35,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/cliutils"
 	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
 	"go.stplr.dev/stplr/internal/config"
@@ -236,12 +236,15 @@ func EscalateToRoot() error {
 	return nil
 }
 
-func runAsRoot(rootCmd string, args []string) error {
+func runAsRoot(ctx context.Context, rootCmd string, args []string) error {
 	// gosec:disable G204
-	cmd := exec.Command(rootCmd, args...)
+	cmd := exec.CommandContext(ctx, rootCmd, args...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	cmd.Cancel = func() error {
+		return cmd.Process.Signal(os.Interrupt)
+	}
 
 	err := cmd.Run()
 	if err != nil {
@@ -252,7 +255,7 @@ func runAsRoot(rootCmd string, args []string) error {
 	return nil
 }
 
-func handleNonRoot(cfg *config.ALRConfig) error {
+func handleNonRoot(ctx context.Context, out output.Output, cfg *config.ALRConfig) error {
 	if !cfg.UseRootCmd() {
 		return cli.Exit(gotext.Get("You need to be root to perform this action"), 1)
 	}
@@ -262,13 +265,16 @@ func handleNonRoot(cfg *config.ALRConfig) error {
 		return cliutils.FormatCliExit("failed to get executable path", err)
 	}
 
-	slog.Warn(gotext.Get("⚠️  This action requires elevated privileges. Attempting to run as root using '%s'...", cfg.RootCmd()))
+	out.Warn(gotext.Get("This action requires elevated privileges."))
+	out.Warn(gotext.Get("Attempting to run as root using '%s'...", cfg.RootCmd()))
 	args := append([]string{executable}, os.Args[1:]...)
-	return runAsRoot(cfg.RootCmd(), args)
+	return runAsRoot(ctx, cfg.RootCmd(), args)
 }
 
 func RootNeededAction(f cli.ActionFunc) cli.ActionFunc {
 	return func(ctx context.Context, c *cli.Command) error {
+		out := output.FromContext(ctx)
+
 		deps, err := appbuilder.New(ctx).WithConfig().Build()
 		if err != nil {
 			return err
@@ -276,7 +282,7 @@ func RootNeededAction(f cli.ActionFunc) cli.ActionFunc {
 		defer deps.Defer()
 
 		if IsNotRoot() {
-			return handleNonRoot(deps.Cfg)
+			return handleNonRoot(ctx, out, deps.Cfg)
 		}
 
 		return f(ctx, c)

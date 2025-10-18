@@ -29,7 +29,6 @@ import (
 	"context"
 	"encoding/gob"
 	"fmt"
-	"log/slog"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -331,7 +330,8 @@ func (i *Builder) InstallPkgs(
 
 func (b *Builder) BuildALRDeps(ctx context.Context, input InstallInput, depends []string) (buildDeps []*BuiltDep, repoDeps []string, err error) {
 	if len(depends) > 0 {
-		slog.Info(gotext.Get("Installing dependencies"))
+		b.out.Info(gotext.Get("Installing dependencies"))
+		// slog.Info(gotext.Get("Installing dependencies"))
 
 		found, notFound, err := b.repos.FindPkgs(ctx, depends)
 		if err != nil {

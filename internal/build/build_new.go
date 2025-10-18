@@ -21,6 +21,8 @@ package build
 import (
 	"context"
 	"fmt"
+
+	"go.stplr.dev/stplr/internal/app/output"
 )
 
 type Builder struct {
@@ -33,6 +35,7 @@ type Builder struct {
 	repos                PackageFinder
 	nonfreeViewer        NonFreeViewerExecutor
 	checksExecutor       ChecksExecutor
+	out                  output.Output
 }
 
 func NewBuilder(
@@ -56,6 +59,7 @@ func NewBuilder(
 		checksExecutor:       checksExecutor,
 		repos:                repos,
 		scriptViewerExecutor: scriptViewerExecutor,
+		out:                  output.NewConsoleOutput(),
 	}
 }
 

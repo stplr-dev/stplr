@@ -27,6 +27,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
+	"go.stplr.dev/stplr/internal/app/output"
 	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
 )
 
@@ -38,10 +39,11 @@ type system interface {
 
 type useCase struct {
 	sys system
+	out output.Output
 }
 
-func New(sys system) *useCase {
-	return &useCase{sys}
+func New(sys system, out output.Output) *useCase {
+	return &useCase{sys, out}
 }
 
 type Options struct {
@@ -53,18 +55,18 @@ type Options struct {
 	NoSuffix    bool
 }
 
-func (s *useCase) Run(ctx context.Context, opts Options) error {
+func (u *useCase) Run(ctx context.Context, opts Options) error {
 	if opts.Script == "" && opts.Package == "" {
 		return errors.NewI18nError(gotext.Get("Nothing to build"))
 	}
 
-	state, err := s.prepareState(ctx, opts)
+	state, err := u.prepareState(ctx, opts)
 	if err != nil {
 		return err
 	}
 	defer state.Cleanup()
 
-	steps := s.getSteps(ctx, state, opts)
+	steps := u.getSteps(ctx, state, opts)
 	for _, s := range steps {
 		slog.Debug("execute step", "step", fmt.Sprintf("%T", s))
 		err := s.Execute(ctx, state)
@@ -73,12 +75,12 @@ func (s *useCase) Run(ctx context.Context, opts Options) error {
 		}
 	}
 
-	slog.Info(gotext.Get("Done"))
+	u.out.Info(gotext.Get("Done"))
 
 	return nil
 }
 
-func (s *useCase) getSteps(ctx context.Context, state *stepState, opts Options) []step {
+func (u *useCase) getSteps(ctx context.Context, state *stepState, opts Options) []step {
 	var steps []step
 
 	steps = append(steps, &checkStep{})
@@ -90,7 +92,7 @@ func (s *useCase) getSteps(ctx context.Context, state *stepState, opts Options) 
 	}
 
 	copyOut := &copyOutStep{}
-	if s.sys.IsRoot() {
+	if u.sys.IsRoot() {
 		steps = append(steps, &setupCopier{})
 		if opts.Script != "" {
 			steps = append(steps, &copyScript{fsys: os.DirFS("/")})
@@ -110,14 +112,14 @@ func (s *useCase) getSteps(ctx context.Context, state *stepState, opts Options) 
 	return steps
 }
 
-func (s *useCase) prepareState(ctx context.Context, opts Options) (*stepState, error) {
+func (u *useCase) prepareState(ctx context.Context, opts Options) (*stepState, error) {
 	state := &stepState{}
 	input := &state.input
 	runtime := &state.runtime
 
 	input.opts = opts
-	input.origUid = s.sys.Getuid()
-	input.origGid = s.sys.Getgid()
+	input.origUid = u.sys.Getuid()
+	input.origGid = u.sys.Getgid()
 
 	wd, err := os.Getwd()
 	if err != nil {

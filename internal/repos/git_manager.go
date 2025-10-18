@@ -31,6 +31,7 @@ import (
 	gitConfig "github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/protocol/packp/sideband"
 )
 
 type gitRepository interface {
@@ -185,6 +186,19 @@ func (gm *GitManager) FetchRepo(ctx context.Context, r gitRepository, ref string
 		slog.Debug("fetch by ref failed, fallback to default", "ref", ref, "err", err)
 	}
 	return gm.fetch(ctx, r, gm.defaultFetchOptions())
+}
+
+func (gm *GitManager) FetchRepoWithProgress(ctx context.Context, r gitRepository, ref string, progress sideband.Progress) error {
+	if ref != "" {
+		err := gm.fetchRepoByRef(ctx, r, ref)
+		if err == nil {
+			return nil
+		}
+		slog.Debug("fetch by ref failed, fallback to default", "ref", ref, "err", err)
+	}
+	options := gm.defaultFetchOptions()
+	options.Progress = progress
+	return gm.fetch(ctx, r, options)
 }
 
 func (gm *GitManager) CheckoutRevision(r gitRepository, revHash *plumbing.Hash) (billy.Filesystem, error) {

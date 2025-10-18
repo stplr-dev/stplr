@@ -28,15 +28,14 @@ import (
 	"context"
 	"log/slog"
 	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/mattn/go-isatty"
 	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app/commands"
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/i18n"
@@ -94,7 +93,7 @@ func GetApp() *cli.Command {
 		},
 		EnableShellCompletion: true,
 		ExitErrHandler: func(ctx context.Context, c *cli.Command, err error) {
-			cliutils.HandleExitCoder(err)
+			cliutils.HandleExitCoder(ctx, err)
 		},
 	}
 }
@@ -125,22 +124,22 @@ func main() {
 
 	ctx := context.Background()
 
+	out := output.NewConsoleOutput()
+	ctx = output.WithOutput(ctx, out)
+
 	app := GetApp()
+	cliutils.Localize(app)
+
 	cfg := config.New()
 	err := cfg.Load()
 	if err != nil {
-		slog.Error(gotext.Get("Error loading config"), "err", err)
+		out.Error("%s: %v", gotext.Get("Error loading config"), err)
 		os.Exit(1)
 	}
 	setLogLevel(cfg.LogLevel())
 
-	ctx, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
-	defer cancel()
-
-	cliutils.Localize(app)
-
 	err = app.Run(ctx, os.Args)
 	if err != nil {
-		slog.Error(gotext.Get("Error while running app"), "err", err)
+		out.Error("%s: %v", gotext.Get("Error while running app"), err)
 	}
 }

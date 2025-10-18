@@ -34,6 +34,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/constants"
 	"go.stplr.dev/stplr/internal/logger"
 	"go.stplr.dev/stplr/internal/utils"
@@ -172,10 +173,11 @@ func getSafeExecutor[T any](ctx context.Context, subCommand, pluginName string, 
 	cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", plugin.EnvUnixSocketDir, constants.SocketDirPath))
 
 	client := plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig:  HandshakeConfig,
-		Plugins:          pluginMap,
-		Cmd:              cmd,
-		Logger:           logger.GetHCLoggerAdapter(),
+		HandshakeConfig: HandshakeConfig,
+		Plugins:         pluginMap,
+		Cmd:             cmd,
+		// TODO: get output from args
+		Logger:           logger.GetHCLoggerAdapter(output.NewConsoleOutput()),
 		SkipHostEnv:      true,
 		UnixSocketConfig: unixSocketConfig,
 		SyncStderr:       os.Stderr,

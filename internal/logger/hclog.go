@@ -29,10 +29,13 @@ import (
 
 	chLog "github.com/charmbracelet/log"
 	"github.com/hashicorp/go-hclog"
+
+	"go.stplr.dev/stplr/internal/app/output"
 )
 
 type HCLoggerAdapter struct {
 	logger *Logger
+	out    output.Output
 }
 
 func hclogLevelTochLog(level hclog.Level) chLog.Level {
@@ -51,14 +54,23 @@ func hclogLevelTochLog(level hclog.Level) chLog.Level {
 
 func (a *HCLoggerAdapter) Log(level hclog.Level, msg string, args ...interface{}) {
 	filteredArgs := make([]interface{}, 0, len(args))
+	outType := ""
 	for i := 0; i < len(args); i += 2 {
 		if i+1 >= len(args) {
 			filteredArgs = append(filteredArgs, args[i])
 			continue
 		}
-
 		key, ok := args[i].(string)
-		if !ok || key != "timestamp" {
+		if !ok {
+			filteredArgs = append(filteredArgs, args[i], args[i+1])
+			continue
+		}
+		switch key {
+		case "@_type":
+			outType = "user"
+		case "timestamp":
+			continue
+		default:
 			filteredArgs = append(filteredArgs, args[i], args[i+1])
 		}
 	}
@@ -78,6 +90,18 @@ func (a *HCLoggerAdapter) Log(level hclog.Level, msg string, args ...interface{}
 		chLogLevel = chLog.DebugLevel
 	} else {
 		chLogLevel = hclogLevelTochLog(level)
+	}
+
+	if outType == "user" {
+		switch level {
+		case hclog.Info:
+			a.out.Info(msg, filteredArgs...)
+		case hclog.Warn:
+			a.out.Warn(msg, filteredArgs...)
+		case hclog.Error:
+			a.out.Error(msg, filteredArgs...)
+		}
+		return
 	}
 
 	a.logger.l.Log(chLogLevel, msg, filteredArgs...)
@@ -158,8 +182,9 @@ func (a *HCLoggerAdapter) StandardWriter(opts *hclog.StandardLoggerOptions) io.W
 	return nil
 }
 
-func GetHCLoggerAdapter() *HCLoggerAdapter {
+func GetHCLoggerAdapter(out output.Output) *HCLoggerAdapter {
 	return &HCLoggerAdapter{
 		logger: logger,
+		out:    out,
 	}
 }

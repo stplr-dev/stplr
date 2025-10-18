@@ -34,6 +34,7 @@ import (
 	"github.com/goreleaser/nfpm/v2/files"
 	"github.com/leonelquinteros/gotext"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/constants"
 	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
@@ -144,11 +145,13 @@ func moveFileWithErrorHandling(src, dst string) error {
 }
 
 func applyFirejailIntegration(
+	out output.Output,
 	vars *alrsh.Package,
 	dirs types.Directories,
 	contents []*files.Content,
 ) ([]*files.Content, error) {
-	slog.Info(gotext.Get("Applying FireJail integration"), "package", vars.Name)
+	out.Info("%s", gotext.Get("Applying FireJail integration for %s package", "test"))
+	// slog.Info(gotext.Get("Applying FireJail integration"), "package", vars.Name)
 
 	if err := createFirejailedDirectory(dirs.PkgDir); err != nil {
 		return nil, fmt.Errorf("failed to create firejailed directory: %w", err)

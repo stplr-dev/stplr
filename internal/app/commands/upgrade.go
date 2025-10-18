@@ -31,6 +31,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app/deps"
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/usecase/upgrade"
 	"go.stplr.dev/stplr/internal/utils"
 )
@@ -54,7 +55,7 @@ func UpgradeCmd() *cli.Command {
 			}
 			defer f()
 
-			return upgrade.New(d.Builder, d.Updater, d.Manager, d.DB, d.Info).Run(ctx, upgrade.Options{
+			return upgrade.New(d.Builder, d.Updater, d.Manager, d.DB, d.Info, output.FromContext(ctx)).Run(ctx, upgrade.Options{
 				Clean:       c.Bool("clean"),
 				Interactive: c.Bool("interactive"),
 			})

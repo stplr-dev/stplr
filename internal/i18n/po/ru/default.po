@@ -17,51 +17,51 @@ msgstr ""
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 5.13.3\n"
 
-#: cmd/stplr/main.go:73
+#: cmd/stplr/main.go:72
 msgid ""
 "Command-line interface for Stapler, a universal Linux package build system"
 msgstr ""
 "Интерфейс командной строки для Stapler, универсальной системы сборки пакетов "
 "Linux"
 
-#: cmd/stplr/main.go:78
+#: cmd/stplr/main.go:77
 msgid "Arguments to be passed on to the package manager"
 msgstr "Аргументы, которые будут переданы менеджеру пакетов"
 
-#: cmd/stplr/main.go:84
+#: cmd/stplr/main.go:83
 msgid "Enable interactive questions and prompts"
 msgstr "Включение интерактивных вопросов и запросов"
 
-#: cmd/stplr/main.go:132
+#: cmd/stplr/main.go:136
 msgid "Error loading config"
 msgstr "Ошибка при загрузке"
 
-#: cmd/stplr/main.go:144
+#: cmd/stplr/main.go:143
 msgid "Error while running app"
 msgstr "Ошибка при запуске приложения"
 
-#: internal/app/commands/build.go:40
+#: internal/app/commands/build.go:41
 msgid "Build a local package"
 msgstr "Сборка локального пакета"
 
-#: internal/app/commands/build.go:46
+#: internal/app/commands/build.go:47
 msgid "Path to the build script"
 msgstr "Путь к скрипту сборки"
 
-#: internal/app/commands/build.go:51
+#: internal/app/commands/build.go:52
 msgid "Specify subpackage in script (for multi package script only)"
 msgstr "Укажите подпакет в скрипте (только для многопакетного скрипта)"
 
-#: internal/app/commands/build.go:56
+#: internal/app/commands/build.go:57
 msgid "Name of the package to build and its repo (example: default/go-bin)"
 msgstr "Имя пакета для сборки и его репозиторий (пример: default/go-bin)"
 
-#: internal/app/commands/build.go:61
+#: internal/app/commands/build.go:62
 msgid ""
 "Build package from scratch even if there's an already built package available"
 msgstr "Создайте пакет с нуля, даже если уже имеется готовый пакет"
 
-#: internal/app/commands/build.go:65
+#: internal/app/commands/build.go:66
 msgid "Do not add suffix to package name"
 msgstr "Не добавлять суффикс к имени пакета"
 
@@ -89,7 +89,7 @@ msgstr "Получить значение из конфигурации"
 msgid "<key>"
 msgstr "<ключ>"
 
-#: internal/app/commands/fix.go:41
+#: internal/app/commands/fix.go:42
 msgid "Attempt to fix problems with Stapler"
 msgstr "Попытка устранить проблемы с Stapler"
 
@@ -137,11 +137,11 @@ msgstr "Для команды remove ожидался хотя бы 1 аргум
 msgid "Install a new package"
 msgstr "Установить новый пакет"
 
-#: internal/app/commands/list.go:41
+#: internal/app/commands/list.go:42
 msgid "List Stapler repo packages"
 msgstr "Список пакетов репозитория Stapler"
 
-#: internal/app/commands/list.go:55
+#: internal/app/commands/list.go:56
 msgid "Format output using a Go template"
 msgstr "Формат выходных данных с использованием шаблона Go"
 
@@ -229,7 +229,7 @@ msgstr "Искать по репозиторию"
 msgid "Search by provides"
 msgstr "Иcкать по provides"
 
-#: internal/app/commands/upgrade.go:41
+#: internal/app/commands/upgrade.go:42
 msgid "Upgrade all installed packages"
 msgstr "Обновить все установленные пакеты"
 
@@ -237,13 +237,17 @@ msgstr "Обновить все установленные пакеты"
 msgid "Print the current Stapler version and exit"
 msgstr "Показать текущую версию Stapler и выйти"
 
-#: internal/app/deps/internal/builder/builder.go:102
+#: internal/app/deps/internal/builder/builder.go:103
 msgid "Unable to detect a supported package manager on the system"
 msgstr "Не удалось обнаружить поддерживаемый менеджер пакетов в системе"
 
-#: internal/app/deps/internal/builder/builder.go:121
+#: internal/app/deps/internal/builder/builder.go:122
 msgid "Error initialization database"
 msgstr "Ошибка инициализации базы данных"
+
+#: internal/app/output/console.go:59
+msgid "ERROR"
+msgstr "ОШИБКА"
 
 #: internal/app/tui/pager/code_pager.go:44
 msgid "q/Esc - Quit"
@@ -265,7 +269,7 @@ msgstr "СОГЛАШЕНИЕ О НЕСВОБОДНОМ ПО"
 msgid "Full license available at: %s"
 msgstr "Полный текст лицензии доступен по адресу: %s"
 
-#: internal/build/build.go:334
+#: internal/build/build.go:333
 msgid "Installing dependencies"
 msgstr "Установка зависимостей"
 
@@ -285,20 +289,23 @@ msgstr ""
 msgid "This package is already installed"
 msgstr "Этот пакет уже установлен"
 
-#: internal/build/firejail.go:151
-msgid "Applying FireJail integration"
+#: internal/build/firejail.go:153
+#, fuzzy
+msgid "Applying FireJail integration for %s package"
 msgstr "Применение интеграции FireJail"
 
-#: internal/build/script_executor.go:177
-msgid "Building package metadata"
-msgstr "Сборка метаданных пакета"
+#: internal/build/script_executor.go:183
+#, fuzzy
+msgid "Building metadata for package %q"
+msgstr "Сборка пакета"
 
-#: internal/build/script_executor.go:358 internal/build/script_executor.go:412
+#: internal/build/script_executor.go:368 internal/build/script_executor.go:424
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
 
-#: internal/build/step_checks.go:39
-msgid "Building package"
+#: internal/build/step_checks.go:42
+#, fuzzy
+msgid "Building the %q package"
 msgstr "Сборка пакета"
 
 #: internal/build/step_flat_vars.go:47
@@ -316,11 +323,11 @@ msgstr ""
 msgid "Would you like to remove the build dependencies?"
 msgstr "Хотели бы вы удалить зависимости сборки?"
 
-#: internal/build/step_prepare.go:50
+#: internal/build/step_prepare.go:55
 msgid "Downloading sources"
 msgstr "Скачивание источников"
 
-#: internal/cliutils/app_builder/builder.go:160
+#: internal/cliutils/app_builder/builder.go:161
 msgid "Error pulling repositories"
 msgstr "Ошибка при извлечении репозиториев"
 
@@ -445,7 +452,7 @@ msgstr "введите текст для фильтрации"
 msgid "for more help"
 msgstr "для дополнительной помощи"
 
-#: internal/cliutils/utils.go:78
+#: internal/cliutils/utils.go:81
 msgid ""
 "This command is deprecated and would be removed in the future, use \"%s\" "
 "instead!"
@@ -464,27 +471,27 @@ msgstr ""
 "Версия базы данных не существует. Запустите stplr fix, если что-то не "
 "работает."
 
-#: internal/logger/log.go:47
-msgid "ERROR"
-msgstr "ОШИБКА"
-
-#: internal/repos/pull.go:97
-msgid "Trying mirror"
-msgstr "Пробую зеркало"
-
-#: internal/repos/pull.go:103
-msgid "Failed to pull from URL"
-msgstr "Не удалось извлечь из URL"
-
-#: internal/repos/pull.go:120
-msgid "Pulling repository"
+#: internal/repos/pull.go:121
+#, fuzzy
+msgid "Pulling repository %s from %s..."
 msgstr "Скачивание репозитория"
 
-#: internal/repos/pull.go:158
-msgid "Git repository does not appear to be a valid Stapler repo"
+#: internal/repos/pull.go:123
+#, fuzzy
+msgid "Trying mirror %d: %s"
+msgstr "Пробую зеркало"
+
+#: internal/repos/pull.go:130
+#, fuzzy
+msgid "Failed to pull from %s: %v"
+msgstr "Не удалось извлечь из URL"
+
+#: internal/repos/pull.go:185
+#, fuzzy
+msgid "Git repository %q does not appear to be a valid Stapler repo"
 msgstr "Репозиторий Git не поддерживается репозиторием Stapler"
 
-#: internal/repos/pull.go:206
+#: internal/repos/pull.go:234
 msgid ""
 "Stapler repo's minimum Stapler version is greater than the current version. "
 "Try updating Stapler if something doesn't work."
@@ -492,31 +499,27 @@ msgstr ""
 "Минимальная версия Stapler для репозитория выше текущей версии. Попробуйте "
 "обновить Stapler, если что-то не работает."
 
-#: internal/repos/pull.go:227
-msgid "Repository up to date"
-msgstr "Репозиторий уже обновлён"
-
 #: internal/service/repos/repos.go:87
 msgid "Error saving config"
 msgstr "Ошибка при сохранении конфигурации"
 
-#: internal/usecase/build/build.go:58
+#: internal/usecase/build/build.go:60
 msgid "Nothing to build"
 msgstr "Нечего собирать"
 
-#: internal/usecase/build/build.go:72
+#: internal/usecase/build/build.go:74
 msgid "Error building package"
 msgstr "Ошибка при сборке пакета"
 
-#: internal/usecase/build/build.go:76
+#: internal/usecase/build/build.go:78
 msgid "Done"
 msgstr "Сделано"
 
-#: internal/usecase/build/steps.go:85
+#: internal/usecase/build/steps.go:86
 msgid "Your settings do not allow build command"
 msgstr "Ваши настройки не позволяют использовать команду build"
 
-#: internal/usecase/build/steps.go:276
+#: internal/usecase/build/steps.go:278
 msgid "Error moving the package"
 msgstr "Ошибка при перемещении пакета"
 
@@ -540,27 +543,27 @@ msgstr "не удалось сохранить конфигурацию"
 msgid "Successfully set %s = %s"
 msgstr "Успешно установлено %s = %s"
 
-#: internal/usecase/fix/fix.go:68
+#: internal/usecase/fix/fix.go:71
 msgid "Clearing cache directory"
 msgstr "Очистка каталога кэша"
 
-#: internal/usecase/fix/fix.go:72
+#: internal/usecase/fix/fix.go:75
 msgid "Unable to open cache directory"
 msgstr "Невозможно открыть каталог кэша"
 
-#: internal/usecase/fix/fix.go:78
+#: internal/usecase/fix/fix.go:81
 msgid "Unable to read cache directory contents"
 msgstr "Невозможно прочитать содержимое каталога кэша"
 
-#: internal/usecase/fix/fix.go:90
+#: internal/usecase/fix/fix.go:93
 msgid "Unable to remove cache item (%s)"
 msgstr "Невозможно удалить элемент кэша (%s)"
 
-#: internal/usecase/fix/fix.go:94
+#: internal/usecase/fix/fix.go:97
 msgid "Rebuilding cache"
 msgstr "Восстановление кэша"
 
-#: internal/usecase/fix/fix.go:98
+#: internal/usecase/fix/fix.go:101
 msgid "Unable to create new cache directory"
 msgstr "Не удалось создать новый каталог кэша"
 
@@ -600,27 +603,27 @@ msgstr "Пользователь решил не продолжать после
 msgid "Error when installing the package"
 msgstr "Ошибка при установке пакета"
 
-#: internal/usecase/list/list.go:85
+#: internal/usecase/list/list.go:87
 msgid "Error getting packages for upgrade"
 msgstr "Ошибка при получении пакетов для обновления"
 
-#: internal/usecase/list/list.go:88
+#: internal/usecase/list/list.go:90
 msgid "No packages for upgrade"
 msgstr "Нет пакетов к обновлению"
 
-#: internal/usecase/list/list.go:98 internal/usecase/list/list.go:187
+#: internal/usecase/list/list.go:100 internal/usecase/list/list.go:189
 msgid "Error parsing format template"
 msgstr "Ошибка при разборе шаблона"
 
-#: internal/usecase/list/list.go:104 internal/usecase/list/list.go:206
+#: internal/usecase/list/list.go:106 internal/usecase/list/list.go:208
 msgid "Error executing template"
 msgstr "Ошибка при выполнении шаблона"
 
-#: internal/usecase/list/list.go:152
+#: internal/usecase/list/list.go:154
 msgid "Failed to parse release"
 msgstr "Не удалось разобрать релиз"
 
-#: internal/usecase/list/list.go:173
+#: internal/usecase/list/list.go:175
 msgid "Error listing installed packages"
 msgstr "Ошибка при составлении списка установленных пакетов"
 
@@ -660,12 +663,12 @@ msgstr "Ошибка при удалении пакетов из базы дан
 msgid "Error while executing search"
 msgstr "Ошибка при выполнении поиска"
 
-#: internal/usecase/upgrade/upgrade.go:72
-#: internal/usecase/upgrade/upgrade.go:89
+#: internal/usecase/upgrade/upgrade.go:75
+#: internal/usecase/upgrade/upgrade.go:92
 msgid "Error checking for updates"
 msgstr "Ошибка при проверке обновлений"
 
-#: internal/usecase/upgrade/upgrade.go:92
+#: internal/usecase/upgrade/upgrade.go:95
 msgid "There is nothing to do."
 msgstr "Здесь нечего делать."
 
@@ -677,33 +680,38 @@ msgstr "Ошибка при понижении привилегий"
 msgid "You need to be a %s member or root to perform this action"
 msgstr "Вы должны быть членом %s или root чтобы выполнить это"
 
-#: internal/utils/cmd.go:257
+#: internal/utils/cmd.go:260
 msgid "You need to be root to perform this action"
 msgstr "Вы должны быть root чтобы выполнить это"
 
-#: internal/utils/cmd.go:265
-msgid ""
-"⚠️  This action requires elevated privileges. Attempting to run as root using "
-"'%s'..."
+#: internal/utils/cmd.go:268
+msgid "This action requires elevated privileges."
 msgstr ""
 "⚠️  Для выполнения этого действия требуются повышенные привилегии. Попытка "
 "запуска от имени пользователя root с использованием '%s'..."
 
-#: pkg/dl/dl.go:215
-msgid "Source can be updated, updating if required"
+#: internal/utils/cmd.go:269
+msgid "Attempting to run as root using '%s'..."
+msgstr ""
+
+#: pkg/dl/dl.go:224
+#, fuzzy
+msgid "Source %q can be updated using %s — updating if required"
 msgstr "Исходный код можно обновлять, обновляя при необходимости"
 
-#: pkg/dl/dl.go:229
-msgid "Downloading source"
-msgstr "Скачивание источника"
+#: pkg/dl/dl.go:245
+msgid "Downloading source %s from %s using %s downloader"
+msgstr ""
 
-#: pkg/dl/dl.go:259
-msgid "Source found in cache and linked to destination"
-msgstr "Источник найден в кэше и связан с пунктом назначения"
-
-#: pkg/dl/dl.go:261
-msgid "Source updated and linked to destination"
+#: pkg/dl/dl.go:280
+#, fuzzy
+msgid "Source %q was updated and linked to destination (type: %s)"
 msgstr "Источник обновлён и связан с пунктом назначения"
+
+#: pkg/dl/dl.go:282
+#, fuzzy
+msgid "Source %q found in cache and linked to destination (type: %s)"
+msgstr "Источник найден в кэше и связан с пунктом назначения"
 
 #: pkg/dl/progress_tui.go:106
 msgid "%s: done!\n"
@@ -713,22 +721,38 @@ msgstr "%s: выполнено!\n"
 msgid "%s %s downloading at %s/s\n"
 msgstr "%s %s загружается — %s/с\n"
 
-#: pkg/reqprov/dirty/dirty.go:42
+#: pkg/reqprov/dirty/dirty.go:47
 msgid "AutoProv is not implemented for this package format, so it's skipped"
 msgstr ""
 "AutoProv не реализовано для этого формата пакета, поэтому будет пропущено"
 
-#: pkg/reqprov/rpm/altlinux.go:44
-msgid "Provided dependency found"
+#: pkg/reqprov/rpm/altlinux.go:50
+#, fuzzy
+msgid "Provided dependency found: %s"
 msgstr "Найденная предоставленная зависимость"
 
-#: pkg/reqprov/rpm/altlinux.go:51
-msgid "Required dependency found"
+#: pkg/reqprov/rpm/altlinux.go:58
+#, fuzzy
+msgid "Required dependency found: %s"
 msgstr "Найдена требуемая зависимость"
 
-#: pkg/reqprov/rpm/altlinux.go:62
-msgid "Command not found on the system"
+#: pkg/reqprov/rpm/altlinux.go:69
+#, fuzzy
+msgid "Command %q not found on the system"
 msgstr "Команда не найдена в системе"
+
+#~ msgid "Building package metadata"
+#~ msgstr "Сборка метаданных пакета"
+
+#~ msgid "Downloading source"
+#~ msgstr "Скачивание источника"
+
+#, fuzzy
+#~ msgid "Error loading config: %v"
+#~ msgstr "Ошибка при загрузке"
+
+#~ msgid "Repository up to date"
+#~ msgstr "Репозиторий уже обновлён"
 
 #~ msgid "Command install expected at least 1 argument, got %d"
 #~ msgstr "Для команды install ожидался хотя бы 1 аргумент, получено %d"

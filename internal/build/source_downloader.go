@@ -25,17 +25,20 @@ import (
 	"os"
 	"strings"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/pkg/dl"
 	"go.stplr.dev/stplr/pkg/dlcache"
 )
 
 type LocalSourceDownloader struct {
 	cfg Config
+	out output.Output
 }
 
-func NewLocalSourceDownloader(cfg Config) *LocalSourceDownloader {
+func NewLocalSourceDownloader(cfg Config, out output.Output) *LocalSourceDownloader {
 	return &LocalSourceDownloader{
 		cfg,
+		out,
 	}
 }
 
@@ -52,6 +55,7 @@ func (s *LocalSourceDownloader) DownloadSources(
 			Progress:    os.Stderr,
 			Destination: getSrcDir(s.cfg, basePkg),
 			LocalDir:    getScriptDir(input.Script),
+			Output:      s.out,
 		}
 
 		opts.DlCache = dlcache.New(s.cfg.GetPaths().CacheDir)

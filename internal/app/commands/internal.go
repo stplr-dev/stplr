@@ -36,6 +36,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/cliutils"
 	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
@@ -87,13 +88,14 @@ func InternalBuildCmd() *cli.Command {
 				}
 			}
 
-			logger.SetupForGoPlugin()
+			out := output.NewPluginOutput()
 
+			logger.SetupForGoPlugin()
 			logger := hclog.New(&hclog.LoggerOptions{
 				Name:        "plugin",
 				Output:      os.Stderr,
 				Level:       hclog.Debug,
-				JSONFormat:  false,
+				JSONFormat:  true,
 				DisableTime: true,
 			})
 
@@ -101,7 +103,7 @@ func InternalBuildCmd() *cli.Command {
 				HandshakeConfig: build.HandshakeConfig,
 				Plugins: map[string]plugin.Plugin{
 					"script-executor": &build.ScriptExecutorPlugin{
-						Impl: build.NewLocalScriptExecutor(cfg),
+						Impl: build.NewLocalScriptExecutor(cfg, out),
 					},
 				},
 				Logger: logger,

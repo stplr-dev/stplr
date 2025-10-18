@@ -28,6 +28,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/cliutils"
 	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
@@ -206,6 +207,7 @@ func (s *buildStep) Execute(ctx context.Context, state *stepState) error {
 		input.deps.Repos,
 		runtime.scripter,
 		runtime.installer,
+		output.NewConsoleOutput(),
 	)
 	if err != nil {
 		return err

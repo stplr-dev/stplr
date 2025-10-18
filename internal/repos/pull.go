@@ -26,12 +26,18 @@ package repos
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/x/term"
 	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-git/v5"
 	gitConfig "github.com/go-git/go-git/v5/config"
@@ -86,38 +92,59 @@ func (rs *Repos) PullOneAndUpdateFromConfig(ctx context.Context, repo *types.Rep
 	return nil
 }
 
+var ErrPullRepoInterrupted = errors.New("pullRepo interrupted")
+
 func (rs *Repos) pullRepo(ctx context.Context, repo *types.Repo, updateRepoFromToml bool) error {
+	if term.IsTerminal(uintptr(syscall.Stdin)) {
+		m := newPullModel(ctx, repo, rs, updateRepoFromToml)
+		w := &progressViewportWriter{}
+		m.writer = w
+		p := tea.NewProgram(m, tea.WithContext(ctx))
+		w.onLine = func(line string, isUpdate bool) {
+			p.Send(progressViewportMsg{line: line, isUpdate: isUpdate})
+		}
+		if _, err := p.Run(); err != nil {
+			if errors.Is(err, tea.ErrInterrupted) {
+				return ErrPullRepoInterrupted
+			}
+			return err
+		}
+		return nil
+	}
 	urls := []string{repo.URL}
 	urls = append(urls, repo.Mirrors...)
 
 	var lastErr error
 
 	for i, repoURL := range urls {
-		if i > 0 {
-			slog.Info(gotext.Get("Trying mirror"), "repo", repo.Name, "mirror", repoURL)
+		if i == 0 {
+			rs.out.Info(gotext.Get("Pulling repository %s from %s...", repo.Name, repoURL))
+		} else {
+			rs.out.Info(gotext.Get("Trying mirror %d: %s", i, repoURL))
+			// slog.Info("Trying mirror", "repo", repo.Name, "mirror", repoURL)
 		}
 
-		err := rs.pullRepoFromURL(ctx, repoURL, repo, updateRepoFromToml)
+		err := rs.pullRepoFromURLWithOutput(ctx, repoURL, repo, updateRepoFromToml, os.Stderr)
 		if err != nil {
 			lastErr = err
-			slog.Warn(gotext.Get("Failed to pull from URL"), "repo", repo.Name, "url", repoURL, "error", err)
+			rs.out.Warn(gotext.Get("Failed to pull from %s: %v", repoURL, strings.TrimSpace(err.Error())))
+			// slog.Warn("Failed to pull from URL", "repo", repo.Name, "url", repoURL, "error", err)
 			continue
 		}
 
-		// Success
 		return nil
 	}
 
 	return fmt.Errorf("failed to pull repository %s from any URL: %w", repo.Name, lastErr)
 }
 
-func (rs *Repos) pullRepoFromURL(ctx context.Context, rawRepoUrl string, repo *types.Repo, update bool) error {
+func (rs *Repos) pullRepoFromURLWithOutput(ctx context.Context, rawRepoUrl string, repo *types.Repo, update bool, progress io.Writer) error {
 	repoURL, err := url.Parse(rawRepoUrl)
 	if err != nil {
 		return fmt.Errorf("invalid URL %s: %w", rawRepoUrl, err)
 	}
 
-	slog.Info(gotext.Get("Pulling repository"), "name", repo.Name)
+	// slog.Info(gotext.Get("Pulling repository"), "name", repo.Name)
 	repoDir := filepath.Join(rs.cfg.GetPaths().RepoDir, repo.Name)
 
 	r, freshGit, err := rs.gm.ReadGitRepo(repoDir, repoURL.String())
@@ -125,7 +152,7 @@ func (rs *Repos) pullRepoFromURL(ctx context.Context, rawRepoUrl string, repo *t
 		return fmt.Errorf("failed to open repo")
 	}
 
-	err = rs.gm.FetchRepo(ctx, r, repo.Ref)
+	err = rs.gm.FetchRepoWithProgress(ctx, r, repo.Ref, progress)
 	if err != nil {
 		return err
 	}
@@ -155,7 +182,8 @@ func (rs *Repos) pullRepoFromURL(ctx context.Context, rawRepoUrl string, repo *t
 func (rs *Repos) loadAndUpdateConfig(repoFS billy.Filesystem, repo *types.Repo, update bool) error {
 	fl, err := repoFS.Open(constants.RepoConfigFile)
 	if err != nil {
-		slog.Warn(gotext.Get("Git repository does not appear to be a valid Stapler repo"), "repo", repo.Name)
+		rs.out.Warn(gotext.Get("Git repository %q does not appear to be a valid Stapler repo", repo.Name))
+		// slog.Warn(gotext.Get("Git repository does not appear to be a valid Stapler repo"), "repo", repo.Name)
 		return nil
 	}
 	defer fl.Close()
@@ -223,9 +251,9 @@ func resolveRevision(r *git.Repository, repo *types.Repo, freshGit bool) (*plumb
 		return nil, nil, err
 	}
 
-	if old.Hash() == *revHash {
-		slog.Info(gotext.Get("Repository up to date"), "name", repo.Name)
-	}
+	// if old.Hash() == *revHash {
+	// 	slog.Info(gotext.Get("Repository up to date"), "name", repo.Name)
+	// }
 
 	return old, revHash, nil
 }

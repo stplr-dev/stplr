@@ -32,6 +32,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/config"
 	database "go.stplr.dev/stplr/internal/db"
 	"go.stplr.dev/stplr/internal/repos"
@@ -110,6 +111,7 @@ func TestPull(t *testing.T) {
 	rs := repos.New(
 		e.Cfg,
 		e.Db,
+		output.NewConsoleOutput(),
 	)
 
 	err := rs.Pull(e.Ctx, []types.Repo{

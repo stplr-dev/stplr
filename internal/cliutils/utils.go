@@ -30,17 +30,21 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
+
+	"go.stplr.dev/stplr/internal/app/output"
 )
 
 type BashCompleteWithErrorFunc func(ctx context.Context, c *cli.Command) error
 
 func BashCompleteWithError[F ~func(context.Context, *cli.Command) T, T error](f F) cli.ShellCompleteFunc {
 	return func(ctx context.Context, c *cli.Command) {
-		HandleExitCoder(f(ctx, c))
+		HandleExitCoder(ctx, f(ctx, c))
 	}
 }
 
-func HandleExitCoder(err error) {
+func HandleExitCoder(ctx context.Context, err error) {
+	out := output.FromContext(ctx)
+
 	if err == nil {
 		return
 	}
@@ -48,16 +52,15 @@ func HandleExitCoder(err error) {
 	if exitErr, ok := err.(cli.ExitCoder); ok {
 		if err.Error() != "" {
 			if _, ok := exitErr.(cli.ErrorFormatter); ok {
-				slog.Error(fmt.Sprintf("%+v\n", err))
+				out.Error(fmt.Sprintf("%+v\n", err))
 			} else {
-				slog.Error(err.Error())
+				out.Error(err.Error())
 			}
 		}
 		cli.OsExiter(exitErr.ExitCode())
 		return
 	}
-
-	slog.Error(err.Error())
+	out.Error(err.Error())
 	cli.OsExiter(1)
 }
 

@@ -25,6 +25,7 @@ package build
 import (
 	"context"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/manager"
 	"go.stplr.dev/stplr/internal/utils"
 )
@@ -40,13 +41,14 @@ func NewMainBuilder(
 	repos PackageFinder,
 	scriptExecutor ScriptExecutor,
 	installerExecutor InstallerExecutor,
+	out output.Output,
 ) (*Builder, error) {
 	builder := NewBuilder(
 		NewScriptResolver(cfg),
 		scriptExecutor,
 		NewLocalCacheExecutor(cfg),
 		installerExecutor,
-		NewLocalSourceDownloader(cfg),
+		NewLocalSourceDownloader(cfg, out),
 		NewChecksRunner(mgr, cfg),
 		NewNonFreeViewer(cfg),
 		repos,

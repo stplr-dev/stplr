@@ -36,7 +36,6 @@ import (
 	"fmt"
 	"hash"
 	"io"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -47,6 +46,8 @@ import (
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/blake2s"
 	"golang.org/x/exp/slices"
+
+	"go.stplr.dev/stplr/internal/app/output"
 )
 
 // Константа для имени файла манифеста кэша
@@ -102,6 +103,7 @@ type Options struct {
 	Progress         io.Writer
 	LocalDir         string
 	DlCache          DlCache
+	Output           output.Output
 }
 
 // Метод для создания нового хеша на основе указанного алгоритма хеширования
@@ -201,7 +203,7 @@ func handleCachedSource(ctx context.Context, opts Options, d Downloader, cacheDi
 	}
 
 	if ok {
-		logCacheHit(opts.Name, manifest.Type, updated)
+		logCacheHit(opts, manifest.Type, updated)
 		return nil
 	}
 
@@ -211,11 +213,18 @@ func handleCachedSource(ctx context.Context, opts Options, d Downloader, cacheDi
 // updateSourceIfNeeded updates the source if the downloader supports updates.
 func updateSourceIfNeeded(ctx context.Context, opts Options, d Downloader, cacheDir string) (bool, error) {
 	if updater, ok := d.(UpdatingDownloader); ok {
-		slog.Info(
-			gotext.Get("Source can be updated, updating if required"),
-			"source", opts.Name,
-			"downloader", d.Name(),
-		)
+		// slog.Info(
+		// 	gotext.Get("Source can be updated, updating if required"),
+		// 	"source", opts.Name,
+		// 	"downloader", d.Name(),
+		// )
+
+		if opts.Output != nil {
+			opts.Output.Info(gotext.Get(
+				"Source %q can be updated using %s — updating if required",
+				opts.Name, d.Name(),
+			))
+		}
 		newOpts := opts
 		newOpts.Destination = cacheDir
 		return updater.Update(newOpts)
@@ -225,12 +234,18 @@ func updateSourceIfNeeded(ctx context.Context, opts Options, d Downloader, cache
 
 // performDownload executes the download and writes the manifest.
 func performDownload(ctx context.Context, opts Options, d Downloader) error {
-	slog.Info(
-		gotext.Get("Downloading source"),
-		"source", opts.Name,
-		"url", opts.URL,
-		"downloader", d.Name(),
-	)
+	// slog.Info(
+	// 	gotext.Get("Downloading source"),
+	// 	"source", opts.Name,
+	// 	"url", opts.URL,
+	// 	"downloader", d.Name(),
+	// )
+	if opts.Output != nil {
+		opts.Output.Info("%s", gotext.Get(
+			"Downloading source %s from %s using %s downloader",
+			opts.Name, opts.URL, d.Name(),
+		))
+	}
 
 	cacheDir, err := opts.DlCache.New(ctx, opts.URL)
 	if err != nil {
@@ -255,12 +270,19 @@ func performDownload(ctx context.Context, opts Options, d Downloader) error {
 }
 
 // logCacheHit logs when a cached source is used or updated.
-func logCacheHit(source string, t Type, updated bool) {
-	msg := gotext.Get("Source found in cache and linked to destination")
-	if updated {
-		msg = gotext.Get("Source updated and linked to destination")
+func logCacheHit(opts Options, t Type, updated bool) {
+	if opts.Output == nil {
+		return
 	}
-	slog.Info(msg, "source", source, "type", t)
+
+	var msg string
+	if updated {
+		msg = gotext.Get("Source %q was updated and linked to destination (type: %s)", opts.Name, t)
+	} else {
+		msg = gotext.Get("Source %q found in cache and linked to destination (type: %s)", opts.Name, t)
+	}
+	opts.Output.Info("%s", msg)
+	// slog.Info(msg)
 }
 
 // Функция writeManifest записывает манифест в указанный каталог кэша

@@ -35,7 +35,7 @@ func TestE2EAlrFix(t *testing.T) {
 
 	runMatrixSuite(t, "run-fix", COMMON_SYSTEMS, func(t *testing.T, r capytest.Runner) {
 		r.Command("stplr", "fix").
-			ExpectStderrContains("--> Done").
+			ExpectStderrContains("Done").
 			ExpectSuccess().
 			Run(t)
 	})

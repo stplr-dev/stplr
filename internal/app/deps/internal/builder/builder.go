@@ -26,6 +26,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/db"
@@ -161,7 +162,7 @@ func (b *builder) Repos() *builder {
 		return b
 	}
 
-	b.deps.Repos = repos.New(cfg, db)
+	b.deps.Repos = repos.New(cfg, db, output.FromContext(b.ctx))
 
 	return b
 }
@@ -202,6 +203,7 @@ func (b *builder) Builder() *builder {
 		b.deps.Repos,
 		b.deps.Scripter,
 		b.deps.Installer,
+		output.NewConsoleOutput(),
 	)
 	if err != nil {
 		b.err = err

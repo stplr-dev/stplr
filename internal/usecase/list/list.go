@@ -21,7 +21,6 @@ package list
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"os"
 	"slices"
 	"strings"
@@ -30,6 +29,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/manager"
 	"go.stplr.dev/stplr/internal/overrides"
@@ -62,14 +62,16 @@ type useCase struct {
 	ignoreProvider IgnorePkgProvider
 
 	info *distro.OSRelease
+	out  output.Output
 }
 
-func New(upd Updater, pkgs PackagesProvider, ignoreProvider IgnorePkgProvider, info *distro.OSRelease) *useCase {
+func New(upd Updater, pkgs PackagesProvider, ignoreProvider IgnorePkgProvider, info *distro.OSRelease, out output.Output) *useCase {
 	return &useCase{
 		upd,
 		pkgs,
 		ignoreProvider,
 		info,
+		out,
 	}
 }
 
@@ -85,7 +87,7 @@ func (u *useCase) runForUpgradable(ctx context.Context, opts Options) error {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error getting packages for upgrade"))
 	}
 	if len(updates) == 0 {
-		slog.Info(gotext.Get("No packages for upgrade"))
+		u.out.Info(gotext.Get("No packages for upgrade"))
 		return nil
 	}
 

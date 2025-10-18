@@ -23,7 +23,6 @@ import (
 	"context"
 	"debug/elf"
 	"errors"
-	"log/slog"
 	"os"
 	"path"
 	"path/filepath"
@@ -33,17 +32,23 @@ import (
 	"github.com/goreleaser/nfpm/v2"
 	"github.com/leonelquinteros/gotext"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
 type Dirty struct{}
 
-func (o *Dirty) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
-	slog.Info(gotext.Get("AutoProv is not implemented for this package format, so it's skipped"))
+func New() *Dirty {
+	return &Dirty{}
+}
+
+func (o *Dirty) FindProvides(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+	// slog.Info(gotext.Get("AutoProv is not implemented for this package format, so it's skipped"))
+	out.Info(gotext.Get("AutoProv is not implemented for this package format, so it's skipped"))
 	return nil
 }
 
-func (o *Dirty) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+func (o *Dirty) FindRequires(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	provSet := make(map[string]struct{})
 	needSet := make(map[string]struct{})
 

@@ -25,11 +25,20 @@ linters:
   enable:
     - gocritic
     - gosec
-#    - testpackage
+    - forbidigo
     - wrapcheck
+  # - testpackage    
   # settings:
   #   testpackage:
   #     skip-regexp: internal_test\.go
+  settings:
+    forbidigo:
+      forbid:
+        - pattern: ^output\.FromContext$
+          msg: "It is forbidden to call output.FromContext directly — use dependency injection"
+          exclude-paths:
+            - ^cmd/stplr/main\.go$
+            - ^internal/app/commands
   exclusions:
     generated: lax
     presets:
@@ -48,6 +57,12 @@ linters:
       - linters:
           - staticcheck
         text: 'SA1019: interp.ExecHandler'
+      - linters:
+          - forbidigo
+        text: "It is forbidden to call output.FromContext directly"
+        paths:
+          - ^cmd/stplr/main\.go$
+          - ^internal/app/commands
     paths:
       - third_party$
       - builtin$

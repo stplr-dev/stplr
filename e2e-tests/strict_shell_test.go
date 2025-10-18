@@ -49,7 +49,7 @@ func TestE2EStrictShell(t *testing.T) {
 
 			for _, p := range pkgs {
 				r.Command("stplr", "build", "-p", p).
-					ExpectStderrContains("Building package name=").
+					ExpectStderrContains("Building the").
 					ExpectFailure().
 					Run(t)
 			}

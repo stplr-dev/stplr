@@ -29,6 +29,7 @@ import (
 
 	"github.com/goreleaser/nfpm/v2"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/types"
 
@@ -37,8 +38,8 @@ import (
 )
 
 type ReqProvFinder interface {
-	FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error
-	FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error
+	FindRequires(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error
+	FindProvides(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error
 	BuildDepends(ctx context.Context) ([]string, error)
 }
 
@@ -54,14 +55,14 @@ func getFinder(info *distro.OSRelease, method string) (ReqProvFinder, error) {
 	case "rpm":
 		switch {
 		case info.ID == "altlinux":
-			return &rpm.ALTLinux{}, nil
+			return rpm.NewALTLinux(), nil
 		case info.ID == "fedora" || slices.Contains(info.Like, "fedora"):
-			return &rpm.Fedora{}, nil
+			return rpm.NewFedora(), nil
 		default:
 			return nil, fmt.Errorf("unsupported RPM-based distro: %s", info.ID)
 		}
 	case "dirty":
-		return &dirty.Dirty{}, nil
+		return dirty.New(), nil
 	default:
 		return nil, fmt.Errorf("unsupported method: %s", method)
 	}
@@ -78,12 +79,12 @@ func New(info *distro.OSRelease, pkgFormat, method string) (*ReqProvService, err
 	}, nil
 }
 
-func (s *ReqProvService) FindProvides(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
-	return s.finder.FindProvides(ctx, pkgInfo, dirs, skiplist, filter)
+func (s *ReqProvService) FindProvides(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+	return s.finder.FindProvides(ctx, out, pkgInfo, dirs, skiplist, filter)
 }
 
-func (s *ReqProvService) FindRequires(ctx context.Context, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
-	return s.finder.FindRequires(ctx, pkgInfo, dirs, skiplist, filter)
+func (s *ReqProvService) FindRequires(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
+	return s.finder.FindRequires(ctx, out, pkgInfo, dirs, skiplist, filter)
 }
 
 func (s *ReqProvService) BuildDepends(ctx context.Context) ([]string, error) {

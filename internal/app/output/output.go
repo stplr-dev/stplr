@@ -16,39 +16,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package build
+package output
 
-import (
-	"context"
-	"errors"
-	"fmt"
+import "context"
 
-	"github.com/leonelquinteros/gotext"
-
-	"go.stplr.dev/stplr/internal/app/output"
-)
-
-type checksStep struct {
-	e   ChecksExecutor
-	out output.Output
+type Output interface {
+	Info(msg string, args ...any)
+	Warn(msg string, args ...any)
+	Error(msg string, args ...any)
 }
 
-func ChecksStep(e ChecksExecutor) *checksStep {
-	return &checksStep{e: e, out: output.NewConsoleOutput()}
+type contextKey struct{}
+
+var outputKey = contextKey{}
+
+func WithOutput(ctx context.Context, out Output) context.Context {
+	return context.WithValue(ctx, outputKey, out)
 }
 
-func (s *checksStep) Run(ctx context.Context, state *BuildState) error {
-	// slog.Info(gotext.Get("Building package"), "name", state.BasePackage)
-	s.out.Info(gotext.Get("Building the %q package", state.BasePackage))
-
-	for _, pkg := range state.Packages {
-		cont, err := s.e.RunChecks(ctx, pkg, state.Input)
-		if err != nil {
-			return fmt.Errorf("RunChecks failed: %w", err)
-		}
-		if !cont {
-			return errors.New("check step declined continuation")
+func FromContext(ctx context.Context) Output {
+	if v := ctx.Value(outputKey); v != nil {
+		if out, ok := v.(Output); ok {
+			return out
 		}
 	}
-	return nil
+	return NewConsoleOutput()
 }
