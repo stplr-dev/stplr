@@ -258,7 +258,7 @@ func InternalSandbox() *cli.Command {
 			cmd.Stderr = os.Stderr
 			cmd.Env = os.Environ()
 			cmd.SysProcAttr = &syscall.SysProcAttr{
-				Cloneflags: syscall.CLONE_NEWUSER | syscall.CLONE_NEWNS | syscall.CLONE_NEWPID,
+				Cloneflags: syscall.CLONE_NEWUSER | syscall.CLONE_NEWNS | syscall.CLONE_NEWPID | syscall.CLONE_NEWIPC,
 			}
 			return cmd.Run()
 		},

@@ -31,7 +31,7 @@ func TestE2ESandbox(t *testing.T) {
 
 	runMatrixSuite(
 		t,
-		"stplr install {repo}/{package}",
+		"stplr install test-sandbox",
 		COMMON_SYSTEMS,
 		func(t *testing.T, r capytest.Runner) {
 			t.Parallel()
@@ -44,5 +44,11 @@ func TestE2ESandbox(t *testing.T) {
 		t.Parallel()
 		defaultPrepare(t, r)
 		execShouldNoError(t, r, "stplr", "install", "test-sandbox-2")
+	}))
+
+	t.Run("stplr install test-sandbox-3", matrixSuite(COMMON_SYSTEMS, func(t *testing.T, r capytest.Runner) {
+		t.Parallel()
+		defaultPrepare(t, r)
+		execShouldNoError(t, r, "stplr", "install", "test-sandbox-3")
 	}))
 }

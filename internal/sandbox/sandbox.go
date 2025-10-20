@@ -46,8 +46,9 @@ func sandboxDirs(keep, hide []string) error {
 	}
 
 	for _, dir := range hide {
-		if err := unix.Mount("tmpfs", dir, "tmpfs", 0, ""); err != nil {
-			return fmt.Errorf("failed to hide dir: %w", err)
+		flags := uintptr(unix.MS_NOSUID | unix.MS_NODEV | unix.MS_NOEXEC)
+		if err := unix.Mount("tmpfs", dir, "tmpfs", flags, "size=64M"); err != nil {
+			return fmt.Errorf("hide %s: %w", dir, err)
 		}
 	}
 
@@ -63,6 +64,11 @@ func sandboxDirs(keep, hide []string) error {
 		}
 	}
 
+	flags := uintptr(unix.MS_NOSUID | unix.MS_NODEV | unix.MS_NOEXEC)
+	if err := unix.Mount("tmpfs", "/tmp", "tmpfs", flags, "size=64M"); err != nil {
+		return fmt.Errorf("hide %s: %w", "/tmp", err)
+	}
+
 	return nil
 }
 
@@ -72,7 +78,7 @@ func hideExecutable() error {
 		return err
 	}
 
-	if err := unix.Mount("/dev/null", execPath, "", unix.MS_BIND, ""); err != nil {
+	if err := unix.Mount("/dev/null", execPath, "", unix.MS_RDONLY|unix.MS_BIND, ""); err != nil {
 		if errors.Is(err, syscall.ENOENT) {
 			return nil
 		}
@@ -88,8 +94,9 @@ func sandboxSocket() error {
 		return err
 	}
 
-	if err := unix.Mount("tmpfs", constants.SocketDirPath, "tmpfs", 0, ""); err != nil {
-		return fmt.Errorf("failed to hide SocketDirPath %w", err)
+	flags := unix.MS_NODEV | unix.MS_NOSUID
+	if err := unix.Mount("tmpfs", constants.SocketDirPath, "tmpfs", uintptr(flags), "size=10M"); err != nil {
+		return fmt.Errorf("hide socket dir: %w", err)
 	}
 
 	return nil
@@ -101,11 +108,30 @@ func hideProc() error {
 		return fmt.Errorf("failed to hide /proc: %w", err)
 	}
 
+	if err := unix.Mount("", "/proc", "", unix.MS_REMOUNT|unix.MS_RDONLY|unix.MS_BIND, ""); err != nil {
+		return fmt.Errorf("protect proc: %w", err)
+	}
+
 	return nil
 }
 
 func Setup(srcDir, pkgDir, homeDir string) error {
-	if err := sandboxDirs([]string{srcDir, pkgDir}, []string{constants.SystemCachePath, homeDir}); err != nil {
+	err := unix.Mount("", "/", "/", unix.MS_PRIVATE|unix.MS_REC, "")
+	if err != nil {
+		return fmt.Errorf("failed to isolate root mounts: %w", err)
+	}
+
+	if err := sandboxDirs(
+		[]string{srcDir, pkgDir},
+		[]string{
+			constants.SystemCachePath,
+			homeDir,
+			"/run",
+			"/var/run",
+			"/var/log",
+			"/dev/shm",
+		},
+	); err != nil {
 		return err
 	}
 
