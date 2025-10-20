@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2025-10-15 20:46+0000\n"
+"PO-Revision-Date: 2025-10-20 19:41+0000\n"
 "Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
 "stplr/ru/>\n"
@@ -290,23 +290,20 @@ msgid "This package is already installed"
 msgstr "Этот пакет уже установлен"
 
 #: internal/build/firejail.go:153
-#, fuzzy
 msgid "Applying FireJail integration for %s package"
-msgstr "Применение интеграции FireJail"
+msgstr "Применение интеграции FireJail для пакета %s"
 
 #: internal/build/script_executor.go:183
-#, fuzzy
 msgid "Building metadata for package %q"
-msgstr "Сборка пакета"
+msgstr "Сборка метаданных пакета %q"
 
 #: internal/build/script_executor.go:368 internal/build/script_executor.go:424
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
 
 #: internal/build/step_checks.go:42
-#, fuzzy
 msgid "Building the %q package"
-msgstr "Сборка пакета"
+msgstr "Сборка пакета %q"
 
 #: internal/build/step_flat_vars.go:47
 msgid "The checksums array must be the same length as sources"
@@ -472,24 +469,20 @@ msgstr ""
 "работает."
 
 #: internal/repos/pull.go:121
-#, fuzzy
 msgid "Pulling repository %s from %s..."
-msgstr "Скачивание репозитория"
+msgstr "Скачивание репозитория %s из %s..."
 
 #: internal/repos/pull.go:123
-#, fuzzy
 msgid "Trying mirror %d: %s"
-msgstr "Пробую зеркало"
+msgstr "Пробую зеркало %d: %s"
 
 #: internal/repos/pull.go:130
-#, fuzzy
 msgid "Failed to pull from %s: %v"
-msgstr "Не удалось извлечь из URL"
+msgstr "Не удалось извлечь из %s: %v"
 
 #: internal/repos/pull.go:185
-#, fuzzy
 msgid "Git repository %q does not appear to be a valid Stapler repo"
-msgstr "Репозиторий Git не поддерживается репозиторием Stapler"
+msgstr "Репозиторий Git %q, похоже, не является корректным репозиторием Stapler"
 
 #: internal/repos/pull.go:234
 msgid ""
@@ -686,32 +679,29 @@ msgstr "Вы должны быть root чтобы выполнить это"
 
 #: internal/utils/cmd.go:268
 msgid "This action requires elevated privileges."
-msgstr ""
-"⚠️  Для выполнения этого действия требуются повышенные привилегии. Попытка "
-"запуска от имени пользователя root с использованием '%s'..."
+msgstr "Это действие требует повышенных привилегий."
 
 #: internal/utils/cmd.go:269
 msgid "Attempting to run as root using '%s'..."
-msgstr ""
+msgstr "Попытка запустить от имени root с использованием '%s'..."
 
 #: pkg/dl/dl.go:224
-#, fuzzy
 msgid "Source %q can be updated using %s — updating if required"
-msgstr "Исходный код можно обновлять, обновляя при необходимости"
+msgstr ""
+"Источник %q можно обновить с помощью %s — обновление будет выполнено при "
+"необходимости"
 
 #: pkg/dl/dl.go:245
 msgid "Downloading source %s from %s using %s downloader"
-msgstr ""
+msgstr "Загрузка источника %s из %s с помощью загрузчика %s"
 
 #: pkg/dl/dl.go:280
-#, fuzzy
 msgid "Source %q was updated and linked to destination (type: %s)"
-msgstr "Источник обновлён и связан с пунктом назначения"
+msgstr "Источник %q был обновлён и связан с пунктом назначения (тип: %s)"
 
 #: pkg/dl/dl.go:282
-#, fuzzy
 msgid "Source %q found in cache and linked to destination (type: %s)"
-msgstr "Источник найден в кэше и связан с пунктом назначения"
+msgstr "Источник %q найден в кэше и связан с пунктом назначения (тип: %s)"
 
 #: pkg/dl/progress_tui.go:106
 msgid "%s: done!\n"
@@ -727,19 +717,16 @@ msgstr ""
 "AutoProv не реализовано для этого формата пакета, поэтому будет пропущено"
 
 #: pkg/reqprov/rpm/altlinux.go:50
-#, fuzzy
 msgid "Provided dependency found: %s"
-msgstr "Найденная предоставленная зависимость"
+msgstr "Найдена предоставленная зависимость: %s"
 
 #: pkg/reqprov/rpm/altlinux.go:58
-#, fuzzy
 msgid "Required dependency found: %s"
-msgstr "Найдена требуемая зависимость"
+msgstr "Найдена требуемая зависимость: %s"
 
 #: pkg/reqprov/rpm/altlinux.go:69
-#, fuzzy
 msgid "Command %q not found on the system"
-msgstr "Команда не найдена в системе"
+msgstr "Команда %q не найдена в системе"
 
 #~ msgid "Building package metadata"
 #~ msgstr "Сборка метаданных пакета"
