@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2025-10-21 06:01+0000\n"
+"PO-Revision-Date: 2025-10-21 06:02+0000\n"
 "Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
 "stplr/ru/>\n"
@@ -515,7 +515,7 @@ msgstr "✔ Репозиторий успешно извлечен!"
 
 #: internal/repos/tui_pull.go:236
 msgid "Pulling %s..."
-msgstr "Вытягивание %с..."
+msgstr "Вытягивание %s..."
 
 #: internal/service/repos/repos.go:87
 msgid "Error saving config"
