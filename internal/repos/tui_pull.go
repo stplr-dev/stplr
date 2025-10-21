@@ -28,6 +28,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/pkg/types"
 )
@@ -179,7 +180,7 @@ func newPullModel(ctx context.Context, repo *types.Repo, rs *Repos, updateRepoFr
 
 		spinner: s,
 		urls:    urls,
-		status:  fmt.Sprintf("Pull %s", urls[0]),
+		status:  gotext.Get("Pull %s", urls[0]),
 		logs:    []string{},
 
 		gitBox:             gitBox,
@@ -200,25 +201,25 @@ func (m pullModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tryPullMsg:
 		if msg.err != nil {
 			line := textErorrDarkerStyle.
-				Render(fmt.Sprintf("- Failed to pull from %s: %v", m.urls[m.current], strings.TrimSpace(msg.err.Error())))
+				Render(gotext.Get("- Failed to pull from %s: %v", m.urls[m.current], strings.TrimSpace(msg.err.Error())))
 			m.logs = append(m.logs, line)
 
 			m.err = msg.err
 			m.current++
 			if m.current < len(m.urls) {
-				m.status = fmt.Sprintf("Trying mirror %d: %s", m.current, m.urls[m.current])
+				m.status = gotext.Get("Trying mirror %d: %s", m.current, m.urls[m.current])
 				return m, tea.Batch(m.spinner.Tick, m.tryPull(m.urls[m.current]))
 			}
 			m.done = true
-			m.status = textErorrStyle.Render("🞮 Failed to pull — the only source is unavailable")
+			m.status = textErorrStyle.Render(gotext.Get("🞮 Failed to pull — the only source is unavailable"))
 			return m, tea.Quit
 		}
 		line := lipgloss.NewStyle().
 			Foreground(lipgloss.Color("245")).
-			Render(fmt.Sprintf("- Pulled from %s", m.urls[m.current]))
+			Render(gotext.Get("- Pulled from %s", m.urls[m.current]))
 		m.logs = append(m.logs, line)
 		m.status = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("10")).Render("✔ Repository pulled successfully!")
+			Foreground(lipgloss.Color("10")).Render(gotext.Get("✔ Repository pulled successfully!"))
 		m.done = true
 		return m, tea.Quit
 	}
@@ -232,7 +233,7 @@ func (m pullModel) View() string {
 	title := lipgloss.NewStyle().
 		Bold(true).
 		Foreground(primaryColor).
-		Render(fmt.Sprintf("Pulling %s...", m.repo.Name))
+		Render(gotext.Get("Pulling %s...", m.repo.Name))
 
 	logSection := ""
 	if len(m.logs) > 0 {

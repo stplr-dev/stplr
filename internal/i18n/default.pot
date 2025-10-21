@@ -471,6 +471,30 @@ msgid ""
 "Try updating Stapler if something doesn't work."
 msgstr ""
 
+#: internal/repos/tui_pull.go:183
+msgid "Pull %s"
+msgstr ""
+
+#: internal/repos/tui_pull.go:204
+msgid "- Failed to pull from %s: %v"
+msgstr ""
+
+#: internal/repos/tui_pull.go:214
+msgid "🞮 Failed to pull — the only source is unavailable"
+msgstr ""
+
+#: internal/repos/tui_pull.go:219
+msgid "- Pulled from %s"
+msgstr ""
+
+#: internal/repos/tui_pull.go:222
+msgid "✔ Repository pulled successfully!"
+msgstr ""
+
+#: internal/repos/tui_pull.go:236
+msgid "Pulling %s..."
+msgstr ""
+
 #: internal/service/repos/repos.go:87
 msgid "Error saving config"
 msgstr ""
