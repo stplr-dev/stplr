@@ -51,7 +51,7 @@ require (
 	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546
 	golang.org/x/sys v0.37.0
 	golang.org/x/text v0.30.0
-	modernc.org/sqlite v1.39.1
+	modernc.org/sqlite v1.40.0
 	mvdan.cc/sh/v3 v3.12.1-0.20251005234102-d3ff6f655a6a
 	xorm.io/xorm v1.3.11
 )
