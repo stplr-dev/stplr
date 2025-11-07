@@ -24,14 +24,17 @@ import (
 	"go.stplr.dev/stplr/internal/app/deps/internal/builder"
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/config/savers"
+	"go.stplr.dev/stplr/internal/copier"
 	"go.stplr.dev/stplr/internal/db"
+	"go.stplr.dev/stplr/internal/installer"
 	"go.stplr.dev/stplr/internal/manager"
-	"go.stplr.dev/stplr/internal/repos"
+	"go.stplr.dev/stplr/internal/scripter"
 	"go.stplr.dev/stplr/internal/search"
+	"go.stplr.dev/stplr/internal/service/repos"
 	"go.stplr.dev/stplr/internal/service/updater"
+	"go.stplr.dev/stplr/internal/utils"
 	"go.stplr.dev/stplr/pkg/distro"
-
-	repos2 "go.stplr.dev/stplr/internal/service/repos"
 )
 
 type WithRepos struct {
@@ -91,7 +94,12 @@ type InstallActionDeps struct {
 func ForInstallAction(ctx context.Context) (*InstallActionDeps, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
-		InstallerAndScripter().
+		RootPluginProvider().
+		InstallerFromPlugin().
+		// Drop caps
+		DropCaps().
+		PluginProvider().
+		ScripterFromPlugin().
 		Config().
 		Manager().
 		DB().
@@ -140,7 +148,11 @@ type UpgradeDeps struct {
 func ForUpgradeAction(ctx context.Context) (*UpgradeDeps, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
-		InstallerAndScripter().
+		RootPluginProvider().
+		InstallerFromPlugin().
+		DropCaps().
+		PluginProvider().
+		ScripterFromPlugin().
 		Config().
 		Manager().
 		DB().
@@ -217,7 +229,8 @@ type ConfigSetActionDeps struct {
 func ForConfigSetAction(ctx context.Context) (*ConfigSetActionDeps, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
-		Config().
+		SystemConfigWriter().
+		ConfigRW().
 		End()
 	if err != nil {
 		return nil, nil, err
@@ -311,6 +324,8 @@ func ReposGetter(ctx context.Context) (*repos.Repos, Cleanup, error) {
 		Start(ctx).
 		Config().
 		DB().
+		PluginProvider().
+		PullerFromPlugin().
 		Repos().
 		End()
 	if err != nil {
@@ -345,12 +360,18 @@ func ForSearchAction(ctx context.Context) (*SearchDeps, Cleanup, error) {
 
 type RepoAddDeps struct {
 	Config *config.ALRConfig
+	Puller repos.PullExecutor
 }
 
 func ForRepoAddAction(ctx context.Context) (*RepoAddDeps, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
-		Config().
+		RootPluginProvider().
+		SystemConfigWriterFromRootPlugin().
+		ConfigRW().
+		DropCaps().
+		PluginProvider().
+		PullerFromPlugin().
 		End()
 	if err != nil {
 		return nil, nil, err
@@ -358,6 +379,7 @@ func ForRepoAddAction(ctx context.Context) (*RepoAddDeps, Cleanup, error) {
 
 	return &RepoAddDeps{
 		Config: b.Cfg,
+		Puller: b.Puller,
 	}, b.Cleanup, nil
 }
 
@@ -369,7 +391,8 @@ type RepoRemoveDeps struct {
 func ForRepoRemoveAction(ctx context.Context) (*RepoRemoveDeps, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
-		Config().
+		SystemConfigWriter().
+		ConfigRW().
 		DB().
 		End()
 	if err != nil {
@@ -384,16 +407,20 @@ func ForRepoRemoveAction(ctx context.Context) (*RepoRemoveDeps, Cleanup, error) 
 
 type UniversalReposModificationActionDeps struct {
 	Config *config.ALRConfig
-	Repos  *repos2.Repos
+	Repos  *repos.Repos
 }
 
 func ForUniversalReposModificationActionDeps(ctx context.Context) (*UniversalReposModificationActionDeps, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
-		Config().
+		RootPluginProvider().
+		SystemConfigWriterFromRootPlugin().
+		ConfigRW().
 		DB().
+		DropCaps().
+		PluginProvider().
+		PullerFromPlugin().
 		Repos().
-		Repos2().
 		End()
 	if err != nil {
 		return nil, nil, err
@@ -401,11 +428,134 @@ func ForUniversalReposModificationActionDeps(ctx context.Context) (*UniversalRep
 
 	return &UniversalReposModificationActionDeps{
 		Config: b.Cfg,
-		Repos:  b.Repos2,
+		Repos:  b.Repos,
 	}, b.Cleanup, nil
 }
 
 type RepoSetRefDeps struct {
 	Config *config.ALRConfig
 	Repos  *repos.Repos
+}
+
+type PluginServeDeps struct {
+	Puller   repos.PullExecutor
+	Scripter scripter.ScriptExecutor
+}
+
+func ForPluginsServe(ctx context.Context) (*PluginServeDeps, Cleanup, error) {
+	b, err := builder.
+		Start(ctx).
+		Config().
+		Scripter().
+		DB().
+		Puller().
+		End()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &PluginServeDeps{
+		b.Puller,
+		b.Scripter,
+	}, b.Cleanup, nil
+}
+
+type RootPluginServeDeps struct {
+	Installer          installer.InstallerExecutor
+	Copier             copier.CopierExecutor
+	SystemConfigWriter savers.SystemConfigWriterExecutor
+}
+
+func ForPluginsServeRoot(ctx context.Context) (*RootPluginServeDeps, Cleanup, error) {
+	b, err := builder.
+		Start(ctx).
+		Manager().
+		Config().
+		UserContext().
+		CopierForRootPlugin().
+		SystemConfigWriter().
+		End()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	needRootCmd := false
+	rootCmd := ""
+
+	if !utils.IsRoot() {
+		needRootCmd = b.Cfg.UseRootCmd()
+		rootCmd = b.Cfg.RootCmd()
+	}
+
+	return &RootPluginServeDeps{
+		Installer:          installer.New(b.Manager, needRootCmd, rootCmd),
+		Copier:             b.Copier,
+		SystemConfigWriter: b.SystemConfigWriter,
+	}, b.Cleanup, nil
+}
+
+type BuildActionDeps struct {
+	Config  *config.ALRConfig
+	Builder *build.Builder
+	Info    *distro.OSRelease
+	Copier  copier.CopierExecutor
+	Manager manager.Manager
+	Repos   *repos.Repos
+}
+
+func ForBuildAction(ctx context.Context) (*BuildActionDeps, Cleanup, error) {
+	b, err := builder.
+		Start(ctx).
+		Config().
+		RootPluginProvider().
+		InstallerFromPlugin().
+		CopierFromRootPlugin().
+		// PatchConfigToUserDirs().
+		//
+		// Drop to builder user
+		DropCaps().
+		PatchToUserDirs().
+		PluginProvider().
+		ScripterFromPlugin().
+		Manager().
+		DB().
+		Repos().
+		Info().
+		Builder().
+		End()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &BuildActionDeps{
+		Builder: b.Builder,
+		Info:    b.Info,
+		Copier:  b.Copier,
+		Manager: b.Manager,
+		Repos:   b.Repos,
+		Config:  b.Cfg,
+	}, b.Cleanup, nil
+}
+
+type RefreshActionDeps struct {
+	Repos *repos.Repos
+}
+
+func ForRefreshAction(ctx context.Context) (*RefreshActionDeps, Cleanup, error) {
+	b, err := builder.
+		Start(ctx).
+		Config().
+		DropCaps().
+		DB().
+		PluginProvider().
+		PullerFromPlugin().
+		Repos().
+		End()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &RefreshActionDeps{
+		Repos: b.Repos,
+	}, b.Cleanup, nil
 }

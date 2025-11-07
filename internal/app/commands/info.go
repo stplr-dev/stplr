@@ -34,7 +34,6 @@ import (
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/usecase/info"
 	"go.stplr.dev/stplr/internal/usecase/info/shell"
-	"go.stplr.dev/stplr/internal/utils"
 )
 
 func InfoCmd() *cli.Command {
@@ -49,7 +48,7 @@ func InfoCmd() *cli.Command {
 			},
 		},
 		ShellComplete: cliutils.BashCompleteWithError(func(ctx context.Context, c *cli.Command) error {
-			if err := utils.ExitIfRootCantDropCapsNoPrivs(); err != nil {
+			if err := cliutils.ExitIfRootCantDropCapsNoPrivs(); err != nil {
 				return err
 			}
 
@@ -67,7 +66,7 @@ func InfoCmd() *cli.Command {
 				return cli.Exit(gotext.Get("Command info expected at least 1 argument, got %d", args.Len()), 1)
 			}
 
-			if err := utils.ExitIfRootCantDropCapsNoPrivs(); err != nil {
+			if err := cliutils.ExitIfRootCantDropCapsNoPrivs(); err != nil {
 				return err
 			}
 

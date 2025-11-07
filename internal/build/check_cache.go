@@ -25,20 +25,21 @@ import (
 
 	"github.com/goreleaser/nfpm/v2"
 
+	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
-type LocalCacheExecutor struct{ cfg Config }
+type LocalCacheExecutor struct{ cfg commonbuild.Config }
 
-func NewLocalCacheExecutor(cfg Config) *LocalCacheExecutor {
+func NewLocalCacheExecutor(cfg commonbuild.Config) *LocalCacheExecutor {
 	return &LocalCacheExecutor{cfg: cfg}
 }
 
 type CheckForBuiltPackageInput interface {
-	OSReleaser
-	PkgFormatter
-	RepositoryGetter
-	BuildOptsProvider
+	commonbuild.OSReleaser
+	commonbuild.PkgFormatter
+	commonbuild.RepositoryGetter
+	commonbuild.BuildOptsProvider
 }
 
 func (c *LocalCacheExecutor) CheckForBuiltPackage(

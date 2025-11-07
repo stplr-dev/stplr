@@ -21,6 +21,7 @@ package build
 import (
 	"context"
 
+	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
@@ -41,7 +42,7 @@ func (s *checkCacheStep) Run(ctx context.Context, state *BuildState) error {
 				return err
 			}
 			if ok {
-				state.BuiltDeps = append(state.BuiltDeps, &BuiltDep{
+				state.BuiltDeps = append(state.BuiltDeps, &commonbuild.BuiltDep{
 					Path: builtPkgPath,
 				})
 			} else {

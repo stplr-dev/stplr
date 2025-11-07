@@ -27,6 +27,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
@@ -35,10 +36,10 @@ type ScriptResolverExecutor interface {
 }
 
 type ScriptResolver struct {
-	cfg Config
+	cfg commonbuild.Config
 }
 
-func NewScriptResolver(cfg Config) *ScriptResolver {
+func NewScriptResolver(cfg commonbuild.Config) *ScriptResolver {
 	return &ScriptResolver{cfg: cfg}
 }
 

@@ -28,6 +28,7 @@ import (
 	"io/fs"
 	"os"
 
+	"github.com/spf13/afero"
 	"mvdan.cc/sh/v3/syntax"
 )
 
@@ -49,6 +50,16 @@ func ReadFromIOReader(r io.Reader, script string) (*ScriptFile, error) {
 }
 
 func ReadFromFS(fsys fs.FS, script string) (*ScriptFile, error) {
+	fl, err := fsys.Open(script)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open Staplerfile: %w", err)
+	}
+	defer fl.Close()
+
+	return ReadFromIOReader(fl, script)
+}
+
+func ReadFromAferoFS(fsys afero.Fs, script string) (*ScriptFile, error) {
 	fl, err := fsys.Open(script)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open Staplerfile: %w", err)

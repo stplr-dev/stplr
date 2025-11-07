@@ -20,13 +20,15 @@ package build
 
 import (
 	"context"
+
+	"go.stplr.dev/stplr/internal/scripter"
 )
 
 type buildPackagesStep struct {
-	scriptExecutor ScriptExecutor
+	scriptExecutor scripter.ScriptExecutor
 }
 
-func BuildPackagesStep(scriptExecutor ScriptExecutor) *buildPackagesStep {
+func BuildPackagesStep(scriptExecutor scripter.ScriptExecutor) *buildPackagesStep {
 	return &buildPackagesStep{scriptExecutor: scriptExecutor}
 }
 

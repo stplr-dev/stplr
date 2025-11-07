@@ -23,15 +23,15 @@
 package build
 
 import (
-	"context"
-
 	"go.stplr.dev/stplr/internal/app/output"
+	"go.stplr.dev/stplr/internal/commonbuild"
+	"go.stplr.dev/stplr/internal/installer"
 	"go.stplr.dev/stplr/internal/manager"
-	"go.stplr.dev/stplr/internal/utils"
+	"go.stplr.dev/stplr/internal/scripter"
 )
 
 type mainBuilderConfig interface {
-	Config
+	commonbuild.Config
 	checksRunnerConfig
 }
 
@@ -39,8 +39,8 @@ func NewMainBuilder(
 	cfg mainBuilderConfig,
 	mgr manager.Manager,
 	repos PackageFinder,
-	scriptExecutor ScriptExecutor,
-	installerExecutor InstallerExecutor,
+	scriptExecutor scripter.ScriptExecutor,
+	installerExecutor installer.InstallerExecutor,
 	out output.Output,
 ) (*Builder, error) {
 	builder := NewBuilder(
@@ -59,41 +59,6 @@ func NewMainBuilder(
 }
 
 type PrepareResult struct {
-	Installer InstallerExecutor
-	Scripter  ScriptExecutor
-}
-
-func PrepareInstallerAndScripter(ctx context.Context) (res *PrepareResult, cleanup func(), err error) {
-	var installerClose func()
-	var scripterClose func()
-
-	installer, installerClose, err := GetSafeInstaller(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	if utils.IsRoot() {
-		if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
-			installerClose()
-			return nil, nil, err
-		}
-	}
-
-	scripter, scripterClose, err := GetSafeScriptExecutor(ctx)
-	if err != nil {
-		installerClose()
-		return nil, nil, err
-	}
-
-	cleanup = func() {
-		scripterClose()
-		installerClose()
-	}
-
-	res = &PrepareResult{
-		Installer: installer,
-		Scripter:  scripter,
-	}
-
-	return res, cleanup, nil
+	Installer installer.InstallerExecutor
+	Scripter  scripter.ScriptExecutor
 }

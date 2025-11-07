@@ -33,15 +33,30 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app/deps"
-	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
+
+	"go.stplr.dev/stplr/internal/cliutils2"
 	"go.stplr.dev/stplr/internal/usecase/repo/add"
 	"go.stplr.dev/stplr/internal/usecase/repo/remove"
 	"go.stplr.dev/stplr/internal/usecase/repo/setref"
 	"go.stplr.dev/stplr/internal/usecase/repo/seturl"
-	"go.stplr.dev/stplr/internal/utils"
 )
 
 var errMissingArgs = errors.New("missing args")
+
+func ShellCompleteRepoName(ctx context.Context, c *cli.Command) {
+	if c.NArg() == 0 {
+		// Get repo names from config
+		d, f, err := deps.ForConfigGetAction(ctx)
+		if err != nil {
+			return
+		}
+		defer f()
+
+		for _, repo := range d.Config.Repos() {
+			fmt.Println(repo.Name)
+		}
+	}
+}
 
 func RepoCmd() *cli.Command {
 	return &cli.Command{
@@ -59,25 +74,12 @@ func RepoCmd() *cli.Command {
 
 func RemoveRepoCmd() *cli.Command {
 	return &cli.Command{
-		Name:      "remove",
-		Usage:     gotext.Get("Remove an existing repository"),
-		Aliases:   []string{"rm"},
-		ArgsUsage: gotext.Get("<name>"),
-		ShellComplete: func(ctx context.Context, c *cli.Command) {
-			if c.NArg() == 0 {
-				// Get repo names from config
-				deps, err := appbuilder.New(ctx).WithConfig().Build()
-				if err != nil {
-					return
-				}
-				defer deps.Defer()
-
-				for _, repo := range deps.Cfg.Repos() {
-					fmt.Println(repo.Name)
-				}
-			}
-		},
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+		Name:          "remove",
+		Usage:         gotext.Get("Remove an existing repository"),
+		Aliases:       []string{"rm"},
+		ArgsUsage:     gotext.Get("<name>"),
+		ShellComplete: ShellCompleteRepoName,
+		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() < 1 {
 				return errMissingArgs
 			}
@@ -98,7 +100,7 @@ func AddRepoCmd() *cli.Command {
 		Name:      "add",
 		Usage:     gotext.Get("Add a new repository"),
 		ArgsUsage: gotext.Get("<name> <url>"),
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() < 2 {
 				return errMissingArgs
 			}
@@ -109,7 +111,7 @@ func AddRepoCmd() *cli.Command {
 			}
 			defer f()
 
-			return add.New(d.Config).Run(ctx, add.Options{
+			return add.New(d.Config, d.Puller).Run(ctx, add.Options{
 				Name: c.Args().Get(0),
 				URL:  c.Args().Get(1),
 			})
@@ -119,24 +121,11 @@ func AddRepoCmd() *cli.Command {
 
 func SetRepoRefCmd() *cli.Command {
 	return &cli.Command{
-		Name:      "set-ref",
-		Usage:     gotext.Get("Set the reference of the repository"),
-		ArgsUsage: gotext.Get("<name> <ref>"),
-		ShellComplete: func(ctx context.Context, c *cli.Command) {
-			if c.NArg() == 0 {
-				// Get repo names from config
-				deps, err := appbuilder.New(ctx).WithConfig().Build()
-				if err != nil {
-					return
-				}
-				defer deps.Defer()
-
-				for _, repo := range deps.Cfg.Repos() {
-					fmt.Println(repo.Name)
-				}
-			}
-		},
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+		Name:          "set-ref",
+		Usage:         gotext.Get("Set the reference of the repository"),
+		ArgsUsage:     gotext.Get("<name> <ref>"),
+		ShellComplete: ShellCompleteRepoName,
+		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() < 2 {
 				return errMissingArgs
 			}
@@ -159,24 +148,11 @@ func SetRepoRefCmd() *cli.Command {
 
 func SetUrlCmd() *cli.Command {
 	return &cli.Command{
-		Name:      "set-url",
-		Usage:     gotext.Get("Set the main url of the repository"),
-		ArgsUsage: gotext.Get("<name> <url>"),
-		ShellComplete: func(ctx context.Context, c *cli.Command) {
-			if c.NArg() == 0 {
-				// Get repo names from config
-				deps, err := appbuilder.New(ctx).WithConfig().Build()
-				if err != nil {
-					return
-				}
-				defer deps.Defer()
-
-				for _, repo := range deps.Cfg.Repos() {
-					fmt.Println(repo.Name)
-				}
-			}
-		},
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+		Name:          "set-url",
+		Usage:         gotext.Get("Set the main url of the repository"),
+		ArgsUsage:     gotext.Get("<name> <url>"),
+		ShellComplete: ShellCompleteRepoName,
+		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() < 2 {
 				return errMissingArgs
 			}

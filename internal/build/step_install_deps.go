@@ -24,18 +24,20 @@ import (
 	"log/slog"
 	"strings"
 
-	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/cliprompts"
+	"go.stplr.dev/stplr/internal/commonbuild"
+	"go.stplr.dev/stplr/internal/installer"
 	"go.stplr.dev/stplr/internal/manager"
 )
 
 type installDepsStep struct {
-	installerExecutor InstallerExecutor
+	installerExecutor installer.InstallerExecutor
 	repos             PackageFinder
 	builder           *Builder
 }
 
 func InstallDepsStep(
-	installerExecutor InstallerExecutor,
+	installerExecutor installer.InstallerExecutor,
 	repos PackageFinder,
 	builder *Builder,
 ) *installDepsStep {
@@ -86,13 +88,13 @@ func (s *installDepsStep) Run(ctx context.Context, state *BuildState) error {
 }
 
 type InstallInput interface {
-	OsInfoProvider
-	BuildOptsProvider
-	PkgFormatProvider
+	commonbuild.OsInfoProvider
+	commonbuild.BuildOptsProvider
+	commonbuild.PkgFormatProvider
 }
 
-func (s *installDepsStep) installBuildDeps(ctx context.Context, input InstallInput, pkgs []string) ([]*BuiltDep, []string, error) {
-	var builtDeps []*BuiltDep
+func (s *installDepsStep) installBuildDeps(ctx context.Context, input InstallInput, pkgs []string) ([]*commonbuild.BuiltDep, []string, error) {
+	var builtDeps []*commonbuild.BuiltDep
 	var deps []string
 	var err error
 	if len(pkgs) > 0 {
@@ -124,8 +126,8 @@ func splitPkgAndDesc(pkgs []string) (names []string, mapping map[string]string) 
 	return
 }
 
-func (i *installDepsStep) installOptDeps(ctx context.Context, input InstallInput, pkgs []string) ([]*BuiltDep, error) {
-	var builtDeps []*BuiltDep
+func (i *installDepsStep) installOptDeps(ctx context.Context, input InstallInput, pkgs []string) ([]*commonbuild.BuiltDep, error) {
+	var builtDeps []*commonbuild.BuiltDep
 
 	namesOnly, descMap := splitPkgAndDesc(pkgs)
 
@@ -148,7 +150,7 @@ func (i *installDepsStep) installOptDeps(ctx context.Context, input InstallInput
 		}
 	}
 
-	optDeps, err = cliutils.ChooseOptDepends(
+	optDeps, err = cliprompts.ChooseOptDepends(
 		ctx,
 		optDepsWithDesc,
 		"install",
@@ -170,7 +172,7 @@ func (i *installDepsStep) installOptDeps(ctx context.Context, input InstallInput
 	return builtDeps, nil
 }
 
-func (s *installDepsStep) installPkgs(ctx context.Context, input InstallInput, pkgs []string) ([]*BuiltDep, error) {
+func (s *installDepsStep) installPkgs(ctx context.Context, input InstallInput, pkgs []string) ([]*commonbuild.BuiltDep, error) {
 	builtDeps, repoDeps, err := s.builder.BuildALRDeps(ctx, input, pkgs)
 	if err != nil {
 		return nil, err

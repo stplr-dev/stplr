@@ -21,13 +21,13 @@ package set
 import (
 	"context"
 	"fmt"
-	"strconv"
-	"strings"
+	"slices"
 
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/config/common"
 )
 
 type useCase struct {
@@ -47,53 +47,21 @@ type Options struct {
 
 func (u *useCase) Run(ctx context.Context, opts Options) error {
 	key := opts.Field
-	value := opts.Value
+	valueStr := opts.Value
 
-	stringSetters := map[string]func(string){
-		"rootCmd":    u.cfg.System.SetRootCmd,
-		"pagerStyle": u.cfg.System.SetPagerStyle,
-		"logLevel":   u.cfg.System.SetLogLevel,
+	if !slices.Contains(u.cfg.AllowedKeys(), key) {
+		return errors.NewI18nError(gotext.Get("unknown config key: %s", key))
 	}
 
-	boolSetters := map[string]func(bool){
-		"useRootCmd":            u.cfg.System.SetUseRootCmd,
-		"autoPull":              u.cfg.System.SetAutoPull,
-		"forbidSkipInChecksums": u.cfg.System.SetForbidSkipInChecksums,
-		"forbidBuildCommand":    u.cfg.System.SetForbidBuildCommand,
+	value, err := u.cfg.ConvertValue(key, valueStr)
+	if err != nil {
+		return errors.NewI18nError(gotext.Get("invalid value for %s: %v", key, err))
 	}
 
-	switch key {
-	case "ignorePkgUpdates":
-		var updates []string
-		if value != "" {
-			updates = strings.Split(value, ",")
-			for i := range updates {
-				updates[i] = strings.TrimSpace(updates[i])
-			}
-		}
-		u.cfg.System.SetIgnorePkgUpdates(updates)
-
-	case "repo", "repos":
-		return errors.NewI18nError(gotext.Get("use 'repo add/remove' commands to manage repositories"))
-
-	default:
-		if setter, ok := stringSetters[key]; ok {
-			setter(value)
-		} else if setter, ok := boolSetters[key]; ok {
-			boolValue, err := strconv.ParseBool(value)
-			if err != nil {
-				return errors.WrapIntoI18nError(err, gotext.Get("invalid boolean value for %s: %s", key, value))
-			}
-			setter(boolValue)
-		} else {
-			return errors.NewI18nError(gotext.Get("unknown config key: %s", key))
-		}
+	if err := u.cfg.SetToAndSave(common.SOURCE_SYSTEM, key, value); err != nil {
+		return errors.NewI18nError(gotext.Get("failed to save config: %v", err))
 	}
 
-	if err := u.cfg.System.Save(); err != nil {
-		return errors.NewI18nError(gotext.Get("failed to save config"))
-	}
-
-	fmt.Println(gotext.Get("Successfully set %s = %s", key, value))
+	fmt.Println(gotext.Get("Successfully set %s = %s", key, valueStr))
 	return nil
 }

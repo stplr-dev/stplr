@@ -42,6 +42,10 @@ func (s Sys) Getgid() int {
 	return os.Getgid()
 }
 
+func (s Sys) Getwd() (string, error) {
+	return os.Getwd()
+}
+
 func mustInt(s string) int {
 	if i, err := strconv.Atoi(s); err != nil {
 		panic(err)

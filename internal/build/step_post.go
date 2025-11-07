@@ -23,15 +23,17 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/cliprompts"
+	"go.stplr.dev/stplr/internal/commonbuild"
+	"go.stplr.dev/stplr/internal/installer"
 	"go.stplr.dev/stplr/internal/manager"
 )
 
 type postStep struct {
-	installerExecutor InstallerExecutor
+	installerExecutor installer.InstallerExecutor
 }
 
-func PostStep(installerExecutor InstallerExecutor) *postStep {
+func PostStep(installerExecutor installer.InstallerExecutor) *postStep {
 	return &postStep{installerExecutor: installerExecutor}
 }
 
@@ -42,11 +44,11 @@ func (s *postStep) Run(ctx context.Context, state *BuildState) error {
 }
 
 func (s *postStep) removeBuildDeps(ctx context.Context, input interface {
-	BuildOptsProvider
+	commonbuild.BuildOptsProvider
 }, deps []string,
 ) error {
 	if len(deps) > 0 {
-		remove, err := cliutils.YesNoPrompt(ctx, gotext.Get("Would you like to remove the build dependencies?"), input.BuildOpts().Interactive, false)
+		remove, err := cliprompts.YesNoPrompt(ctx, gotext.Get("Would you like to remove the build dependencies?"), input.BuildOpts().Interactive, false)
 		if err != nil {
 			return err
 		}

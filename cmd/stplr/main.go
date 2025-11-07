@@ -60,11 +60,9 @@ func GetApp() *cli.Command {
 		commands.RepoCmd(),
 		commands.ConfigCmd(),
 		// Internal commands
-		commands.InternalBuildCmd(),
-		commands.InternalInstallCmd(),
-		commands.InternalReposCmd(),
-		commands.InternalCoplyFiles(),
 		commands.InternalSandbox(),
+		commands.InternalPluginProvider(),
+		commands.InternalPluginProviderRoot(),
 	}
 
 	return &cli.Command{

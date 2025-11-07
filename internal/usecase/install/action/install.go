@@ -27,14 +27,15 @@ import (
 
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/build"
-	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/cliprompts"
+	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/internal/manager"
 	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
 type builder interface {
-	InstallPkgs(ctx context.Context, input build.InstallInput, pkgs []string) ([]*build.BuiltDep, error)
+	InstallPkgs(ctx context.Context, input build.InstallInput, pkgs []string) ([]*commonbuild.BuiltDep, error)
 }
 
 type useCase struct {
@@ -73,7 +74,7 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 	if stdErrors.Is(err, build.ErrLicenseAgreementWasDeclined) {
 		return errors.NewI18nError(gotext.Get("License agreement was declined"))
 	}
-	if stdErrors.Is(err, cliutils.ErrUserChoseNotContinue) {
+	if stdErrors.Is(err, cliprompts.ErrUserChoseNotContinue) {
 		return errors.NewI18nError(gotext.Get("User chose not to continue after reading script"))
 	}
 	if err != nil {

@@ -23,123 +23,179 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 
 	"github.com/leonelquinteros/gotext"
+	"github.com/spf13/afero"
 
 	"go.stplr.dev/stplr/internal/app/errors"
-	"go.stplr.dev/stplr/internal/app/output"
-	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
+	"go.stplr.dev/stplr/internal/build"
+	"go.stplr.dev/stplr/internal/cliprompts"
+	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/commonbuild"
+	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/copier"
+	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/pkg/distro"
+	"go.stplr.dev/stplr/pkg/staplerfile"
+	"go.stplr.dev/stplr/pkg/types"
 )
 
-type system interface {
-	IsRoot() bool
-	Getuid() int
-	Getgid() int
-}
-
 type useCase struct {
-	sys system
-	out output.Output
+	config  *config.ALRConfig
+	builder *build.Builder
+	info    *distro.OSRelease
+	copier  copier.CopierExecutor
+	manager manager.Manager
+	finder  build.PackageFinder
+	fsys    afero.Fs
+
+	cleanups []func()
 }
 
-func New(sys system, out output.Output) *useCase {
-	return &useCase{sys, out}
+type ConstructOptions struct {
+	Config  *config.ALRConfig
+	Builder *build.Builder
+	Info    *distro.OSRelease
+	Copier  copier.CopierExecutor
+	Manager manager.Manager
+	Finder  build.PackageFinder
 }
 
-type Options struct {
-	Script      string
+func New(o ConstructOptions) *useCase {
+	return &useCase{
+		config:  o.Config,
+		builder: o.Builder,
+		copier:  o.Copier,
+		info:    o.Info,
+		manager: o.Manager,
+		finder:  o.Finder,
+		fsys:    afero.NewOsFs(),
+	}
+}
+
+type RunOptions struct {
 	Subpackage  string
-	Package     string
+	Directory   string
 	Clean       bool
 	Interactive bool
 	NoSuffix    bool
+
+	Script  string
+	Package string
 }
 
-func (u *useCase) Run(ctx context.Context, opts Options) error {
-	if opts.Script == "" && opts.Package == "" {
-		return errors.NewI18nError(gotext.Get("Nothing to build"))
+func (u *useCase) Run(ctx context.Context, o RunOptions) error {
+	if err := u.checks(); err != nil {
+		return err
 	}
 
-	state, err := u.prepareState(ctx, opts)
+	var err error
+	var pkgs []*commonbuild.BuiltDep
+
+	switch {
+	case o.Package != "":
+		pkgs, err = u.runForDb(ctx, o)
+	case o.Script != "":
+		pkgs, err = u.runForScript(ctx, o)
+	default:
+		return fmt.Errorf("either Script or Package must be specified")
+	}
 	if err != nil {
 		return err
 	}
-	defer state.Cleanup()
 
-	steps := u.getSteps(ctx, state, opts)
-	for _, s := range steps {
-		slog.Debug("execute step", "step", fmt.Sprintf("%T", s))
-		err := s.Execute(ctx, state)
-		if err != nil {
-			return errors.WrapIntoI18nError(err, gotext.Get("Error building package"))
-		}
+	builtPkgs := make([]commonbuild.BuiltDep, len(pkgs))
+	for i, pkg := range pkgs {
+		builtPkgs[i] = commonbuild.BuiltDep{Name: pkg.Name, Path: pkg.Path}
 	}
 
-	u.out.Info(gotext.Get("Done"))
+	if err := u.copier.CopyOut(ctx, builtPkgs); err != nil {
+		return errors.WrapIntoI18nError(err, gotext.Get("Error moving the package"))
+	}
 
 	return nil
 }
 
-func (u *useCase) getSteps(ctx context.Context, state *stepState, opts Options) []step {
-	var steps []step
-
-	steps = append(steps, &checkStep{})
-
-	if opts.Package != "" {
-		steps = append(steps, &prepareDbArgs{state.input.deps.Repos})
-	} else {
-		steps = append(steps, &prepareScriptArgs{})
+func (u *useCase) checks() error {
+	if u.config.ForbidBuildCommand() {
+		return errors.NewI18nError(gotext.Get("Your settings do not allow build command"))
 	}
 
-	copyOut := &copyOutStep{}
-	if u.sys.IsRoot() {
-		steps = append(steps, &setupCopier{})
-		if opts.Script != "" {
-			steps = append(steps, &copyScript{fsys: os.DirFS("/")})
-		}
-		copyOut.copy = copyOutViaCopier
-	} else {
-		steps = append(steps, &modifyCfgPaths{})
-		copyOut.copy = copyOutViaOsutils
+	if err := cliutils.EnsureIsPrivilegedGroupMemberOrRoot(); err != nil {
+		return err
 	}
 
-	steps = append(steps,
-		&prepareInstallerAndScripterStep{},
-		&buildStep{},
-		copyOut,
-	)
-
-	return steps
+	return nil
 }
 
-func (u *useCase) prepareState(ctx context.Context, opts Options) (*stepState, error) {
-	state := &stepState{}
-	input := &state.input
-	runtime := &state.runtime
+func (u *useCase) runForDb(ctx context.Context, o RunOptions) ([]*commonbuild.BuiltDep, error) {
+	foundPkgs, _, err := u.finder.FindPkgs(ctx, []string{o.Package})
+	if err != nil {
+		return nil, fmt.Errorf("failed to find pkgs: %w", err)
+	}
 
-	input.opts = opts
-	input.origUid = u.sys.Getuid()
-	input.origGid = u.sys.Getgid()
+	pkg := cliprompts.FlattenPkgs(ctx, foundPkgs, "build", o.Interactive)
+	var packages []string
+	if pkg[0].BasePkgName != "" {
+		packages = append(packages, pkg[0].Name)
+	}
 
-	wd, err := os.Getwd()
+	return u.builder.BuildPackageFromDb(
+		ctx,
+		&build.BuildPackageFromDbArgs{
+			Package:  &pkg[0],
+			Packages: packages,
+			BuildArgs: build.BuildArgs{
+				Opts: &types.BuildOpts{
+					Clean:       o.Clean,
+					Interactive: o.Interactive,
+					NoSuffix:    o.NoSuffix,
+				},
+				PkgFormat_: build.GetPkgFormat(u.manager),
+				Info:       u.info,
+			},
+		},
+	)
+}
+
+func (u *useCase) runForScript(ctx context.Context, o RunOptions) ([]*commonbuild.BuiltDep, error) {
+	file, err := staplerfile.ReadFromAferoFS(u.fsys, o.Script)
 	if err != nil {
 		return nil, err
 	}
-	input.wd = wd
 
-	deps, err := appbuilder.
-		New(ctx).
-		WithConfig().
-		WithDB().
-		WithReposNoPull().
-		WithDistroInfo().
-		WithManager().
-		Build()
+	script, err := u.copier.Copy(ctx, file, u.info)
 	if err != nil {
 		return nil, err
 	}
-	runtime.cleanups = append(runtime.cleanups, deps.Defer)
-	input.deps = deps
 
-	return state, nil
+	u.cleanups = append(u.cleanups, func() {
+		err = os.RemoveAll(filepath.Dir(script))
+		if err != nil {
+			slog.Warn("failed to cleanup", "err", err)
+		}
+	})
+
+	var packages []string
+	if o.Subpackage != "" {
+		packages = []string{o.Subpackage}
+	}
+
+	return u.builder.BuildPackageFromScript(
+		ctx,
+		&build.BuildPackageFromScriptArgs{
+			Script:   script,
+			Packages: packages,
+			BuildArgs: build.BuildArgs{
+				Opts: &types.BuildOpts{
+					Clean:       o.Clean,
+					Interactive: o.Interactive,
+					NoSuffix:    o.NoSuffix,
+				},
+				PkgFormat_: build.GetPkgFormat(u.manager),
+				Info:       u.info,
+			},
+		},
+	)
 }

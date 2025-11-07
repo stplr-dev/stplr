@@ -25,137 +25,25 @@
 package build
 
 import (
-	"bytes"
 	"context"
-	"encoding/gob"
 	"fmt"
 
 	"github.com/leonelquinteros/gotext"
 
-	"go.stplr.dev/stplr/internal/cliutils"
-	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/cliprompts"
+	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/internal/scripter"
 	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-type BuildInput struct {
-	Opts        *types.BuildOpts
-	Info_       *distro.OSRelease
-	PkgFormat_  string
-	Script      string
-	Repository_ string
-	Packages_   []string
-}
-
-func (bi *BuildInput) GobEncode() ([]byte, error) {
-	w := new(bytes.Buffer)
-	encoder := gob.NewEncoder(w)
-
-	if err := encoder.Encode(bi.Opts); err != nil {
-		return nil, err
-	}
-	if err := encoder.Encode(bi.Info_); err != nil {
-		return nil, err
-	}
-	if err := encoder.Encode(bi.PkgFormat_); err != nil {
-		return nil, err
-	}
-	if err := encoder.Encode(bi.Script); err != nil {
-		return nil, err
-	}
-	if err := encoder.Encode(bi.Repository_); err != nil {
-		return nil, err
-	}
-	if err := encoder.Encode(bi.Packages_); err != nil {
-		return nil, err
-	}
-
-	return w.Bytes(), nil
-}
-
-func (bi *BuildInput) GobDecode(data []byte) error {
-	r := bytes.NewBuffer(data)
-	decoder := gob.NewDecoder(r)
-
-	if err := decoder.Decode(&bi.Opts); err != nil {
-		return err
-	}
-	if err := decoder.Decode(&bi.Info_); err != nil {
-		return err
-	}
-	if err := decoder.Decode(&bi.PkgFormat_); err != nil {
-		return err
-	}
-	if err := decoder.Decode(&bi.Script); err != nil {
-		return err
-	}
-	if err := decoder.Decode(&bi.Repository_); err != nil {
-		return err
-	}
-	if err := decoder.Decode(&bi.Packages_); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (b *BuildInput) Repository() string {
-	return b.Repository_
-}
-
-func (b *BuildInput) BuildOpts() *types.BuildOpts {
-	return b.Opts
-}
-
-func (b *BuildInput) OSRelease() *distro.OSRelease {
-	return b.Info_
-}
-
-func (b *BuildInput) PkgFormat() string {
-	return b.PkgFormat_
-}
-
-func (b *BuildInput) Packages() []string {
-	return b.Packages_
-}
-
-type BuildOptsProvider interface {
-	BuildOpts() *types.BuildOpts
-}
-
-type OsInfoProvider interface {
-	OSRelease() *distro.OSRelease
-}
-
-type PkgFormatProvider interface {
-	PkgFormat() string
-}
-
-type RepositoryProvider interface {
-	Repository() string
-}
-
 // ================================================
 
-func Map[T, R any](items []T, f func(T) R) []R {
-	res := make([]R, len(items))
-	for i, item := range items {
-		res[i] = f(item)
-	}
-	return res
-}
-
-func GetBuiltPaths(deps []*BuiltDep) []string {
-	return Map(deps, func(dep *BuiltDep) string {
+func GetBuiltPaths(deps []*commonbuild.BuiltDep) []string {
+	return scripter.Map(deps, func(dep *commonbuild.BuiltDep) string {
 		return dep.Path
-	})
-}
-
-func GetBuiltName(deps []*BuiltDep) []string {
-	return Map(deps, func(dep *BuiltDep) string {
-		return dep.Name
 	})
 }
 
@@ -163,35 +51,9 @@ type PackageFinder interface {
 	FindPkgs(ctx context.Context, pkgs []string) (map[string][]staplerfile.Package, []string, error)
 }
 
-type Config interface {
-	GetPaths() *config.Paths
-	PagerStyle() string
-}
-
-type BuiltDep struct {
-	Name string
-	Path string
-}
-
-type OSReleaser interface {
-	OSRelease() *distro.OSRelease
-}
-
-type PkgFormatter interface {
-	PkgFormat() string
-}
-
-type RepositoryGetter interface {
-	Repository() string
-}
-
 type SourcesInput struct {
 	Sources   []string
 	Checksums []string
-}
-
-type FunctionsOutput struct {
-	Contents *[]string
 }
 
 type BuildArgs struct {
@@ -227,10 +89,10 @@ type BuildPackageFromScriptArgs struct {
 func (b *Builder) BuildPackageFromDb(
 	ctx context.Context,
 	args *BuildPackageFromDbArgs,
-) ([]*BuiltDep, error) {
+) ([]*commonbuild.BuiltDep, error) {
 	scriptInfo := b.scriptResolver.ResolveScript(ctx, args.Package)
 
-	return b.BuildPackage(ctx, &BuildInput{
+	return b.BuildPackage(ctx, &commonbuild.BuildInput{
 		Script:      scriptInfo.Script,
 		Repository_: scriptInfo.Repository,
 		Packages_:   args.Packages,
@@ -243,8 +105,8 @@ func (b *Builder) BuildPackageFromDb(
 func (b *Builder) BuildPackageFromScript(
 	ctx context.Context,
 	args *BuildPackageFromScriptArgs,
-) ([]*BuiltDep, error) {
-	return b.BuildPackage(ctx, &BuildInput{
+) ([]*commonbuild.BuiltDep, error) {
+	return b.BuildPackage(ctx, &commonbuild.BuildInput{
 		Script:      args.Script,
 		Repository_: "default",
 		Packages_:   args.Packages,
@@ -301,7 +163,7 @@ func (i *Builder) InstallPkgs(
 	ctx context.Context,
 	input InstallInput,
 	pkgs []string,
-) ([]*BuiltDep, error) {
+) ([]*commonbuild.BuiltDep, error) {
 	builtDeps, repoDeps, err := i.BuildALRDeps(ctx, input, pkgs)
 	if err != nil {
 		return nil, err
@@ -328,7 +190,7 @@ func (i *Builder) InstallPkgs(
 	return builtDeps, nil
 }
 
-func (b *Builder) BuildALRDeps(ctx context.Context, input InstallInput, depends []string) (buildDeps []*BuiltDep, repoDeps []string, err error) {
+func (b *Builder) BuildALRDeps(ctx context.Context, input InstallInput, depends []string) (buildDeps []*commonbuild.BuiltDep, repoDeps []string, err error) {
 	if len(depends) > 0 {
 		b.out.Info(gotext.Get("Installing dependencies"))
 		// slog.Info(gotext.Get("Installing dependencies"))
@@ -339,7 +201,7 @@ func (b *Builder) BuildALRDeps(ctx context.Context, input InstallInput, depends 
 		}
 		repoDeps = notFound
 
-		pkgs := cliutils.FlattenPkgs(
+		pkgs := cliprompts.FlattenPkgs(
 			ctx,
 			found,
 			"install",

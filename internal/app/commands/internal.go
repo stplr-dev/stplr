@@ -25,206 +25,18 @@ package commands
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"os"
 	"os/exec"
-	"os/user"
 	"syscall"
 
-	"github.com/hashicorp/go-hclog"
-	"github.com/hashicorp/go-plugin"
-	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
-	"go.stplr.dev/stplr/internal/app/output"
-	"go.stplr.dev/stplr/internal/build"
-	"go.stplr.dev/stplr/internal/cliutils"
-	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
-	"go.stplr.dev/stplr/internal/config"
-	"go.stplr.dev/stplr/internal/logger"
-	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/internal/app/deps"
+
+	"go.stplr.dev/stplr/internal/plugins"
 	"go.stplr.dev/stplr/internal/sandbox"
 	"go.stplr.dev/stplr/internal/utils"
 )
-
-func InternalBuildCmd() *cli.Command {
-	return &cli.Command{
-		Name:     "_internal-safe-script-executor",
-		HideHelp: true,
-		Hidden:   true,
-		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name: "user-mode",
-			},
-		},
-		Action: func(ctx context.Context, c *cli.Command) error {
-			cfg := config.New()
-			err := cfg.Load()
-			if err != nil {
-				return cliutils.FormatCliExit(gotext.Get("Error loading config"), err)
-			}
-
-			slog.Debug("start _internal-safe-script-executor", "uid", syscall.Getuid(), "gid", syscall.Getgid())
-
-			if utils.IsRoot() {
-				if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
-					return err
-				}
-			} else {
-				u, err := user.Current()
-				if err != nil {
-					return err
-				}
-				uid, gid, err := utils.GetUidGidBuilderUserString()
-				if err != nil {
-					return err
-				}
-				// If we are in usermode (non builder user)
-				if u.Uid != uid || u.Gid != gid {
-					err = config.PatchToUserDirs(cfg)
-					if err != nil {
-						return err
-					}
-				}
-			}
-
-			out := output.NewPluginOutput()
-
-			logger.SetupForGoPlugin()
-			logger := hclog.New(&hclog.LoggerOptions{
-				Name:        "plugin",
-				Output:      os.Stderr,
-				Level:       hclog.Debug,
-				JSONFormat:  true,
-				DisableTime: true,
-			})
-
-			plugin.Serve(&plugin.ServeConfig{
-				HandshakeConfig: build.HandshakeConfig,
-				Plugins: map[string]plugin.Plugin{
-					"script-executor": &build.ScriptExecutorPlugin{
-						Impl: build.NewLocalScriptExecutor(cfg, out),
-					},
-				},
-				Logger: logger,
-			})
-			return nil
-		},
-	}
-}
-
-func InternalReposCmd() *cli.Command {
-	return &cli.Command{
-		Name:     "_internal-repos",
-		HideHelp: true,
-		Hidden:   true,
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
-			logger.SetupForGoPlugin()
-
-			if err := utils.ExitIfCantDropCapsToBuilderUser(); err != nil {
-				return err
-			}
-
-			deps, err := appbuilder.
-				New(ctx).
-				WithConfig().
-				WithDB().
-				WithReposNoPull().
-				Build()
-			if err != nil {
-				return err
-			}
-			defer deps.Defer()
-
-			pluginCfg := build.GetPluginServeCommonConfig()
-			pluginCfg.Plugins = map[string]plugin.Plugin{
-				"repos": &build.ReposExecutorPlugin{
-					Impl: build.NewRepos(
-						deps.Repos,
-					),
-				},
-			}
-			plugin.Serve(pluginCfg)
-			return nil
-		}),
-	}
-}
-
-func InternalInstallCmd() *cli.Command {
-	return &cli.Command{
-		Name:     "_internal-installer",
-		HideHelp: true,
-		Hidden:   true,
-		Action: func(ctx context.Context, c *cli.Command) error {
-			needRootCmd := utils.IsNotRoot()
-
-			logger.SetupForGoPlugin()
-
-			deps, err := appbuilder.
-				New(ctx).
-				WithConfig().
-				WithDB().
-				WithReposNoPull().
-				Build()
-			if err != nil {
-				return err
-			}
-			defer deps.Defer()
-
-			logger := hclog.New(&hclog.LoggerOptions{
-				Name:        "plugin",
-				Output:      os.Stderr,
-				Level:       hclog.Trace,
-				JSONFormat:  true,
-				DisableTime: true,
-			})
-
-			plugin.Serve(&plugin.ServeConfig{
-				HandshakeConfig: build.HandshakeConfig,
-				Plugins: map[string]plugin.Plugin{
-					"installer": &build.InstallerExecutorPlugin{
-						Impl: build.NewInstaller(
-							manager.Detect(),
-							needRootCmd,
-							deps.Cfg.RootCmd(),
-						),
-					},
-				},
-				Logger: logger,
-			})
-			return nil
-		},
-	}
-}
-
-func InternalCoplyFiles() *cli.Command {
-	return &cli.Command{
-		Name:     "_internal-script-copier",
-		HideHelp: true,
-		Hidden:   true,
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
-			logger.SetupForGoPlugin()
-			logger := hclog.New(&hclog.LoggerOptions{
-				Name:        "plugin",
-				Output:      os.Stderr,
-				Level:       hclog.Trace,
-				JSONFormat:  true,
-				DisableTime: true,
-			})
-			plugin.Serve(&plugin.ServeConfig{
-				HandshakeConfig: build.HandshakeConfig,
-				Plugins: map[string]plugin.Plugin{
-					"script-copier": &build.ScriptCopierPlugin{
-						Impl: build.NewLocalScriptCopierExecutor(),
-					},
-				},
-				Logger: logger,
-			})
-
-			return nil
-		}),
-	}
-}
 
 func InternalSandbox() *cli.Command {
 	return &cli.Command{
@@ -261,6 +73,42 @@ func InternalSandbox() *cli.Command {
 				Cloneflags: syscall.CLONE_NEWUSER | syscall.CLONE_NEWNS | syscall.CLONE_NEWPID | syscall.CLONE_NEWIPC,
 			}
 			return cmd.Run()
+		},
+	}
+}
+
+func InternalPluginProvider() *cli.Command {
+	return &cli.Command{
+		Name:     plugins.ProviderSubcommand,
+		HideHelp: true,
+		Hidden:   true,
+		Action: func(ctx context.Context, c *cli.Command) error {
+			d, f, err := deps.ForPluginsServe(ctx)
+			if err != nil {
+				return err
+			}
+			defer f()
+			return plugins.Serve(plugins.PluginMap(d.Puller, d.Scripter))
+		},
+	}
+}
+
+func InternalPluginProviderRoot() *cli.Command {
+	return &cli.Command{
+		Name:     plugins.RootProviderSubcommand,
+		HideHelp: true,
+		Hidden:   true,
+		Action: func(ctx context.Context, c *cli.Command) error {
+			d, f, err := deps.ForPluginsServeRoot(ctx)
+			if err != nil {
+				return err
+			}
+			defer f()
+			return plugins.Serve(plugins.RootPluginMap(
+				d.Installer,
+				d.Copier,
+				d.SystemConfigWriter,
+			))
 		},
 	}
 }

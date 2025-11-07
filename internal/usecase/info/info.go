@@ -31,7 +31,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
-	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/cliprompts"
 	"go.stplr.dev/stplr/internal/overrides"
 	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/staplerfile"
@@ -74,7 +74,7 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		return errors.WrapIntoI18nError(ErrPackageNotFound, gotext.Get("Package not found"))
 	}
 
-	pkgs := cliutils.FlattenPkgs(ctx, found, "show", opts.Interactive)
+	pkgs := cliprompts.FlattenPkgs(ctx, found, "show", opts.Interactive)
 
 	systemLang, err := locale.GetLanguage()
 	if err != nil {

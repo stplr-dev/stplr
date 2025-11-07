@@ -32,16 +32,17 @@ import (
 
 	"go.stplr.dev/stplr/internal/app/deps"
 	"go.stplr.dev/stplr/internal/app/output"
+	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/cliutils2"
 	"go.stplr.dev/stplr/internal/usecase/fix"
-	"go.stplr.dev/stplr/internal/utils"
 )
 
 func FixCmd() *cli.Command {
 	return &cli.Command{
 		Name:  "fix",
 		Usage: gotext.Get("Attempt to fix problems with Stapler"),
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
-			if err := utils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
+		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+			if err := cliutils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
 				return err
 			}
 

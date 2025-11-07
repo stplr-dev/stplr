@@ -21,11 +21,12 @@ package build
 import (
 	"context"
 
+	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
 type ScriptViewerExecutor interface {
-	ViewScript(ctx context.Context, input *BuildInput, sf *staplerfile.ScriptFile, basePkg string) error
+	ViewScript(ctx context.Context, input *commonbuild.BuildInput, sf *staplerfile.ScriptFile, basePkg string) error
 }
 
 type scriptViewStep struct {

@@ -32,8 +32,8 @@ import (
 
 	"go.stplr.dev/stplr/internal/app/deps"
 	"go.stplr.dev/stplr/internal/app/output"
+	"go.stplr.dev/stplr/internal/cliutils2"
 	"go.stplr.dev/stplr/internal/usecase/upgrade"
-	"go.stplr.dev/stplr/internal/utils"
 )
 
 func UpgradeCmd() *cli.Command {
@@ -48,7 +48,7 @@ func UpgradeCmd() *cli.Command {
 				Usage:   gotext.Get("Build package from scratch even if there's an already built package available"),
 			},
 		},
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			d, f, err := deps.ForUpgradeAction(ctx)
 			if err != nil {
 				return err

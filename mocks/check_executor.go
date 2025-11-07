@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	build "go.stplr.dev/stplr/internal/build"
+	commonbuild "go.stplr.dev/stplr/internal/commonbuild"
 	staplerfile "go.stplr.dev/stplr/pkg/staplerfile"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -81,7 +81,7 @@ func (m *MockChecksExecutor) EXPECT() *MockChecksExecutorMockRecorder {
 }
 
 // RunChecks mocks base method.
-func (m *MockChecksExecutor) RunChecks(ctx context.Context, pkg *staplerfile.Package, input *build.BuildInput) (bool, error) {
+func (m *MockChecksExecutor) RunChecks(ctx context.Context, pkg *staplerfile.Package, input *commonbuild.BuildInput) (bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RunChecks", ctx, pkg, input)
 	ret0, _ := ret[0].(bool)

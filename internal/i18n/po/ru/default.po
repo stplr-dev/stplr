@@ -13,30 +13,30 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 5.13.3\n"
 
-#: cmd/stplr/main.go:72
+#: cmd/stplr/main.go:70
 msgid ""
 "Command-line interface for Stapler, a universal Linux package build system"
 msgstr ""
 "Интерфейс командной строки для Stapler, универсальной системы сборки пакетов "
 "Linux"
 
-#: cmd/stplr/main.go:77
+#: cmd/stplr/main.go:75
 msgid "Arguments to be passed on to the package manager"
 msgstr "Аргументы, которые будут переданы менеджеру пакетов"
 
-#: cmd/stplr/main.go:83
+#: cmd/stplr/main.go:81
 msgid "Enable interactive questions and prompts"
 msgstr "Включение интерактивных вопросов и запросов"
 
-#: cmd/stplr/main.go:136
+#: cmd/stplr/main.go:134
 msgid "Error loading config"
 msgstr "Ошибка при загрузке"
 
-#: cmd/stplr/main.go:143
+#: cmd/stplr/main.go:141
 msgid "Error while running app"
 msgstr "Ошибка при запуске приложения"
 
@@ -65,31 +65,35 @@ msgstr "Создайте пакет с нуля, даже если уже име
 msgid "Do not add suffix to package name"
 msgstr "Не добавлять суффикс к имени пакета"
 
-#: internal/app/commands/config.go:43
+#: internal/app/commands/config.go:45
 msgid "Manage config"
 msgstr "Управление конфигурацией"
 
-#: internal/app/commands/config.go:55
+#: internal/app/commands/config.go:57
 msgid "Show config"
 msgstr "Показать конфигурацию"
 
-#: internal/app/commands/config.go:81
+#: internal/app/commands/config.go:83
 msgid "Set config value"
 msgstr "Установить значение в конфигурации"
 
-#: internal/app/commands/config.go:82
+#: internal/app/commands/config.go:84
 msgid "<key> <value>"
 msgstr "<ключ> <значение>"
 
-#: internal/app/commands/config.go:112
+#: internal/app/commands/config.go:103
+msgid "use 'repo add/remove' commands to manage repositories"
+msgstr "используйте команды 'repo add/remove' для управления репозиториями"
+
+#: internal/app/commands/config.go:122
 msgid "Get config value"
 msgstr "Получить значение из конфигурации"
 
-#: internal/app/commands/config.go:113
+#: internal/app/commands/config.go:123
 msgid "<key>"
 msgstr "<ключ>"
 
-#: internal/app/commands/fix.go:42
+#: internal/app/commands/fix.go:43
 msgid "Attempt to fix problems with Stapler"
 msgstr "Попытка устранить проблемы с Stapler"
 
@@ -117,15 +121,15 @@ msgstr "Ошибка при получении рабочего каталога
 msgid "Error parsing os-release file"
 msgstr "Ошибка при разборе файла выпуска операционной системы"
 
-#: internal/app/commands/info.go:43
+#: internal/app/commands/info.go:42
 msgid "Print information about a package"
 msgstr "Отобразить информацию о пакете"
 
-#: internal/app/commands/info.go:48
+#: internal/app/commands/info.go:47
 msgid "Show all information, not just for the current distro"
 msgstr "Показывать всю информацию, не только для текущего дистрибутива"
 
-#: internal/app/commands/info.go:67
+#: internal/app/commands/info.go:66
 msgid "Command info expected at least 1 argument, got %d"
 msgstr "Для команды info ожидался хотя бы 1 аргумент, получено %d"
 
@@ -137,15 +141,15 @@ msgstr "Для команды remove ожидался хотя бы 1 аргум
 msgid "Install a new package"
 msgstr "Установить новый пакет"
 
-#: internal/app/commands/list.go:42
+#: internal/app/commands/list.go:43
 msgid "List Stapler repo packages"
 msgstr "Список пакетов репозитория Stapler"
 
-#: internal/app/commands/list.go:56
+#: internal/app/commands/list.go:57
 msgid "Format output using a Go template"
 msgstr "Формат выходных данных с использованием шаблона Go"
 
-#: internal/app/commands/refresh.go:38
+#: internal/app/commands/refresh.go:39
 msgid "Pull all repositories that have changed"
 msgstr "Скачать все изменённые репозитории"
 
@@ -153,59 +157,59 @@ msgstr "Скачать все изменённые репозитории"
 msgid "Remove an installed package"
 msgstr "Удалить установленный пакет"
 
-#: internal/app/commands/repo.go:49
+#: internal/app/commands/repo.go:64
 msgid "Manage repos"
 msgstr "Управление репозиториями"
 
-#: internal/app/commands/repo.go:63
+#: internal/app/commands/repo.go:78
 msgid "Remove an existing repository"
 msgstr "Удалить существующий репозиторий"
 
-#: internal/app/commands/repo.go:65
+#: internal/app/commands/repo.go:80
 msgid "<name>"
 msgstr "<имя>"
 
-#: internal/app/commands/repo.go:99
+#: internal/app/commands/repo.go:101
 msgid "Add a new repository"
 msgstr "Добавить новый репозиторий"
 
-#: internal/app/commands/repo.go:100 internal/app/commands/repo.go:164
+#: internal/app/commands/repo.go:102 internal/app/commands/repo.go:153
 msgid "<name> <url>"
 msgstr "<имя> <url>"
 
-#: internal/app/commands/repo.go:123
+#: internal/app/commands/repo.go:125
 msgid "Set the reference of the repository"
 msgstr "Установить ссылку на версию репозитория"
 
-#: internal/app/commands/repo.go:124
+#: internal/app/commands/repo.go:126
 msgid "<name> <ref>"
 msgstr "<имя> <ссылка_на_версию>"
 
-#: internal/app/commands/repo.go:163
+#: internal/app/commands/repo.go:152
 msgid "Set the main url of the repository"
 msgstr "Установить главный URL репозитория"
 
-#: internal/app/commands/repo_mirror.go:39
+#: internal/app/commands/repo_mirror.go:37
 msgid "Manage mirrors of repos"
 msgstr "Управление зеркалами репозитория"
 
-#: internal/app/commands/repo_mirror.go:51
+#: internal/app/commands/repo_mirror.go:49
 msgid "Add a mirror URL to repository"
 msgstr "Добавить зеркало репозитория"
 
-#: internal/app/commands/repo_mirror.go:89
+#: internal/app/commands/repo_mirror.go:75
 msgid "Remove mirror from the repository"
 msgstr "Удалить зеркало из репозитория"
 
-#: internal/app/commands/repo_mirror.go:107
+#: internal/app/commands/repo_mirror.go:81
 msgid "Ignore if mirror does not exist"
 msgstr "Игнорировать, если зеркала не существует"
 
-#: internal/app/commands/repo_mirror.go:112
+#: internal/app/commands/repo_mirror.go:86
 msgid "Match partial URL (e.g., github.com instead of full URL)"
 msgstr "Соответствует частичному URL (например, github.com вместо полного URL)"
 
-#: internal/app/commands/repo_mirror.go:140
+#: internal/app/commands/repo_mirror.go:114
 msgid "Remove all mirrors from the repository"
 msgstr "Удалить все зеркала из репозитория"
 
@@ -237,11 +241,16 @@ msgstr "Обновить все установленные пакеты"
 msgid "Print the current Stapler version and exit"
 msgstr "Показать текущую версию Stapler и выйти"
 
-#: internal/app/deps/internal/builder/builder.go:103
+#: internal/app/deps/internal/builder/builder.go:110
+#, fuzzy
+msgid "Failed to get working directory"
+msgstr "Ошибка при получении рабочего каталога"
+
+#: internal/app/deps/internal/builder/builder.go:160
 msgid "Unable to detect a supported package manager on the system"
 msgstr "Не удалось обнаружить поддерживаемый менеджер пакетов в системе"
 
-#: internal/app/deps/internal/builder/builder.go:122
+#: internal/app/deps/internal/builder/builder.go:179
 msgid "Error initialization database"
 msgstr "Ошибка инициализации базы данных"
 
@@ -269,15 +278,15 @@ msgstr "СОГЛАШЕНИЕ О НЕСВОБОДНОМ ПО"
 msgid "Full license available at: %s"
 msgstr "Полный текст лицензии доступен по адресу: %s"
 
-#: internal/build/build.go:333
+#: internal/build/build.go:195
 msgid "Installing dependencies"
 msgstr "Установка зависимостей"
 
-#: internal/build/check_executor.go:54
+#: internal/build/check_executor.go:56
 msgid "Your settings do not allow SKIP in checksums"
 msgstr "Ваши настройки не позволяют использовать SKIP в контрольных суммах"
 
-#: internal/build/check_executor.go:61
+#: internal/build/check_executor.go:63
 msgid ""
 "Your system's CPU architecture doesn't match this package. Do you want to "
 "build anyway?"
@@ -285,21 +294,9 @@ msgstr ""
 "Архитектура процессора вашей системы не соответствует этому пакету. Вы все "
 "равно хотите выполнить сборку?"
 
-#: internal/build/check_executor.go:84
+#: internal/build/check_executor.go:86
 msgid "This package is already installed"
 msgstr "Этот пакет уже установлен"
-
-#: internal/build/firejail.go:153
-msgid "Applying FireJail integration for %s package"
-msgstr "Применение интеграции FireJail для пакета %s"
-
-#: internal/build/script_executor.go:183
-msgid "Building metadata for package %q"
-msgstr "Сборка метаданных пакета %q"
-
-#: internal/build/script_executor.go:368 internal/build/script_executor.go:424
-msgid "Executing %s()"
-msgstr "Выполнение %s()"
 
 #: internal/build/step_checks.go:42
 msgid "Building the %q package"
@@ -309,24 +306,51 @@ msgstr "Сборка пакета %q"
 msgid "The checksums array must be the same length as sources"
 msgstr "Массив контрольных сумм должен быть той же длины, что и источники"
 
-#: internal/build/step_nonfree_view.go:102
+#: internal/build/step_nonfree_view.go:103
 msgid ""
 "This package contains non-free software that requires license acceptance."
 msgstr ""
 "Этот пакет содержит несвободное программное обеспечение, которое требует "
 "принятия лицензии."
 
-#: internal/build/step_post.go:49
+#: internal/build/step_post.go:51
 msgid "Would you like to remove the build dependencies?"
 msgstr "Хотели бы вы удалить зависимости сборки?"
 
-#: internal/build/step_prepare.go:55
+#: internal/build/step_prepare.go:56
 msgid "Downloading sources"
 msgstr "Скачивание источников"
 
-#: internal/cliutils/app_builder/builder.go:161
-msgid "Error pulling repositories"
-msgstr "Ошибка при извлечении репозиториев"
+#: internal/cliprompts/prompt.go:69
+msgid "Would you like to view the build script for %s"
+msgstr "Показать скрипт для пакета %s"
+
+#: internal/cliprompts/prompt.go:80
+msgid "Would you still like to continue?"
+msgstr "Продолжить?"
+
+#: internal/cliprompts/prompt.go:119
+msgid "Error prompting for choice of package"
+msgstr "Ошибка при запросе выбора пакета"
+
+#: internal/cliprompts/prompt.go:143
+msgid "Choose which package to %s"
+msgstr "Выберите, какой пакет использовать для %s"
+
+#: internal/cliprompts/prompt.go:164
+msgid "Choose which optional package to install"
+msgid_plural "Choose which optional packages to install"
+msgstr[0] "Выберите, какой дополнительный пакет следует установить"
+msgstr[1] "Выберите, какие дополнительные пакеты следует установить"
+msgstr[2] "Выберите, какие дополнительные пакеты следует установить"
+
+#: internal/cliutils/cli.go:53
+msgid "Error on dropping capabilities"
+msgstr "Ошибка при понижении привилегий"
+
+#: internal/cliutils/cli.go:122
+msgid "You need to be a %s member or root to perform this action"
+msgstr "Вы должны быть членом %s или root чтобы выполнить это"
 
 #: internal/cliutils/localize.go:32
 msgid "Shows a list of commands or help for one command"
@@ -335,29 +359,6 @@ msgstr "Показывает список команд или справку п�
 #: internal/cliutils/localize.go:33
 msgid "Show help"
 msgstr "Показать справку"
-
-#: internal/cliutils/prompt.go:69
-msgid "Would you like to view the build script for %s"
-msgstr "Показать скрипт для пакета %s"
-
-#: internal/cliutils/prompt.go:80
-msgid "Would you still like to continue?"
-msgstr "Продолжить?"
-
-#: internal/cliutils/prompt.go:119
-msgid "Error prompting for choice of package"
-msgstr "Ошибка при запросе выбора пакета"
-
-#: internal/cliutils/prompt.go:143
-msgid "Choose which package to %s"
-msgstr "Выберите, какой пакет использовать для %s"
-
-#: internal/cliutils/prompt.go:164
-msgid "Choose which optional package to install"
-msgid_plural "Choose which optional packages to install"
-msgstr[0] "Выберите, какой дополнительный пакет следует установить"
-msgstr[1] "Выберите, какие дополнительные пакеты следует установить"
-msgstr[2] "Выберите, какие дополнительные пакеты следует установить"
 
 #: internal/cliutils/template.go:80 internal/cliutils/template.go:99
 #: internal/cliutils/template.go:126
@@ -457,6 +458,18 @@ msgstr ""
 "Эта команда устарела и будет удалена в будущем, используйте вместо нее \"%s"
 "\"!"
 
+#: internal/cliutils2/cli.go:58
+msgid "You need to be root to perform this action"
+msgstr "Вы должны быть root чтобы выполнить это"
+
+#: internal/cliutils2/cli.go:66
+msgid "This action requires elevated privileges."
+msgstr "Это действие требует повышенных привилегий."
+
+#: internal/cliutils2/cli.go:67
+msgid "Attempting to run as root using '%s'..."
+msgstr "Попытка запустить от имени root с использованием '%s'..."
+
 #: internal/db/db.go:82
 msgid "Database version mismatch; resetting"
 msgstr "Несоответствие версий базы данных; сброс настроек"
@@ -468,24 +481,20 @@ msgstr ""
 "Версия базы данных не существует. Запустите stplr fix, если что-то не "
 "работает."
 
-#: internal/repos/pull.go:121
-msgid "Pulling repository %s from %s..."
-msgstr "Скачивание репозитория %s из %s..."
+#: internal/scripter/firejail.go:153
+#, fuzzy
+msgid "Applying FireJail integration for %q package"
+msgstr "Применение интеграции FireJail для пакета %s"
 
-#: internal/repos/pull.go:123
-msgid "Trying mirror %d: %s"
-msgstr "Пробую зеркало %d: %s"
+#: internal/scripter/scripter.go:185
+msgid "Building metadata for package %q"
+msgstr "Сборка метаданных пакета %q"
 
-#: internal/repos/pull.go:130
-msgid "Failed to pull from %s: %v"
-msgstr "Не удалось извлечь из %s: %v"
+#: internal/scripter/scripter.go:370 internal/scripter/scripter.go:426
+msgid "Executing %s()"
+msgstr "Выполнение %s()"
 
-#: internal/repos/pull.go:185
-msgid "Git repository %q does not appear to be a valid Stapler repo"
-msgstr ""
-"Репозиторий Git %q, похоже, не является корректным репозиторием Stapler"
-
-#: internal/repos/pull.go:234
+#: internal/service/repos/internal/puller/puller.go:236
 msgid ""
 "Stapler repo's minimum Stapler version is greater than the current version. "
 "Try updating Stapler if something doesn't work."
@@ -493,71 +502,62 @@ msgstr ""
 "Минимальная версия Stapler для репозитория выше текущей версии. Попробуйте "
 "обновить Stapler, если что-то не работает."
 
-#: internal/repos/tui_pull.go:183
+#: internal/service/repos/repos.go:111
+msgid "Error pulling repositories"
+msgstr "Ошибка при извлечении репозиториев"
+
+#: internal/service/repos/tui_pull.go:189
+#: internal/service/repos/tui_pull.go:243
 msgid "Pull %s"
 msgstr "Получение %s"
 
-#: internal/repos/tui_pull.go:204
+#: internal/service/repos/tui_pull.go:245
+msgid "Trying mirror %d: %s"
+msgstr "Пробую зеркало %d: %s"
+
+#: internal/service/repos/tui_pull.go:251
 msgid "- Failed to pull from %s: %v"
 msgstr "- Не удалось извлечь из %s: %v"
 
-#: internal/repos/tui_pull.go:214
-msgid "🞮 Failed to pull — the only source is unavailable"
-msgstr "🞮 Не удалось выполнить запрос — единственный источник недоступен"
-
-#: internal/repos/tui_pull.go:219
+#: internal/service/repos/tui_pull.go:258
 msgid "- Pulled from %s"
 msgstr "- Получено из %s"
 
-#: internal/repos/tui_pull.go:222
+#: internal/service/repos/tui_pull.go:261
 msgid "✔ Repository pulled successfully!"
 msgstr "✔ Репозиторий успешно извлечен!"
 
-#: internal/repos/tui_pull.go:236
+#: internal/service/repos/tui_pull.go:266
+msgid "🞮 Failed to pull — the only source is unavailable"
+msgstr "🞮 Не удалось выполнить запрос — единственный источник недоступен"
+
+#: internal/service/repos/tui_pull.go:279
 msgid "Pulling %s..."
 msgstr "Вытягивание %s..."
 
-#: internal/service/repos/repos.go:87
-msgid "Error saving config"
-msgstr "Ошибка при сохранении конфигурации"
-
-#: internal/usecase/build/build.go:60
-msgid "Nothing to build"
-msgstr "Нечего собирать"
-
-#: internal/usecase/build/build.go:74
-msgid "Error building package"
-msgstr "Ошибка при сборке пакета"
-
-#: internal/usecase/build/build.go:78
-msgid "Done"
-msgstr "Сделано"
-
-#: internal/usecase/build/steps.go:86
-msgid "Your settings do not allow build command"
-msgstr "Ваши настройки не позволяют использовать команду build"
-
-#: internal/usecase/build/steps.go:278
+#: internal/usecase/build/build.go:114
 msgid "Error moving the package"
 msgstr "Ошибка при перемещении пакета"
+
+#: internal/usecase/build/build.go:122
+msgid "Your settings do not allow build command"
+msgstr "Ваши настройки не позволяют использовать команду build"
 
 #: internal/usecase/config/get/get.go:82
 msgid "unknown config key: %s"
 msgstr "неизвестный ключ конфигурации: %s"
 
-#: internal/usecase/config/set/set.go:77
-msgid "use 'repo add/remove' commands to manage repositories"
-msgstr "используйте команды 'repo add/remove' для управления репозиториями"
-
-#: internal/usecase/config/set/set.go:85
-msgid "invalid boolean value for %s: %s"
+#: internal/usecase/config/set/set.go:58
+#, fuzzy
+msgid "invalid value for %s: %v"
 msgstr "неверное булево значение для %s: %s"
 
-#: internal/usecase/config/set/set.go:94
-msgid "failed to save config"
+#: internal/usecase/config/set/set.go:62
+#, fuzzy
+msgid "failed to save config: %v"
 msgstr "не удалось сохранить конфигурацию"
 
-#: internal/usecase/config/set/set.go:97
+#: internal/usecase/config/set/set.go:65
 msgid "Successfully set %s = %s"
 msgstr "Успешно установлено %s = %s"
 
@@ -585,6 +585,10 @@ msgstr "Восстановление кэша"
 msgid "Unable to create new cache directory"
 msgstr "Не удалось создать новый каталог кэша"
 
+#: internal/usecase/fix/fix.go:108
+msgid "Done"
+msgstr "Сделано"
+
 #: internal/usecase/info/info.go:70
 msgid "Error finding packages"
 msgstr "Ошибка при поиске пакетов"
@@ -609,15 +613,15 @@ msgstr "Ошибка кодирования переменных скрита"
 msgid "Error getting packages"
 msgstr "Ошибка при получении пакетов"
 
-#: internal/usecase/install/action/install.go:74
+#: internal/usecase/install/action/install.go:75
 msgid "License agreement was declined"
 msgstr "Лицензионное соглашение было отклонено"
 
-#: internal/usecase/install/action/install.go:77
+#: internal/usecase/install/action/install.go:78
 msgid "User chose not to continue after reading script"
 msgstr "Пользователь решил не продолжать после просмотра скрипта"
 
-#: internal/usecase/install/action/install.go:80
+#: internal/usecase/install/action/install.go:81
 msgid "Error when installing the package"
 msgstr "Ошибка при установке пакета"
 
@@ -649,9 +653,13 @@ msgstr "Ошибка при составлении списка установл
 msgid "Error removing packages"
 msgstr "Ошибка при удалении пакетов"
 
-#: internal/usecase/repo/add/add.go:49
+#: internal/usecase/repo/add/add.go:65
 msgid "Repo \"%s\" already exists"
 msgstr "Репозиторий \"%s\" уже существует"
+
+#: internal/usecase/repo/add/add.go:83
+msgid "Error saving config"
+msgstr "Ошибка при сохранении конфигурации"
 
 #: internal/usecase/repo/mirrors/remove/remove.go:111
 msgid "No mirrors containing \"%s\" found in repo \"%s\""
@@ -669,11 +677,11 @@ msgstr "Удалены зеркала %d из репозитория \"%s\"\n"
 msgid "Repo \"%s\" does not exist"
 msgstr "Репозитория \"%s\" не существует"
 
-#: internal/usecase/repo/remove/remove.go:71
+#: internal/usecase/repo/remove/remove.go:75
 msgid "Error removing repo directory"
 msgstr "Ошибка при удалении каталога репозитория"
 
-#: internal/usecase/repo/remove/remove.go:84
+#: internal/usecase/repo/remove/remove.go:88
 msgid "Error removing packages from database"
 msgstr "Ошибка при удалении пакетов из базы данных"
 
@@ -689,26 +697,6 @@ msgstr "Ошибка при проверке обновлений"
 #: internal/usecase/upgrade/upgrade.go:95
 msgid "There is nothing to do."
 msgstr "Здесь нечего делать."
-
-#: internal/utils/cmd.go:107
-msgid "Error on dropping capabilities"
-msgstr "Ошибка при понижении привилегий"
-
-#: internal/utils/cmd.go:214
-msgid "You need to be a %s member or root to perform this action"
-msgstr "Вы должны быть членом %s или root чтобы выполнить это"
-
-#: internal/utils/cmd.go:260
-msgid "You need to be root to perform this action"
-msgstr "Вы должны быть root чтобы выполнить это"
-
-#: internal/utils/cmd.go:268
-msgid "This action requires elevated privileges."
-msgstr "Это действие требует повышенных привилегий."
-
-#: internal/utils/cmd.go:269
-msgid "Attempting to run as root using '%s'..."
-msgstr "Попытка запустить от имени root с использованием '%s'..."
 
 #: pkg/dl/dl.go:224
 msgid "Source %q can be updated using %s — updating if required"
@@ -752,6 +740,22 @@ msgstr "Найдена требуемая зависимость: %s"
 #: pkg/reqprov/rpm/altlinux.go:69
 msgid "Command %q not found on the system"
 msgstr "Команда %q не найдена в системе"
+
+#~ msgid "Nothing to build"
+#~ msgstr "Нечего собирать"
+
+#~ msgid "Error building package"
+#~ msgstr "Ошибка при сборке пакета"
+
+#~ msgid "Pulling repository %s from %s..."
+#~ msgstr "Скачивание репозитория %s из %s..."
+
+#~ msgid "Failed to pull from %s: %v"
+#~ msgstr "Не удалось извлечь из %s: %v"
+
+#~ msgid "Git repository %q does not appear to be a valid Stapler repo"
+#~ msgstr ""
+#~ "Репозиторий Git %q, похоже, не является корректным репозиторием Stapler"
 
 #~ msgid "Building package metadata"
 #~ msgstr "Сборка метаданных пакета"

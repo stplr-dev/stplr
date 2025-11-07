@@ -25,7 +25,8 @@ package build
 import (
 	"context"
 
-	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/cliprompts"
+	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
@@ -45,11 +46,11 @@ func NewScriptViewer(cfg ScriptViewerConfig) *ScriptViewer {
 
 func (s *ScriptViewer) ViewScript(
 	ctx context.Context,
-	input *BuildInput,
+	input *commonbuild.BuildInput,
 	f *staplerfile.ScriptFile,
 	basePkg string,
 ) error {
-	return cliutils.PromptViewScript(
+	return cliprompts.PromptViewScript(
 		ctx,
 		f.Path(),
 		basePkg,

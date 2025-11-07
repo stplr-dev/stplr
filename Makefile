@@ -125,8 +125,6 @@ update-deps-cve:
 MOCKS_DESTINATION=mocks
 mocks: \
 	internal/usecase/build/steps.go \
-	internal/build/executors_plugins.go \
-	internal/repos/git_manager.go \
 	internal/build/check_executor.go
 	@echo "Generating mocks..."
 	@rm -rf $(MOCKS_DESTINATION)

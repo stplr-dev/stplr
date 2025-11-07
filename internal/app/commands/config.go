@@ -25,16 +25,18 @@ package commands
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app/deps"
+	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/cliutils2"
 	"go.stplr.dev/stplr/internal/usecase/config/get"
 	"go.stplr.dev/stplr/internal/usecase/config/set"
 	"go.stplr.dev/stplr/internal/usecase/config/show"
-	"go.stplr.dev/stplr/internal/utils"
 )
 
 func ConfigCmd() *cli.Command {
@@ -89,17 +91,25 @@ func SetConfig() *cli.Command {
 			}
 			return nil
 		}),
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() < 2 {
 				return cliutils.FormatCliExit("missing args", nil)
 			}
-			d, f, err := deps.ForConfigShowAction(ctx)
+
+			field := c.Args().Get(0)
+
+			repoKeys := []string{"repo", "repos"}
+			if slices.Contains(repoKeys, field) {
+				return errors.NewI18nError(gotext.Get("use 'repo add/remove' commands to manage repositories"))
+			}
+
+			d, f, err := deps.ForConfigSetAction(ctx)
 			if err != nil {
 				return err
 			}
 			defer f()
 			return set.New(d.Config).Run(ctx, set.Options{
-				Field: c.Args().Get(0),
+				Field: field,
 				Value: c.Args().Get(1),
 			})
 		}),
@@ -120,7 +130,7 @@ func GetConfig() *cli.Command {
 			}
 			return nil
 		}),
-		Action: utils.ReadonlyAction(func(ctx context.Context, c *cli.Command) error {
+		Action: cliutils2.ReadonlyAction(func(ctx context.Context, c *cli.Command) error {
 			d, f, err := deps.ForConfigGetAction(ctx)
 			if err != nil {
 				return err

@@ -20,16 +20,18 @@ package build
 
 import (
 	"context"
+
+	"go.stplr.dev/stplr/internal/scripter"
 )
 
 type readScriptStep struct {
-	reader ScriptReader
-	parser PackagesParser
+	reader scripter.ScriptReader
+	parser scripter.PackagesParser
 }
 
 func ReadScriptStep(
-	reader ScriptReader,
-	parser PackagesParser,
+	reader scripter.ScriptReader,
+	parser scripter.PackagesParser,
 ) *readScriptStep {
 	return &readScriptStep{
 		reader: reader,

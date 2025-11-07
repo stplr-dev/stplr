@@ -29,14 +29,15 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/tui/pager"
+	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
 var ErrLicenseAgreementWasDeclined = errors.New("license agreement was declined")
 
-type NonFreeViewer struct{ cfg Config }
+type NonFreeViewer struct{ cfg commonbuild.Config }
 
-func NewNonFreeViewer(cfg Config) *NonFreeViewer {
+func NewNonFreeViewer(cfg commonbuild.Config) *NonFreeViewer {
 	return &NonFreeViewer{cfg: cfg}
 }
 

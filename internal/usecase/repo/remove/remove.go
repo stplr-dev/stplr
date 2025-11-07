@@ -28,7 +28,7 @@ import (
 
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/config"
-	"go.stplr.dev/stplr/internal/utils"
+	"go.stplr.dev/stplr/internal/config/common"
 )
 
 type useCase struct {
@@ -64,18 +64,22 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		return cliutils.FormatCliExit(gotext.Get("Repo \"%s\" does not exist", name), nil)
 	}
 
+	// err := u.cfg.SetTo(common.SOURCE_SYSTEM, common.REPOS, slices.Delete(reposSlice, index, index+1))
+	// if err != nil {
+	// 	return err
+	// }
 	u.cfg.SetRepos(slices.Delete(reposSlice, index, index+1))
 
 	err := os.RemoveAll(filepath.Join(u.cfg.GetPaths().RepoDir, name))
 	if err != nil {
 		return cliutils.FormatCliExit(gotext.Get("Error removing repo directory"), err)
 	}
-	err = u.cfg.System.Save()
+	err = u.cfg.Save(common.SOURCE_SYSTEM)
 	if err != nil {
 		return cliutils.FormatCliExit(gotext.Get("Error saving config"), err)
 	}
 
-	if err := utils.ExitIfCantDropCapsToBuilderUser(); err != nil {
+	if err := cliutils.ExitIfCantDropCapsToBuilderUser(); err != nil {
 		return err
 	}
 

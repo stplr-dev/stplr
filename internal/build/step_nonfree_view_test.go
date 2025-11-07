@@ -27,6 +27,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"go.stplr.dev/stplr/internal/build"
+	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
 )
@@ -56,7 +57,7 @@ func TestNonfreeViewStepRun(t *testing.T) {
 		pkg1,
 		pkg2,
 	}
-	state.Input = &build.BuildInput{
+	state.Input = &commonbuild.BuildInput{
 		Opts: &types.BuildOpts{
 			Interactive: true,
 		},

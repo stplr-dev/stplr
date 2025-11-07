@@ -25,14 +25,19 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/goccy/go-yaml"
-	"github.com/knadh/koanf/providers/confmap"
 	"github.com/knadh/koanf/v2"
 
+	"go.stplr.dev/stplr/internal/config/common"
+	"go.stplr.dev/stplr/internal/config/internal/sources"
+	"go.stplr.dev/stplr/internal/config/savers"
 	"go.stplr.dev/stplr/internal/constants"
 	"go.stplr.dev/stplr/pkg/types"
 )
@@ -41,65 +46,57 @@ type ALRConfig struct {
 	cfg   *types.Config
 	paths *Paths
 
-	System *SystemConfig
-	env    *EnvConfig
+	srcs []sources.Source
 }
 
-func New() *ALRConfig {
-	return &ALRConfig{
-		System: NewSystemConfig(),
-		env:    NewEnvConfig(),
+type Option func(*ALRConfig)
+
+func WithSystemConfigWriter(w savers.SystemConfigWriterExecutor) Option {
+	return func(cfg *ALRConfig) {
+		for _, src := range cfg.srcs {
+			if v, ok := src.(*sources.SystemConfig); ok {
+				v.Writer = w
+				return
+			}
+		}
 	}
 }
 
-func defaultConfigKoanf() *koanf.Koanf {
-	k := koanf.New(".")
-	defaults := map[string]interface{}{
-		"rootCmd":          "sudo",
-		"useRootCmd":       true,
-		"pagerStyle":       "native",
-		"ignorePkgUpdates": []string{},
-		"logLevel":         "info",
-		"autoPull":         true,
-		"repos":            []types.Repo{},
+func New(opts ...Option) *ALRConfig {
+	cfg := &ALRConfig{
+		srcs: []sources.Source{
+			sources.NewDefaultConfig(),
+			sources.NewSystemConfig(),
+			sources.NewEnvConfig(),
+		},
 	}
-	if err := k.Load(confmap.Provider(defaults, "."), nil); err != nil {
-		panic(k)
+
+	for _, opt := range opts {
+		opt(cfg)
 	}
-	return k
+
+	return cfg
 }
 
 func (c *ALRConfig) Load() error {
-	config := types.Config{}
-
 	merged := koanf.New(".")
 
-	if err := c.System.Load(); err != nil {
-		return fmt.Errorf("failed to load system config: %w", err)
+	for _, src := range c.srcs {
+		k, err := src.Load()
+		if err != nil {
+			return fmt.Errorf("failed to load %s config: %w", src.Name(), err)
+		}
+		if err := merged.Merge(k); err != nil {
+			return fmt.Errorf("failed to merge %s config: %w", src.Name(), err)
+		}
 	}
 
-	if err := c.env.Load(); err != nil {
-		return fmt.Errorf("failed to load env config: %w", err)
+	cfg := &types.Config{}
+	if err := merged.Unmarshal("", cfg); err != nil {
+		return fmt.Errorf("failed to unmarshal: %w", err)
 	}
 
-	systemK := c.System.koanf()
-	envK := c.env.koanf()
-
-	if err := merged.Merge(defaultConfigKoanf()); err != nil {
-		return fmt.Errorf("failed to merge default config: %w", err)
-	}
-	if err := merged.Merge(systemK); err != nil {
-		return fmt.Errorf("failed to merge system config: %w", err)
-	}
-	if err := merged.Merge(envK); err != nil {
-		return fmt.Errorf("failed to merge env config: %w", err)
-	}
-	if err := merged.Unmarshal("", &config); err != nil {
-		return fmt.Errorf("failed to unmarshal merged config: %w", err)
-	}
-
-	c.cfg = &config
-
+	c.cfg = cfg
 	c.paths = &Paths{}
 	c.paths.UserConfigPath = constants.SystemConfigPath
 	c.paths.CacheDir = constants.SystemCachePath
@@ -108,6 +105,61 @@ func (c *ALRConfig) Load() error {
 	c.paths.DBPath = filepath.Join(c.paths.CacheDir, "db")
 
 	return nil
+}
+
+func (c *ALRConfig) SetTo(level, key string, value any) error {
+	for _, src := range c.srcs {
+		if src.Name() != level {
+			continue
+		}
+
+		setter, ok := src.(sources.Setter)
+		if !ok {
+			return fmt.Errorf("%s config is not writable", src.Name())
+		}
+
+		return setter.Set(key, value)
+	}
+	return fmt.Errorf("unknown config level: %s", level)
+}
+
+// TODO: remove
+func (c *ALRConfig) SetRepos(v []types.Repo) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+	var m []interface{}
+	if err := json.Unmarshal(b, &m); err != nil {
+		panic(err)
+	}
+	if err := c.SetTo(common.SOURCE_SYSTEM, common.REPO, m); err != nil {
+		panic(err)
+	}
+}
+
+func (c *ALRConfig) Save(level string) error {
+	for _, src := range c.srcs {
+		if src.Name() != level {
+			continue
+		}
+
+		saver, ok := src.(sources.Saver)
+		if !ok {
+			return nil
+		}
+
+		return saver.Save()
+	}
+	return nil
+}
+
+func (c *ALRConfig) SetToAndSave(level, key string, value any) error {
+	if err := c.SetTo(level, key, value); err != nil {
+		return err
+	}
+
+	return c.Save(level)
 }
 
 func (c *ALRConfig) ToYAML() (string, error) {
@@ -122,7 +174,6 @@ func (c *ALRConfig) RootCmd() string             { return c.cfg.RootCmd }
 func (c *ALRConfig) PagerStyle() string          { return c.cfg.PagerStyle }
 func (c *ALRConfig) AutoPull() bool              { return c.cfg.AutoPull }
 func (c *ALRConfig) Repos() []types.Repo         { return c.cfg.Repos }
-func (c *ALRConfig) SetRepos(repos []types.Repo) { c.System.SetRepos(repos) }
 func (c *ALRConfig) IgnorePkgUpdates() []string  { return c.cfg.IgnorePkgUpdates }
 func (c *ALRConfig) LogLevel() string            { return c.cfg.LogLevel }
 func (c *ALRConfig) UseRootCmd() bool            { return c.cfg.UseRootCmd }
@@ -141,4 +192,45 @@ func PatchToUserDirs(c *ALRConfig) error {
 	paths.PkgsDir = filepath.Join(paths.CacheDir, "pkgs")
 
 	return nil
+}
+
+func (c *ALRConfig) AllowedKeys() []string {
+	return []string{
+		common.ROOT_CMD,
+		common.PAGER_STYLE,
+		common.LOG_LEVEL,
+		common.USE_ROOT_CMD,
+		common.AUTO_PULL,
+		common.IGNORE_PKG_UPDATES,
+		common.FORBID_SKIP_IN_CHECKSUMS,
+		common.FORBID_BUILD_COMMAND,
+	}
+}
+
+func (c *ALRConfig) ConvertValue(key, v string) (any, error) {
+	switch key {
+	case common.AUTO_PULL, common.USE_ROOT_CMD,
+		common.FORBID_SKIP_IN_CHECKSUMS, common.FORBID_BUILD_COMMAND:
+		val, err := strconv.ParseBool(v)
+		if err != nil {
+			return nil, fmt.Errorf("expected boolean value, got: %s", v)
+		}
+		return val, nil
+
+	case common.IGNORE_PKG_UPDATES:
+		if v == "" {
+			return []string{}, nil
+		}
+		updates := strings.Split(v, ",")
+		for i := range updates {
+			updates[i] = strings.TrimSpace(updates[i])
+		}
+		return updates, nil
+
+	case common.ROOT_CMD, common.PAGER_STYLE, common.LOG_LEVEL:
+		return v, nil
+
+	default:
+		return nil, fmt.Errorf("unknown config key: %s", key)
+	}
 }

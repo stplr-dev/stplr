@@ -28,6 +28,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"go.stplr.dev/stplr/internal/build"
+	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
 )
@@ -114,7 +115,7 @@ func TestCheckCacheStep(t *testing.T) {
 			}
 
 			state := &build.BuildState{
-				Input: &build.BuildInput{
+				Input: &commonbuild.BuildInput{
 					Opts: &types.BuildOpts{Clean: tt.clean},
 				},
 				Packages: packages,

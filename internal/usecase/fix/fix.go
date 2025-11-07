@@ -31,11 +31,11 @@ import (
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/config"
-	"go.stplr.dev/stplr/pkg/types"
 )
 
 type ReposPuller interface {
-	Pull(ctx context.Context, repos []types.Repo) error
+	// Pull(ctx context.Context, repos []types.Repo) error
+	PullAll(ctx context.Context) error
 }
 
 type ReposPullerGetter func(ctx context.Context) (ReposPuller, deps.Cleanup, error)
@@ -62,7 +62,7 @@ func (u *useCase) reinit(ctx context.Context) error {
 	defer f()
 
 	// TODO: replace with rereader
-	return r.Pull(ctx, nil)
+	return r.PullAll(ctx)
 }
 
 func (u *useCase) Run(ctx context.Context) error {

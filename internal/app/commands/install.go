@@ -33,9 +33,9 @@ import (
 	"go.stplr.dev/stplr/internal/app/deps"
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/cliutils2"
 	"go.stplr.dev/stplr/internal/usecase/install/action"
 	"go.stplr.dev/stplr/internal/usecase/install/shell"
-	"go.stplr.dev/stplr/internal/utils"
 )
 
 func installCmdActionChecks(_ context.Context, c *cli.Command) error {
@@ -67,7 +67,7 @@ func InstallCmd() *cli.Command {
 
 			return shell.New(d.DB).Run(ctx)
 		}),
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			if err := installCmdActionChecks(ctx, c); err != nil {
 				return err
 			}

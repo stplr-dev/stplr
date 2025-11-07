@@ -25,50 +25,14 @@ package build
 import (
 	"path/filepath"
 
-	"go.stplr.dev/stplr/pkg/types"
+	"go.stplr.dev/stplr/internal/commonbuild"
 )
 
-type BaseDirProvider interface {
-	BaseDir() string
-}
-
-type SrcDirProvider interface {
-	SrcDir() string
-}
-
-type PkgDirProvider interface {
-	PkgDir() string
-}
-
-type ScriptDirProvider interface {
-	ScriptDir() string
-}
-
-func getDirs(
-	cfg Config,
-	scriptPath string,
-	basePkg string,
-) (types.Directories, error) {
-	pkgsDir := cfg.GetPaths().PkgsDir
-
-	scriptPath, err := filepath.Abs(scriptPath)
-	if err != nil {
-		return types.Directories{}, err
-	}
-	baseDir := filepath.Join(pkgsDir, basePkg)
-	return types.Directories{
-		BaseDir:   getBaseDir(cfg, basePkg),
-		SrcDir:    getSrcDir(cfg, basePkg),
-		PkgDir:    filepath.Join(baseDir, "pkg"),
-		ScriptDir: getScriptDir(scriptPath),
-	}, nil
-}
-
-func getBaseDir(cfg Config, basePkg string) string {
+func getBaseDir(cfg commonbuild.Config, basePkg string) string {
 	return filepath.Join(cfg.GetPaths().PkgsDir, basePkg)
 }
 
-func getSrcDir(cfg Config, basePkg string) string {
+func getSrcDir(cfg commonbuild.Config, basePkg string) string {
 	return filepath.Join(getBaseDir(cfg, basePkg), "src")
 }
 

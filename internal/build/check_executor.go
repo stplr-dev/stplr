@@ -25,7 +25,9 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
+	"go.stplr.dev/stplr/internal/cliprompts"
 	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/internal/cpu"
 	"go.stplr.dev/stplr/internal/manager"
 	"go.stplr.dev/stplr/pkg/staplerfile"
@@ -47,7 +49,7 @@ func NewChecksRunner(mgr manager.Manager, cfg checksRunnerConfig) *ChecksRunner 
 	}
 }
 
-func (r *ChecksRunner) RunChecks(ctx context.Context, pkg *staplerfile.Package, input *BuildInput) (bool, error) {
+func (r *ChecksRunner) RunChecks(ctx context.Context, pkg *staplerfile.Package, input *commonbuild.BuildInput) (bool, error) {
 	if r.cfg.ForbidSkipInChecksums() {
 		checksums := pkg.Checksums.Resolved()
 		if slices.ContainsFunc(checksums, IsSkipChecksum) {
@@ -56,7 +58,7 @@ func (r *ChecksRunner) RunChecks(ctx context.Context, pkg *staplerfile.Package, 
 	}
 
 	if !cpu.IsCompatibleWith(cpu.Arch(), pkg.Architectures) {
-		cont, err := cliutils.YesNoPrompt(
+		cont, err := cliprompts.YesNoPrompt(
 			ctx,
 			gotext.Get("Your system's CPU architecture doesn't match this package. Do you want to build anyway?"),
 			input.Opts.Interactive,
@@ -91,5 +93,5 @@ func (r *ChecksRunner) RunChecks(ctx context.Context, pkg *staplerfile.Package, 
 }
 
 type ChecksExecutor interface {
-	RunChecks(ctx context.Context, pkg *staplerfile.Package, input *BuildInput) (bool, error)
+	RunChecks(ctx context.Context, pkg *staplerfile.Package, input *commonbuild.BuildInput) (bool, error)
 }

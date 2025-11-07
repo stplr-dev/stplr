@@ -23,22 +23,12 @@
 package utils
 
 import (
-	"context"
 	"errors"
-	"fmt"
 	"os"
-	"os/exec"
 	"os/user"
 	"strconv"
 	"syscall"
 
-	"github.com/leonelquinteros/gotext"
-	"github.com/urfave/cli/v3"
-
-	"go.stplr.dev/stplr/internal/app/output"
-	"go.stplr.dev/stplr/internal/cliutils"
-	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
-	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/constants"
 )
 
@@ -69,7 +59,7 @@ func GetUidGidStaplerUser() (int, int, error) {
 	return uid, gid, nil
 }
 
-func dropCapsToBuilderUser() error {
+func DropCapsToBuilderUser() error {
 	uid, gid, err := GetUidGidStaplerUser()
 	if err != nil {
 		return err
@@ -83,67 +73,6 @@ func dropCapsToBuilderUser() error {
 		return err
 	}
 	return EnsureIsBuilderUser()
-}
-
-func ExitIfCantDropGidToStapler() cli.ExitCoder {
-	_, gid, err := GetUidGidStaplerUser()
-	if err != nil {
-		return cliutils.FormatCliExit(fmt.Sprintf("cannot get gid %s", constants.BuilderUser), err)
-	}
-	err = syscall.Setgid(gid)
-	if err != nil {
-		return cliutils.FormatCliExit(fmt.Sprintf("cannot get setgid %s", constants.BuilderUser), err)
-	}
-	return nil
-}
-
-// ExitIfCantDropCapsToBuilderUser attempts to drop capabilities to the already
-// running user. Returns a cli.ExitCoder with an error if the operation fails.
-// See also [ExitIfCantDropCapsToBuilderUserNoPrivs] for a version that also applies
-// no-new-privs.
-func ExitIfCantDropCapsToBuilderUser() cli.ExitCoder {
-	err := dropCapsToBuilderUser()
-	if err != nil {
-		return cliutils.FormatCliExit(gotext.Get("Error on dropping capabilities"), err)
-	}
-	return nil
-}
-
-func ExitIfCantSetNoNewPrivs() cli.ExitCoder {
-	if err := NoNewPrivs(); err != nil {
-		return cliutils.FormatCliExit("error on NoNewPrivs", err)
-	}
-
-	return nil
-}
-
-// ExitIfCantDropCapsToBuilderUserNoPrivs combines [ExitIfCantDropCapsToBuilderUser] with [ExitIfCantSetNoNewPrivs]
-func ExitIfCantDropCapsToBuilderUserNoPrivs() cli.ExitCoder {
-	if err := ExitIfCantDropCapsToBuilderUser(); err != nil {
-		return err
-	}
-
-	if err := ExitIfCantSetNoNewPrivs(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func ExitIfRootCantDropCapsNoPrivs() cli.ExitCoder {
-	if IsNotRoot() {
-		return nil
-	}
-
-	if err := ExitIfCantDropCapsToBuilderUser(); err != nil {
-		return err
-	}
-
-	if err := ExitIfCantSetNoNewPrivs(); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func IsNotRoot() bool {
@@ -184,38 +113,6 @@ func EnsureIsBuilderUser() error {
 	return nil
 }
 
-func EnsureIsPrivilegedGroupMemberOrRoot() error {
-	currentUser, err := user.Current()
-	if err != nil {
-		return err
-	}
-
-	if currentUser.Uid == "0" {
-		return nil
-	}
-
-	group, err := user.LookupGroup(constants.PrivilegedGroup)
-	if err != nil {
-		return err
-	}
-
-	groups, err := currentUser.GroupIds()
-	if err != nil {
-		return err
-	}
-
-	for _, gid := range groups {
-		if gid == group.Gid {
-			return nil
-		}
-	}
-
-	return cliutils.FormatCliExit(
-		gotext.Get("You need to be a %s member or root to perform this action", constants.PrivilegedGroup),
-		nil,
-	)
-}
-
 func EscalateToRootGid() error {
 	return syscall.Setgid(0)
 }
@@ -234,71 +131,4 @@ func EscalateToRoot() error {
 		return err
 	}
 	return nil
-}
-
-func runAsRoot(ctx context.Context, rootCmd string, args []string) error {
-	// gosec:disable G204
-	cmd := exec.CommandContext(ctx, rootCmd, args...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Cancel = func() error {
-		return cmd.Process.Signal(os.Interrupt)
-	}
-
-	err := cmd.Run()
-	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			cli.OsExiter(exitErr.ExitCode())
-		}
-	}
-	return nil
-}
-
-func handleNonRoot(ctx context.Context, out output.Output, cfg *config.ALRConfig) error {
-	if !cfg.UseRootCmd() {
-		return cli.Exit(gotext.Get("You need to be root to perform this action"), 1)
-	}
-
-	executable, err := os.Executable()
-	if err != nil {
-		return cliutils.FormatCliExit("failed to get executable path", err)
-	}
-
-	out.Warn(gotext.Get("This action requires elevated privileges."))
-	out.Warn(gotext.Get("Attempting to run as root using '%s'...", cfg.RootCmd()))
-	args := append([]string{executable}, os.Args[1:]...)
-	return runAsRoot(ctx, cfg.RootCmd(), args)
-}
-
-func RootNeededAction(f cli.ActionFunc) cli.ActionFunc {
-	return func(ctx context.Context, c *cli.Command) error {
-		out := output.FromContext(ctx)
-
-		deps, err := appbuilder.New(ctx).WithConfig().Build()
-		if err != nil {
-			return err
-		}
-		defer deps.Defer()
-
-		if IsNotRoot() {
-			return handleNonRoot(ctx, out, deps.Cfg)
-		}
-
-		return f(ctx, c)
-	}
-}
-
-func ReadonlyAction(f cli.ActionFunc) cli.ActionFunc {
-	return func(ctx context.Context, c *cli.Command) error {
-		if IsNotRoot() {
-			// TODO: relaunch in userns with HOME hide
-		} else {
-			if err := ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
-				return err
-			}
-		}
-
-		return f(ctx, c)
-	}
 }

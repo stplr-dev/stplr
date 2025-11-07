@@ -20,26 +20,42 @@ package add
 
 import (
 	"context"
+	"log/slog"
+	"os"
 
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
-	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/config/common"
+	"go.stplr.dev/stplr/internal/plugins/shared"
+	"go.stplr.dev/stplr/internal/service/repos"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
 type useCase struct {
-	cfg *config.ALRConfig
+	cfg    *config.ALRConfig
+	puller repos.PullExecutor
 }
 
-func New(cfg *config.ALRConfig) *useCase {
-	return &useCase{cfg}
+func New(cfg *config.ALRConfig, p repos.PullExecutor) *useCase {
+	return &useCase{cfg, p}
 }
 
 type Options struct {
 	Name string
 	URL  string
+}
+
+type reporter struct{}
+
+func (r *reporter) Notify(ctx context.Context, event shared.NotifyEvent, data map[string]string) error {
+	slog.Warn("Notify", "event", event, "data", data)
+	return nil
+}
+
+func (r *reporter) NotifyWrite(ctx context.Context, event shared.NotifyWriterEvent, p []byte) (n int, err error) {
+	return os.Stderr.Write(p)
 }
 
 func (u *useCase) Run(ctx context.Context, opts Options) error {
@@ -55,21 +71,14 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		URL:  opts.URL,
 	}
 
-	r, close, err := build.GetSafeReposExecutor(ctx)
-	if err != nil {
-		return err
-	}
-	defer close()
-
-	repo, err = r.PullOneAndUpdateFromConfig(ctx, &repo)
+	newRepo, err := u.puller.Pull(ctx, repo, &reporter{})
 	if err != nil {
 		return err
 	}
 
-	repos = append(repos, repo)
+	repos = append(repos, newRepo)
 	u.cfg.SetRepos(repos)
-
-	err = u.cfg.System.Save()
+	err = u.cfg.Save(common.SOURCE_SYSTEM)
 	if err != nil {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error saving config"))
 	}

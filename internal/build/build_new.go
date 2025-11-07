@@ -23,14 +23,17 @@ import (
 	"fmt"
 
 	"go.stplr.dev/stplr/internal/app/output"
+	"go.stplr.dev/stplr/internal/commonbuild"
+	"go.stplr.dev/stplr/internal/installer"
+	"go.stplr.dev/stplr/internal/scripter"
 )
 
 type Builder struct {
 	scriptResolver       ScriptResolverExecutor
-	scriptExecutor       ScriptExecutor
+	scriptExecutor       scripter.ScriptExecutor
 	cacheExecutor        CacheExecutor
 	scriptViewerExecutor ScriptViewerExecutor
-	installerExecutor    InstallerExecutor
+	installerExecutor    installer.InstallerExecutor
 	sourceExecutor       SourceDownloaderExecutor
 	repos                PackageFinder
 	nonfreeViewer        NonFreeViewerExecutor
@@ -40,9 +43,9 @@ type Builder struct {
 
 func NewBuilder(
 	scriptResolver ScriptResolverExecutor,
-	scriptExecutor ScriptExecutor,
+	scriptExecutor scripter.ScriptExecutor,
 	cacheExecutor CacheExecutor,
-	installerExecutor InstallerExecutor,
+	installerExecutor installer.InstallerExecutor,
 	sourceExecutor SourceDownloaderExecutor,
 	checksExecutor ChecksExecutor,
 	nonfreeViewer NonFreeViewerExecutor,
@@ -67,7 +70,7 @@ type BuildStep interface {
 	Run(ctx context.Context, state *BuildState) error
 }
 
-func runSteps(ctx context.Context, state *BuildState, steps []BuildStep) ([]*BuiltDep, error) {
+func runSteps(ctx context.Context, state *BuildState, steps []BuildStep) ([]*commonbuild.BuiltDep, error) {
 	for _, step := range steps {
 		if err := step.Run(ctx, state); err != nil {
 			return nil, fmt.Errorf("step (%T) failed: %w", step, err)
@@ -80,7 +83,7 @@ func runSteps(ctx context.Context, state *BuildState, steps []BuildStep) ([]*Bui
 	return state.BuiltDeps, nil
 }
 
-func (b *Builder) BuildPackage(ctx context.Context, input *BuildInput) ([]*BuiltDep, error) {
+func (b *Builder) BuildPackage(ctx context.Context, input *commonbuild.BuildInput) ([]*commonbuild.BuiltDep, error) {
 	state := NewBuildState()
 	state.Input = input
 

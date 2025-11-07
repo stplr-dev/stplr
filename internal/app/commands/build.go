@@ -26,13 +26,13 @@ package commands
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
-	"go.stplr.dev/stplr/internal/app/output"
-	"go.stplr.dev/stplr/internal/sys"
-	"go.stplr.dev/stplr/internal/usecase/build"
+	"go.stplr.dev/stplr/internal/app/deps"
+	build "go.stplr.dev/stplr/internal/usecase/build"
 )
 
 func BuildCmd() *cli.Command {
@@ -67,18 +67,27 @@ func BuildCmd() *cli.Command {
 			},
 		},
 		Action: func(ctx context.Context, c *cli.Command) error {
-			out := output.FromContext(ctx)
+			d, f, err := deps.ForBuildAction(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to get BuildActionDeps: %w", err)
+			}
+			defer f()
 
-			return build.
-				New(sys.Sys{}, out).
-				Run(ctx, build.Options{
-					Script:      c.String("script"),
-					Subpackage:  c.String("subpackage"),
-					Package:     c.String("package"),
-					Clean:       c.Bool("clean"),
-					Interactive: c.Bool("interactive"),
-					NoSuffix:    c.Bool("no-suffix"),
-				})
+			return build.New(build.ConstructOptions{
+				Builder: d.Builder,
+				Info:    d.Info,
+				Copier:  d.Copier,
+				Manager: d.Manager,
+				Finder:  d.Repos,
+				Config:  d.Config,
+			}).Run(ctx, build.RunOptions{
+				Script:      c.String("script"),
+				Package:     c.String("package"),
+				Subpackage:  c.String("subpackage"),
+				Clean:       c.Bool("clean"),
+				Interactive: c.Bool("interactive"),
+				NoSuffix:    c.Bool("no-suffix"),
+			})
 		},
 	}
 }

@@ -21,6 +21,7 @@ package build
 import (
 	"context"
 
+	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
@@ -31,7 +32,7 @@ type CacheExecutor interface {
 type SourceDownloaderExecutor interface {
 	DownloadSources(
 		ctx context.Context,
-		input *BuildInput,
+		input *commonbuild.BuildInput,
 		basePkg string,
 		si SourcesInput,
 	) error

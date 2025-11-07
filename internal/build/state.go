@@ -18,12 +18,15 @@
 
 package build
 
-import "go.stplr.dev/stplr/pkg/staplerfile"
+import (
+	"go.stplr.dev/stplr/internal/commonbuild"
+	"go.stplr.dev/stplr/pkg/staplerfile"
+)
 
 type BuildState struct {
-	Input      *BuildInput
+	Input      *commonbuild.BuildInput
 	ScriptFile *staplerfile.ScriptFile
-	BuiltDeps  []*BuiltDep
+	BuiltDeps  []*commonbuild.BuiltDep
 	Packages   []*staplerfile.Package
 
 	BasePackage string

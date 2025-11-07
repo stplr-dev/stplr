@@ -32,8 +32,9 @@ import (
 
 	"go.stplr.dev/stplr/internal/app/deps"
 	"go.stplr.dev/stplr/internal/app/output"
+	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/cliutils2"
 	"go.stplr.dev/stplr/internal/usecase/list"
-	"go.stplr.dev/stplr/internal/utils"
 )
 
 func ListCmd() *cli.Command {
@@ -56,8 +57,8 @@ func ListCmd() *cli.Command {
 				Usage:   gotext.Get("Format output using a Go template"),
 			},
 		},
-		Action: utils.ReadonlyAction(func(ctx context.Context, c *cli.Command) error {
-			if err := utils.ExitIfRootCantDropCapsNoPrivs(); err != nil {
+		Action: cliutils2.ReadonlyAction(func(ctx context.Context, c *cli.Command) error {
+			if err := cliutils.ExitIfRootCantDropCapsNoPrivs(); err != nil {
 				return err
 			}
 

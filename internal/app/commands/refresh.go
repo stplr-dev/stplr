@@ -28,8 +28,9 @@ import (
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
-	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
-	"go.stplr.dev/stplr/internal/utils"
+	"go.stplr.dev/stplr/internal/app/deps"
+	"go.stplr.dev/stplr/internal/cliutils2"
+	"go.stplr.dev/stplr/internal/usecase/refresh"
 )
 
 func RefreshCmd() *cli.Command {
@@ -37,22 +38,14 @@ func RefreshCmd() *cli.Command {
 		Name:    "refresh",
 		Usage:   gotext.Get("Pull all repositories that have changed"),
 		Aliases: []string{"ref"},
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
-			if err := utils.ExitIfCantDropCapsToBuilderUser(); err != nil {
-				return err
-			}
-
-			deps, err := appbuilder.
-				New(ctx).
-				WithConfig().
-				WithDB().
-				WithReposForcePull().
-				Build()
+		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+			d, f, err := deps.ForRefreshAction(ctx)
 			if err != nil {
 				return err
 			}
-			defer deps.Defer()
-			return nil
+			defer f()
+
+			return refresh.New(d.Repos).Run(ctx, refresh.Options{})
 		}),
 	}
 }

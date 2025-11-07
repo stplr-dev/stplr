@@ -25,16 +25,17 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/output"
+	"go.stplr.dev/stplr/internal/scripter"
 )
 
 type prepareStep struct {
-	scriptExecutor   ScriptExecutor
+	scriptExecutor   scripter.ScriptExecutor
 	sourceDownloader SourceDownloaderExecutor
 	out              output.Output
 }
 
 func PrepareStep(
-	scriptExecutor ScriptExecutor,
+	scriptExecutor scripter.ScriptExecutor,
 	sourceDownloader SourceDownloaderExecutor,
 ) *prepareStep {
 	return &prepareStep{

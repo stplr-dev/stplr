@@ -2,5 +2,6 @@
     "explorer.confirmDelete": false,
     "go.testTags": "e2e",
     "go.buildTags": "e2e",
-    "go.testTimeout": "30m"
+    "go.testTimeout": "30m",
+    "go.testFlags": ["-v", "-parallel", "4"],
 }

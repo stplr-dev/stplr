@@ -27,9 +27,9 @@ import (
 	"go.stplr.dev/stplr/internal/app/deps"
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/cliutils2"
 	"go.stplr.dev/stplr/internal/usecase/remove/action"
 	"go.stplr.dev/stplr/internal/usecase/remove/shell"
-	"go.stplr.dev/stplr/internal/utils"
 )
 
 func removeCmdActionChecks(_ context.Context, c *cli.Command) error {
@@ -54,7 +54,7 @@ func RemoveCmd() *cli.Command {
 
 			return shell.New(d.Mgr, d.DB).Run(ctx)
 		}),
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			if err := removeCmdActionChecks(ctx, c); err != nil {
 				return err
 			}

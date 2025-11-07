@@ -26,16 +26,17 @@ import (
 	"strings"
 
 	"go.stplr.dev/stplr/internal/app/output"
+	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/pkg/dl"
 	"go.stplr.dev/stplr/pkg/dlcache"
 )
 
 type LocalSourceDownloader struct {
-	cfg Config
+	cfg commonbuild.Config
 	out output.Output
 }
 
-func NewLocalSourceDownloader(cfg Config, out output.Output) *LocalSourceDownloader {
+func NewLocalSourceDownloader(cfg commonbuild.Config, out output.Output) *LocalSourceDownloader {
 	return &LocalSourceDownloader{
 		cfg,
 		out,
@@ -44,7 +45,7 @@ func NewLocalSourceDownloader(cfg Config, out output.Output) *LocalSourceDownloa
 
 func (s *LocalSourceDownloader) DownloadSources(
 	ctx context.Context,
-	input *BuildInput,
+	input *commonbuild.BuildInput,
 	basePkg string,
 	si SourcesInput,
 ) error {

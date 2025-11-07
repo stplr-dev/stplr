@@ -29,8 +29,8 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app/deps"
+	"go.stplr.dev/stplr/internal/cliutils2"
 	"go.stplr.dev/stplr/internal/usecase/search"
-	"go.stplr.dev/stplr/internal/utils"
 )
 
 func SearchCmd() *cli.Command {
@@ -70,7 +70,7 @@ func SearchCmd() *cli.Command {
 				Usage:   gotext.Get("Format output using a Go template"),
 			},
 		},
-		Action: utils.ReadonlyAction(func(ctx context.Context, c *cli.Command) error {
+		Action: cliutils2.ReadonlyAction(func(ctx context.Context, c *cli.Command) error {
 			d, f, err := deps.ForSearchAction(ctx)
 			if err != nil {
 				return err

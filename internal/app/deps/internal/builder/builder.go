@@ -20,6 +20,8 @@ package builder
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 
 	stdErrors "errors"
 
@@ -28,15 +30,21 @@ import (
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/build"
+	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/config/savers"
+	"go.stplr.dev/stplr/internal/copier"
 	"go.stplr.dev/stplr/internal/db"
+	"go.stplr.dev/stplr/internal/installer"
 	"go.stplr.dev/stplr/internal/manager"
-	"go.stplr.dev/stplr/internal/repos"
+	"go.stplr.dev/stplr/internal/plugins"
+	"go.stplr.dev/stplr/internal/scripter"
 	"go.stplr.dev/stplr/internal/search"
 	"go.stplr.dev/stplr/internal/service/updater"
 	"go.stplr.dev/stplr/internal/sys"
+	"go.stplr.dev/stplr/internal/utils"
 
-	repos2 "go.stplr.dev/stplr/internal/service/repos"
+	"go.stplr.dev/stplr/internal/service/repos"
 
 	"go.stplr.dev/stplr/pkg/distro"
 )
@@ -44,17 +52,27 @@ import (
 type Cleanup func()
 
 type Deps struct {
-	Cfg       *config.ALRConfig
-	Manager   manager.Manager
-	DB        *db.Database
-	Repos     *repos.Repos
-	Repos2    *repos2.Repos
-	Installer build.InstallerExecutor
-	Scripter  build.ScriptExecutor
-	Builder   *build.Builder
-	Info      *distro.OSRelease
-	Searcher  *search.Searcher
-	Updater   *updater.Updater
+	UID int
+	GID int
+	WD  string
+
+	Cfg      *config.ALRConfig
+	Manager  manager.Manager
+	DB       *db.Database
+	Repos    *repos.Repos
+	Builder  *build.Builder
+	Info     *distro.OSRelease
+	Searcher *search.Searcher
+	Updater  *updater.Updater
+
+	PluginProvider     *plugins.Provider
+	RootPluginProvider *plugins.Provider
+
+	Puller             repos.PullExecutor
+	Copier             copier.CopierExecutor
+	Installer          installer.InstallerExecutor
+	Scripter           scripter.ScriptExecutor
+	SystemConfigWriter savers.SystemConfigWriterExecutor
 
 	cleanups []Cleanup
 }
@@ -69,13 +87,35 @@ type builder struct {
 	ctx  context.Context
 	err  error
 	deps *Deps
+	sys  *sys.Sys
 }
 
 func Start(ctx context.Context) *builder {
 	return &builder{
 		ctx:  ctx,
 		deps: &Deps{},
+		sys:  &sys.Sys{},
 	}
+}
+
+func (b *builder) UserContext() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	uid := b.sys.Getuid()
+	gid := b.sys.Getgid()
+	wd, err := b.sys.Getwd()
+	if err != nil {
+		b.err = errors.WrapIntoI18nError(err, gotext.Get("Failed to get working directory"))
+		return b
+	}
+
+	b.deps.UID = uid
+	b.deps.GID = gid
+	b.deps.WD = wd
+
+	return b
 }
 
 func (b *builder) Config() *builder {
@@ -84,6 +124,23 @@ func (b *builder) Config() *builder {
 	}
 
 	cfg := config.New()
+	if err := cfg.Load(); err != nil {
+		b.err = errors.WrapIntoI18nError(err, gotext.Get("Error loading config"))
+		return b
+	}
+
+	b.deps.Cfg = cfg
+	return b
+}
+
+func (b *builder) ConfigRW() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	cfg := config.New(
+		config.WithSystemConfigWriter(b.deps.SystemConfigWriter),
+	)
 	if err := cfg.Load(); err != nil {
 		b.err = errors.WrapIntoI18nError(err, gotext.Get("Error loading config"))
 		return b
@@ -132,19 +189,65 @@ func (b *builder) DB() *builder {
 	return b
 }
 
-func (b *builder) InstallerAndScripter() *builder {
+func (b *builder) Scripter() *builder {
 	if b.err != nil {
 		return b
 	}
 
-	res, cleanup, err := build.PrepareInstallerAndScripter(b.ctx)
+	isBuilder, err := utils.IsBuilderUser()
 	if err != nil {
 		b.err = err
 		return b
 	}
-	b.deps.cleanups = append(b.deps.cleanups, cleanup)
 
-	b.deps.Installer, b.deps.Scripter = res.Installer, res.Scripter
+	if !isBuilder {
+		err = config.PatchToUserDirs(b.deps.Cfg)
+		if err != nil {
+			b.err = err
+			return b
+		}
+	}
+
+	// TODO
+	b.deps.Scripter = scripter.NewLocalScriptExecutor(b.deps.Cfg, output.NewPluginOutput())
+
+	return b
+}
+
+func (b *builder) PatchToUserDirs() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	isBuilder, err := utils.IsBuilderUser()
+	if err != nil {
+		b.err = err
+		return b
+	}
+
+	if !isBuilder {
+		err = config.PatchToUserDirs(b.deps.Cfg)
+		if err != nil {
+			b.err = err
+			return b
+		}
+	}
+
+	return b
+}
+
+func (b *builder) ScripterFromPlugin() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	res, err := plugins.GetScripter(b.ctx, b.deps.PluginProvider)
+	if err != nil {
+		b.err = err
+		return b
+	}
+
+	b.deps.Scripter = res
 
 	return b
 }
@@ -155,24 +258,12 @@ func (b *builder) Repos() *builder {
 	}
 
 	cfg := b.deps.Cfg
-	db := b.deps.DB
-
-	if cfg == nil || db == nil {
-		b.err = stdErrors.New("config and db are required for initializing repos")
+	if cfg == nil {
+		b.err = stdErrors.New("config is required for initializing repos")
 		return b
 	}
 
-	b.deps.Repos = repos.New(cfg, db, output.FromContext(b.ctx))
-
-	return b
-}
-
-func (b *builder) Repos2() *builder {
-	if b.err != nil {
-		return b
-	}
-
-	b.deps.Repos2 = repos2.New(b.deps.Cfg, &sys.Sys{}, b.deps.Repos)
+	b.deps.Repos = repos.New(cfg, b.deps.DB, &sys.Sys{}, b.deps.Puller)
 
 	return b
 }
@@ -231,6 +322,162 @@ func (b *builder) Updater() *builder {
 	}
 
 	b.deps.Updater = updater.New(b.deps.Manager, b.deps.Info, b.deps.Searcher)
+
+	return b
+}
+
+func (b *builder) DropCaps() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	if utils.IsRoot() {
+		if err := cliutils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
+			b.err = err
+			return nil
+		}
+	}
+
+	return b
+}
+
+func (b *builder) PluginProvider() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	b.deps.PluginProvider = plugins.NewProvider(output.NewConsoleOutput())
+	err := b.deps.PluginProvider.SetupConnection()
+	if err != nil {
+		b.err = err
+		return b
+	}
+	cleanup := func() {
+		err := b.deps.PluginProvider.Cleanup()
+		if err != nil {
+			slog.Warn("failed to cleanup PluginProvider")
+		}
+	}
+	b.deps.cleanups = append(b.deps.cleanups, cleanup)
+
+	return b
+}
+
+func (b *builder) PullerFromPlugin() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	var err error
+
+	b.deps.Puller, err = plugins.GetPuller(b.ctx, b.deps.PluginProvider)
+	if err != nil {
+		b.err = err
+		return b
+	}
+
+	return b
+}
+
+func (b *builder) Puller() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	b.deps.Puller = repos.NewPuller(b.deps.Cfg, b.deps.DB)
+
+	return b
+}
+
+func (b *builder) RootPluginProvider() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	b.deps.RootPluginProvider = plugins.NewProvider(output.NewConsoleOutput())
+	err := b.deps.RootPluginProvider.SetupRootConnection()
+	if err != nil {
+		b.err = err
+		return b
+	}
+	cleanup := func() {
+		err := b.deps.RootPluginProvider.Cleanup()
+		if err != nil {
+			slog.Warn("failed to cleanup RootPluginProvider")
+		}
+	}
+	b.deps.cleanups = append(b.deps.cleanups, cleanup)
+
+	return b
+}
+
+func (b *builder) InstallerFromPlugin() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	var err error
+
+	b.deps.Installer, err = plugins.GetInstaller(b.ctx, b.deps.RootPluginProvider)
+	if err != nil {
+		b.err = err
+		return b
+	}
+
+	return b
+}
+
+func (b *builder) CopierFromRootPlugin() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	var err error
+	b.deps.Copier, err = plugins.GetCopier(b.ctx, b.deps.RootPluginProvider)
+	if err != nil {
+		b.err = fmt.Errorf("failed to get copier: %w", err)
+		return b
+	}
+
+	return b
+}
+
+func (b *builder) CopierForRootPlugin() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	var err error
+	b.deps.Copier, err = copier.New(b.deps.UID, b.deps.GID, b.deps.WD)
+	if err != nil {
+		b.err = fmt.Errorf("failed to init copier: %w", err)
+		return b
+	}
+
+	return b
+}
+
+func (b *builder) SystemConfigWriterFromRootPlugin() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	var err error
+	b.deps.SystemConfigWriter, err = plugins.GetSystemConfigWriter(b.ctx, b.deps.RootPluginProvider)
+	if err != nil {
+		b.err = fmt.Errorf("failed to get system-config-writer: %w", err)
+		return b
+	}
+
+	return b
+}
+
+func (b *builder) SystemConfigWriter() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	b.deps.SystemConfigWriter = &savers.SystemConfigWriter{}
 
 	return b
 }

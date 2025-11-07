@@ -20,17 +20,15 @@ package commands
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app/deps"
-	appbuilder "go.stplr.dev/stplr/internal/cliutils/app_builder"
+	"go.stplr.dev/stplr/internal/cliutils2"
 	"go.stplr.dev/stplr/internal/usecase/repo/mirrors/add"
 	mirrorsClear "go.stplr.dev/stplr/internal/usecase/repo/mirrors/clear"
 	"go.stplr.dev/stplr/internal/usecase/repo/mirrors/remove"
-	"go.stplr.dev/stplr/internal/utils"
 )
 
 func RepoMirrorCmd() *cli.Command {
@@ -47,23 +45,11 @@ func RepoMirrorCmd() *cli.Command {
 
 func AddMirror() *cli.Command {
 	return &cli.Command{
-		Name:      "add",
-		Usage:     gotext.Get("Add a mirror URL to repository"),
-		ArgsUsage: gotext.Get("<name> <url>"),
-		ShellComplete: func(ctx context.Context, c *cli.Command) {
-			if c.NArg() == 0 {
-				deps, err := appbuilder.New(ctx).WithConfig().Build()
-				if err != nil {
-					return
-				}
-				defer deps.Defer()
-
-				for _, repo := range deps.Cfg.Repos() {
-					fmt.Println(repo.Name)
-				}
-			}
-		},
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+		Name:          "add",
+		Usage:         gotext.Get("Add a mirror URL to repository"),
+		ArgsUsage:     gotext.Get("<name> <url>"),
+		ShellComplete: ShellCompleteRepoName,
+		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() < 2 {
 				return errMissingArgs
 			}
@@ -84,23 +70,11 @@ func AddMirror() *cli.Command {
 
 func RemoveMirror() *cli.Command {
 	return &cli.Command{
-		Name:      "remove",
-		Aliases:   []string{"rm"},
-		Usage:     gotext.Get("Remove mirror from the repository"),
-		ArgsUsage: gotext.Get("<name> <url>"),
-		ShellComplete: func(ctx context.Context, c *cli.Command) {
-			deps, err := appbuilder.New(ctx).WithConfig().Build()
-			if err != nil {
-				return
-			}
-			defer deps.Defer()
-
-			if c.NArg() == 0 {
-				for _, repo := range deps.Cfg.Repos() {
-					fmt.Println(repo.Name)
-				}
-			}
-		},
+		Name:          "remove",
+		Aliases:       []string{"rm"},
+		Usage:         gotext.Get("Remove mirror from the repository"),
+		ArgsUsage:     gotext.Get("<name> <url>"),
+		ShellComplete: ShellCompleteRepoName,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:  "ignore-missing",
@@ -112,7 +86,7 @@ func RemoveMirror() *cli.Command {
 				Usage:   gotext.Get("Match partial URL (e.g., github.com instead of full URL)"),
 			},
 		},
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() < 2 {
 				return errMissingArgs
 			}
@@ -135,25 +109,12 @@ func RemoveMirror() *cli.Command {
 
 func ClearMirrors() *cli.Command {
 	return &cli.Command{
-		Name:      "clear",
-		Aliases:   []string{"rm-all"},
-		Usage:     gotext.Get("Remove all mirrors from the repository"),
-		ArgsUsage: gotext.Get("<name>"),
-		ShellComplete: func(ctx context.Context, c *cli.Command) {
-			if c.NArg() == 0 {
-				// Get repo names from config
-				deps, err := appbuilder.New(ctx).WithConfig().Build()
-				if err != nil {
-					return
-				}
-				defer deps.Defer()
-
-				for _, repo := range deps.Cfg.Repos() {
-					fmt.Println(repo.Name)
-				}
-			}
-		},
-		Action: utils.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+		Name:          "clear",
+		Aliases:       []string{"rm-all"},
+		Usage:         gotext.Get("Remove all mirrors from the repository"),
+		ArgsUsage:     gotext.Get("<name>"),
+		ShellComplete: ShellCompleteRepoName,
+		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() < 1 {
 				return errMissingArgs
 			}

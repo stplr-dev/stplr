@@ -20,17 +20,30 @@ package repos
 
 import (
 	"context"
+	"syscall"
 
+	stdErrors "errors"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/x/term"
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/db"
+	"go.stplr.dev/stplr/internal/plugins/shared"
+	"go.stplr.dev/stplr/internal/service/repos/internal/puller"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-type ReposPuller interface {
-	Pull(ctx context.Context, repos []types.Repo) error
-}
+type (
+	PullExecutor       = puller.PullExecutor
+	Puller             = puller.Puller
+	PullExecutorPlugin = puller.PullExecutorPlugin
+	PullOptions        = puller.PullOptions
+)
+
+var NewPuller = puller.NewPuller
 
 type SysDropper interface {
 	DropCapsToBuilderUser() error
@@ -38,13 +51,15 @@ type SysDropper interface {
 
 type Repos struct {
 	cfg *config.ALRConfig
+	db  *db.Database
 	sys SysDropper
-	rp  ReposPuller
+	rp  PullExecutor
 }
 
-func New(cfg *config.ALRConfig, sys SysDropper, rp ReposPuller) *Repos {
+func New(cfg *config.ALRConfig, db *db.Database, sys SysDropper, rp PullExecutor) *Repos {
 	return &Repos{
 		cfg: cfg,
+		db:  db,
 		sys: sys,
 		rp:  rp,
 	}
@@ -82,10 +97,7 @@ func (r *Repos) ModifySlice(ctx context.Context, c func(repos []types.Repo) ([]t
 		return err
 	}
 	r.cfg.SetRepos(newRepos)
-	err = r.cfg.System.Save()
-	if err != nil {
-		return errors.WrapIntoI18nError(err, gotext.Get("Error saving config"))
-	}
+	_ = r.cfg.Save("system")
 
 	err = r.sys.DropCapsToBuilderUser()
 	if err != nil {
@@ -93,10 +105,66 @@ func (r *Repos) ModifySlice(ctx context.Context, c func(repos []types.Repo) ([]t
 	}
 
 	if pull {
-		err = r.rp.Pull(ctx, newRepos)
-		if err != nil {
-			return errors.WrapIntoI18nError(err, gotext.Get("Error pulling repositories"))
+		for i, repo := range newRepos {
+			updatedRepo, err := r.rp.Pull(ctx, repo, &emptyNotfier{})
+			if err != nil {
+				return errors.WrapIntoI18nError(err, gotext.Get("Error pulling repositories"))
+			}
+			newRepos[i] = updatedRepo
 		}
 	}
 	return nil
+}
+
+func (r *Repos) PullAll(ctx context.Context) error {
+	repos := r.cfg.Repos()
+	for i, repo := range repos {
+		updatedRepo, err := r.pull(ctx, repo)
+		if err != nil {
+			return err
+		}
+		repos[i] = updatedRepo
+	}
+	return nil
+}
+
+type emptyNotfier struct{}
+
+func (tn *emptyNotfier) Notify(ctx context.Context, event shared.NotifyEvent, data map[string]string) error {
+	return nil
+}
+
+func (tn *emptyNotfier) NotifyWrite(ctx context.Context, event shared.NotifyWriterEvent, p []byte) (n int, err error) {
+	return len(p), nil
+}
+
+var ErrPullRepoInterrupted = stdErrors.New("pullRepo interrupted")
+
+func (r *Repos) pullTui(ctx context.Context, repo types.Repo) (types.Repo, error) {
+	m := newPullModel(ctx, repo, r.rp, false)
+	w := &progressViewportWriter{}
+	m.writer = w
+	p := tea.NewProgram(m,
+		tea.WithInput(nil),
+		tea.WithContext(ctx),
+	)
+	w.onLine = func(line string, isUpdate bool) {
+		p.Send(progressViewportMsg{line: line, isUpdate: isUpdate})
+	}
+	if _, err := p.Run(); err != nil {
+		if stdErrors.Is(err, tea.ErrInterrupted) {
+			return m.repo, ErrPullRepoInterrupted
+		}
+		return m.repo, err
+	}
+	return m.repo, nil
+}
+
+func (r *Repos) pull(ctx context.Context, repo types.Repo) (types.Repo, error) {
+	// TODO: different output based on term.IsTerminal(uintptr(syscall.Stdin))
+	if term.IsTerminal(uintptr(syscall.Stdin)) {
+		return r.pullTui(ctx, repo)
+	}
+
+	return r.rp.Pull(ctx, repo, &emptyNotfier{})
 }
