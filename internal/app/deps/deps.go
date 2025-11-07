@@ -360,7 +360,8 @@ func ForSearchAction(ctx context.Context) (*SearchDeps, Cleanup, error) {
 
 type RepoAddDeps struct {
 	Config *config.ALRConfig
-	Puller repos.PullExecutor
+	// Puller repos.PullExecutor
+	Repos *repos.Repos
 }
 
 func ForRepoAddAction(ctx context.Context) (*RepoAddDeps, Cleanup, error) {
@@ -372,6 +373,8 @@ func ForRepoAddAction(ctx context.Context) (*RepoAddDeps, Cleanup, error) {
 		DropCaps().
 		PluginProvider().
 		PullerFromPlugin().
+		DB().
+		Repos().
 		End()
 	if err != nil {
 		return nil, nil, err
@@ -379,7 +382,7 @@ func ForRepoAddAction(ctx context.Context) (*RepoAddDeps, Cleanup, error) {
 
 	return &RepoAddDeps{
 		Config: b.Cfg,
-		Puller: b.Puller,
+		Repos:  b.Repos,
 	}, b.Cleanup, nil
 }
 

@@ -241,16 +241,16 @@ msgstr "Обновить все установленные пакеты"
 msgid "Print the current Stapler version and exit"
 msgstr "Показать текущую версию Stapler и выйти"
 
-#: internal/app/deps/internal/builder/builder.go:110
+#: internal/app/deps/internal/builder/builder.go:112
 #, fuzzy
 msgid "Failed to get working directory"
 msgstr "Ошибка при получении рабочего каталога"
 
-#: internal/app/deps/internal/builder/builder.go:160
+#: internal/app/deps/internal/builder/builder.go:162
 msgid "Unable to detect a supported package manager on the system"
 msgstr "Не удалось обнаружить поддерживаемый менеджер пакетов в системе"
 
-#: internal/app/deps/internal/builder/builder.go:179
+#: internal/app/deps/internal/builder/builder.go:181
 msgid "Error initialization database"
 msgstr "Ошибка инициализации базы данных"
 
@@ -502,30 +502,29 @@ msgstr ""
 "Минимальная версия Stapler для репозитория выше текущей версии. Попробуйте "
 "обновить Stapler, если что-то не работает."
 
-#: internal/service/repos/repos.go:111
-msgid "Error pulling repositories"
-msgstr "Ошибка при извлечении репозиториев"
-
-#: internal/service/repos/tui_pull.go:189
-#: internal/service/repos/tui_pull.go:243
+#: internal/service/repos/repos.go:78
 msgid "Pull %s"
 msgstr "Получение %s"
 
-#: internal/service/repos/tui_pull.go:245
+#: internal/service/repos/repos.go:80
 msgid "Trying mirror %d: %s"
 msgstr "Пробую зеркало %d: %s"
 
+#: internal/service/repos/repos.go:130
+msgid "Error pulling repositories"
+msgstr "Ошибка при извлечении репозиториев"
+
+#: internal/service/repos/repos.go:180
+msgid "Repository pulled successfully!"
+msgstr "Репозиторий успешно извлечен!"
+
 #: internal/service/repos/tui_pull.go:251
-msgid "- Failed to pull from %s: %v"
-msgstr "- Не удалось извлечь из %s: %v"
+msgid "Failed to pull from %s: %v"
+msgstr "Не удалось извлечь из %s: %v"
 
 #: internal/service/repos/tui_pull.go:258
 msgid "- Pulled from %s"
 msgstr "- Получено из %s"
-
-#: internal/service/repos/tui_pull.go:261
-msgid "✔ Repository pulled successfully!"
-msgstr "✔ Репозиторий успешно извлечен!"
 
 #: internal/service/repos/tui_pull.go:266
 msgid "🞮 Failed to pull — the only source is unavailable"
@@ -653,11 +652,11 @@ msgstr "Ошибка при составлении списка установл
 msgid "Error removing packages"
 msgstr "Ошибка при удалении пакетов"
 
-#: internal/usecase/repo/add/add.go:65
+#: internal/usecase/repo/add/add.go:51
 msgid "Repo \"%s\" already exists"
 msgstr "Репозиторий \"%s\" уже существует"
 
-#: internal/usecase/repo/add/add.go:83
+#: internal/usecase/repo/add/add.go:69
 msgid "Error saving config"
 msgstr "Ошибка при сохранении конфигурации"
 
@@ -749,9 +748,6 @@ msgstr "Команда %q не найдена в системе"
 
 #~ msgid "Pulling repository %s from %s..."
 #~ msgstr "Скачивание репозитория %s из %s..."
-
-#~ msgid "Failed to pull from %s: %v"
-#~ msgstr "Не удалось извлечь из %s: %v"
 
 #~ msgid "Git repository %q does not appear to be a valid Stapler repo"
 #~ msgstr ""

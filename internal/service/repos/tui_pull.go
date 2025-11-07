@@ -248,7 +248,7 @@ func (m pullModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, waitForNotifier(m.msgs)
 		case puller.EventErrorPull:
 			line := textErorrDarkerStyle.
-				Render(gotext.Get("- Failed to pull from %s: %v", msg.Data["url"], strings.TrimSpace(msg.Data["err"])))
+				Render(fmt.Sprintf("- %s", gotext.Get("Failed to pull from %s: %v", msg.Data["url"], strings.TrimSpace(msg.Data["err"]))))
 			m.logs = append(m.logs, line)
 			return m, waitForNotifier(m.msgs)
 		}
@@ -258,7 +258,7 @@ func (m pullModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			Render(gotext.Get("- Pulled from %s", m.lastUrl))
 		m.logs = append(m.logs, line)
 		m.status = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("10")).Render(gotext.Get("✔ Repository pulled successfully!"))
+			Foreground(lipgloss.Color("10")).Render(fmt.Sprintf("✔ %s", gotext.Get("Repository pulled successfully!")))
 		m.done = true
 		return m, tea.Quit
 	case errMsg:

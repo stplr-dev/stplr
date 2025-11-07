@@ -20,42 +20,28 @@ package add
 
 import (
 	"context"
-	"log/slog"
-	"os"
 
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/config/common"
-	"go.stplr.dev/stplr/internal/plugins/shared"
 	"go.stplr.dev/stplr/internal/service/repos"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
 type useCase struct {
-	cfg    *config.ALRConfig
-	puller repos.PullExecutor
+	cfg *config.ALRConfig
+	r   *repos.Repos
 }
 
-func New(cfg *config.ALRConfig, p repos.PullExecutor) *useCase {
+func New(cfg *config.ALRConfig, p *repos.Repos) *useCase {
 	return &useCase{cfg, p}
 }
 
 type Options struct {
 	Name string
 	URL  string
-}
-
-type reporter struct{}
-
-func (r *reporter) Notify(ctx context.Context, event shared.NotifyEvent, data map[string]string) error {
-	slog.Warn("Notify", "event", event, "data", data)
-	return nil
-}
-
-func (r *reporter) NotifyWrite(ctx context.Context, event shared.NotifyWriterEvent, p []byte) (n int, err error) {
-	return os.Stderr.Write(p)
 }
 
 func (u *useCase) Run(ctx context.Context, opts Options) error {
@@ -71,7 +57,7 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		URL:  opts.URL,
 	}
 
-	newRepo, err := u.puller.Pull(ctx, repo, &reporter{})
+	newRepo, err := u.r.Pull(ctx, repo)
 	if err != nil {
 		return err
 	}

@@ -20,6 +20,8 @@ package repos
 
 import (
 	"context"
+	"strconv"
+	"strings"
 	"syscall"
 
 	stdErrors "errors"
@@ -29,6 +31,7 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/db"
 	"go.stplr.dev/stplr/internal/plugins/shared"
@@ -45,31 +48,58 @@ type (
 
 var NewPuller = puller.NewPuller
 
-type SysDropper interface {
-	DropCapsToBuilderUser() error
-}
-
 type Repos struct {
 	cfg *config.ALRConfig
 	db  *db.Database
-	sys SysDropper
 	rp  PullExecutor
+	out output.Output
 }
 
-func New(cfg *config.ALRConfig, db *db.Database, sys SysDropper, rp PullExecutor) *Repos {
+func New(cfg *config.ALRConfig, db *db.Database, rp PullExecutor, out output.Output) *Repos {
 	return &Repos{
 		cfg: cfg,
 		db:  db,
-		sys: sys,
 		rp:  rp,
+		out: out,
 	}
+}
+
+type simpleNotifier struct {
+	out output.Output
+}
+
+func (tn *simpleNotifier) Notify(ctx context.Context, event shared.NotifyEvent, data map[string]string) error {
+	switch event {
+	case puller.EventTryPull:
+		i, _ := strconv.Atoi(data["i"])
+		url := data["url"]
+		var msg string
+		if i == 0 {
+			msg = gotext.Get("Pull %s", url)
+		} else {
+			msg = gotext.Get("Trying mirror %d: %s", i, url)
+		}
+		tn.out.Info(msg)
+	case puller.EventErrorPull:
+		url := data["url"]
+		errMsg := data["err"]
+		if errMsg == "" {
+			errMsg = "unknown error"
+		}
+		tn.out.Error("Failed to pull from %s: %v", url, strings.TrimSpace(errMsg))
+
+	default:
+		tn.out.Warn("Unknown notify event: %v, data: %v", event, data)
+	}
+	return nil
+}
+
+func (tn *simpleNotifier) NotifyWrite(ctx context.Context, event shared.NotifyWriterEvent, p []byte) (n int, err error) {
+	return len(p), nil
 }
 
 // Modify updates the configured repositories using the provided callback.
 // The updated list is saved into the system configuration.
-//
-// WARNING: Any root-level operations must be performed before this method,
-// because process privileges are permanently dropped to the builder user.
 //
 // The callback can return nil to exclude a repo from the final list.
 func (r *Repos) Modify(ctx context.Context, c func(repo types.Repo) *types.Repo) error {
@@ -84,13 +114,7 @@ func (r *Repos) Modify(ctx context.Context, c func(repo types.Repo) *types.Repo)
 	}, true)
 }
 
-// WARNING: Any root-level operations must be performed before this method,
-// because process privileges are permanently dropped to the builder user.
 func (r *Repos) ModifySlice(ctx context.Context, c func(repos []types.Repo) ([]types.Repo, error), pull bool) error {
-	// TODO: Consider rewriting this to use GetSafeConfigModifier or smth else
-	// to avoid the side-effect of dropping privileges here.
-	// This is may not be ideal, but refactoring is deferred.
-
 	repos := r.cfg.Repos()
 	newRepos, err := c(repos)
 	if err != nil {
@@ -99,14 +123,9 @@ func (r *Repos) ModifySlice(ctx context.Context, c func(repos []types.Repo) ([]t
 	r.cfg.SetRepos(newRepos)
 	_ = r.cfg.Save("system")
 
-	err = r.sys.DropCapsToBuilderUser()
-	if err != nil {
-		return err
-	}
-
 	if pull {
 		for i, repo := range newRepos {
-			updatedRepo, err := r.rp.Pull(ctx, repo, &emptyNotfier{})
+			updatedRepo, err := r.rp.Pull(ctx, repo, &simpleNotifier{r.out})
 			if err != nil {
 				return errors.WrapIntoI18nError(err, gotext.Get("Error pulling repositories"))
 			}
@@ -119,23 +138,13 @@ func (r *Repos) ModifySlice(ctx context.Context, c func(repos []types.Repo) ([]t
 func (r *Repos) PullAll(ctx context.Context) error {
 	repos := r.cfg.Repos()
 	for i, repo := range repos {
-		updatedRepo, err := r.pull(ctx, repo)
+		updatedRepo, err := r.Pull(ctx, repo)
 		if err != nil {
 			return err
 		}
 		repos[i] = updatedRepo
 	}
 	return nil
-}
-
-type emptyNotfier struct{}
-
-func (tn *emptyNotfier) Notify(ctx context.Context, event shared.NotifyEvent, data map[string]string) error {
-	return nil
-}
-
-func (tn *emptyNotfier) NotifyWrite(ctx context.Context, event shared.NotifyWriterEvent, p []byte) (n int, err error) {
-	return len(p), nil
 }
 
 var ErrPullRepoInterrupted = stdErrors.New("pullRepo interrupted")
@@ -160,11 +169,14 @@ func (r *Repos) pullTui(ctx context.Context, repo types.Repo) (types.Repo, error
 	return m.repo, nil
 }
 
-func (r *Repos) pull(ctx context.Context, repo types.Repo) (types.Repo, error) {
-	// TODO: different output based on term.IsTerminal(uintptr(syscall.Stdin))
+func (r *Repos) Pull(ctx context.Context, repo types.Repo) (types.Repo, error) {
 	if term.IsTerminal(uintptr(syscall.Stdin)) {
 		return r.pullTui(ctx, repo)
 	}
-
-	return r.rp.Pull(ctx, repo, &emptyNotfier{})
+	repo, err := r.rp.Pull(ctx, repo, &simpleNotifier{r.out})
+	if err != nil {
+		return repo, err
+	}
+	r.out.Info(gotext.Get("Repository pulled successfully!"))
+	return repo, err
 }

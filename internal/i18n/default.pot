@@ -231,15 +231,15 @@ msgstr ""
 msgid "Print the current Stapler version and exit"
 msgstr ""
 
-#: internal/app/deps/internal/builder/builder.go:110
+#: internal/app/deps/internal/builder/builder.go:112
 msgid "Failed to get working directory"
 msgstr ""
 
-#: internal/app/deps/internal/builder/builder.go:160
+#: internal/app/deps/internal/builder/builder.go:162
 msgid "Unable to detect a supported package manager on the system"
 msgstr ""
 
-#: internal/app/deps/internal/builder/builder.go:179
+#: internal/app/deps/internal/builder/builder.go:181
 msgid "Error initialization database"
 msgstr ""
 
@@ -479,29 +479,28 @@ msgid ""
 "Try updating Stapler if something doesn't work."
 msgstr ""
 
-#: internal/service/repos/repos.go:111
-msgid "Error pulling repositories"
-msgstr ""
-
-#: internal/service/repos/tui_pull.go:189
-#: internal/service/repos/tui_pull.go:243
+#: internal/service/repos/repos.go:78
 msgid "Pull %s"
 msgstr ""
 
-#: internal/service/repos/tui_pull.go:245
+#: internal/service/repos/repos.go:80
 msgid "Trying mirror %d: %s"
 msgstr ""
 
+#: internal/service/repos/repos.go:130
+msgid "Error pulling repositories"
+msgstr ""
+
+#: internal/service/repos/repos.go:180
+msgid "Repository pulled successfully!"
+msgstr ""
+
 #: internal/service/repos/tui_pull.go:251
-msgid "- Failed to pull from %s: %v"
+msgid "Failed to pull from %s: %v"
 msgstr ""
 
 #: internal/service/repos/tui_pull.go:258
 msgid "- Pulled from %s"
-msgstr ""
-
-#: internal/service/repos/tui_pull.go:261
-msgid "✔ Repository pulled successfully!"
 msgstr ""
 
 #: internal/service/repos/tui_pull.go:266
@@ -628,11 +627,11 @@ msgstr ""
 msgid "Error removing packages"
 msgstr ""
 
-#: internal/usecase/repo/add/add.go:65
+#: internal/usecase/repo/add/add.go:51
 msgid "Repo \"%s\" already exists"
 msgstr ""
 
-#: internal/usecase/repo/add/add.go:83
+#: internal/usecase/repo/add/add.go:69
 msgid "Error saving config"
 msgstr ""
 

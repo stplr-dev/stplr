@@ -111,7 +111,7 @@ func AddRepoCmd() *cli.Command {
 			}
 			defer f()
 
-			return add.New(d.Config, d.Puller).Run(ctx, add.Options{
+			return add.New(d.Config, d.Repos).Run(ctx, add.Options{
 				Name: c.Args().Get(0),
 				URL:  c.Args().Get(1),
 			})

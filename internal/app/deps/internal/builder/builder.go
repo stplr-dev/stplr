@@ -88,6 +88,7 @@ type builder struct {
 	err  error
 	deps *Deps
 	sys  *sys.Sys
+	out  output.Output
 }
 
 func Start(ctx context.Context) *builder {
@@ -95,6 +96,7 @@ func Start(ctx context.Context) *builder {
 		ctx:  ctx,
 		deps: &Deps{},
 		sys:  &sys.Sys{},
+		out:  output.NewConsoleOutput(),
 	}
 }
 
@@ -208,8 +210,7 @@ func (b *builder) Scripter() *builder {
 		}
 	}
 
-	// TODO
-	b.deps.Scripter = scripter.NewLocalScriptExecutor(b.deps.Cfg, output.NewPluginOutput())
+	b.deps.Scripter = scripter.NewLocalScriptExecutor(b.deps.Cfg, b.out)
 
 	return b
 }
@@ -263,7 +264,7 @@ func (b *builder) Repos() *builder {
 		return b
 	}
 
-	b.deps.Repos = repos.New(cfg, b.deps.DB, &sys.Sys{}, b.deps.Puller)
+	b.deps.Repos = repos.New(cfg, b.deps.DB, b.deps.Puller, b.out)
 
 	return b
 }
@@ -294,7 +295,7 @@ func (b *builder) Builder() *builder {
 		b.deps.Repos,
 		b.deps.Scripter,
 		b.deps.Installer,
-		output.NewConsoleOutput(),
+		b.out,
 	)
 	if err != nil {
 		b.err = err
@@ -346,7 +347,7 @@ func (b *builder) PluginProvider() *builder {
 		return b
 	}
 
-	b.deps.PluginProvider = plugins.NewProvider(output.NewConsoleOutput())
+	b.deps.PluginProvider = plugins.NewProvider(b.out)
 	err := b.deps.PluginProvider.SetupConnection()
 	if err != nil {
 		b.err = err
@@ -394,7 +395,7 @@ func (b *builder) RootPluginProvider() *builder {
 		return b
 	}
 
-	b.deps.RootPluginProvider = plugins.NewProvider(output.NewConsoleOutput())
+	b.deps.RootPluginProvider = plugins.NewProvider(b.out)
 	err := b.deps.RootPluginProvider.SetupRootConnection()
 	if err != nil {
 		b.err = err
