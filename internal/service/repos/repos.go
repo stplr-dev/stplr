@@ -125,7 +125,7 @@ func (r *Repos) ModifySlice(ctx context.Context, c func(repos []types.Repo) ([]t
 
 	if pull {
 		for i, repo := range newRepos {
-			updatedRepo, err := r.rp.Pull(ctx, repo, &simpleNotifier{r.out})
+			updatedRepo, err := r.Pull(ctx, repo)
 			if err != nil {
 				return errors.WrapIntoI18nError(err, gotext.Get("Error pulling repositories"))
 			}
