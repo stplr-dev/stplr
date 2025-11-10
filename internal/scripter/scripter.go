@@ -127,12 +127,16 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 		return pkg.DisableNetwork.Resolved()
 	})
 
-	fakeroot := handlers.FakerootExecHandler(
+	fakeroot, cleanup, err := handlers.SandboxHandler(
 		2*time.Second,
 		dirs.SrcDir,
 		dirs.PkgDir,
 		disableNet,
 	)
+	if err != nil {
+		return nil, err
+	}
+	defer cleanup()
 
 	runner, err := interp.New(
 		interp.Env(expand.ListEnviron(env...)),       // Устанавливаем окружение

@@ -17,26 +17,26 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 5.13.3\n"
 
-#: cmd/stplr/main.go:70
+#: cmd/stplr/main.go:69
 msgid ""
 "Command-line interface for Stapler, a universal Linux package build system"
 msgstr ""
 "Интерфейс командной строки для Stapler, универсальной системы сборки пакетов "
 "Linux"
 
-#: cmd/stplr/main.go:75
+#: cmd/stplr/main.go:74
 msgid "Arguments to be passed on to the package manager"
 msgstr "Аргументы, которые будут переданы менеджеру пакетов"
 
-#: cmd/stplr/main.go:81
+#: cmd/stplr/main.go:80
 msgid "Enable interactive questions and prompts"
 msgstr "Включение интерактивных вопросов и запросов"
 
-#: cmd/stplr/main.go:134
+#: cmd/stplr/main.go:133
 msgid "Error loading config"
 msgstr "Ошибка при загрузке"
 
-#: cmd/stplr/main.go:141
+#: cmd/stplr/main.go:140
 msgid "Error while running app"
 msgstr "Ошибка при запуске приложения"
 
@@ -486,11 +486,11 @@ msgstr ""
 msgid "Applying FireJail integration for %q package"
 msgstr "Применение интеграции FireJail для пакета %s"
 
-#: internal/scripter/scripter.go:185
+#: internal/scripter/scripter.go:189
 msgid "Building metadata for package %q"
 msgstr "Сборка метаданных пакета %q"
 
-#: internal/scripter/scripter.go:370 internal/scripter/scripter.go:426
+#: internal/scripter/scripter.go:374 internal/scripter/scripter.go:430
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
 

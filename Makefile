@@ -33,7 +33,6 @@ XGOTEXT_BIN := go run github.com/Tom5521/xgotext@v1.2.0
 
 build: $(BIN)
 
-export CGO_ENABLED := 0
 $(BIN):
 ifeq ($(GENERATE),1)
 	go generate ./...

@@ -448,6 +448,7 @@ type PluginServeDeps struct {
 func ForPluginsServe(ctx context.Context) (*PluginServeDeps, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
+		SetupPluginOutput().
 		Config().
 		Scripter().
 		DB().

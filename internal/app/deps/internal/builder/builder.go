@@ -483,6 +483,16 @@ func (b *builder) SystemConfigWriter() *builder {
 	return b
 }
 
+func (b *builder) SetupPluginOutput() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	b.out = output.NewPluginOutput()
+
+	return b
+}
+
 func (b *builder) End() (*Deps, error) {
 	if b.err != nil {
 		b.deps.Cleanup()

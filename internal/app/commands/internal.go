@@ -24,58 +24,13 @@ package commands
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"os/exec"
-	"syscall"
 
 	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app/deps"
 
 	"go.stplr.dev/stplr/internal/plugins"
-	"go.stplr.dev/stplr/internal/sandbox"
-	"go.stplr.dev/stplr/internal/utils"
 )
-
-func InternalSandbox() *cli.Command {
-	return &cli.Command{
-		Name:                  "_internal-sandbox",
-		HideHelp:              true,
-		Hidden:                true,
-		SkipFlagParsing:       true,
-		EnableShellCompletion: false,
-		Action: func(ctx context.Context, c *cli.Command) error {
-			if c.NArg() < 4 {
-				return fmt.Errorf("not enough arguments: need srcDir, pkgDir, command")
-			}
-
-			cmdArgs := c.Args().Slice()[3:]
-			if len(cmdArgs) == 0 {
-				return fmt.Errorf("no command specified")
-			}
-
-			if err := sandbox.Setup(c.Args().Get(0), c.Args().Get(1), c.Args().Get(2)); err != nil {
-				return fmt.Errorf("failed to setup sandbox: %w", err)
-			}
-
-			if err := utils.NoNewPrivs(); err != nil {
-				return fmt.Errorf("failed to drop privileges: %w", err)
-			}
-
-			//gosec:disable G204 -- Expected
-			cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
-			cmd.Stdin = os.Stdin
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			cmd.Env = os.Environ()
-			cmd.SysProcAttr = &syscall.SysProcAttr{
-				Cloneflags: syscall.CLONE_NEWUSER | syscall.CLONE_NEWNS | syscall.CLONE_NEWPID | syscall.CLONE_NEWIPC,
-			}
-			return cmd.Run()
-		},
-	}
-}
 
 func InternalPluginProvider() *cli.Command {
 	return &cli.Command{

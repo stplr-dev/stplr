@@ -9,24 +9,24 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: cmd/stplr/main.go:70
+#: cmd/stplr/main.go:69
 msgid ""
 "Command-line interface for Stapler, a universal Linux package build system"
 msgstr ""
 
-#: cmd/stplr/main.go:75
+#: cmd/stplr/main.go:74
 msgid "Arguments to be passed on to the package manager"
 msgstr ""
 
-#: cmd/stplr/main.go:81
+#: cmd/stplr/main.go:80
 msgid "Enable interactive questions and prompts"
 msgstr ""
 
-#: cmd/stplr/main.go:134
+#: cmd/stplr/main.go:133
 msgid "Error loading config"
 msgstr ""
 
-#: cmd/stplr/main.go:141
+#: cmd/stplr/main.go:140
 msgid "Error while running app"
 msgstr ""
 
@@ -465,11 +465,11 @@ msgstr ""
 msgid "Applying FireJail integration for %q package"
 msgstr ""
 
-#: internal/scripter/scripter.go:185
+#: internal/scripter/scripter.go:189
 msgid "Building metadata for package %q"
 msgstr ""
 
-#: internal/scripter/scripter.go:370 internal/scripter/scripter.go:426
+#: internal/scripter/scripter.go:374 internal/scripter/scripter.go:430
 msgid "Executing %s()"
 msgstr ""
 
