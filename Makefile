@@ -121,18 +121,8 @@ update-license:
 update-deps-cve:
 	bash scripts/update-deps-cve.sh
 
-MOCKS_DESTINATION=mocks
 mocks: \
-	internal/usecase/build/steps.go \
-	internal/build/check_executor.go
-	@echo "Generating mocks..."
-	@rm -rf $(MOCKS_DESTINATION)
-	@for file in $^; do \
-		mockgen -source=$$file -destination=$(MOCKS_DESTINATION)/$$(basename $$file) --package=mocks --exclude_interfaces=step; \
-	done
-
-mocks2: \
-	internal/repos/git_manager.go \
+	internal/service/repos/internal/gitmanager/gitmanager.go \
 	internal/build/utils.go
 	@echo "Generating mocks..."
 	@for file in $^; do \
