@@ -51,7 +51,7 @@ require (
 	go.elara.ws/vercmp v0.0.0-20250912200949-2e97859b8794
 	go.uber.org/mock v0.6.0
 	golang.org/x/crypto v0.44.0
-	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546
+	golang.org/x/exp v0.0.0-20251113190631-e25ba8c21ef6
 	golang.org/x/sys v0.38.0
 	golang.org/x/text v0.31.0
 	modernc.org/sqlite v1.40.0
