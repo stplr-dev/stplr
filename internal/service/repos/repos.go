@@ -20,6 +20,7 @@ package repos
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"syscall"
@@ -140,6 +141,41 @@ func (r *Repos) PullAll(ctx context.Context) error {
 	for i, repo := range repos {
 		updatedRepo, err := r.Pull(ctx, repo)
 		if err != nil {
+			return err
+		}
+		repos[i] = updatedRepo
+	}
+	return nil
+}
+
+type rereadOption func(*rereadConfig)
+
+type rereadConfig struct {
+	deleteFailed bool
+}
+
+func WithDeleteFailed() rereadOption {
+	return func(cfg *rereadConfig) {
+		cfg.deleteFailed = true
+	}
+}
+
+func (r *Repos) RereadAll(ctx context.Context, opts ...rereadOption) error {
+	cfg := &rereadConfig{}
+	for _, opt := range opts {
+		opt(cfg)
+	}
+
+	repos := r.cfg.Repos()
+	for i, repo := range repos {
+		updatedRepo, err := r.rp.Read(ctx, repo, &simpleNotifier{r.out})
+		if err != nil {
+			if cfg.deleteFailed {
+				if delErr := r.db.DeletePkgs(ctx, "repository = ?", repo.Name); delErr != nil {
+					return fmt.Errorf("failed to delete repo %q: %w", repo.Name, delErr)
+				}
+				continue
+			}
 			return err
 		}
 		repos[i] = updatedRepo

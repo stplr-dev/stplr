@@ -35,6 +35,7 @@ import (
 	"go.stplr.dev/stplr/internal/service/updater"
 	"go.stplr.dev/stplr/internal/utils"
 	"go.stplr.dev/stplr/pkg/distro"
+	"go.stplr.dev/stplr/pkg/dlcache"
 )
 
 type WithRepos struct {
@@ -322,6 +323,7 @@ func ForFixAction(ctx context.Context) (*FixActionDeps, Cleanup, error) {
 func ReposGetter(ctx context.Context) (*repos.Repos, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
+		DropCaps().
 		Config().
 		DB().
 		PluginProvider().
@@ -561,5 +563,26 @@ func ForRefreshAction(ctx context.Context) (*RefreshActionDeps, Cleanup, error) 
 
 	return &RefreshActionDeps{
 		Repos: b.Repos,
+	}, b.Cleanup, nil
+}
+
+type MigrateActionDeps struct {
+	DbResetter      *db.Resetter
+	DlCacheResetter *dlcache.Resetter
+	Repos           *repos.Repos
+}
+
+func ForMigrateAction(ctx context.Context) (*MigrateActionDeps, Cleanup, error) {
+	b, err := builder.
+		Start(ctx).
+		Config().
+		End()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &MigrateActionDeps{
+		DbResetter:      db.NewResetter(b.Cfg),
+		DlCacheResetter: dlcache.NewResetter(b.Cfg),
 	}, b.Cleanup, nil
 }

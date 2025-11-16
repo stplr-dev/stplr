@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// This file was originally part of the project "ALR - Any Linux Repository"
-// created by the ALR Authors.
-// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
-//
-// Copyright (C) 2025 The ALR Authors
+// Stapler
 // Copyright (C) 2025 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
@@ -20,27 +16,41 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//go:build e2e
-
-package e2etests_test
+package db
 
 import (
-	"testing"
-
-	"go.alt-gnome.ru/capytest"
+	"context"
+	"fmt"
 )
 
-func TestE2EIssue75InstallWithDeps(t *testing.T) {
-	t.Parallel()
+type Resetter struct {
+	cfg Config
+}
 
-	runMatrixSuite(
-		t,
-		"issue-75-ref-specify",
-		COMMON_SYSTEMS,
-		func(t *testing.T, r capytest.Runner) {
-			defaultPrepare(t, r)
-			execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", "alr-repo", "a9b7919b3c")
-			execShouldNoError(t, r, "sh", "-c", "test $(stplr list | wc -l) -eq 2 || exit 1")
-		},
-	)
+func NewResetter(cfg Config) *Resetter {
+	return &Resetter{
+		cfg,
+	}
+}
+
+func (r *Resetter) Reset(ctx context.Context) error {
+	db := New(r.cfg)
+
+	if err := db.Connect(); err != nil {
+		return fmt.Errorf("failed to connect to db: %w", err)
+	}
+
+	if err := db.reset(); err != nil {
+		return fmt.Errorf("failed to reset db: %w", err)
+	}
+
+	if err := db.sync(); err != nil {
+		return fmt.Errorf("failed to sync db: %w", err)
+	}
+
+	if err := db.addVersion(); err != nil {
+		return fmt.Errorf("failed to add db version: %w", err)
+	}
+
+	return nil
 }

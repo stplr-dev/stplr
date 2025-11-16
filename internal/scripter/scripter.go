@@ -249,7 +249,7 @@ func buildPkgMetadata(
 	deps []string,
 	preferedContents *[]string,
 ) (*nfpm.Info, error) {
-	pkgInfo := getBasePkgInfo(vars, input)
+	pkgInfo := GetBasePkgInfo(vars, input)
 	pkgInfo.Description = vars.Description.Resolved()
 	pkgInfo.Platform = "linux"
 	pkgInfo.Homepage = vars.Homepage.Resolved()

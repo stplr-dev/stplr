@@ -42,7 +42,6 @@ import (
 
 	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/internal/cpu"
-	"go.stplr.dev/stplr/internal/manager"
 	"go.stplr.dev/stplr/internal/overrides"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
@@ -193,7 +192,7 @@ type getBasePkgInfoInput interface {
 	commonbuild.BuildOptsProvider
 }
 
-func getBasePkgInfo(pkg *staplerfile.Package, input getBasePkgInfoInput) *nfpm.Info {
+func GetBasePkgInfo(pkg *staplerfile.Package, input getBasePkgInfoInput) *nfpm.Info {
 	var name string
 	if input.BuildOpts().NoSuffix {
 		name = pkg.Name
@@ -207,16 +206,6 @@ func getBasePkgInfo(pkg *staplerfile.Package, input getBasePkgInfoInput) *nfpm.I
 		Release: overrides.ReleasePlatformSpecific(pkg.Release, input.OSRelease()),
 		Epoch:   strconv.FormatUint(uint64(pkg.Epoch), 10),
 	}
-}
-
-// Функция getPkgFormat возвращает формат пакета из менеджера пакетов,
-// или STPLR_PKG_FORMAT, если он установлен.
-func GetPkgFormat(mgr manager.Manager) string {
-	pkgFormat := mgr.Format()
-	if format, ok := os.LookupEnv("STPLR_PKG_FORMAT"); ok {
-		pkgFormat = format
-	}
-	return pkgFormat
 }
 
 // Функция setScripts добавляет скрипты-перехватчики к метаданным пакета.

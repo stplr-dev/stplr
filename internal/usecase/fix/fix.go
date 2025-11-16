@@ -20,6 +20,7 @@ package fix
 
 import (
 	"context"
+	"fmt"
 	"io/fs"
 	"log/slog"
 	"os"
@@ -31,6 +32,7 @@ import (
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/db"
 )
 
 type ReposPuller interface {
@@ -55,6 +57,10 @@ func New(config Config, init ReposPullerGetter, out output.Output) *useCase {
 }
 
 func (u *useCase) reinit(ctx context.Context) error {
+	if err := db.NewResetter(u.config).Reset(ctx); err != nil {
+		return fmt.Errorf("failed to reset db: %w", err)
+	}
+
 	r, f, err := u.init(ctx)
 	if err != nil {
 		return err

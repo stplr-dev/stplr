@@ -373,7 +373,7 @@ func (b *builder) PullerFromPlugin() *builder {
 
 	b.deps.Puller, err = plugins.GetPuller(b.ctx, b.deps.PluginProvider)
 	if err != nil {
-		b.err = err
+		b.err = fmt.Errorf("failed to get puller from plugin: %w", err)
 		return b
 	}
 

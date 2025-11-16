@@ -9,24 +9,24 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: cmd/stplr/main.go:69
+#: cmd/stplr/main.go:70
 msgid ""
 "Command-line interface for Stapler, a universal Linux package build system"
 msgstr ""
 
-#: cmd/stplr/main.go:74
+#: cmd/stplr/main.go:75
 msgid "Arguments to be passed on to the package manager"
 msgstr ""
 
-#: cmd/stplr/main.go:80
+#: cmd/stplr/main.go:81
 msgid "Enable interactive questions and prompts"
 msgstr ""
 
-#: cmd/stplr/main.go:133
+#: cmd/stplr/main.go:134
 msgid "Error loading config"
 msgstr ""
 
-#: cmd/stplr/main.go:140
+#: cmd/stplr/main.go:141
 msgid "Error while running app"
 msgstr ""
 
@@ -137,6 +137,10 @@ msgstr ""
 
 #: internal/app/commands/list.go:57
 msgid "Format output using a Go template"
+msgstr ""
+
+#: internal/app/commands/migrate.go:37
+msgid "Migrate to current version"
 msgstr ""
 
 #: internal/app/commands/refresh.go:39
@@ -452,15 +456,6 @@ msgstr ""
 msgid "Attempting to run as root using '%s'..."
 msgstr ""
 
-#: internal/db/db.go:82
-msgid "Database version mismatch; resetting"
-msgstr ""
-
-#: internal/db/db.go:88
-msgid ""
-"Database version does not exist. Run stplr fix if something isn't working."
-msgstr ""
-
 #: internal/scripter/firejail.go:153
 msgid "Applying FireJail integration for %q package"
 msgstr ""
@@ -473,25 +468,25 @@ msgstr ""
 msgid "Executing %s()"
 msgstr ""
 
-#: internal/service/repos/internal/puller/puller.go:236
+#: internal/service/repos/internal/puller/puller.go:229
 msgid ""
 "Stapler repo's minimum Stapler version is greater than the current version. "
 "Try updating Stapler if something doesn't work."
 msgstr ""
 
-#: internal/service/repos/repos.go:78
+#: internal/service/repos/repos.go:79
 msgid "Pull %s"
 msgstr ""
 
-#: internal/service/repos/repos.go:80
+#: internal/service/repos/repos.go:81
 msgid "Trying mirror %d: %s"
 msgstr ""
 
-#: internal/service/repos/repos.go:130
+#: internal/service/repos/repos.go:131
 msgid "Error pulling repositories"
 msgstr ""
 
-#: internal/service/repos/repos.go:180
+#: internal/service/repos/repos.go:216
 msgid "Repository pulled successfully!"
 msgstr ""
 
@@ -535,31 +530,31 @@ msgstr ""
 msgid "Successfully set %s = %s"
 msgstr ""
 
-#: internal/usecase/fix/fix.go:71
+#: internal/usecase/fix/fix.go:77
 msgid "Clearing cache directory"
 msgstr ""
 
-#: internal/usecase/fix/fix.go:75
+#: internal/usecase/fix/fix.go:81
 msgid "Unable to open cache directory"
 msgstr ""
 
-#: internal/usecase/fix/fix.go:81
+#: internal/usecase/fix/fix.go:87
 msgid "Unable to read cache directory contents"
 msgstr ""
 
-#: internal/usecase/fix/fix.go:93
+#: internal/usecase/fix/fix.go:99
 msgid "Unable to remove cache item (%s)"
 msgstr ""
 
-#: internal/usecase/fix/fix.go:97
+#: internal/usecase/fix/fix.go:103
 msgid "Rebuilding cache"
 msgstr ""
 
-#: internal/usecase/fix/fix.go:101
+#: internal/usecase/fix/fix.go:107
 msgid "Unable to create new cache directory"
 msgstr ""
 
-#: internal/usecase/fix/fix.go:108
+#: internal/usecase/fix/fix.go:114
 msgid "Done"
 msgstr ""
 
@@ -621,6 +616,18 @@ msgstr ""
 
 #: internal/usecase/list/list.go:175
 msgid "Error listing installed packages"
+msgstr ""
+
+#: internal/usecase/migrate/migrate.go:49
+msgid "Error resetting database"
+msgstr ""
+
+#: internal/usecase/migrate/migrate.go:53
+msgid "Error resetting cache"
+msgstr ""
+
+#: internal/usecase/migrate/migrate.go:63
+msgid "Failed to reread all"
 msgstr ""
 
 #: internal/usecase/remove/action/remove.go:47

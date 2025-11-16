@@ -117,6 +117,41 @@ func (s *PullExecutorRPCServer) Pull(ctx context.Context, args *PullExecutorPull
 	return nil
 }
 
+type PullExecutorReadArgs struct {
+	Repo   types.Repo
+	Report uint32
+}
+type PullExecutorReadResp struct {
+	Result0 types.Repo
+}
+
+func (s *PullExecutorRPC) Read(ctx context.Context, repo types.Repo, report PullReporter) (types.Repo, error) {
+	var resp *PullExecutorReadResp
+	serverReport := &PullReporterRPCServer{report, s.broker}
+	brokerIdReport := s.broker.NextId()
+	go s.broker.AcceptAndServe(brokerIdReport, serverReport)
+	err := s.client.Call(ctx, "Plugin.Read", &PullExecutorReadArgs{Repo: repo, Report: brokerIdReport}, &resp)
+	if err != nil {
+		return types.Repo{}, err
+	}
+	return resp.Result0, nil
+}
+func (s *PullExecutorRPCServer) Read(ctx context.Context, args *PullExecutorReadArgs, resp *PullExecutorReadResp) error {
+	var err error
+	connReport, err := s.broker.Dial(args.Report)
+	if err != nil {
+		return err
+	}
+	clientReport := rpc.NewClient(connReport)
+	rpcReport := &PullReporterRPC{clientReport, s.broker}
+	result0, err := s.Impl.Read(ctx, args.Repo, rpcReport)
+	if err != nil {
+		return err
+	}
+	*resp = PullExecutorReadResp{Result0: result0}
+	return nil
+}
+
 type PullReporterNotifyArgs struct {
 	Event shared.NotifyEvent
 	Data  map[string]string

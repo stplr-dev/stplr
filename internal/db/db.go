@@ -26,13 +26,12 @@ package db
 
 import (
 	"context"
-	"log/slog"
+	"errors"
 
-	"github.com/leonelquinteros/gotext"
 	_ "modernc.org/sqlite"
 	"xorm.io/xorm"
 
-	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
+	"go.stplr.dev/stplr/pkg/staplerfile"
 
 	"go.stplr.dev/stplr/internal/config"
 )
@@ -74,19 +73,17 @@ func (d *Database) Init(ctx context.Context) error {
 	if err := d.Connect(); err != nil {
 		return err
 	}
-	if err := d.engine.Sync2(new(alrsh.Package), new(Version)); err != nil {
+
+	if err := d.sync(); err != nil {
 		return err
 	}
 	ver, ok := d.GetVersion(ctx)
-	if ok && ver != CurrentVersion {
-		slog.Warn(gotext.Get("Database version mismatch; resetting"), "version", ver, "expected", CurrentVersion)
-		if err := d.reset(); err != nil {
-			return err
-		}
-		return d.Init(ctx)
-	} else if !ok {
-		slog.Warn(gotext.Get("Database version does not exist. Run stplr fix if something isn't working."))
-		return d.addVersion(CurrentVersion)
+
+	switch {
+	case !ok:
+		return d.addVersion()
+	case ver != CurrentVersion:
+		return errors.New("incorrect db version")
 	}
 	return nil
 }
@@ -100,16 +97,20 @@ func (d *Database) GetVersion(ctx context.Context) (int, bool) {
 	return v.Version, true
 }
 
-func (d *Database) addVersion(ver int) error {
-	_, err := d.engine.Insert(&Version{Version: ver})
+func (d *Database) addVersion() error {
+	_, err := d.engine.Insert(&Version{Version: CurrentVersion})
 	return err
 }
 
-func (d *Database) reset() error {
-	return d.engine.DropTables(new(alrsh.Package), new(Version))
+func (d *Database) sync() error {
+	return d.engine.Sync(new(staplerfile.Package), new(Version))
 }
 
-func (d *Database) InsertPackage(ctx context.Context, pkg alrsh.Package) error {
+func (d *Database) reset() error {
+	return d.engine.DropTables(new(staplerfile.Package), new(Version))
+}
+
+func (d *Database) InsertPackage(ctx context.Context, pkg staplerfile.Package) error {
 	session := d.engine.Context(ctx)
 
 	affected, err := session.Where("name = ? AND repository = ?", pkg.Name, pkg.Repository).Update(&pkg)
@@ -127,14 +128,14 @@ func (d *Database) InsertPackage(ctx context.Context, pkg alrsh.Package) error {
 	return nil
 }
 
-func (d *Database) GetPkgs(_ context.Context, where string, args ...any) ([]alrsh.Package, error) {
-	var pkgs []alrsh.Package
+func (d *Database) GetPkgs(_ context.Context, where string, args ...any) ([]staplerfile.Package, error) {
+	var pkgs []staplerfile.Package
 	err := d.engine.Where(where, args...).Find(&pkgs)
 	return pkgs, err
 }
 
-func (d *Database) GetPkg(where string, args ...any) (*alrsh.Package, error) {
-	var pkg alrsh.Package
+func (d *Database) GetPkg(where string, args ...any) (*staplerfile.Package, error) {
+	var pkg staplerfile.Package
 	has, err := d.engine.Where(where, args...).Get(&pkg)
 	if err != nil || !has {
 		return nil, err
@@ -143,12 +144,12 @@ func (d *Database) GetPkg(where string, args ...any) (*alrsh.Package, error) {
 }
 
 func (d *Database) DeletePkgs(_ context.Context, where string, args ...any) error {
-	_, err := d.engine.Where(where, args...).Delete(&alrsh.Package{})
+	_, err := d.engine.Where(where, args...).Delete(&staplerfile.Package{})
 	return err
 }
 
 func (d *Database) IsEmpty() bool {
-	count, err := d.engine.Count(new(alrsh.Package))
+	count, err := d.engine.Count(new(staplerfile.Package))
 	return err != nil || count == 0
 }
 

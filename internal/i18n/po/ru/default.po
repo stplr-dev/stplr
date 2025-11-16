@@ -17,26 +17,26 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 5.13.3\n"
 
-#: cmd/stplr/main.go:69
+#: cmd/stplr/main.go:70
 msgid ""
 "Command-line interface for Stapler, a universal Linux package build system"
 msgstr ""
 "Интерфейс командной строки для Stapler, универсальной системы сборки пакетов "
 "Linux"
 
-#: cmd/stplr/main.go:74
+#: cmd/stplr/main.go:75
 msgid "Arguments to be passed on to the package manager"
 msgstr "Аргументы, которые будут переданы менеджеру пакетов"
 
-#: cmd/stplr/main.go:80
+#: cmd/stplr/main.go:81
 msgid "Enable interactive questions and prompts"
 msgstr "Включение интерактивных вопросов и запросов"
 
-#: cmd/stplr/main.go:133
+#: cmd/stplr/main.go:134
 msgid "Error loading config"
 msgstr "Ошибка при загрузке"
 
-#: cmd/stplr/main.go:140
+#: cmd/stplr/main.go:141
 msgid "Error while running app"
 msgstr "Ошибка при запуске приложения"
 
@@ -148,6 +148,10 @@ msgstr "Список пакетов репозитория Stapler"
 #: internal/app/commands/list.go:57
 msgid "Format output using a Go template"
 msgstr "Формат выходных данных с использованием шаблона Go"
+
+#: internal/app/commands/migrate.go:37
+msgid "Migrate to current version"
+msgstr "Мигрировать до текущей версии"
 
 #: internal/app/commands/refresh.go:39
 msgid "Pull all repositories that have changed"
@@ -470,17 +474,6 @@ msgstr "Это действие требует повышенных привил
 msgid "Attempting to run as root using '%s'..."
 msgstr "Попытка запустить от имени root с использованием '%s'..."
 
-#: internal/db/db.go:82
-msgid "Database version mismatch; resetting"
-msgstr "Несоответствие версий базы данных; сброс настроек"
-
-#: internal/db/db.go:88
-msgid ""
-"Database version does not exist. Run stplr fix if something isn't working."
-msgstr ""
-"Версия базы данных не существует. Запустите stplr fix, если что-то не "
-"работает."
-
 #: internal/scripter/firejail.go:153
 #, fuzzy
 msgid "Applying FireJail integration for %q package"
@@ -494,7 +487,7 @@ msgstr "Сборка метаданных пакета %q"
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
 
-#: internal/service/repos/internal/puller/puller.go:236
+#: internal/service/repos/internal/puller/puller.go:229
 msgid ""
 "Stapler repo's minimum Stapler version is greater than the current version. "
 "Try updating Stapler if something doesn't work."
@@ -502,19 +495,19 @@ msgstr ""
 "Минимальная версия Stapler для репозитория выше текущей версии. Попробуйте "
 "обновить Stapler, если что-то не работает."
 
-#: internal/service/repos/repos.go:78
+#: internal/service/repos/repos.go:79
 msgid "Pull %s"
 msgstr "Получение %s"
 
-#: internal/service/repos/repos.go:80
+#: internal/service/repos/repos.go:81
 msgid "Trying mirror %d: %s"
 msgstr "Пробую зеркало %d: %s"
 
-#: internal/service/repos/repos.go:130
+#: internal/service/repos/repos.go:131
 msgid "Error pulling repositories"
 msgstr "Ошибка при извлечении репозиториев"
 
-#: internal/service/repos/repos.go:180
+#: internal/service/repos/repos.go:216
 msgid "Repository pulled successfully!"
 msgstr "Репозиторий успешно извлечен!"
 
@@ -560,31 +553,31 @@ msgstr "не удалось сохранить конфигурацию"
 msgid "Successfully set %s = %s"
 msgstr "Успешно установлено %s = %s"
 
-#: internal/usecase/fix/fix.go:71
+#: internal/usecase/fix/fix.go:77
 msgid "Clearing cache directory"
 msgstr "Очистка каталога кэша"
 
-#: internal/usecase/fix/fix.go:75
+#: internal/usecase/fix/fix.go:81
 msgid "Unable to open cache directory"
 msgstr "Невозможно открыть каталог кэша"
 
-#: internal/usecase/fix/fix.go:81
+#: internal/usecase/fix/fix.go:87
 msgid "Unable to read cache directory contents"
 msgstr "Невозможно прочитать содержимое каталога кэша"
 
-#: internal/usecase/fix/fix.go:93
+#: internal/usecase/fix/fix.go:99
 msgid "Unable to remove cache item (%s)"
 msgstr "Невозможно удалить элемент кэша (%s)"
 
-#: internal/usecase/fix/fix.go:97
+#: internal/usecase/fix/fix.go:103
 msgid "Rebuilding cache"
 msgstr "Восстановление кэша"
 
-#: internal/usecase/fix/fix.go:101
+#: internal/usecase/fix/fix.go:107
 msgid "Unable to create new cache directory"
 msgstr "Не удалось создать новый каталог кэша"
 
-#: internal/usecase/fix/fix.go:108
+#: internal/usecase/fix/fix.go:114
 msgid "Done"
 msgstr "Сделано"
 
@@ -647,6 +640,21 @@ msgstr "Не удалось разобрать релиз"
 #: internal/usecase/list/list.go:175
 msgid "Error listing installed packages"
 msgstr "Ошибка при составлении списка установленных пакетов"
+
+#: internal/usecase/migrate/migrate.go:49
+#, fuzzy
+msgid "Error resetting database"
+msgstr "Ошибка инициализации базы данных"
+
+#: internal/usecase/migrate/migrate.go:53
+#, fuzzy
+msgid "Error resetting cache"
+msgstr "Ошибка при получении пакетов"
+
+#: internal/usecase/migrate/migrate.go:63
+#, fuzzy
+msgid "Failed to reread all"
+msgstr "Не удалось разобрать релиз"
 
 #: internal/usecase/remove/action/remove.go:47
 msgid "Error removing packages"
@@ -739,6 +747,15 @@ msgstr "Найдена требуемая зависимость: %s"
 #: pkg/reqprov/rpm/altlinux.go:69
 msgid "Command %q not found on the system"
 msgstr "Команда %q не найдена в системе"
+
+#~ msgid "Database version mismatch; resetting"
+#~ msgstr "Несоответствие версий базы данных; сброс настроек"
+
+#~ msgid ""
+#~ "Database version does not exist. Run stplr fix if something isn't working."
+#~ msgstr ""
+#~ "Версия базы данных не существует. Запустите stplr fix, если что-то не "
+#~ "работает."
 
 #~ msgid "Nothing to build"
 #~ msgstr "Нечего собирать"

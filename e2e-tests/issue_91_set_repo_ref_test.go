@@ -41,7 +41,7 @@ func TestE2EIssue91MultiplePackages(t *testing.T) {
 			defaultPrepare(t, r)
 			execShouldError(t, r, "sudo", "stplr", "repo", "set-ref")
 			execShouldError(t, r, "sudo", "stplr", "repo", "set-ref", "alr-repo")
-			execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", "alr-repo", "bd26236cd7")
+			execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", "alr-repo", "a9b7919b3c")
 			execShouldNoError(t, r, "sh", "-c", "test $(stplr list | wc -l) -eq 2 || exit 1")
 		},
 	)

@@ -23,54 +23,14 @@
 package build
 
 import (
-	"fmt"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
 
-	"github.com/goreleaser/nfpm/v2"
-
-	"go.stplr.dev/stplr/internal/commonbuild"
-	"go.stplr.dev/stplr/internal/cpu"
 	"go.stplr.dev/stplr/internal/manager"
-	"go.stplr.dev/stplr/internal/overrides"
-	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
 )
 
 var RegexpALRPackageName = regexp.MustCompile(`^(?P<package>[^+]+)\+stplr-(?P<repo>.+)$`)
-
-type getBasePkgInfoInput interface {
-	commonbuild.OSReleaser
-	commonbuild.RepositoryGetter
-	commonbuild.BuildOptsProvider
-}
-
-func getBasePkgInfo(pkg *alrsh.Package, input getBasePkgInfoInput) *nfpm.Info {
-	var name string
-	if input.BuildOpts().NoSuffix {
-		name = pkg.Name
-	} else {
-		name = fmt.Sprintf("%s+stplr-%s", pkg.Name, input.Repository())
-	}
-	return &nfpm.Info{
-		Name:    name,
-		Arch:    cpu.Arch(),
-		Version: pkg.Version,
-		Release: overrides.ReleasePlatformSpecific(pkg.Release, input.OSRelease()),
-		Epoch:   strconv.FormatUint(uint64(pkg.Epoch), 10),
-	}
-}
-
-// Функция getPkgFormat возвращает формат пакета из менеджера пакетов,
-// или STPLR_PKG_FORMAT, если он установлен.
-func GetPkgFormat(mgr manager.Manager) string {
-	pkgFormat := mgr.Format()
-	if format, ok := os.LookupEnv("STPLR_PKG_FORMAT"); ok {
-		pkgFormat = format
-	}
-	return pkgFormat
-}
 
 // Функция removeDuplicates убирает любые дубликаты из предоставленного среза.
 func removeDuplicates[T comparable](slice []T) []T {
@@ -106,4 +66,14 @@ func removeDuplicatesSources(sources, checksums []string) ([]string, []string) {
 		newChecksums[i] = seen[k]
 	}
 	return newSources, newChecksums
+}
+
+// Функция getPkgFormat возвращает формат пакета из менеджера пакетов,
+// или STPLR_PKG_FORMAT, если он установлен.
+func GetPkgFormat(mgr manager.Manager) string {
+	pkgFormat := mgr.Format()
+	if format, ok := os.LookupEnv("STPLR_PKG_FORMAT"); ok {
+		pkgFormat = format
+	}
+	return pkgFormat
 }

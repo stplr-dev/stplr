@@ -47,4 +47,5 @@ type PullReporter interface {
 
 type PullExecutor interface {
 	Pull(ctx context.Context, repo types.Repo, report PullReporter) (types.Repo, error)
+	Read(ctx context.Context, repo types.Repo, report PullReporter) (types.Repo, error)
 }

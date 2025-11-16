@@ -23,11 +23,11 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 
-	"github.com/go-git/go-billy/v5"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/leonelquinteros/gotext"
@@ -38,6 +38,7 @@ import (
 	"go.stplr.dev/stplr/internal/constants"
 	database "go.stplr.dev/stplr/internal/db"
 	"go.stplr.dev/stplr/internal/plugins/shared"
+	"go.stplr.dev/stplr/internal/repoprocessor"
 	"go.stplr.dev/stplr/internal/service/repos/internal/gitmanager"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
@@ -60,7 +61,7 @@ type Puller struct {
 	cfg *config.ALRConfig
 	db  *database.Database
 
-	rp *RepoProcessor
+	rp *repoprocessor.RepoProcessor
 	gm *gitmanager.GitManager
 }
 
@@ -68,7 +69,7 @@ func NewPuller(cfg *config.ALRConfig, db *database.Database) *Puller {
 	return &Puller{
 		cfg,
 		db,
-		&RepoProcessor{},
+		repoprocessor.New(),
 		&gitmanager.GitManager{},
 	}
 }
@@ -106,6 +107,20 @@ func (p *Puller) Pull(ctx context.Context, repo types.Repo, report PullReporter)
 	return repo, fmt.Errorf("failed to pull repository %s from any URL: %w", repo.Name, lastErr)
 }
 
+func (p *Puller) Read(ctx context.Context, repo types.Repo, report PullReporter) (types.Repo, error) {
+	repoDir := filepath.Join(p.cfg.GetPaths().RepoDir, repo.Name)
+
+	if err := p.processRepoChanges(ctx, repo, repoDir); err != nil {
+		return repo, err
+	}
+
+	if err := p.loadAndUpdateConfig(repoDir, &repo); err != nil {
+		return repo, err
+	}
+
+	return repo, nil
+}
+
 func (p *Puller) pull(ctx context.Context, rawRepoUrl string, repo *types.Repo, report PullReporter) error {
 	repoURL, err := url.Parse(rawRepoUrl)
 	if err != nil {
@@ -124,26 +139,20 @@ func (p *Puller) pull(ctx context.Context, rawRepoUrl string, repo *types.Repo, 
 		return err
 	}
 
-	oldHead, revHash, err := p.resolveRevision(r, *repo, isGitFresh)
+	_, revHash, err := p.resolveRevision(r, *repo, isGitFresh)
 	if err != nil {
 		return err
 	}
 
-	repoFs, err := p.gm.CheckoutRevision(r, revHash)
-	if err != nil {
+	if _, err = p.gm.CheckoutRevision(r, revHash); err != nil {
 		return err
 	}
 
-	newHead, err := r.Head()
-	if err != nil {
+	if err := p.processRepoChanges(ctx, *repo, repoDir); err != nil {
 		return err
 	}
 
-	if err := p.processRepoChanges(ctx, *repo, repoDir, r, oldHead, newHead, isGitFresh); err != nil {
-		return err
-	}
-
-	return p.loadAndUpdateConfig(repoFs, repo)
+	return p.loadAndUpdateConfig(repoDir, repo)
 }
 
 func (p *Puller) resolveRevision(r *git.Repository, repo types.Repo, isFresh bool) (*plumbing.Reference, *plumbing.Hash, error) {
@@ -164,43 +173,27 @@ func (p *Puller) resolveRevision(r *git.Repository, repo types.Repo, isFresh boo
 	return head, revHash, nil
 }
 
-func (p *Puller) processRepoChanges(ctx context.Context, repo types.Repo, repoDir string, r *git.Repository, old, new *plumbing.Reference, freshGit bool) error {
-	var actions []PackageAction
-	var err error
-
-	if p.db.IsEmpty() || freshGit {
-		actions, err = p.rp.ProcessFull(ctx, repo, repoDir)
-	} else {
-		actions, err = p.rp.ProcessChanges(ctx, repo, r, old, new)
+func (p *Puller) processRepoChanges(ctx context.Context, repo types.Repo, repoDir string) error {
+	if err := p.db.DeletePkgs(ctx, "repository = ?", repo.Name); err != nil {
+		return fmt.Errorf("failed to remove pkgs: %w", err)
 	}
+
+	pkgs, err := p.rp.Process(ctx, repo, repoDir)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to process %q repo: %w", repo.Name, err)
 	}
 
-	return p.processActions(ctx, repo, actions)
-}
-
-func (p *Puller) processActions(ctx context.Context, repo types.Repo, actions []PackageAction) error {
-	for _, action := range actions {
-		switch action.Type {
-		case ActionUpsert:
-			err := p.db.InsertPackage(ctx, *action.Pkg)
-			if err != nil {
-				return err
-			}
-		case ActionDelete:
-			err := p.db.DeletePkgs(ctx, "name = ? AND repository = ?", action.Pkg.Name, repo.Name)
-			if err != nil {
-				return fmt.Errorf("error deleting package %s: %w", action.Pkg.Name, err)
-			}
+	for _, pkg := range pkgs {
+		if err := p.db.InsertPackage(ctx, *pkg); err != nil {
+			return err
 		}
 	}
 
 	return nil
 }
 
-func (rs *Puller) loadAndUpdateConfig(repoFS billy.Filesystem, repo *types.Repo) error {
-	fl, err := repoFS.Open(constants.RepoConfigFile)
+func (rs *Puller) loadAndUpdateConfig(repoDir string, repo *types.Repo) error {
+	fl, err := os.Open(filepath.Join(repoDir, constants.RepoConfigFile))
 	if err != nil {
 		// rs.out.Warn(gotext.Get("Git repository %q does not appear to be a valid Stapler repo", repo.Name))
 		// slog.Warn(gotext.Get("Git repository does not appear to be a valid Stapler repo"), "repo", repo.Name)

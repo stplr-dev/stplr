@@ -26,6 +26,7 @@ import (
 	"github.com/goreleaser/nfpm/v2"
 
 	"go.stplr.dev/stplr/internal/commonbuild"
+	"go.stplr.dev/stplr/internal/scripter"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
@@ -63,7 +64,7 @@ func (c *LocalCacheExecutor) CheckForBuiltPackage(
 }
 
 func pkgFileName(input CheckForBuiltPackageInput, pkg *staplerfile.Package) (string, error) {
-	pkgInfo := getBasePkgInfo(pkg, input)
+	pkgInfo := scripter.GetBasePkgInfo(pkg, input)
 
 	packager, err := nfpm.Get(input.PkgFormat())
 	if err != nil {

@@ -16,18 +16,35 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package puller
+package commands
 
 import (
-	"path/filepath"
-	"strings"
+	"context"
+
+	"github.com/leonelquinteros/gotext"
+	"github.com/urfave/cli/v3"
+
+	"go.stplr.dev/stplr/internal/app/deps"
+	"go.stplr.dev/stplr/internal/cliutils2"
+	"go.stplr.dev/stplr/internal/service/repos"
+
+	"go.stplr.dev/stplr/internal/usecase/migrate"
 )
 
-func isValidScriptPath(path string) bool {
-	if filepath.Base(path) != "Staplerfile" {
-		return false
-	}
+func MigrateCmd() *cli.Command {
+	return &cli.Command{
+		Name:  "migrate",
+		Usage: gotext.Get("Migrate to current version"),
+		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+			d, f, err := deps.ForMigrateAction(ctx)
+			if err != nil {
+				return err
+			}
+			defer f()
 
-	dir := filepath.Dir(path)
-	return dir == "." || !strings.Contains(strings.TrimPrefix(dir, "./"), "/")
+			return migrate.New(d.DbResetter, d.DlCacheResetter, func() (*repos.Repos, deps.Cleanup, error) {
+				return deps.ReposGetter(ctx)
+			}).Run(ctx)
+		}),
+	}
 }
