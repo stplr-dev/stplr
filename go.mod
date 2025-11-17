@@ -2,9 +2,6 @@ module go.stplr.dev/stplr
 
 go 1.24.4
 
-// see https://github.com/urfave/cli/pull/2196
-replace github.com/urfave/cli/v3 => github.com/Maks1mS/urfave-cli/v3 v3.0.0-20250902060525-3de689e94b58
-
 // support of context via github.com/keegancsmith/rpc
 // see https://github.com/hashicorp/go-plugin/issues/284
 replace github.com/hashicorp/go-plugin => go.stplr.dev/go-plugin v1.7.1-0.20251005131903-98f00a04f159
@@ -44,7 +41,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/spf13/afero v1.15.0
 	github.com/stretchr/testify v1.11.1
-	github.com/urfave/cli/v3 v3.6.0
+	github.com/urfave/cli/v3 v3.6.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	go.alt-gnome.ru/capytest v0.0.3
 	go.alt-gnome.ru/capytest/providers/podman v0.0.3
