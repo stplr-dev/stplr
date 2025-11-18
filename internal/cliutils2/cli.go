@@ -20,6 +20,7 @@ package cliutils2
 
 import (
 	"context"
+	"log/slog"
 	"os"
 	"os/exec"
 
@@ -66,6 +67,7 @@ func handleNonRoot(ctx context.Context, out output.Output, cfg *config.ALRConfig
 	out.Warn(gotext.Get("This action requires elevated privileges."))
 	out.Warn(gotext.Get("Attempting to run as root using '%s'...", cfg.RootCmd()))
 	args := append([]string{executable}, os.Args[1:]...)
+	slog.Warn("trying elevate privileges", "rootCmd", cfg.RootCmd(), "args", args)
 	return runAsRoot(ctx, cfg.RootCmd(), args)
 }
 

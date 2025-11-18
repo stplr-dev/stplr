@@ -20,6 +20,7 @@ package action
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -59,6 +60,8 @@ type Options struct {
 }
 
 func (u *useCase) Run(ctx context.Context, opts Options) error {
+	slog.Info("trying install", "pkgs", opts.Pkgs, "interactive", opts.Interactive)
+
 	_, err := u.builder.InstallPkgs(
 		ctx,
 		&build.BuildArgs{
@@ -72,12 +75,15 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		opts.Pkgs,
 	)
 	if stdErrors.Is(err, build.ErrLicenseAgreementWasDeclined) {
+		slog.Info("license agreement was declined", "pkgs", opts.Pkgs)
 		return errors.NewI18nError(gotext.Get("License agreement was declined"))
 	}
 	if stdErrors.Is(err, cliprompts.ErrUserChoseNotContinue) {
+		slog.Info("user chose not to continue after reading the script", "pkgs", opts.Pkgs)
 		return errors.NewI18nError(gotext.Get("User chose not to continue after reading script"))
 	}
 	if err != nil {
+		slog.Error("error when installing", "pkgs", opts.Pkgs, "err", err)
 		return errors.WrapIntoI18nError(err, gotext.Get("Error when installing the package"))
 	}
 

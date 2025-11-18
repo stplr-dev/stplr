@@ -22,11 +22,11 @@ msgstr ""
 msgid "Enable interactive questions and prompts"
 msgstr ""
 
-#: cmd/stplr/main.go:134
+#: cmd/stplr/main.go:131
 msgid "Error loading config"
 msgstr ""
 
-#: cmd/stplr/main.go:141
+#: cmd/stplr/main.go:138
 msgid "Error while running app"
 msgstr ""
 
@@ -289,7 +289,7 @@ msgstr ""
 msgid "This package is already installed"
 msgstr ""
 
-#: internal/build/step_checks.go:42
+#: internal/build/step_checks.go:41
 msgid "Building the %q package"
 msgstr ""
 
@@ -306,7 +306,7 @@ msgstr ""
 msgid "Would you like to remove the build dependencies?"
 msgstr ""
 
-#: internal/build/step_prepare.go:56
+#: internal/build/step_prepare.go:55
 msgid "Downloading sources"
 msgstr ""
 
@@ -438,21 +438,15 @@ msgstr ""
 msgid "for more help"
 msgstr ""
 
-#: internal/cliutils/utils.go:81
-msgid ""
-"This command is deprecated and would be removed in the future, use \"%s\" "
-"instead!"
-msgstr ""
-
-#: internal/cliutils2/cli.go:58
+#: internal/cliutils2/cli.go:59
 msgid "You need to be root to perform this action"
 msgstr ""
 
-#: internal/cliutils2/cli.go:66
+#: internal/cliutils2/cli.go:67
 msgid "This action requires elevated privileges."
 msgstr ""
 
-#: internal/cliutils2/cli.go:67
+#: internal/cliutils2/cli.go:68
 msgid "Attempting to run as root using '%s'..."
 msgstr ""
 
@@ -460,15 +454,15 @@ msgstr ""
 msgid "Applying FireJail integration for %q package"
 msgstr ""
 
-#: internal/scripter/scripter.go:189
+#: internal/scripter/scripter.go:187
 msgid "Building metadata for package %q"
 msgstr ""
 
-#: internal/scripter/scripter.go:374 internal/scripter/scripter.go:430
+#: internal/scripter/scripter.go:372 internal/scripter/scripter.go:426
 msgid "Executing %s()"
 msgstr ""
 
-#: internal/service/repos/internal/puller/puller.go:229
+#: internal/service/repos/internal/puller/puller.go:230
 msgid ""
 "Stapler repo's minimum Stapler version is greater than the current version. "
 "Try updating Stapler if something doesn't work."
@@ -582,15 +576,15 @@ msgstr ""
 msgid "Error getting packages"
 msgstr ""
 
-#: internal/usecase/install/action/install.go:75
+#: internal/usecase/install/action/install.go:79
 msgid "License agreement was declined"
 msgstr ""
 
-#: internal/usecase/install/action/install.go:78
+#: internal/usecase/install/action/install.go:83
 msgid "User chose not to continue after reading script"
 msgstr ""
 
-#: internal/usecase/install/action/install.go:81
+#: internal/usecase/install/action/install.go:87
 msgid "Error when installing the package"
 msgstr ""
 
@@ -679,19 +673,19 @@ msgstr ""
 msgid "There is nothing to do."
 msgstr ""
 
-#: pkg/dl/dl.go:224
+#: pkg/dl/dl.go:219
 msgid "Source %q can be updated using %s — updating if required"
 msgstr ""
 
-#: pkg/dl/dl.go:245
+#: pkg/dl/dl.go:240
 msgid "Downloading source %s from %s using %s downloader"
 msgstr ""
 
-#: pkg/dl/dl.go:280
+#: pkg/dl/dl.go:275
 msgid "Source %q was updated and linked to destination (type: %s)"
 msgstr ""
 
-#: pkg/dl/dl.go:282
+#: pkg/dl/dl.go:277
 msgid "Source %q found in cache and linked to destination (type: %s)"
 msgstr ""
 
@@ -703,18 +697,18 @@ msgstr ""
 msgid "%s %s downloading at %s/s\n"
 msgstr ""
 
-#: pkg/reqprov/dirty/dirty.go:47
+#: pkg/reqprov/dirty/dirty.go:46
 msgid "AutoProv is not implemented for this package format, so it's skipped"
 msgstr ""
 
-#: pkg/reqprov/rpm/altlinux.go:50
+#: pkg/reqprov/rpm/altlinux.go:49
 msgid "Provided dependency found: %s"
 msgstr ""
 
-#: pkg/reqprov/rpm/altlinux.go:58
+#: pkg/reqprov/rpm/altlinux.go:56
 msgid "Required dependency found: %s"
 msgstr ""
 
-#: pkg/reqprov/rpm/altlinux.go:69
+#: pkg/reqprov/rpm/altlinux.go:67
 msgid "Command %q not found on the system"
 msgstr ""

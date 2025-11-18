@@ -83,6 +83,7 @@ func GetApp() *cli.Command {
 		},
 		Commands: cmds,
 		Before: func(ctx context.Context, c *cli.Command) (context.Context, error) {
+			slog.Debug("cli started", "args", os.Args)
 			if trimmed := strings.TrimSpace(c.String("pm-args")); trimmed != "" {
 				args := strings.Split(trimmed, " ")
 				manager.Args = append(manager.Args, args...)
@@ -91,7 +92,7 @@ func GetApp() *cli.Command {
 		},
 		EnableShellCompletion: true,
 		ExitErrHandler: func(ctx context.Context, c *cli.Command, err error) {
-			cliutils.HandleExitCoder(ctx, err)
+			cliutils.HandleExitCoder(ctx, c, err)
 		},
 	}
 }
@@ -108,11 +109,7 @@ func setLogLevel(newLevel string) {
 	case "ERROR":
 		level = slog.LevelError
 	}
-	logger, ok := slog.Default().Handler().(*logger.Logger)
-	if !ok {
-		panic("unexpected")
-	}
-	logger.SetLevel(level)
+	logger.Level.Set(level)
 }
 
 func main() {

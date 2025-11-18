@@ -32,11 +32,11 @@ msgstr "Аргументы, которые будут переданы мене�
 msgid "Enable interactive questions and prompts"
 msgstr "Включение интерактивных вопросов и запросов"
 
-#: cmd/stplr/main.go:134
+#: cmd/stplr/main.go:131
 msgid "Error loading config"
 msgstr "Ошибка при загрузке"
 
-#: cmd/stplr/main.go:141
+#: cmd/stplr/main.go:138
 msgid "Error while running app"
 msgstr "Ошибка при запуске приложения"
 
@@ -302,7 +302,7 @@ msgstr ""
 msgid "This package is already installed"
 msgstr "Этот пакет уже установлен"
 
-#: internal/build/step_checks.go:42
+#: internal/build/step_checks.go:41
 msgid "Building the %q package"
 msgstr "Сборка пакета %q"
 
@@ -321,7 +321,7 @@ msgstr ""
 msgid "Would you like to remove the build dependencies?"
 msgstr "Хотели бы вы удалить зависимости сборки?"
 
-#: internal/build/step_prepare.go:56
+#: internal/build/step_prepare.go:55
 msgid "Downloading sources"
 msgstr "Скачивание источников"
 
@@ -454,23 +454,15 @@ msgstr "введите текст для фильтрации"
 msgid "for more help"
 msgstr "для дополнительной помощи"
 
-#: internal/cliutils/utils.go:81
-msgid ""
-"This command is deprecated and would be removed in the future, use \"%s\" "
-"instead!"
-msgstr ""
-"Эта команда устарела и будет удалена в будущем, используйте вместо нее \"%s"
-"\"!"
-
-#: internal/cliutils2/cli.go:58
+#: internal/cliutils2/cli.go:59
 msgid "You need to be root to perform this action"
 msgstr "Вы должны быть root чтобы выполнить это"
 
-#: internal/cliutils2/cli.go:66
+#: internal/cliutils2/cli.go:67
 msgid "This action requires elevated privileges."
 msgstr "Это действие требует повышенных привилегий."
 
-#: internal/cliutils2/cli.go:67
+#: internal/cliutils2/cli.go:68
 msgid "Attempting to run as root using '%s'..."
 msgstr "Попытка запустить от имени root с использованием '%s'..."
 
@@ -479,15 +471,15 @@ msgstr "Попытка запустить от имени root с использ
 msgid "Applying FireJail integration for %q package"
 msgstr "Применение интеграции FireJail для пакета %s"
 
-#: internal/scripter/scripter.go:189
+#: internal/scripter/scripter.go:187
 msgid "Building metadata for package %q"
 msgstr "Сборка метаданных пакета %q"
 
-#: internal/scripter/scripter.go:374 internal/scripter/scripter.go:430
+#: internal/scripter/scripter.go:372 internal/scripter/scripter.go:426
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
 
-#: internal/service/repos/internal/puller/puller.go:229
+#: internal/service/repos/internal/puller/puller.go:230
 msgid ""
 "Stapler repo's minimum Stapler version is greater than the current version. "
 "Try updating Stapler if something doesn't work."
@@ -605,15 +597,15 @@ msgstr "Ошибка кодирования переменных скрита"
 msgid "Error getting packages"
 msgstr "Ошибка при получении пакетов"
 
-#: internal/usecase/install/action/install.go:75
+#: internal/usecase/install/action/install.go:79
 msgid "License agreement was declined"
 msgstr "Лицензионное соглашение было отклонено"
 
-#: internal/usecase/install/action/install.go:78
+#: internal/usecase/install/action/install.go:83
 msgid "User chose not to continue after reading script"
 msgstr "Пользователь решил не продолжать после просмотра скрипта"
 
-#: internal/usecase/install/action/install.go:81
+#: internal/usecase/install/action/install.go:87
 msgid "Error when installing the package"
 msgstr "Ошибка при установке пакета"
 
@@ -705,21 +697,21 @@ msgstr "Ошибка при проверке обновлений"
 msgid "There is nothing to do."
 msgstr "Здесь нечего делать."
 
-#: pkg/dl/dl.go:224
+#: pkg/dl/dl.go:219
 msgid "Source %q can be updated using %s — updating if required"
 msgstr ""
 "Источник %q можно обновить с помощью %s — обновление будет выполнено при "
 "необходимости"
 
-#: pkg/dl/dl.go:245
+#: pkg/dl/dl.go:240
 msgid "Downloading source %s from %s using %s downloader"
 msgstr "Загрузка источника %s из %s с помощью загрузчика %s"
 
-#: pkg/dl/dl.go:280
+#: pkg/dl/dl.go:275
 msgid "Source %q was updated and linked to destination (type: %s)"
 msgstr "Источник %q был обновлён и связан с пунктом назначения (тип: %s)"
 
-#: pkg/dl/dl.go:282
+#: pkg/dl/dl.go:277
 msgid "Source %q found in cache and linked to destination (type: %s)"
 msgstr "Источник %q найден в кэше и связан с пунктом назначения (тип: %s)"
 
@@ -731,22 +723,29 @@ msgstr "%s: выполнено!\n"
 msgid "%s %s downloading at %s/s\n"
 msgstr "%s %s загружается — %s/с\n"
 
-#: pkg/reqprov/dirty/dirty.go:47
+#: pkg/reqprov/dirty/dirty.go:46
 msgid "AutoProv is not implemented for this package format, so it's skipped"
 msgstr ""
 "AutoProv не реализовано для этого формата пакета, поэтому будет пропущено"
 
-#: pkg/reqprov/rpm/altlinux.go:50
+#: pkg/reqprov/rpm/altlinux.go:49
 msgid "Provided dependency found: %s"
 msgstr "Найдена предоставленная зависимость: %s"
 
-#: pkg/reqprov/rpm/altlinux.go:58
+#: pkg/reqprov/rpm/altlinux.go:56
 msgid "Required dependency found: %s"
 msgstr "Найдена требуемая зависимость: %s"
 
-#: pkg/reqprov/rpm/altlinux.go:69
+#: pkg/reqprov/rpm/altlinux.go:67
 msgid "Command %q not found on the system"
 msgstr "Команда %q не найдена в системе"
+
+#~ msgid ""
+#~ "This command is deprecated and would be removed in the future, use \"%s\" "
+#~ "instead!"
+#~ msgstr ""
+#~ "Эта команда устарела и будет удалена в будущем, используйте вместо нее "
+#~ "\"%s\"!"
 
 #~ msgid "Database version mismatch; resetting"
 #~ msgstr "Несоответствие версий базы данных; сброс настроек"

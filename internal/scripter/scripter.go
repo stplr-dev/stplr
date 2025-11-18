@@ -184,8 +184,6 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 			return nil, err
 		}
 
-		// slog.Info(gotext.Get("Building metadata for package %q", basePkg), "name", basePkg)
-
 		e.out.Info(gotext.Get("Building metadata for package %q", basePkg))
 
 		pkgInfo, err := buildPkgMetadata(
@@ -372,7 +370,6 @@ func execFunc(ctx context.Context, out output.Output, d *decoder.Decoder, name s
 	})
 	if ok {
 		out.Info(gotext.Get("Executing %s()", name))
-		// slog.Info(gotext.Get("Executing %s()", name))
 		err := fn(ctx, interp.Dir(dirs.SrcDir))
 		if err != nil {
 			return err
@@ -426,7 +423,6 @@ func (e *LocalScriptExecutor) ExecutePackageFunctions(
 	})
 
 	if ok {
-		// slog.Info(gotext.Get("Executing %s()", filesFuncName))
 		e.out.Info("%s", gotext.Get("Executing %s()", filesFuncName))
 
 		buf := &bytes.Buffer{}

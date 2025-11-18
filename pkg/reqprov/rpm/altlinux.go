@@ -46,7 +46,6 @@ func NewALTLinux() *ALTLinux {
 
 func (o *ALTLinux) FindProvides(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	return o.rpmFindDependenciesALTLinux(ctx, out, pkgInfo, dirs, "/usr/lib/rpm/find-provides", []string{"RPM_FINDPROV_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
-		// slog.Info(gotext.Get("Provided dependency found"), "dep", dep)
 		out.Info(gotext.Get("Provided dependency found: %s", dep))
 		pkgInfo.Provides = append(pkgInfo.Provides, dep)
 	})
@@ -54,7 +53,6 @@ func (o *ALTLinux) FindProvides(ctx context.Context, out output.Output, pkgInfo 
 
 func (o *ALTLinux) FindRequires(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	return o.rpmFindDependenciesALTLinux(ctx, out, pkgInfo, dirs, "/usr/lib/rpm/find-requires", []string{"RPM_FINDREQ_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
-		// slog.Info(gotext.Get("Required dependency found"), "dep", dep)
 		out.Info(gotext.Get("Required dependency found: %s", dep))
 		pkgInfo.Depends = append(pkgInfo.Depends, dep)
 	})
@@ -67,7 +65,6 @@ func (o *ALTLinux) BuildDepends(ctx context.Context) ([]string, error) {
 func (o *ALTLinux) rpmFindDependenciesALTLinux(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, command string, envs []string, updateFunc func(string)) error {
 	if _, err := exec.LookPath(command); err != nil {
 		out.Warn(gotext.Get("Command %q not found on the system", command))
-		// slog.Info(gotext.Get("Command %q not found on the system"), "command", command)
 		return nil
 	}
 

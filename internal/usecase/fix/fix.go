@@ -91,7 +91,7 @@ func (u *useCase) Run(ctx context.Context) error {
 		fullPath := filepath.Join(paths.CacheDir, entry)
 
 		if err := makeWritableRecursive(fullPath); err != nil {
-			slog.Debug("Failed to make path writable", "path", fullPath, "error", err)
+			slog.Debug("failed to make path writable", "path", fullPath, "error", err)
 		}
 
 		err = os.RemoveAll(fullPath)
@@ -112,7 +112,6 @@ func (u *useCase) Run(ctx context.Context) error {
 	}
 
 	u.out.Info(gotext.Get("Done"))
-
 	return nil
 }
 

@@ -193,7 +193,6 @@ func (i *Builder) InstallPkgs(
 func (b *Builder) BuildALRDeps(ctx context.Context, input InstallInput, depends []string) (buildDeps []*commonbuild.BuiltDep, repoDeps []string, err error) {
 	if len(depends) > 0 {
 		b.out.Info(gotext.Get("Installing dependencies"))
-		// slog.Info(gotext.Get("Installing dependencies"))
 
 		found, notFound, err := b.repos.FindPkgs(ctx, depends)
 		if err != nil {

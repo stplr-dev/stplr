@@ -28,7 +28,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app/output"
@@ -38,16 +37,18 @@ type BashCompleteWithErrorFunc func(ctx context.Context, c *cli.Command) error
 
 func BashCompleteWithError[F ~func(context.Context, *cli.Command) T, T error](f F) cli.ShellCompleteFunc {
 	return func(ctx context.Context, c *cli.Command) {
-		HandleExitCoder(ctx, f(ctx, c))
+		HandleExitCoder(ctx, c, f(ctx, c))
 	}
 }
 
-func HandleExitCoder(ctx context.Context, err error) {
+func HandleExitCoder(ctx context.Context, c *cli.Command, err error) {
 	out := output.FromContext(ctx)
 
 	if err == nil {
 		return
 	}
+
+	slog.Error(fmt.Sprintf("%s command failed", c.Name), "err", err)
 
 	if exitErr, ok := err.(cli.ExitCoder); ok {
 		if err.Error() != "" {
@@ -73,12 +74,4 @@ func FormatCliExitWithCode(msg string, err error, exitCode int) cli.ExitCoder {
 		return cli.Exit(stdErrors.New(msg), exitCode)
 	}
 	return cli.Exit(fmt.Errorf("%s: %w", msg, err), exitCode)
-}
-
-func WarnLegacyCommand(newSyntax string) {
-	slog.Warn(
-		gotext.Get(
-			"This command is deprecated and would be removed in the future, use \"%s\" instead!", newSyntax,
-		),
-	)
 }

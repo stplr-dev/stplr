@@ -16,38 +16,35 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package build
+package logger
 
 import (
-	"context"
-	"errors"
-	"fmt"
-
-	"github.com/leonelquinteros/gotext"
-
-	"go.stplr.dev/stplr/internal/app/output"
+	"log/slog"
+	"os"
 )
 
-type checksStep struct {
-	e   ChecksExecutor
-	out output.Output
+var Level = new(slog.LevelVar)
+
+func SetupDefault() {
+	Level.Set(slog.LevelInfo)
+	slogLogger := slog.New(NewJournalHandler(Level))
+	slog.SetDefault(slogLogger)
 }
 
-func ChecksStep(e ChecksExecutor) *checksStep {
-	return &checksStep{e: e, out: output.NewConsoleOutput()}
-}
-
-func (s *checksStep) Run(ctx context.Context, state *BuildState) error {
-	s.out.Info(gotext.Get("Building the %q package", state.BasePackage))
-
-	for _, pkg := range state.Packages {
-		cont, err := s.e.RunChecks(ctx, pkg, state.Input)
-		if err != nil {
-			return fmt.Errorf("RunChecks failed: %w", err)
-		}
-		if !cont {
-			return errors.New("check step declined continuation")
-		}
-	}
-	return nil
+func SetupForGoPlugin() {
+	slogLogger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		Level: Level,
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			switch a.Key {
+			case slog.TimeKey:
+				a.Key = "@timestamp"
+			case slog.MessageKey:
+				a.Key = "@message"
+			case slog.LevelKey:
+				a.Key = "@level"
+			}
+			return a
+		},
+	}))
+	slog.SetDefault(slogLogger)
 }

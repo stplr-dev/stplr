@@ -43,7 +43,6 @@ func New() *Dirty {
 }
 
 func (o *Dirty) FindProvides(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
-	// slog.Info(gotext.Get("AutoProv is not implemented for this package format, so it's skipped"))
 	out.Info(gotext.Get("AutoProv is not implemented for this package format, so it's skipped"))
 	return nil
 }

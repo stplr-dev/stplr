@@ -309,6 +309,7 @@ type FixActionDeps struct {
 func ForFixAction(ctx context.Context) (*FixActionDeps, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
+		DropCaps().
 		Config().
 		End()
 	if err != nil {

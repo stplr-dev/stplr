@@ -23,33 +23,36 @@
 package logger
 
 import (
+	"context"
 	"io"
 	"log"
+	"log/slog"
 	"strings"
 
-	chLog "github.com/charmbracelet/log"
 	"github.com/hashicorp/go-hclog"
 
 	"go.stplr.dev/stplr/internal/app/output"
 )
 
 type HCLoggerAdapter struct {
-	logger *Logger
+	logger *slog.Logger
 	out    output.Output
 }
 
-func hclogLevelTochLog(level hclog.Level) chLog.Level {
+func hclogLevelTochLog(level hclog.Level) slog.Level {
 	switch level {
+	case hclog.Trace:
 	case hclog.Debug:
-		return chLog.DebugLevel
+		return slog.LevelDebug
+	case hclog.NoLevel:
 	case hclog.Info:
-		return chLog.InfoLevel
+		return slog.LevelInfo
 	case hclog.Warn:
-		return chLog.WarnLevel
+		return slog.LevelWarn
 	case hclog.Error:
-		return chLog.ErrorLevel
+		return slog.LevelError
 	}
-	return chLog.FatalLevel
+	return slog.LevelError
 }
 
 func (a *HCLoggerAdapter) Log(level hclog.Level, msg string, args ...interface{}) {
@@ -80,16 +83,16 @@ func (a *HCLoggerAdapter) Log(level hclog.Level, msg string, args ...interface{}
 	// - https://github.com/hashicorp/go-plugin/issues/331
 	// - https://github.com/hashicorp/go-plugin/issues/203
 	// - https://github.com/hashicorp/go-plugin/issues/192
-	var chLogLevel chLog.Level
+	var slogLevel slog.Level
 	if msg == "plugin process exited" ||
 		strings.HasPrefix(msg, "[ERR] plugin: stream copy 'stderr' error") ||
 		strings.Contains(msg, "error closing client during Kill") ||
 		strings.Contains(msg, "plugin failed to exit gracefully") ||
 		strings.Contains(msg, "plugin received interrupt signal") ||
 		strings.HasPrefix(msg, "[DEBUG] plugin") {
-		chLogLevel = chLog.DebugLevel
+		slogLevel = slog.LevelDebug
 	} else {
-		chLogLevel = hclogLevelTochLog(level)
+		slogLevel = hclogLevelTochLog(level)
 	}
 
 	if outType == "user" {
@@ -104,7 +107,7 @@ func (a *HCLoggerAdapter) Log(level hclog.Level, msg string, args ...interface{}
 		return
 	}
 
-	a.logger.l.Log(chLogLevel, msg, filteredArgs...)
+	a.logger.Log(context.Background(), slogLevel, msg, filteredArgs...)
 }
 
 func (a *HCLoggerAdapter) Trace(msg string, args ...interface{}) {
@@ -128,23 +131,23 @@ func (a *HCLoggerAdapter) Error(msg string, args ...interface{}) {
 }
 
 func (a *HCLoggerAdapter) IsTrace() bool {
-	return a.logger.l.GetLevel() <= chLog.DebugLevel
+	return a.IsDebug()
 }
 
 func (a *HCLoggerAdapter) IsDebug() bool {
-	return a.logger.l.GetLevel() <= chLog.DebugLevel
+	return Level.Level() <= slog.LevelDebug
 }
 
 func (a *HCLoggerAdapter) IsInfo() bool {
-	return a.logger.l.GetLevel() <= chLog.InfoLevel
+	return Level.Level() <= slog.LevelInfo
 }
 
 func (a *HCLoggerAdapter) IsWarn() bool {
-	return a.logger.l.GetLevel() <= chLog.WarnLevel
+	return Level.Level() <= slog.LevelWarn
 }
 
 func (a *HCLoggerAdapter) IsError() bool {
-	return a.logger.l.GetLevel() <= chLog.ErrorLevel
+	return Level.Level() <= slog.LevelError
 }
 
 func (a *HCLoggerAdapter) ImpliedArgs() []interface{} {
@@ -184,7 +187,7 @@ func (a *HCLoggerAdapter) StandardWriter(opts *hclog.StandardLoggerOptions) io.W
 
 func GetHCLoggerAdapter(out output.Output) *HCLoggerAdapter {
 	return &HCLoggerAdapter{
-		logger: logger,
+		logger: slog.Default(),
 		out:    out,
 	}
 }

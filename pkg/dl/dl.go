@@ -36,6 +36,7 @@ import (
 	"fmt"
 	"hash"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -213,12 +214,6 @@ func handleCachedSource(ctx context.Context, opts Options, d Downloader, cacheDi
 // updateSourceIfNeeded updates the source if the downloader supports updates.
 func updateSourceIfNeeded(ctx context.Context, opts Options, d Downloader, cacheDir string) (bool, error) {
 	if updater, ok := d.(UpdatingDownloader); ok {
-		// slog.Info(
-		// 	gotext.Get("Source can be updated, updating if required"),
-		// 	"source", opts.Name,
-		// 	"downloader", d.Name(),
-		// )
-
 		if opts.Output != nil {
 			opts.Output.Info(gotext.Get(
 				"Source %q can be updated using %s — updating if required",
@@ -234,12 +229,12 @@ func updateSourceIfNeeded(ctx context.Context, opts Options, d Downloader, cache
 
 // performDownload executes the download and writes the manifest.
 func performDownload(ctx context.Context, opts Options, d Downloader) error {
-	// slog.Info(
-	// 	gotext.Get("Downloading source"),
-	// 	"source", opts.Name,
-	// 	"url", opts.URL,
-	// 	"downloader", d.Name(),
-	// )
+	slog.Debug(
+		"downloading source",
+		"source", opts.Name,
+		"url", opts.URL,
+		"downloader", d.Name(),
+	)
 	if opts.Output != nil {
 		opts.Output.Info("%s", gotext.Get(
 			"Downloading source %s from %s using %s downloader",
@@ -282,7 +277,6 @@ func logCacheHit(opts Options, t Type, updated bool) {
 		msg = gotext.Get("Source %q found in cache and linked to destination (type: %s)", opts.Name, t)
 	}
 	opts.Output.Info("%s", msg)
-	// slog.Info(msg)
 }
 
 // Функция writeManifest записывает манифест в указанный каталог кэша

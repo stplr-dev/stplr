@@ -66,7 +66,6 @@ func (o *Fedora) FindProvides(ctx context.Context, out output.Output, pkgInfo *n
 		args,
 		func(dep string) {
 			out.Info(gotext.Get("Provided dependency found: %s", dep))
-			// slog.Info(gotext.Get("Provided dependency found"), "dep", dep)
 			pkgInfo.Provides = append(pkgInfo.Provides, dep)
 		})
 }
@@ -91,7 +90,6 @@ func (o *Fedora) FindRequires(ctx context.Context, out output.Output, pkgInfo *n
 		args,
 		func(dep string) {
 			out.Info(gotext.Get("Required dependency found: %s", dep))
-			// slog.Info(gotext.Get("Required dependency found"), "dep", dep)
 			pkgInfo.Depends = append(pkgInfo.Depends, dep)
 		})
 }
@@ -103,7 +101,6 @@ func (o *Fedora) BuildDepends(ctx context.Context) ([]string, error) {
 func rpmFindDependenciesFedora(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, command string, args []string, updateFunc func(string)) error {
 	if _, err := exec.LookPath(command); err != nil {
 		out.Warn(gotext.Get("Command %q not found on the system", command))
-		// slog.Info(gotext.Get("Command not found on the system"), "command", command)
 		return nil
 	}
 
