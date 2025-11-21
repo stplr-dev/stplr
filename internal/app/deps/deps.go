@@ -22,6 +22,7 @@ import (
 	"context"
 
 	"go.stplr.dev/stplr/internal/app/deps/internal/builder"
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/config/savers"
@@ -585,5 +586,22 @@ func ForMigrateAction(ctx context.Context) (*MigrateActionDeps, Cleanup, error) 
 	return &MigrateActionDeps{
 		DbResetter:      db.NewResetter(b.Cfg),
 		DlCacheResetter: dlcache.NewResetter(b.Cfg),
+	}, b.Cleanup, nil
+}
+
+type SupportActionDeps struct {
+	Out output.Output
+}
+
+func ForSupportAction(ctx context.Context) (*SupportActionDeps, Cleanup, error) {
+	b, err := builder.
+		Start(ctx).
+		End()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &SupportActionDeps{
+		Out: b.Output,
 	}, b.Cleanup, nil
 }

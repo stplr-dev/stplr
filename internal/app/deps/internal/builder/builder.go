@@ -56,6 +56,8 @@ type Deps struct {
 	GID int
 	WD  string
 
+	Output output.Output
+
 	Cfg      *config.ALRConfig
 	Manager  manager.Manager
 	DB       *db.Database
@@ -88,15 +90,15 @@ type builder struct {
 	err  error
 	deps *Deps
 	sys  *sys.Sys
-	out  output.Output
 }
 
 func Start(ctx context.Context) *builder {
 	return &builder{
-		ctx:  ctx,
-		deps: &Deps{},
-		sys:  &sys.Sys{},
-		out:  output.NewConsoleOutput(),
+		ctx: ctx,
+		deps: &Deps{
+			Output: output.NewConsoleOutput(),
+		},
+		sys: &sys.Sys{},
 	}
 }
 
@@ -210,7 +212,7 @@ func (b *builder) Scripter() *builder {
 		}
 	}
 
-	b.deps.Scripter = scripter.NewLocalScriptExecutor(b.deps.Cfg, b.out)
+	b.deps.Scripter = scripter.NewLocalScriptExecutor(b.deps.Cfg, b.deps.Output)
 
 	return b
 }
@@ -264,7 +266,7 @@ func (b *builder) Repos() *builder {
 		return b
 	}
 
-	b.deps.Repos = repos.New(cfg, b.deps.DB, b.deps.Puller, b.out)
+	b.deps.Repos = repos.New(cfg, b.deps.DB, b.deps.Puller, b.deps.Output)
 
 	return b
 }
@@ -295,7 +297,7 @@ func (b *builder) Builder() *builder {
 		b.deps.Repos,
 		b.deps.Scripter,
 		b.deps.Installer,
-		b.out,
+		b.deps.Output,
 	)
 	if err != nil {
 		b.err = err
@@ -347,7 +349,7 @@ func (b *builder) PluginProvider() *builder {
 		return b
 	}
 
-	b.deps.PluginProvider = plugins.NewProvider(b.out)
+	b.deps.PluginProvider = plugins.NewProvider(b.deps.Output)
 	err := b.deps.PluginProvider.SetupConnection()
 	if err != nil {
 		b.err = err
@@ -395,7 +397,7 @@ func (b *builder) RootPluginProvider() *builder {
 		return b
 	}
 
-	b.deps.RootPluginProvider = plugins.NewProvider(b.out)
+	b.deps.RootPluginProvider = plugins.NewProvider(b.deps.Output)
 	err := b.deps.RootPluginProvider.SetupRootConnection()
 	if err != nil {
 		b.err = err
@@ -488,7 +490,7 @@ func (b *builder) SetupPluginOutput() *builder {
 		return b
 	}
 
-	b.out = output.NewPluginOutput()
+	b.deps.Output = output.NewPluginOutput()
 
 	return b
 }
