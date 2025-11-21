@@ -45,7 +45,7 @@ jobs:
       - name: Install build deps
         run: |
           apt-get update
-          apt-get install -y libsystemd-dev
+          apt-get install -y libsystemd-devel
 
       - name: Set up Go
         uses: actions/setup-go@v5
