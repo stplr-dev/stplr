@@ -696,7 +696,7 @@ msgstr "Ошибка при удалении пакетов из базы дан
 msgid "Error while executing search"
 msgstr "Ошибка при выполнении поиска"
 
-#: internal/usecase/support/support.go:57
+#: internal/usecase/support/support.go:46
 #, fuzzy
 msgid "Failed to generate support archive"
 msgstr "Ошибка при удалении каталога репозитория"

@@ -16,37 +16,28 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package support
+//go:build e2e
+
+package e2etests_test
 
 import (
-	"context"
+	"testing"
 
-	"github.com/leonelquinteros/gotext"
-	"github.com/spf13/afero"
-
-	"go.stplr.dev/stplr/internal/app/errors"
-	"go.stplr.dev/stplr/internal/app/output"
+	"go.alt-gnome.ru/capytest"
 )
 
-type useCase struct {
-	out output.Output
-}
+func TestE2EIssue144SupportCommand(t *testing.T) {
+	t.Parallel()
 
-func New(out output.Output) *useCase {
-	return &useCase{
-		out,
-	}
-}
+	t.Run("support creates archive", matrixSuite(COMMON_SYSTEMS, func(t *testing.T, r capytest.Runner) {
+		defaultPrepare(t, r)
 
-func (u *useCase) Run(ctx context.Context) error {
-	archivePath := "stplr-support.tar.gz"
+		r.Command("stplr", "support").
+			ExpectSuccess().
+			Run(t)
 
-	c := newArchiveCreator(afero.NewOsFs())
-	if err := c.CreateSupportArchive(ctx, archivePath); err != nil {
-		return errors.WrapIntoI18nError(err, gotext.Get("Failed to generate support archive"))
-	}
-
-	u.out.Info("Support archive %s has been created. You can send it to whoever needs it.", archivePath)
-
-	return nil
+		r.Command("sh", "-c", "ls stplr-support.tar.gz").
+			ExpectSuccess().
+			Run(t)
+	}))
 }

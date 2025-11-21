@@ -672,7 +672,7 @@ msgstr ""
 msgid "Error while executing search"
 msgstr ""
 
-#: internal/usecase/support/support.go:57
+#: internal/usecase/support/support.go:46
 msgid "Failed to generate support archive"
 msgstr ""
 
