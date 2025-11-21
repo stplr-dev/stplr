@@ -39,6 +39,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install build deps
+        run: |
+          apt-get update
+          apt-get install -y libsystemd-dev
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
