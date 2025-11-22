@@ -5,38 +5,37 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2025-10-21 06:02+0000\n"
-"Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
-"Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
-"stplr/ru/>\n"
+"PO-Revision-Date: 2025-11-22 08:59+0300\n"
+"Last-Translator: Maxim Slipenko <maks1ms@alt-gnome.ru>\n"
+"Language-Team: Russian\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.13.3\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Gtranslator 48.0\n"
 
-#: cmd/stplr/main.go:70
+#: cmd/stplr/main.go:71
 msgid ""
 "Command-line interface for Stapler, a universal Linux package build system"
 msgstr ""
 "Интерфейс командной строки для Stapler, универсальной системы сборки пакетов "
 "Linux"
 
-#: cmd/stplr/main.go:75
+#: cmd/stplr/main.go:76
 msgid "Arguments to be passed on to the package manager"
 msgstr "Аргументы, которые будут переданы менеджеру пакетов"
 
-#: cmd/stplr/main.go:81
+#: cmd/stplr/main.go:82
 msgid "Enable interactive questions and prompts"
 msgstr "Включение интерактивных вопросов и запросов"
 
-#: cmd/stplr/main.go:131
+#: cmd/stplr/main.go:132
 msgid "Error loading config"
 msgstr "Ошибка при загрузке"
 
-#: cmd/stplr/main.go:138
+#: cmd/stplr/main.go:139
 msgid "Error while running app"
 msgstr "Ошибка при запуске приложения"
 
@@ -237,6 +236,14 @@ msgstr "Искать по репозиторию"
 msgid "Search by provides"
 msgstr "Иcкать по provides"
 
+#: internal/app/commands/support.go:35
+msgid "Dump debug information"
+msgstr "Выгрузить отладочную информацию"
+
+#: internal/app/commands/support.go:36
+msgid "Gathers system, configuration, and log data into a diagnostic archive"
+msgstr "Собирает данные о системе, конфигурацию и логи в диагностический архив"
+
 #: internal/app/commands/upgrade.go:42
 msgid "Upgrade all installed packages"
 msgstr "Обновить все установленные пакеты"
@@ -245,16 +252,15 @@ msgstr "Обновить все установленные пакеты"
 msgid "Print the current Stapler version and exit"
 msgstr "Показать текущую версию Stapler и выйти"
 
-#: internal/app/deps/internal/builder/builder.go:112
-#, fuzzy
+#: internal/app/deps/internal/builder/builder.go:114
 msgid "Failed to get working directory"
 msgstr "Ошибка при получении рабочего каталога"
 
-#: internal/app/deps/internal/builder/builder.go:162
+#: internal/app/deps/internal/builder/builder.go:164
 msgid "Unable to detect a supported package manager on the system"
 msgstr "Не удалось обнаружить поддерживаемый менеджер пакетов в системе"
 
-#: internal/app/deps/internal/builder/builder.go:181
+#: internal/app/deps/internal/builder/builder.go:183
 msgid "Error initialization database"
 msgstr "Ошибка инициализации базы данных"
 
@@ -467,9 +473,8 @@ msgid "Attempting to run as root using '%s'..."
 msgstr "Попытка запустить от имени root с использованием '%s'..."
 
 #: internal/scripter/firejail.go:153
-#, fuzzy
 msgid "Applying FireJail integration for %q package"
-msgstr "Применение интеграции FireJail для пакета %s"
+msgstr "Применение интеграции FireJail для пакета %q"
 
 #: internal/scripter/scripter.go:187
 msgid "Building metadata for package %q"
@@ -532,14 +537,12 @@ msgid "unknown config key: %s"
 msgstr "неизвестный ключ конфигурации: %s"
 
 #: internal/usecase/config/set/set.go:58
-#, fuzzy
 msgid "invalid value for %s: %v"
-msgstr "неверное булево значение для %s: %s"
+msgstr "неверное булево значение для %s: %v"
 
 #: internal/usecase/config/set/set.go:62
-#, fuzzy
 msgid "failed to save config: %v"
-msgstr "не удалось сохранить конфигурацию"
+msgstr "не удалось сохранить конфигурацию: %v"
 
 #: internal/usecase/config/set/set.go:65
 msgid "Successfully set %s = %s"
@@ -634,9 +637,8 @@ msgid "Error listing installed packages"
 msgstr "Ошибка при составлении списка установленных пакетов"
 
 #: internal/usecase/migrate/migrate.go:49
-#, fuzzy
 msgid "Error resetting database"
-msgstr "Ошибка инициализации базы данных"
+msgstr "Ошибка cброса базы данных"
 
 #: internal/usecase/migrate/migrate.go:53
 #, fuzzy
@@ -687,6 +689,17 @@ msgstr "Ошибка при удалении пакетов из базы дан
 #: internal/usecase/search/search.go:97
 msgid "Error while executing search"
 msgstr "Ошибка при выполнении поиска"
+
+#: internal/usecase/support/support.go:46
+#, fuzzy
+msgid "Failed to generate support archive"
+msgstr "Ошибка при удалении каталога репозитория"
+
+#: internal/usecase/support/support.go:49
+msgid ""
+"Support archive %s has been created. You can send it to whoever needs it."
+msgstr ""
+"Диагностический архив %s создан. Вы можете отправить его тем, кому он нужен."
 
 #: internal/usecase/upgrade/upgrade.go:75
 #: internal/usecase/upgrade/upgrade.go:92
@@ -796,10 +809,6 @@ msgstr "Команда %q не найдена в системе"
 
 #~ msgid "Name of the repo to be deleted"
 #~ msgstr "Имя репозитория, который будет удалён"
-
-#, fuzzy
-#~ msgid "Failed to remove temporary directory"
-#~ msgstr "Ошибка при удалении каталога репозитория"
 
 #~ msgid "Generate a Staplerfile from a template"
 #~ msgstr "Генерация Staplerfile из шаблона"

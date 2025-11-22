@@ -9,24 +9,24 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: cmd/stplr/main.go:70
+#: cmd/stplr/main.go:71
 msgid ""
 "Command-line interface for Stapler, a universal Linux package build system"
 msgstr ""
 
-#: cmd/stplr/main.go:75
+#: cmd/stplr/main.go:76
 msgid "Arguments to be passed on to the package manager"
 msgstr ""
 
-#: cmd/stplr/main.go:81
+#: cmd/stplr/main.go:82
 msgid "Enable interactive questions and prompts"
 msgstr ""
 
-#: cmd/stplr/main.go:131
+#: cmd/stplr/main.go:132
 msgid "Error loading config"
 msgstr ""
 
-#: cmd/stplr/main.go:138
+#: cmd/stplr/main.go:139
 msgid "Error while running app"
 msgstr ""
 
@@ -227,6 +227,14 @@ msgstr ""
 msgid "Search by provides"
 msgstr ""
 
+#: internal/app/commands/support.go:35
+msgid "Dump debug information"
+msgstr ""
+
+#: internal/app/commands/support.go:36
+msgid "Gathers system, configuration, and log data into a diagnostic archive"
+msgstr ""
+
 #: internal/app/commands/upgrade.go:42
 msgid "Upgrade all installed packages"
 msgstr ""
@@ -235,15 +243,15 @@ msgstr ""
 msgid "Print the current Stapler version and exit"
 msgstr ""
 
-#: internal/app/deps/internal/builder/builder.go:112
+#: internal/app/deps/internal/builder/builder.go:114
 msgid "Failed to get working directory"
 msgstr ""
 
-#: internal/app/deps/internal/builder/builder.go:162
+#: internal/app/deps/internal/builder/builder.go:164
 msgid "Unable to detect a supported package manager on the system"
 msgstr ""
 
-#: internal/app/deps/internal/builder/builder.go:181
+#: internal/app/deps/internal/builder/builder.go:183
 msgid "Error initialization database"
 msgstr ""
 
@@ -662,6 +670,15 @@ msgstr ""
 
 #: internal/usecase/search/search.go:97
 msgid "Error while executing search"
+msgstr ""
+
+#: internal/usecase/support/support.go:46
+msgid "Failed to generate support archive"
+msgstr ""
+
+#: internal/usecase/support/support.go:49
+msgid ""
+"Support archive %s has been created. You can send it to whoever needs it."
 msgstr ""
 
 #: internal/usecase/upgrade/upgrade.go:75
