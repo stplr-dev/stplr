@@ -151,7 +151,7 @@ func parseOSReleaseFromRunner(runner *interp.Runner) (*OSRelease, error) {
 	return out, nil
 }
 
-func isIdEqualOrLike(info *OSRelease, id string) bool {
+func IsIdEqualOrLike(info *OSRelease, id string) bool {
 	return info.ID == id || slices.Contains(info.Like, id)
 }
 
@@ -162,13 +162,13 @@ func parseRHELPlatfrom(platform string) string {
 
 func setReleaseID(runner *interp.Runner, info *OSRelease) {
 	switch {
-	case info.ID == "altlinux":
+	case IsIdEqualOrLike(info, "altlinux"):
 		info.ReleaseID = runner.Vars["ALT_BRANCH_ID"].Str
 
-	case isIdEqualOrLike(info, "rhel"), isIdEqualOrLike(info, "fedora"):
+	case IsIdEqualOrLike(info, "rhel"), IsIdEqualOrLike(info, "fedora"):
 		info.ReleaseID = parseRHELPlatfrom(runner.Vars["PLATFORM_ID"].Str)
 
-	case isIdEqualOrLike(info, "debian"), isIdEqualOrLike(info, "ubuntu"):
+	case IsIdEqualOrLike(info, "debian"), IsIdEqualOrLike(info, "ubuntu"):
 		info.ReleaseID = runner.Vars["VERSION_CODENAME"].Str
 	}
 

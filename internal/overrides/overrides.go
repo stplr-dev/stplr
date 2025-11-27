@@ -183,11 +183,11 @@ func parseLangs(langs []string, tags []language.Tag) ([]string, error) {
 }
 
 func ReleasePlatformSpecific(release int, info *distro.OSRelease) string {
-	if info.ID == "altlinux" {
+	if distro.IsIdEqualOrLike(info, "altlinux") {
 		return fmt.Sprintf("alt%d", release)
 	}
 
-	if info.ID == "fedora" || slices.Contains(info.Like, "fedora") {
+	if distro.IsIdEqualOrLike(info, "fedora") {
 		re := regexp.MustCompile(`platform:(\S+)`)
 		match := re.FindStringSubmatch(info.PlatformID)
 		if len(match) > 1 {
@@ -199,13 +199,13 @@ func ReleasePlatformSpecific(release int, info *distro.OSRelease) string {
 }
 
 func ParseReleasePlatformSpecific(s string, info *distro.OSRelease) (int, error) {
-	if info.ID == "altlinux" {
+	if distro.IsIdEqualOrLike(info, "altlinux") {
 		if strings.HasPrefix(s, "alt") {
 			return strconv.Atoi(s[3:])
 		}
 	}
 
-	if info.ID == "fedora" || slices.Contains(info.Like, "fedora") {
+	if distro.IsIdEqualOrLike(info, "fedora") {
 		parts := strings.SplitN(s, ".", 2)
 		return strconv.Atoi(parts[0])
 	}

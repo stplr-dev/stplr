@@ -36,34 +36,71 @@ const (
 	fedoraRpmBuild = altRpmBuild
 )
 
-func TestEmptyBuildDepends(t *testing.T) {
-	_, err := reqprov.New(&distro.OSRelease{ID: "unknown"}, "deb", "")
-	require.Error(t, err)
-}
+func TestBuildDepends(t *testing.T) {
+	tests := []struct {
+		name      string
+		osRelease *distro.OSRelease
+		pkgFormat string
+		buildOpts string
+		wantDeps  []string
+		wantErr   bool
+	}{
+		{
+			name:      "empty build depends - unknown distro",
+			osRelease: &distro.OSRelease{ID: "unknown"},
+			pkgFormat: "deb",
+			buildOpts: "",
+			wantDeps:  nil,
+			wantErr:   true,
+		},
+		{
+			name:      "altlinux by ID",
+			osRelease: &distro.OSRelease{ID: altId},
+			pkgFormat: "rpm",
+			buildOpts: "",
+			wantDeps:  []string{altRpmBuild},
+			wantErr:   false,
+		},
+		{
+			name:      "fedora by ID",
+			osRelease: &distro.OSRelease{ID: fedoraId},
+			pkgFormat: "rpm",
+			buildOpts: "",
+			wantDeps:  []string{fedoraRpmBuild},
+			wantErr:   false,
+		},
+		{
+			name:      "fedora by Like",
+			osRelease: &distro.OSRelease{ID: "mycustom", Like: []string{fedoraId}},
+			pkgFormat: "rpm",
+			buildOpts: "",
+			wantDeps:  []string{fedoraRpmBuild},
+			wantErr:   false,
+		},
+		{
+			name:      "altlinux by Like",
+			osRelease: &distro.OSRelease{ID: "mycustom", Like: []string{altId}},
+			pkgFormat: "rpm",
+			buildOpts: "",
+			wantDeps:  []string{altRpmBuild},
+			wantErr:   false,
+		},
+	}
 
-func TestAltLinuxBuildDepends(t *testing.T) {
-	svc, err := reqprov.New(&distro.OSRelease{ID: altId}, "rpm", "")
-	require.NoError(t, err)
-	deps, err := svc.BuildDepends(context.Background())
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			svc, err := reqprov.New(tt.osRelease, tt.pkgFormat, tt.buildOpts)
 
-	assert.NoError(t, err)
-	assert.Equal(t, []string{altRpmBuild}, deps)
-}
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
 
-func TestFedoraBuildDependsByID(t *testing.T) {
-	svc, err := reqprov.New(&distro.OSRelease{ID: fedoraId}, "rpm", "")
-	require.NoError(t, err)
-	deps, err := svc.BuildDepends(context.Background())
+			require.NoError(t, err)
+			deps, err := svc.BuildDepends(context.Background())
 
-	assert.NoError(t, err)
-	assert.Equal(t, []string{fedoraRpmBuild}, deps)
-}
-
-func TestFedoraBuildDependsByLike(t *testing.T) {
-	svc, err := reqprov.New(&distro.OSRelease{ID: "mycustom", Like: []string{fedoraId}}, "rpm", "")
-	require.NoError(t, err)
-	deps, err := svc.BuildDepends(context.Background())
-
-	assert.NoError(t, err)
-	assert.Equal(t, []string{fedoraRpmBuild}, deps)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.wantDeps, deps)
+		})
+	}
 }

@@ -246,6 +246,13 @@ func TestReleasePlatformSpecific(t *testing.T) {
 		},
 		{
 			info: &distro.OSRelease{
+				ID:   "alt-atomic",
+				Like: []string{"altlinux"},
+			},
+			expected: "alt1",
+		},
+		{
+			info: &distro.OSRelease{
 				ID: "ubuntu",
 			},
 			expected: "1",

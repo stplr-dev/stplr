@@ -25,7 +25,6 @@ package reqprov
 import (
 	"context"
 	"fmt"
-	"slices"
 
 	"github.com/goreleaser/nfpm/v2"
 
@@ -54,9 +53,9 @@ func getFinder(info *distro.OSRelease, method string) (ReqProvFinder, error) {
 	switch method {
 	case "rpm":
 		switch {
-		case info.ID == "altlinux":
+		case distro.IsIdEqualOrLike(info, "altlinux"):
 			return rpm.NewALTLinux(), nil
-		case info.ID == "fedora" || slices.Contains(info.Like, "fedora"):
+		case distro.IsIdEqualOrLike(info, "fedora"):
 			return rpm.NewFedora(), nil
 		default:
 			return nil, fmt.Errorf("unsupported RPM-based distro: %s", info.ID)
