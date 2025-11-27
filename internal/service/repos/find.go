@@ -30,7 +30,17 @@ import (
 	"strings"
 
 	"go.stplr.dev/stplr/pkg/staplerfile"
+	"go.stplr.dev/stplr/pkg/types"
 )
+
+func (rs *Repos) GetRepo(name string) (types.Repo, error) {
+	for _, r := range rs.cfg.Repos() {
+		if r.Name == name {
+			return r, nil
+		}
+	}
+	return types.Repo{}, fmt.Errorf("repo %q not found", name)
+}
 
 func (rs *Repos) FindPkgs(ctx context.Context, pkgs []string) (map[string][]staplerfile.Package, []string, error) {
 	found := make(map[string][]staplerfile.Package)

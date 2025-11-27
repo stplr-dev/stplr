@@ -142,11 +142,15 @@ func (w *progressViewportWriter) Write(p []byte) (n int, err error) {
 
 // ================
 
+type pullModelState struct {
+	repo types.Repo
+}
+
 type pullModel struct {
 	ctx  context.Context
 	done bool
 
-	repo types.Repo
+	state *pullModelState
 
 	lastUrl string
 	logs    []string
@@ -167,6 +171,10 @@ type pullModel struct {
 func newPullModel(ctx context.Context, repo types.Repo, rs PullExecutor, updateRepoFromToml bool) *pullModel {
 	pm := pullModel{}
 
+	pm.state = &pullModelState{
+		repo: repo,
+	}
+
 	msgs := make(chan tea.Msg)
 	notifier := &teaNotifier{parent: &pm, ch: msgs}
 
@@ -183,7 +191,6 @@ func newPullModel(ctx context.Context, repo types.Repo, rs PullExecutor, updateR
 		Padding(0, 1)
 
 	pm.ctx = ctx
-	pm.repo = repo
 	pm.rs = rs
 	pm.spinner = s
 	pm.status = gotext.Get("Pull %s", urls[0])
@@ -210,7 +217,7 @@ type (
 	}
 )
 
-func (m *pullModel) pull() tea.Cmd {
+func (m pullModel) pull() tea.Cmd {
 	return func() tea.Msg {
 		err := m.Pull()
 		if err != nil {
@@ -276,7 +283,7 @@ func (m pullModel) View() string {
 	title := lipgloss.NewStyle().
 		Bold(true).
 		Foreground(primaryColor).
-		Render(gotext.Get("Pulling %s...", m.repo.Name))
+		Render(gotext.Get("Pulling %s...", m.state.repo.Name))
 
 	logSection := ""
 	if len(m.logs) > 0 {
@@ -301,10 +308,10 @@ func (m pullModel) View() string {
 	return fmt.Sprintf("%s%s%s%s", title, logSection, statusLine, gitBox)
 }
 
-func (m *pullModel) Pull() error {
-	newRepo, err := m.rs.Pull(m.ctx, m.repo, m.notifier)
+func (m pullModel) Pull() error {
+	newRepo, err := m.rs.Pull(m.ctx, m.state.repo, m.notifier)
 	if err == nil {
-		m.repo = newRepo
+		m.state.repo = newRepo
 	}
 	return err
 }

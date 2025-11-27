@@ -279,7 +279,7 @@ msgstr ""
 msgid "Full license available at: %s"
 msgstr ""
 
-#: internal/build/build.go:195
+#: internal/build/build.go:204
 msgid "Installing dependencies"
 msgstr ""
 
@@ -470,6 +470,10 @@ msgstr ""
 msgid "Executing %s()"
 msgstr ""
 
+#: internal/service/repos/internal/puller/puller.go:199
+msgid "Git repository does not appear to be a valid Stapler repo"
+msgstr ""
+
 #: internal/service/repos/internal/puller/puller.go:230
 msgid ""
 "Stapler repo's minimum Stapler version is greater than the current version. "
@@ -492,27 +496,33 @@ msgstr ""
 msgid "Repository pulled successfully!"
 msgstr ""
 
-#: internal/service/repos/tui_pull.go:251
+#: internal/service/repos/tui_pull.go:258
 msgid "Failed to pull from %s: %v"
 msgstr ""
 
-#: internal/service/repos/tui_pull.go:258
+#: internal/service/repos/tui_pull.go:265
 msgid "- Pulled from %s"
 msgstr ""
 
-#: internal/service/repos/tui_pull.go:266
+#: internal/service/repos/tui_pull.go:273
 msgid "🞮 Failed to pull — the only source is unavailable"
 msgstr ""
 
-#: internal/service/repos/tui_pull.go:279
+#: internal/service/repos/tui_pull.go:286
 msgid "Pulling %s..."
 msgstr ""
 
-#: internal/usecase/build/build.go:114
+#: internal/usecase/build/build.go:109
+msgid ""
+"Error when building the package. Report the issue here: %s\n"
+"Error trace"
+msgstr ""
+
+#: internal/usecase/build/build.go:124
 msgid "Error moving the package"
 msgstr ""
 
-#: internal/usecase/build/build.go:122
+#: internal/usecase/build/build.go:132
 msgid "Your settings do not allow build command"
 msgstr ""
 
@@ -592,7 +602,13 @@ msgstr ""
 msgid "User chose not to continue after reading script"
 msgstr ""
 
-#: internal/usecase/install/action/install.go:87
+#: internal/usecase/install/action/install.go:88
+msgid ""
+"Error when installing the package. Report the issue here: %s\n"
+"Error trace"
+msgstr ""
+
+#: internal/usecase/install/action/install.go:95
 msgid "Error when installing the package"
 msgstr ""
 

@@ -82,6 +82,14 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		slog.Info("user chose not to continue after reading the script", "pkgs", opts.Pkgs)
 		return errors.NewI18nError(gotext.Get("User chose not to continue after reading script"))
 	}
+	var ctxErr *build.BuildContextError
+	if stdErrors.As(err, &ctxErr) {
+		msg := gotext.Get(
+			"Error when installing the package. Report the issue here: %s\nError trace",
+			ctxErr.ReportUrl,
+		)
+		return errors.WrapIntoI18nError(ctxErr.Unwrap(), msg)
+	}
 	if err != nil {
 		slog.Error("error when installing", "pkgs", opts.Pkgs, "err", err)
 		return errors.WrapIntoI18nError(err, gotext.Get("Error when installing the package"))

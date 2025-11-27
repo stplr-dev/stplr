@@ -3,3 +3,4 @@
   ref: main
   mirrors:
   - https://github.com/example/example.git
+  report_url: https://altlinux.space/stapler/repo-for-tests.git?package={{ .BasePackageName }}

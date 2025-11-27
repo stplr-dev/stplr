@@ -19,8 +19,11 @@
 package build
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"log/slog"
+	"text/template"
 
 	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/commonbuild"
@@ -83,6 +86,22 @@ func runSteps(ctx context.Context, state *BuildState, steps []BuildStep) ([]*com
 	return state.BuiltDeps, nil
 }
 
+type BuildContextError struct {
+	Repo      string
+	Package   string
+	ReportUrl string
+
+	Err error
+}
+
+func (e *BuildContextError) Error() string {
+	return fmt.Sprintf("build error for %s/%s: %s", e.Repo, e.Package, e.Err.Error())
+}
+
+func (e *BuildContextError) Unwrap() error {
+	return e.Err
+}
+
 func (b *Builder) BuildPackage(ctx context.Context, input *commonbuild.BuildInput) ([]*commonbuild.BuiltDep, error) {
 	state := NewBuildState()
 	state.Input = input
@@ -127,5 +146,44 @@ func (b *Builder) BuildPackage(ctx context.Context, input *commonbuild.BuildInpu
 		),
 	}
 
-	return runSteps(ctx, state, steps)
+	res, stepsErr := runSteps(ctx, state, steps)
+	if stepsErr != nil {
+		if input.BasePkgName != "" {
+			repo, err := b.repos.GetRepo(input.Repository())
+			if err != nil {
+				slog.Error("")
+				return nil, fmt.Errorf("failed to get repo: %w", err)
+			}
+
+			if repo.ReportUrl == "" {
+				return nil, stepsErr
+			}
+
+			tmpl, err := template.New("report-url").Parse(repo.ReportUrl)
+			if err != nil {
+				return nil, fmt.Errorf("invalid report url template: %w", err)
+			}
+
+			data := map[string]interface{}{
+				"Repo":            repo.Name,
+				"BasePackageName": input.BasePkgName,
+			}
+
+			var buf bytes.Buffer
+			if err := tmpl.Execute(&buf, data); err != nil {
+				return nil, fmt.Errorf("failed to execute report url template: %w", err)
+			}
+
+			reportURL := buf.String()
+
+			return nil, &BuildContextError{
+				Repo:      repo.Name,
+				Package:   input.BasePkgName,
+				Err:       stepsErr,
+				ReportUrl: reportURL,
+			}
+		}
+		return nil, stepsErr
+	}
+	return res, nil
 }

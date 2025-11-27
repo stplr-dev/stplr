@@ -196,8 +196,7 @@ func (rs *Puller) loadAndUpdateConfig(repoDir string, repo *types.Repo) error {
 	fl, err := os.Open(filepath.Join(repoDir, constants.RepoConfigFile))
 	if err != nil {
 		// TODO:
-		// rs.out.Warn(gotext.Get("Git repository %q does not appear to be a valid Stapler repo", repo.Name))
-		// slog.Warn(gotext.Get("Git repository does not appear to be a valid Stapler repo"), "repo", repo.Name)
+		slog.Warn(gotext.Get("Git repository does not appear to be a valid Stapler repo"), "repo", repo.Name)
 		return nil
 	}
 	defer fl.Close()
@@ -218,6 +217,7 @@ func (rs *Puller) loadAndUpdateConfig(repoDir string, repo *types.Repo) error {
 	if len(repoCfg.Repo.Mirrors) > 0 {
 		repo.Mirrors = repoCfg.Repo.Mirrors
 	}
+	repo.ReportUrl = repoCfg.Repo.ReportUrl
 	return nil
 }
 

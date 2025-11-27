@@ -198,11 +198,11 @@ func (r *Repos) pullTui(ctx context.Context, repo types.Repo) (types.Repo, error
 	}
 	if _, err := p.Run(); err != nil {
 		if stdErrors.Is(err, tea.ErrInterrupted) {
-			return m.repo, ErrPullRepoInterrupted
+			return m.state.repo, ErrPullRepoInterrupted
 		}
-		return m.repo, err
+		return m.state.repo, err
 	}
-	return m.repo, nil
+	return m.state.repo, nil
 }
 
 func (r *Repos) Pull(ctx context.Context, repo types.Repo) (types.Repo, error) {

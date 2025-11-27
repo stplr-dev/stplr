@@ -31,5 +31,6 @@ type RepoConfig struct {
 		URL        string   `toml:"url"`
 		Ref        string   `toml:"ref"`
 		Mirrors    []string `toml:"mirrors"`
+		ReportUrl  string   `toml:"report_url"`
 	}
 }

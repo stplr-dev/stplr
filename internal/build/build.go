@@ -49,6 +49,7 @@ func GetBuiltPaths(deps []*commonbuild.BuiltDep) []string {
 
 type PackageFinder interface {
 	FindPkgs(ctx context.Context, pkgs []string) (map[string][]staplerfile.Package, []string, error)
+	GetRepo(name string) (types.Repo, error)
 }
 
 type SourcesInput struct {
@@ -92,7 +93,15 @@ func (b *Builder) BuildPackageFromDb(
 ) ([]*commonbuild.BuiltDep, error) {
 	scriptInfo := b.scriptResolver.ResolveScript(ctx, args.Package)
 
+	// very dirty but ok
+	// TODO: refactor logic
+	name := args.Package.BasePkgName
+	if name == "" {
+		name = args.Package.Name
+	}
+
 	return b.BuildPackage(ctx, &commonbuild.BuildInput{
+		BasePkgName: name,
 		Script:      scriptInfo.Script,
 		Repository_: scriptInfo.Repository,
 		Packages_:   args.Packages,

@@ -27,6 +27,7 @@ import (
 )
 
 type BuildInput struct {
+	BasePkgName string
 	Opts        *types.BuildOpts
 	Info_       *distro.OSRelease
 	PkgFormat_  string
@@ -39,6 +40,9 @@ func (bi *BuildInput) GobEncode() ([]byte, error) {
 	w := new(bytes.Buffer)
 	encoder := gob.NewEncoder(w)
 
+	if err := encoder.Encode(bi.BasePkgName); err != nil {
+		return nil, err
+	}
 	if err := encoder.Encode(bi.Opts); err != nil {
 		return nil, err
 	}
@@ -65,6 +69,9 @@ func (bi *BuildInput) GobDecode(data []byte) error {
 	r := bytes.NewBuffer(data)
 	decoder := gob.NewDecoder(r)
 
+	if err := decoder.Decode(&bi.BasePkgName); err != nil {
+		return err
+	}
 	if err := decoder.Decode(&bi.Opts); err != nil {
 		return err
 	}

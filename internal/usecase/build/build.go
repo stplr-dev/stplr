@@ -25,6 +25,8 @@ import (
 	"os"
 	"path/filepath"
 
+	stdErrors "errors"
+
 	"github.com/leonelquinteros/gotext"
 	"github.com/spf13/afero"
 
@@ -100,6 +102,14 @@ func (u *useCase) Run(ctx context.Context, o RunOptions) error {
 		pkgs, err = u.runForScript(ctx, o)
 	default:
 		return fmt.Errorf("either Script or Package must be specified")
+	}
+	var ctxErr *build.BuildContextError
+	if stdErrors.As(err, &ctxErr) {
+		msg := gotext.Get(
+			"Error when building the package. Report the issue here: %s\nError trace",
+			ctxErr.ReportUrl,
+		)
+		return errors.WrapIntoI18nError(ctxErr.Unwrap(), msg)
 	}
 	if err != nil {
 		return err

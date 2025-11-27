@@ -40,8 +40,9 @@ type Config struct {
 
 // Repo represents a ALR repo within a configuration file
 type Repo struct {
-	Name    string   `json:"name" koanf:"name"`
-	URL     string   `json:"url" koanf:"url"`
-	Ref     string   `json:"ref" koanf:"ref"`
-	Mirrors []string `json:"mirrors" koanf:"mirrors"`
+	Name      string   `json:"name" koanf:"name"`
+	URL       string   `json:"url" koanf:"url"`
+	Ref       string   `json:"ref" koanf:"ref"`
+	Mirrors   []string `json:"mirrors" koanf:"mirrors"`
+	ReportUrl string   `json:"report_url" koanf:"report_url"`
 }
