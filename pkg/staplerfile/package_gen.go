@@ -31,6 +31,8 @@ type packageResolved struct {
 	Provides          []string          `json:"provides"`
 	Conflicts         []string          `json:"conflicts"`
 	Replaces          []string          `json:"replaces"`
+	AppStreamAppID    string            `json:"appstream_app_id"`
+	AppStreamMetaInfo string            `json:"appstream_metainfo"`
 	NonFree           bool              `json:"nonfree"`
 	NonFreeUrl        string            `json:"nonfree_url"`
 	NonFreeMsg        string            `json:"nonfree_msg"`
@@ -72,6 +74,8 @@ func PackageToResolved(src *Package) packageResolved {
 		Provides:          src.Provides,
 		Conflicts:         src.Conflicts,
 		Replaces:          src.Replaces,
+		AppStreamAppID:    src.AppStreamAppID.Resolved(),
+		AppStreamMetaInfo: src.AppStreamMetaInfo.Resolved(),
 		NonFree:           src.NonFree,
 		NonFreeUrl:        src.NonFreeUrl.Resolved(),
 		NonFreeMsg:        src.NonFreeMsg.Resolved(),
@@ -102,6 +106,8 @@ func PackageToResolved(src *Package) packageResolved {
 }
 
 func ResolvePackage(pkg *Package, overrides []string) {
+	pkg.AppStreamAppID.Resolve(overrides)
+	pkg.AppStreamMetaInfo.Resolve(overrides)
 	pkg.NonFreeUrl.Resolve(overrides)
 	pkg.NonFreeMsg.Resolve(overrides)
 	pkg.NonFreeMsgFile.Resolve(overrides)

@@ -79,11 +79,13 @@ var testPkg = staplerfile.Package{
 		"":     {"golang"},
 		"arch": {"go"},
 	}),
-	Repository: "default",
-	Summary:    staplerfile.OverridableFromMap(map[string]string{}),
-	Group:      staplerfile.OverridableFromMap(map[string]string{}),
-	OptDepends: staplerfile.OverridableFromMap(map[string][]string{}),
-	NonFreeUrl: staplerfile.OverridableFromMap(map[string]string{}),
+	Repository:        "default",
+	Summary:           staplerfile.OverridableFromMap(map[string]string{}),
+	Group:             staplerfile.OverridableFromMap(map[string]string{}),
+	OptDepends:        staplerfile.OverridableFromMap(map[string][]string{}),
+	NonFreeUrl:        staplerfile.OverridableFromMap(map[string]string{}),
+	AppStreamAppID:    staplerfile.OverridableFromMap(map[string]string{}),
+	AppStreamMetaInfo: staplerfile.OverridableFromMap(map[string]string{}),
 }
 
 func TestInit(t *testing.T) {
