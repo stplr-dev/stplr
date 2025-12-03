@@ -48,6 +48,10 @@ func InstallDepsStep(
 	}
 }
 
+func (s *installDepsStep) Name() string {
+	return "install deps"
+}
+
 func (s *installDepsStep) Run(ctx context.Context, state *BuildState) error {
 	slog.Debug("installBuildDeps")
 	alrBuildDeps, installedBuildDeps, err := s.installBuildDeps(ctx, state.Input, state.FlatVars.BuildDepends)

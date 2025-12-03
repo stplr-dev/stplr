@@ -37,6 +37,10 @@ func PostStep(installerExecutor installer.InstallerExecutor) *postStep {
 	return &postStep{installerExecutor: installerExecutor}
 }
 
+func (s *postStep) Name() string {
+	return "post"
+}
+
 func (s *postStep) Run(ctx context.Context, state *BuildState) error {
 	err := s.removeBuildDeps(ctx, state.Input, state.InstalledBuildDeps)
 

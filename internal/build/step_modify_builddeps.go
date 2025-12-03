@@ -32,6 +32,10 @@ func ModifyBuilddepsStep() *modifyBuilddepsStep {
 	return &modifyBuilddepsStep{}
 }
 
+func (s *modifyBuilddepsStep) Name() string {
+	return "modify build deps"
+}
+
 func (s *modifyBuilddepsStep) Run(ctx context.Context, state *BuildState) error {
 	for _, vars := range state.Packages {
 		if len(vars.AutoReq.Resolved()) == 1 && decoder.IsTruthy(vars.AutoReq.Resolved()[0]) {

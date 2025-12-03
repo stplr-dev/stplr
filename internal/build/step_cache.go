@@ -33,6 +33,10 @@ func CheckCacheStep(cacheExecutor CacheExecutor) *checkCacheStep {
 	return &checkCacheStep{cacheExecutor: cacheExecutor}
 }
 
+func (s *checkCacheStep) Name() string {
+	return "check cache"
+}
+
 func (s *checkCacheStep) Run(ctx context.Context, state *BuildState) error {
 	if !state.Input.Opts.Clean {
 		var remaining []*staplerfile.Package

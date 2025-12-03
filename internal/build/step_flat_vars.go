@@ -30,6 +30,10 @@ type flatVarsStep struct{}
 
 func FlatVarsStep() *flatVarsStep { return &flatVarsStep{} }
 
+func (s *flatVarsStep) Name() string {
+	return "flat vars"
+}
+
 func (s *flatVarsStep) Run(ctx context.Context, state *BuildState) error {
 	buildDepends := []string{}
 	optDepends := []string{}

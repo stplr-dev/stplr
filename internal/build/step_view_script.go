@@ -37,6 +37,10 @@ func ScriptViewStep(scriptViewer ScriptViewerExecutor) *scriptViewStep {
 	return &scriptViewStep{scriptViewer: scriptViewer}
 }
 
+func (s *scriptViewStep) Name() string {
+	return "view script"
+}
+
 func (s *scriptViewStep) Run(ctx context.Context, state *BuildState) error {
 	return s.scriptViewer.ViewScript(
 		ctx,

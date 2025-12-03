@@ -37,6 +37,10 @@ func ChecksStep(e ChecksExecutor) *checksStep {
 	return &checksStep{e: e, out: output.NewConsoleOutput()}
 }
 
+func (s *checksStep) Name() string {
+	return "checks"
+}
+
 func (s *checksStep) Run(ctx context.Context, state *BuildState) error {
 	s.out.Info(gotext.Get("Building the %q package", state.BasePackage))
 

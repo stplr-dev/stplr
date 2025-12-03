@@ -297,11 +297,11 @@ msgstr ""
 msgid "This package is already installed"
 msgstr ""
 
-#: internal/build/step_checks.go:41
+#: internal/build/step_checks.go:45
 msgid "Building the %q package"
 msgstr ""
 
-#: internal/build/step_flat_vars.go:47
+#: internal/build/step_flat_vars.go:51
 msgid "The checksums array must be the same length as sources"
 msgstr ""
 
@@ -310,11 +310,11 @@ msgid ""
 "This package contains non-free software that requires license acceptance."
 msgstr ""
 
-#: internal/build/step_post.go:51
+#: internal/build/step_post.go:55
 msgid "Would you like to remove the build dependencies?"
 msgstr ""
 
-#: internal/build/step_prepare.go:55
+#: internal/build/step_prepare.go:59
 msgid "Downloading sources"
 msgstr ""
 

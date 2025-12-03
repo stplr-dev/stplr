@@ -70,13 +70,14 @@ func NewBuilder(
 }
 
 type BuildStep interface {
+	Name() string
 	Run(ctx context.Context, state *BuildState) error
 }
 
 func runSteps(ctx context.Context, state *BuildState, steps []BuildStep) ([]*commonbuild.BuiltDep, error) {
 	for _, step := range steps {
 		if err := step.Run(ctx, state); err != nil {
-			return nil, fmt.Errorf("step (%T) failed: %w", step, err)
+			return nil, fmt.Errorf("step %q failed: %w", step.Name(), err)
 		}
 
 		if state.ShouldExit {

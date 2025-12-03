@@ -128,6 +128,10 @@ func NonfreeViewStep(e NonFreeViewerExecutor) *nonfreeViewStep {
 	return &nonfreeViewStep{e: e}
 }
 
+func (s *nonfreeViewStep) Name() string {
+	return "view nonfree"
+}
+
 func (s *nonfreeViewStep) Run(ctx context.Context, state *BuildState) error {
 	for _, pkg := range state.Packages {
 		if err := s.e.ViewNonfree(

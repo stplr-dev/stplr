@@ -45,6 +45,10 @@ func PrepareStep(
 	}
 }
 
+func (s *prepareStep) Name() string {
+	return "prepare"
+}
+
 func (b *prepareStep) Run(ctx context.Context, state *BuildState) error {
 	slog.Debug("PrepareDirs")
 	err := b.scriptExecutor.PrepareDirs(ctx, state.Input, state.BasePackage)

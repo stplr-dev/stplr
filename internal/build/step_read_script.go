@@ -39,6 +39,10 @@ func ReadScriptStep(
 	}
 }
 
+func (s *readScriptStep) Name() string {
+	return "read script"
+}
+
 func (s *readScriptStep) Run(ctx context.Context, state *BuildState) error {
 	f, err := s.reader.Read(ctx, state.Input.Script)
 	if err != nil {

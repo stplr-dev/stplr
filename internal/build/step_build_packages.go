@@ -32,6 +32,10 @@ func BuildPackagesStep(scriptExecutor scripter.ScriptExecutor) *buildPackagesSte
 	return &buildPackagesStep{scriptExecutor: scriptExecutor}
 }
 
+func (s *buildPackagesStep) Name() string {
+	return "build packages"
+}
+
 func (s *buildPackagesStep) Run(ctx context.Context, state *BuildState) error {
 	res, err := s.scriptExecutor.ExecuteSecondPass(
 		ctx,
