@@ -578,6 +578,7 @@ func ForMigrateAction(ctx context.Context) (*MigrateActionDeps, Cleanup, error) 
 	b, err := builder.
 		Start(ctx).
 		Config().
+		DropCaps().
 		End()
 	if err != nil {
 		return nil, nil, err
