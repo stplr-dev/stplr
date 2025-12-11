@@ -55,7 +55,7 @@ jobs:
 
     - name: SonarQube Scan for Pull Request
       if: github.event_name == 'pull_request'
-      uses: https://github.com/sonarsource/sonarqube-scan-action@v6
+      uses: https://github.com/sonarsource/sonarqube-scan-action@v7
       with:
         args: >
           -Dsonar.pullrequest.key=${{ github.event.number }}
@@ -68,7 +68,7 @@ jobs:
 
     - name: SonarQube Scan for Push to main
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: https://github.com/sonarsource/sonarqube-scan-action@v6
+      uses: https://github.com/sonarsource/sonarqube-scan-action@v7
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
