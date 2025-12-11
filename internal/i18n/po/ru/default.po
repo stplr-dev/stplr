@@ -5,16 +5,17 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2025-11-22 08:59+0300\n"
-"Last-Translator: Maxim Slipenko <maks1ms@alt-gnome.ru>\n"
-"Language-Team: Russian\n"
+"PO-Revision-Date: 2025-12-11 06:55+0000\n"
+"Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
+"Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
+"stplr/ru/>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Gtranslator 48.0\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Weblate 5.14.3\n"
 
 #: cmd/stplr/main.go:71
 msgid ""
@@ -485,10 +486,8 @@ msgid "Executing %s()"
 msgstr "Выполнение %s()"
 
 #: internal/service/repos/internal/puller/puller.go:199
-#, fuzzy
 msgid "Git repository does not appear to be a valid Stapler repo"
-msgstr ""
-"Репозиторий Git %q, похоже, не является корректным репозиторием Stapler"
+msgstr "Git-репозиторий не выглядит корректным репозиторием Stapler"
 
 #: internal/service/repos/internal/puller/puller.go:230
 msgid ""
@@ -535,6 +534,8 @@ msgid ""
 "Error when building the package. Report the issue here: %s\n"
 "Error trace"
 msgstr ""
+"Ошибка при сборке пакета. Сообщите о проблеме здесь: %s\n"
+"Трассировка ошибки"
 
 #: internal/usecase/build/build.go:124
 msgid "Error moving the package"
@@ -621,11 +622,13 @@ msgid "User chose not to continue after reading script"
 msgstr "Пользователь решил не продолжать после просмотра скрипта"
 
 #: internal/usecase/install/action/install.go:88
-#, fuzzy
 msgid ""
 "Error when installing the package. Report the issue here: %s\n"
 "Error trace"
-msgstr "Ошибка при установке пакета"
+msgstr ""
+"Ошибка при установке пакета. Сообщите о проблеме здесь: %s\n"
+"\n"
+"Трассировка ошибки"
 
 #: internal/usecase/install/action/install.go:95
 msgid "Error when installing the package"
@@ -660,14 +663,12 @@ msgid "Error resetting database"
 msgstr "Ошибка cброса базы данных"
 
 #: internal/usecase/migrate/migrate.go:53
-#, fuzzy
 msgid "Error resetting cache"
-msgstr "Ошибка при получении пакетов"
+msgstr "Ошибка при сбросе кэша"
 
 #: internal/usecase/migrate/migrate.go:63
-#, fuzzy
 msgid "Failed to reread all"
-msgstr "Не удалось разобрать релиз"
+msgstr "Не удалось перечитать всё"
 
 #: internal/usecase/remove/action/remove.go:47
 msgid "Error removing packages"
@@ -710,9 +711,8 @@ msgid "Error while executing search"
 msgstr "Ошибка при выполнении поиска"
 
 #: internal/usecase/support/support.go:46
-#, fuzzy
 msgid "Failed to generate support archive"
-msgstr "Ошибка при удалении каталога репозитория"
+msgstr "Не удалось создать архив для поддержки"
 
 #: internal/usecase/support/support.go:49
 msgid ""
