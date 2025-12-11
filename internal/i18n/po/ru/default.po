@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2025-12-11 06:55+0000\n"
+"PO-Revision-Date: 2025-12-11 06:56+0000\n"
 "Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
 "stplr/ru/>\n"
@@ -627,7 +627,6 @@ msgid ""
 "Error trace"
 msgstr ""
 "Ошибка при установке пакета. Сообщите о проблеме здесь: %s\n"
-"\n"
 "Трассировка ошибки"
 
 #: internal/usecase/install/action/install.go:95
