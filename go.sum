@@ -241,8 +241,12 @@ github.com/goreleaser/chglog v0.7.3 h1:eCKJrvsDgG+F1F2fhwM6qX+S5yMiZgsQ4VNTPFl9q
 github.com/goreleaser/chglog v0.7.3/go.mod h1:HXPf4avc1kTD00a46LuTEH0i1dZctLq8Xs2BxUfROnY=
 github.com/goreleaser/fileglob v1.3.0 h1:/X6J7U8lbDpQtBvGcwwPS6OpzkNVlVEsFUVRx9+k+7I=
 github.com/goreleaser/fileglob v1.3.0/go.mod h1:Jx6BoXv3mbYkEzwm9THo7xbr5egkAraxkGorbJb4RxU=
+github.com/goreleaser/fileglob v1.4.0 h1:Y7zcUnzQjT1gbntacGAkIIfLv+OwojxTXBFxjSFoBBs=
+github.com/goreleaser/fileglob v1.4.0/go.mod h1:1pbHx7hhmJIxNZvm6fi6WVrnP0tndq6p3ayWdLn1Yf8=
 github.com/goreleaser/nfpm/v2 v2.43.1 h1:y7i+5wlAuBqUEsTL4cZp0FjnNStoA/to9Yuju+MqZpc=
 github.com/goreleaser/nfpm/v2 v2.43.1/go.mod h1:3sDxZIYoMCd3FPa44PuxWnhMtOUHEDBhsmddHAcfySw=
+github.com/goreleaser/nfpm/v2 v2.44.0 h1:TlfLFJX/soK/I9GFbXMtP4SRM74s8sAfdBYNDYjCL8U=
+github.com/goreleaser/nfpm/v2 v2.44.0/go.mod h1:sLNhEIplQWuRK5QLxUsMCpkttUiM8lI1cH7rkjmziZU=
 github.com/hashicorp/errwrap v1.0.0 h1:hLrqtEDnRye3+sgx6z4qVLNuviH3MR5aQ0ykNJa/UYA=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-hclog v1.6.3 h1:Qr2kF+eVWjTiYmU7Y31tYlP1h0q/X3Nl3tPGdaB11/k=
@@ -287,6 +291,8 @@ github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+o
 github.com/klauspost/compress v1.4.1/go.mod h1:RyIbtBH6LamlWaDj8nUwkbUhJ87Yi3uG0guNDohfE1A=
 github.com/klauspost/compress v1.18.0 h1:c/Cqfb0r+Yi+JtIEq73FWXVkRonBlf0CRNYc8Zttxdo=
 github.com/klauspost/compress v1.18.0/go.mod h1:2Pp+KzxcywXVXMr50+X0Q/Lsb43OQHYWRCY2AiWywWQ=
+github.com/klauspost/compress v1.18.2 h1:iiPHWW0YrcFgpBYhsA6D1+fqHssJscY/Tm/y2Uqnapk=
+github.com/klauspost/compress v1.18.2/go.mod h1:R0h/fSBs8DE4ENlcrlib3PsXS61voFxhIs2DeRhCvJ4=
 github.com/klauspost/cpuid v1.2.0/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
 github.com/klauspost/pgzip v1.2.6 h1:8RXeL5crjEUFnR2/Sn6GJNWtSQ3Dk8pq4CL3jvdDyjU=
 github.com/klauspost/pgzip v1.2.6/go.mod h1:Ch1tH69qFZu15pkjo5kYi6mth2Zzwzt50oCQKQE9RUs=

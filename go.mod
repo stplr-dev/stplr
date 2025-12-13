@@ -1,6 +1,6 @@
 module go.stplr.dev/stplr
 
-go 1.24.4
+go 1.25
 
 // support of context via github.com/keegancsmith/rpc
 // see https://github.com/hashicorp/go-plugin/issues/284
@@ -21,7 +21,7 @@ require (
 	github.com/go-git/go-git/v5 v5.16.4
 	github.com/goccy/go-yaml v1.19.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
-	github.com/goreleaser/nfpm/v2 v2.43.1
+	github.com/goreleaser/nfpm/v2 v2.44.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.7.0
 	github.com/jeandeaual/go-locale v0.0.0-20250612000132-0ef82f21eade
@@ -106,7 +106,7 @@ require (
 	github.com/google/rpmpack v0.7.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/goreleaser/chglog v0.7.3 // indirect
-	github.com/goreleaser/fileglob v1.3.0 // indirect
+	github.com/goreleaser/fileglob v1.4.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/yamux v0.1.2 // indirect
@@ -114,7 +114,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/knadh/koanf/maps v0.1.2 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
