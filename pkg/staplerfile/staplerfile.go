@@ -50,7 +50,24 @@ type ScriptFile struct {
 	path string
 }
 
-func (s *ScriptFile) ParseBuildVars(ctx context.Context, info *distro.OSRelease, packages []string) (string, []*Package, error) {
+type parseOptions struct {
+	language string
+}
+
+type parseOption func(*parseOptions)
+
+func WithCustomLanguage(lang string) parseOption {
+	return func(os *parseOptions) {
+		os.language = lang
+	}
+}
+
+func (s *ScriptFile) ParseBuildVars(ctx context.Context, info *distro.OSRelease, packages []string, opts ...parseOption) (string, []*Package, error) {
+	options := &parseOptions{}
+	for _, opt := range opts {
+		opt(options)
+	}
+
 	r, err := s.createRunner(info)
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to create runner: %w", err)
@@ -64,7 +81,7 @@ func (s *ScriptFile) ParseBuildVars(ctx context.Context, info *distro.OSRelease,
 		return "", nil, fmt.Errorf("failed to run script: %w", err)
 	}
 
-	dec, err := newDecoder(info, r)
+	dec, err := newDecoder(info, r, options)
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to get decoder: %w", err)
 	}
@@ -179,15 +196,24 @@ func runScript(ctx context.Context, runner *interp.Runner, fl *syntax.File) erro
 	return runner.Run(ctx, fl)
 }
 
-func newDecoder(info *distro.OSRelease, runner *interp.Runner) (*decoder.Decoder, error) {
+func newDecoder(info *distro.OSRelease, runner *interp.Runner, options *parseOptions) (*decoder.Decoder, error) {
 	d := decoder.New(info, runner)
-	systemLang, err := locale.GetLanguage()
-	if err != nil {
-		return nil, fmt.Errorf("cant get systemlang: %w", err)
+
+	var systemLang string
+	var err error
+
+	if options.language == "" {
+		systemLang, err = locale.GetLanguage()
+		if err != nil {
+			return nil, fmt.Errorf("cant get systemlang: %w", err)
+		}
+		if systemLang == "" || systemLang == "C" {
+			systemLang = "en"
+		}
+	} else {
+		systemLang = options.language
 	}
-	if systemLang == "" || systemLang == "C" {
-		systemLang = "en"
-	}
+
 	d.OverridesOpts = d.OverridesOpts.WithLanguages([]string{systemLang})
 	return d, nil
 }
