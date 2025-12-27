@@ -28,9 +28,9 @@ import (
 
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/manager"
-	"go.stplr.dev/stplr/internal/overrides"
 	"go.stplr.dev/stplr/internal/search"
 	"go.stplr.dev/stplr/pkg/distro"
+	"go.stplr.dev/stplr/pkg/overrides"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 

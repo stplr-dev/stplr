@@ -31,8 +31,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/text/language"
 
-	"go.stplr.dev/stplr/internal/overrides"
 	"go.stplr.dev/stplr/pkg/distro"
+	"go.stplr.dev/stplr/pkg/overrides"
 )
 
 var info = &distro.OSRelease{

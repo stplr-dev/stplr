@@ -37,9 +37,9 @@ import (
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
 
-	"go.stplr.dev/stplr/internal/overrides"
 	"go.stplr.dev/stplr/internal/shutils/runner"
 	"go.stplr.dev/stplr/pkg/distro"
+	"go.stplr.dev/stplr/pkg/overrides"
 )
 
 var ErrNotPointerToStruct = errors.New("val must be a pointer to a struct")

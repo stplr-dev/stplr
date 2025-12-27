@@ -42,7 +42,7 @@ import (
 
 	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/internal/cpu"
-	"go.stplr.dev/stplr/internal/overrides"
+	"go.stplr.dev/stplr/pkg/overrides"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
 )
