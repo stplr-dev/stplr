@@ -30,7 +30,6 @@ import (
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/search"
 	"go.stplr.dev/stplr/pkg/distro"
-	"go.stplr.dev/stplr/pkg/overrides"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
@@ -87,10 +86,10 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error while executing search"))
 	}
 
-	return u.outputResults(packages, resolver, opts.Format, opts.All)
+	return u.outputResults(packages, resolver, opts.Format)
 }
 
-func (u *useCase) outputResults(packages []staplerfile.Package, resolver *staplerfile.Resolver, format string, all bool) error {
+func (u *useCase) outputResults(packages []staplerfile.Package, resolver *staplerfile.Resolver, format string) error {
 	var tmpl *template.Template
 	var err error
 	if format != "" {

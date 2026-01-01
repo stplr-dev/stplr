@@ -32,7 +32,6 @@ import (
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/cliprompts"
 	"go.stplr.dev/stplr/pkg/distro"
-	"go.stplr.dev/stplr/pkg/overrides"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
