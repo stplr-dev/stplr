@@ -570,23 +570,19 @@ msgstr ""
 msgid "Done"
 msgstr ""
 
-#: internal/usecase/info/info.go:70
+#: internal/usecase/info/info.go:68
 msgid "Error finding packages"
 msgstr ""
 
-#: internal/usecase/info/info.go:74
+#: internal/usecase/info/info.go:72
 msgid "Package not found"
 msgstr ""
 
-#: internal/usecase/info/info.go:81
-msgid "Can't detect system language"
+#: internal/usecase/info/info.go:80
+msgid "Error initializing resolver"
 msgstr ""
 
-#: internal/usecase/info/info.go:93
-msgid "Error resolving overrides"
-msgstr ""
-
-#: internal/usecase/info/info.go:102
+#: internal/usecase/info/info.go:89
 msgid "Error encoding script variables"
 msgstr ""
 
@@ -612,27 +608,27 @@ msgstr ""
 msgid "Error when installing the package"
 msgstr ""
 
-#: internal/usecase/list/list.go:87
+#: internal/usecase/list/list.go:90
 msgid "Error getting packages for upgrade"
 msgstr ""
 
-#: internal/usecase/list/list.go:90
+#: internal/usecase/list/list.go:93
 msgid "No packages for upgrade"
 msgstr ""
 
-#: internal/usecase/list/list.go:100 internal/usecase/list/list.go:189
+#: internal/usecase/list/list.go:103 internal/usecase/list/list.go:193
 msgid "Error parsing format template"
 msgstr ""
 
-#: internal/usecase/list/list.go:106 internal/usecase/list/list.go:208
+#: internal/usecase/list/list.go:110 internal/usecase/list/list.go:213
 msgid "Error executing template"
 msgstr ""
 
-#: internal/usecase/list/list.go:154
+#: internal/usecase/list/list.go:158
 msgid "Failed to parse release"
 msgstr ""
 
-#: internal/usecase/list/list.go:175
+#: internal/usecase/list/list.go:179
 msgid "Error listing installed packages"
 msgstr ""
 
@@ -684,7 +680,7 @@ msgstr ""
 msgid "Error removing packages from database"
 msgstr ""
 
-#: internal/usecase/search/search.go:97
+#: internal/usecase/search/search.go:86
 msgid "Error while executing search"
 msgstr ""
 
@@ -744,4 +740,12 @@ msgstr ""
 
 #: pkg/reqprov/rpm/altlinux.go:67
 msgid "Command %q not found on the system"
+msgstr ""
+
+#: pkg/staplerfile/resolver.go:43
+msgid "Can't detect system language"
+msgstr ""
+
+#: pkg/staplerfile/resolver.go:55
+msgid "Error resolving overrides"
 msgstr ""

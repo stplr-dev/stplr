@@ -27,7 +27,6 @@ import (
 	stdErrors "errors"
 
 	"github.com/goccy/go-yaml"
-	"github.com/jeandeaual/go-locale"
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
@@ -76,25 +75,14 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 
 	pkgs := cliprompts.FlattenPkgs(ctx, found, "show", opts.Interactive)
 
-	systemLang, err := locale.GetLanguage()
+	resolver := staplerfile.NewResolver(u.info)
+	err = resolver.Init()
 	if err != nil {
-		return errors.WrapIntoI18nError(err, gotext.Get("Can't detect system language"))
-	}
-	if systemLang == "" {
-		systemLang = "en"
-	}
-
-	names, err := overrides.Resolve(
-		u.info,
-		overrides.DefaultOpts.
-			WithLanguages([]string{systemLang}),
-	)
-	if err != nil {
-		return errors.WrapIntoI18nError(err, gotext.Get("Error resolving overrides"))
+		return errors.WrapIntoI18nError(err, gotext.Get("Error initializing resolver"))
 	}
 
 	for _, pkg := range pkgs {
-		staplerfile.ResolvePackage(&pkg, names)
+		resolver.Resolve(&pkg)
 		view := staplerfile.NewPackageView(pkg)
 		view.Resolved = !opts.All
 		err = yaml.NewEncoder(u.stdout, yaml.UseJSONMarshaler(), yaml.OmitEmpty()).Encode(view)

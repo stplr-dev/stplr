@@ -61,6 +61,8 @@ type useCase struct {
 	pkgs           PackagesProvider
 	ignoreProvider IgnorePkgProvider
 
+	resolver *staplerfile.Resolver
+
 	info *distro.OSRelease
 	out  output.Output
 }
@@ -70,6 +72,7 @@ func New(upd Updater, pkgs PackagesProvider, ignoreProvider IgnorePkgProvider, i
 		upd,
 		pkgs,
 		ignoreProvider,
+		staplerfile.NewResolver(info),
 		info,
 		out,
 	}
@@ -101,6 +104,7 @@ func (u *useCase) runForUpgradable(ctx context.Context, opts Options) error {
 	}
 
 	for _, updateInfo := range updates {
+		u.resolver.Resolve(updateInfo.Package)
 		err = tmpl.Execute(os.Stdout, updateInfo)
 		if err != nil {
 			return errors.WrapIntoI18nError(err, gotext.Get("Error executing template"))
@@ -204,6 +208,7 @@ func (u *useCase) processAndOutputPackages(opts Options, pkgs []staplerfile.Pack
 			}
 		}
 
+		u.resolver.Resolve(pkgInfo.Package)
 		if err := tmpl.Execute(os.Stdout, pkgInfo); err != nil {
 			return errors.WrapIntoI18nError(err, gotext.Get("Error executing template"))
 		}
@@ -213,6 +218,11 @@ func (u *useCase) processAndOutputPackages(opts Options, pkgs []staplerfile.Pack
 }
 
 func (u *useCase) Run(ctx context.Context, opts Options) error {
+	err := u.resolver.Init()
+	if err != nil {
+		return err
+	}
+
 	if opts.Upgradable {
 		return u.runForUpgradable(ctx, opts)
 	}

@@ -13,8 +13,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 5.14.3\n"
 
 #: cmd/stplr/main.go:71
@@ -589,23 +589,20 @@ msgstr "Не удалось создать новый каталог кэша"
 msgid "Done"
 msgstr "Сделано"
 
-#: internal/usecase/info/info.go:70
+#: internal/usecase/info/info.go:68
 msgid "Error finding packages"
 msgstr "Ошибка при поиске пакетов"
 
-#: internal/usecase/info/info.go:74
+#: internal/usecase/info/info.go:72
 msgid "Package not found"
 msgstr "Пакет не найден"
 
-#: internal/usecase/info/info.go:81
-msgid "Can't detect system language"
-msgstr "Ошибка при определении языка системы"
+#: internal/usecase/info/info.go:80
+#, fuzzy
+msgid "Error initializing resolver"
+msgstr "Ошибка инициализации базы данных"
 
-#: internal/usecase/info/info.go:93
-msgid "Error resolving overrides"
-msgstr "Ошибка устранения переорпеделений"
-
-#: internal/usecase/info/info.go:102
+#: internal/usecase/info/info.go:89
 msgid "Error encoding script variables"
 msgstr "Ошибка кодирования переменных скрита"
 
@@ -633,27 +630,27 @@ msgstr ""
 msgid "Error when installing the package"
 msgstr "Ошибка при установке пакета"
 
-#: internal/usecase/list/list.go:87
+#: internal/usecase/list/list.go:90
 msgid "Error getting packages for upgrade"
 msgstr "Ошибка при получении пакетов для обновления"
 
-#: internal/usecase/list/list.go:90
+#: internal/usecase/list/list.go:93
 msgid "No packages for upgrade"
 msgstr "Нет пакетов к обновлению"
 
-#: internal/usecase/list/list.go:100 internal/usecase/list/list.go:189
+#: internal/usecase/list/list.go:103 internal/usecase/list/list.go:193
 msgid "Error parsing format template"
 msgstr "Ошибка при разборе шаблона"
 
-#: internal/usecase/list/list.go:106 internal/usecase/list/list.go:208
+#: internal/usecase/list/list.go:110 internal/usecase/list/list.go:213
 msgid "Error executing template"
 msgstr "Ошибка при выполнении шаблона"
 
-#: internal/usecase/list/list.go:154
+#: internal/usecase/list/list.go:158
 msgid "Failed to parse release"
 msgstr "Не удалось разобрать релиз"
 
-#: internal/usecase/list/list.go:175
+#: internal/usecase/list/list.go:179
 msgid "Error listing installed packages"
 msgstr "Ошибка при составлении списка установленных пакетов"
 
@@ -705,7 +702,7 @@ msgstr "Ошибка при удалении каталога репозитор
 msgid "Error removing packages from database"
 msgstr "Ошибка при удалении пакетов из базы данных"
 
-#: internal/usecase/search/search.go:97
+#: internal/usecase/search/search.go:86
 msgid "Error while executing search"
 msgstr "Ошибка при выполнении поиска"
 
@@ -770,6 +767,14 @@ msgstr "Найдена требуемая зависимость: %s"
 #: pkg/reqprov/rpm/altlinux.go:67
 msgid "Command %q not found on the system"
 msgstr "Команда %q не найдена в системе"
+
+#: pkg/staplerfile/resolver.go:43
+msgid "Can't detect system language"
+msgstr "Ошибка при определении языка системы"
+
+#: pkg/staplerfile/resolver.go:55
+msgid "Error resolving overrides"
+msgstr "Ошибка устранения переорпеделений"
 
 #~ msgid ""
 #~ "This command is deprecated and would be removed in the future, use \"%s\" "

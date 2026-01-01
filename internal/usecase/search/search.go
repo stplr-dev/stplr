@@ -25,7 +25,6 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/jeandeaual/go-locale"
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
@@ -65,22 +64,13 @@ func New(searcher Searcher, info *distro.OSRelease) *useCase {
 }
 
 func (u *useCase) Run(ctx context.Context, opts Options) error {
-	systemLang, err := locale.GetLanguage()
-	if err != nil {
-		return errors.WrapIntoI18nError(err, gotext.Get("Can't detect system language"))
-	}
-	if systemLang == "" {
-		systemLang = "en"
-	}
-	var names []string
+	var resolver *staplerfile.Resolver
+
 	if !opts.All {
-		names, err = overrides.Resolve(
-			u.info,
-			overrides.DefaultOpts.
-				WithLanguages([]string{systemLang}),
-		)
+		resolver = staplerfile.NewResolver(u.info)
+		err := resolver.Init()
 		if err != nil {
-			return errors.WrapIntoI18nError(err, gotext.Get("Error resolving overrides"))
+			return errors.WrapIntoI18nError(err, gotext.Get("Error initializing resolver"))
 		}
 	}
 
@@ -97,10 +87,10 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error while executing search"))
 	}
 
-	return u.outputResults(packages, names, opts.Format, opts.All)
+	return u.outputResults(packages, resolver, opts.Format, opts.All)
 }
 
-func (u *useCase) outputResults(packages []staplerfile.Package, names []string, format string, all bool) error {
+func (u *useCase) outputResults(packages []staplerfile.Package, resolver *staplerfile.Resolver, format string, all bool) error {
 	var tmpl *template.Template
 	var err error
 	if format != "" {
@@ -111,7 +101,9 @@ func (u *useCase) outputResults(packages []staplerfile.Package, names []string, 
 	}
 
 	for _, pkg := range packages {
-		staplerfile.ResolvePackage(&pkg, names)
+		if resolver != nil {
+			resolver.Resolve(&pkg)
+		}
 		if tmpl != nil {
 			err = tmpl.Execute(os.Stdout, &pkg)
 			if err != nil {
