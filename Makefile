@@ -83,7 +83,8 @@ uninstall:
 	rm -rf \
 		$(DESTDIR)$(bindir)/$(NAME) \
 		$(DESTDIR)$(datadir)/bash-completion/completions/$(NAME) \
-		$(DESTDIR)$(datadir)/zsh/site-functions/_$(NAME)
+		$(DESTDIR)$(datadir)/zsh/site-functions/_$(NAME) \
+		$(DESTDIR)$(datadir)/fish/vendor_completions.d/$(NAME).fish
 
 clean clear:
 	rm -f $(BIN)
