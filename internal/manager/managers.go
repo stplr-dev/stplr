@@ -50,6 +50,7 @@ var managers = []Manager{
 	NewYUM(),
 	NewAPK(),
 	NewZypper(),
+	NewEpm(),
 }
 
 // Register registers a new package manager
@@ -118,4 +119,13 @@ func ensureOpts(opts *Opts) *Opts {
 	}
 	opts.Args = append(opts.Args, Args...)
 	return opts
+}
+
+func SupportedPackageFormats() []string {
+	return []string{
+		"archlinux",
+		"apk",
+		"deb",
+		"rpm",
+	}
 }
