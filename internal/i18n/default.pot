@@ -644,7 +644,7 @@ msgstr ""
 msgid "Failed to reread all"
 msgstr ""
 
-#: internal/usecase/remove/action/remove.go:47
+#: internal/usecase/remove/action/remove.go:59
 msgid "Error removing packages"
 msgstr ""
 

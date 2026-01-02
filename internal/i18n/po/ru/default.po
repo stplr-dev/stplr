@@ -666,7 +666,7 @@ msgstr "Ошибка при сбросе кэша"
 msgid "Failed to reread all"
 msgstr "Не удалось перечитать всё"
 
-#: internal/usecase/remove/action/remove.go:47
+#: internal/usecase/remove/action/remove.go:59
 msgid "Error removing packages"
 msgstr "Ошибка при удалении пакетов"
 

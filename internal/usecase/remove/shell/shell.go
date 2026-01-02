@@ -76,11 +76,12 @@ func (u *useCase) Run(ctx context.Context) error {
 	}
 
 	for _, pkg := range res {
-		_, ok := installedMap[fmt.Sprintf("%s/%s", pkg.Repository, pkg.Name)]
+		pkgFullName := fmt.Sprintf("%s/%s", pkg.Repository, pkg.Name)
+		_, ok := installedMap[pkgFullName]
 		if !ok {
 			continue
 		}
-		fmt.Fprintln(u.stdout, pkg.Name)
+		fmt.Fprintln(u.stdout, pkgFullName)
 	}
 
 	return nil

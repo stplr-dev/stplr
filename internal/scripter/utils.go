@@ -192,12 +192,16 @@ type getBasePkgInfoInput interface {
 	commonbuild.BuildOptsProvider
 }
 
+func FormatName(name, repo string) string {
+	return fmt.Sprintf("%s+stplr-%s", name, repo)
+}
+
 func GetBasePkgInfo(pkg *staplerfile.Package, input getBasePkgInfoInput) *nfpm.Info {
 	var name string
 	if input.BuildOpts().NoSuffix {
 		name = pkg.Name
 	} else {
-		name = fmt.Sprintf("%s+stplr-%s", pkg.Name, input.Repository())
+		name = FormatName(pkg.Name, input.Repository())
 	}
 	return &nfpm.Info{
 		Name:    name,
