@@ -25,6 +25,8 @@ import (
 
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/internal/scripter"
+	"go.stplr.dev/stplr/internal/service/repos"
 )
 
 type useCase struct {
@@ -41,9 +43,19 @@ type Options struct {
 }
 
 func (u *useCase) Run(ctx context.Context, opts Options) error {
+	systemPkgsName := make([]string, 0, len(opts.Pkgs))
+	for _, pkg := range opts.Pkgs {
+		name, repo, ok := repos.ExtractNameAndRepo(pkg)
+		if ok {
+			systemPkgsName = append(systemPkgsName, scripter.FormatName(name, repo))
+		} else {
+			systemPkgsName = append(systemPkgsName, pkg)
+		}
+	}
+
 	if err := u.mgr.Remove(&manager.Opts{
 		NoConfirm: !opts.Interactive,
-	}, opts.Pkgs...); err != nil {
+	}, systemPkgsName...); err != nil {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error removing packages"))
 	}
 

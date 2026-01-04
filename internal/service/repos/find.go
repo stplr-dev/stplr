@@ -70,7 +70,7 @@ func (rs *Repos) lookupPkg(ctx context.Context, pkgName string) ([]staplerfile.P
 	var result []staplerfile.Package
 	var err error
 
-	if name, repo, ok := extractNameAndRepo(pkgName); ok {
+	if name, repo, ok := ExtractNameAndRepo(pkgName); ok {
 		result, err = rs.db.GetPkgs(ctx, "name = ? AND repository = ?", name, repo)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get by name and repo: %w", err)
@@ -92,7 +92,7 @@ func (rs *Repos) lookupPkg(ctx context.Context, pkgName string) ([]staplerfile.P
 	return result, nil
 }
 
-func extractNameAndRepo(pkgName string) (string, string, bool) {
+func ExtractNameAndRepo(pkgName string) (string, string, bool) {
 	switch {
 	case strings.Contains(pkgName, "/"):
 		// repo/pkg
