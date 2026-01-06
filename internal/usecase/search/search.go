@@ -35,6 +35,7 @@ import (
 
 type Searcher interface {
 	Search(ctx context.Context, opts *search.SearchOptions) ([]staplerfile.Package, error)
+	SearchByCEL(ctx context.Context, query string, overrides []string) ([]staplerfile.Package, error)
 }
 
 type useCase struct {
@@ -51,6 +52,9 @@ type Options struct {
 	Provides    string
 	Format      string
 	All         bool
+
+	PackageName string
+	Query       string
 }
 
 func New(searcher Searcher, info *distro.OSRelease) *useCase {
@@ -63,44 +67,52 @@ func New(searcher Searcher, info *distro.OSRelease) *useCase {
 }
 
 func (u *useCase) Run(ctx context.Context, opts Options) error {
-	var resolver *staplerfile.Resolver
-
-	if !opts.All {
-		resolver = staplerfile.NewResolver(u.info)
-		err := resolver.Init()
-		if err != nil {
-			return errors.WrapIntoI18nError(err, gotext.Get("Error initializing resolver"))
-		}
+	resolver := staplerfile.NewResolver(u.info)
+	err := resolver.Init()
+	if err != nil {
+		return errors.WrapIntoI18nError(err, gotext.Get("Error initializing resolver"))
 	}
 
-	packages, err := u.searcher.Search(
-		ctx,
-		search.NewSearchOptions().
-			WithName(opts.Name).
-			WithDescription(opts.Description).
-			WithRepository(opts.Repository).
-			WithProvides(opts.Provides).
-			Build(),
-	)
+	var packages []staplerfile.Package
+
+	switch {
+	case opts.Query != "":
+		packages, err = u.searcher.SearchByCEL(ctx, opts.Query, resolver.Names())
+	case opts.PackageName != "":
+		packages, err = u.searcher.SearchByCEL(ctx, fmt.Sprintf("name.contains('%s')", opts.PackageName), resolver.Names())
+	default:
+		packages, err = u.searcher.Search(
+			ctx,
+			search.NewSearchOptions().
+				WithName(opts.Name).
+				WithDescription(opts.Description).
+				WithRepository(opts.Repository).
+				WithProvides(opts.Provides).
+				Build(),
+		)
+	}
+
 	if err != nil {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error while executing search"))
 	}
 
-	return u.outputResults(packages, resolver, opts.Format)
+	return u.outputResults(packages, resolver, opts.Format, opts.All)
 }
 
-func (u *useCase) outputResults(packages []staplerfile.Package, resolver *staplerfile.Resolver, format string) error {
+func (u *useCase) outputResults(packages []staplerfile.Package, resolver *staplerfile.Resolver, format string, all bool) error {
 	var tmpl *template.Template
 	var err error
-	if format != "" {
-		tmpl, err = template.New("format").Parse(format)
-		if err != nil {
-			return errors.WrapIntoI18nError(err, gotext.Get("Error parsing format template"))
-		}
+	if format == "" {
+		format = "{{.Repository}}/{{.Name}} {{.Version}}-{{.Release}}\n"
+	}
+
+	tmpl, err = template.New("format").Parse(format)
+	if err != nil {
+		return errors.WrapIntoI18nError(err, gotext.Get("Error parsing format template"))
 	}
 
 	for _, pkg := range packages {
-		if resolver != nil {
+		if !all {
 			resolver.Resolve(&pkg)
 		}
 		if tmpl != nil {
@@ -108,7 +120,6 @@ func (u *useCase) outputResults(packages []staplerfile.Package, resolver *staple
 			if err != nil {
 				return errors.WrapIntoI18nError(err, gotext.Get("Error executing template"))
 			}
-			fmt.Fprintln(u.stdout)
 		} else {
 			fmt.Fprintln(u.stdout, pkg.Name)
 		}

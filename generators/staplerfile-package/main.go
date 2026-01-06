@@ -1,11 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// This file was originally part of the project "ALR - Any Linux Repository"
-// created by the ALR Authors.
-// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
-//
-// Copyright (C) 2025 The ALR Authors
-// Copyright (C) 2025 The Stapler Authors
+// Stapler
+// Copyright (C) 2026 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,17 +43,14 @@ type {{ .EntityNameLower }}Resolved struct {
 
 	for _, field := range fields {
 		for _, name := range field.Names {
-			// Поле с типом
 			fieldTypeStr := exprToString(field.Type)
 
-			// Структура поля
 			var buf bytes.Buffer
 			buf.WriteString("\t")
 			buf.WriteString(name.Name)
 			buf.WriteString(" ")
 			buf.WriteString(fieldTypeStr)
 
-			// Обработка json-тега
 			jsonTag := ""
 			if field.Tag != nil {
 				raw := strings.Trim(field.Tag.Value, "`")
@@ -164,6 +157,120 @@ func Resolve{{ .EntityName }}(pkg *{{ .EntityName }}, overrides []string) {
 	}
 }
 
+func celColumnMapGenerator(buf *bytes.Buffer, fields []*ast.Field) {
+	contentTemplate := template.Must(template.New("").Parse(`
+// GetCELColumnMap returns a map of CEL field names to their SQL column information
+func GetCELColumnMap() map[string]cel2sqlite.ColumnInfo {
+	return map[string]cel2sqlite.ColumnInfo{
+{{ .Entries }}
+	}
+}
+`))
+
+	var entriesBuilder strings.Builder
+
+	for _, field := range fields {
+		for _, name := range field.Names {
+			// Получаем теги
+			var celName, sqlName string
+			var skip bool
+
+			if field.Tag != nil {
+				raw := strings.Trim(field.Tag.Value, "`")
+				tag := reflect.StructTag(raw)
+
+				// Получаем CEL имя из тега sh
+				celName = tag.Get("sh")
+				if celName == "" {
+					celName = strings.ToLower(name.Name)
+				}
+
+				// Получаем SQL имя из тега xorm
+				xormTag := tag.Get("xorm")
+				sqlName = extractSQLName(xormTag)
+
+				// Пропускаем поля с xorm:"-"
+				if xormTag == "-" || sqlName == "" {
+					skip = true
+				}
+			} else {
+				celName = strings.ToLower(name.Name)
+				skip = true
+			}
+
+			if skip {
+				continue
+			}
+
+			// Определяем тип колонки
+			colType := determineColumnType(field.Type)
+
+			var entryBuf bytes.Buffer
+			entryBuf.WriteString(fmt.Sprintf("\t\t\"%s\": {SQLName: \"%s\", Type: cel2sqlite.%s},\n",
+				celName, sqlName, colType))
+			entriesBuilder.Write(entryBuf.Bytes())
+		}
+	}
+
+	params := struct {
+		Entries string
+	}{
+		Entries: entriesBuilder.String(),
+	}
+
+	err := contentTemplate.Execute(buf, params)
+	if err != nil {
+		log.Fatalf("execute template: %v", err)
+	}
+}
+
+func extractSQLName(xormTag string) string {
+	if xormTag == "" || xormTag == "-" {
+		return ""
+	}
+
+	parts := strings.Split(xormTag, " ")
+	for _, part := range parts {
+		part = strings.Trim(part, "'\"")
+		// Пропускаем ключевые слова xorm
+		if part == "pk" || part == "notnull" || part == "json" ||
+			strings.HasPrefix(part, "default") || strings.Contains(part, ":") {
+			continue
+		}
+		// Первый не-ключевой элемент это имя колонки
+		if part != "" {
+			return part
+		}
+	}
+	return ""
+}
+
+func determineColumnType(expr ast.Expr) string {
+	switch overridableFieldKind(expr) {
+	case "overridable_array":
+		return "ColumnTypeOverridableFieldArray"
+	case "overridable_scalar":
+		return "ColumnTypeOverridableField"
+	}
+
+	typeStr := exprToString(expr)
+
+	switch {
+	case typeStr == "string":
+		return "ColumnTypeString"
+	case typeStr == "int" || typeStr == "uint" ||
+		typeStr == "int64" || typeStr == "uint64" ||
+		typeStr == "int32" || typeStr == "uint32":
+		return "ColumnTypeInt"
+	case typeStr == "bool":
+		return "ColumnTypeBool"
+	case strings.HasPrefix(typeStr, "[]"):
+		return "ColumnTypeJSONArray"
+	default:
+		return "ColumnTypeString"
+	}
+}
+
 func main() {
 	path := os.Getenv("GOFILE")
 	if path == "" {
@@ -176,13 +283,11 @@ func main() {
 		log.Fatalf("parsing file: %v", err)
 	}
 
-	entityName := "Package" // имя структуры, которую анализируем
+	entityName := "Package"
 
 	found := false
-
 	fields := make([]*ast.Field, 0)
 
-	// Ищем структуру с нужным именем
 	for _, decl := range node.Decls {
 		genDecl, ok := decl.(*ast.GenDecl)
 		if !ok || genDecl.Tok != token.TYPE {
@@ -209,13 +314,14 @@ func main() {
 	var buf bytes.Buffer
 
 	buf.WriteString("// DO NOT EDIT MANUALLY. This file is generated.\n")
-	buf.WriteString("package staplerfile")
+	buf.WriteString("package staplerfile\n\n")
+	buf.WriteString("import \"go.stplr.dev/stplr/internal/cel2sqlite\"\n")
 
 	resolvedStructGenerator(&buf, fields)
 	toResolvedFuncGenerator(&buf, fields)
 	resolveFuncGenerator(&buf, fields)
+	celColumnMapGenerator(&buf, fields)
 
-	// Форматируем вывод
 	formatted, err := format.Source(buf.Bytes())
 	if err != nil {
 		log.Fatalf("formatting: %v", err)
@@ -236,7 +342,7 @@ func main() {
 func exprToString(expr ast.Expr) string {
 	if t, ok := expr.(*ast.IndexExpr); ok {
 		if ident, ok := t.X.(*ast.Ident); ok && ident.Name == "OverridableField" {
-			return exprToString(t.Index) // T
+			return exprToString(t.Index)
 		}
 	}
 
@@ -247,11 +353,25 @@ func exprToString(expr ast.Expr) string {
 	return buf.String()
 }
 
-func isOverridableField(expr ast.Expr) bool {
+func overridableFieldKind(expr ast.Expr) string {
 	indexExpr, ok := expr.(*ast.IndexExpr)
 	if !ok {
-		return false
+		return ""
 	}
+
 	ident, ok := indexExpr.X.(*ast.Ident)
-	return ok && ident.Name == "OverridableField"
+	if !ok || ident.Name != "OverridableField" {
+		return ""
+	}
+
+	switch indexExpr.Index.(type) {
+	case *ast.ArrayType:
+		return "overridable_array"
+	default:
+		return "overridable_scalar"
+	}
+}
+
+func isOverridableField(expr ast.Expr) bool {
+	return overridableFieldKind(expr) != ""
 }

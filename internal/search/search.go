@@ -27,6 +27,7 @@ package search
 import (
 	"context"
 
+	"go.stplr.dev/stplr/internal/cel2sqlite"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
@@ -50,5 +51,24 @@ func (s *Searcher) Search(
 ) ([]staplerfile.Package, error) {
 	where, args := opts.WhereClause()
 	packages, err := s.pp.GetPkgs(ctx, where, args...)
+	return packages, err
+}
+
+func (s *Searcher) SearchByCEL(
+	ctx context.Context,
+	query string,
+	overrides []string,
+) ([]staplerfile.Package, error) {
+	c, err := cel2sqlite.NewConverter(staplerfile.GetCELColumnMap(), overrides)
+	if err != nil {
+		return nil, err
+	}
+
+	where, err := c.Convert(query)
+	if err != nil {
+		return nil, err
+	}
+
+	packages, err := s.pp.GetPkgs(ctx, where)
 	return packages, err
 }

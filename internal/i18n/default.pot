@@ -212,19 +212,23 @@ msgid "Search packages"
 msgstr ""
 
 #: internal/app/commands/search.go:50
-msgid "Search by name"
+msgid "Search by query (CEL syntax)"
 msgstr ""
 
 #: internal/app/commands/search.go:55
-msgid "Search by description"
+msgid "[DEPRECATED] Search by name"
 msgstr ""
 
 #: internal/app/commands/search.go:60
-msgid "Search by repository"
+msgid "[DEPRECATED] Search by description"
 msgstr ""
 
 #: internal/app/commands/search.go:65
-msgid "Search by provides"
+msgid "[DEPRECATED] Search by repository"
+msgstr ""
+
+#: internal/app/commands/search.go:70
+msgid "[DEPRECATED] Search by provides"
 msgstr ""
 
 #: internal/app/commands/support.go:35
@@ -680,7 +684,7 @@ msgstr ""
 msgid "Error removing packages from database"
 msgstr ""
 
-#: internal/usecase/search/search.go:86
+#: internal/usecase/search/search.go:96
 msgid "Error while executing search"
 msgstr ""
 

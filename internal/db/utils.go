@@ -26,13 +26,20 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"regexp"
+	"strings"
+	"sync"
 
 	"golang.org/x/exp/slices"
 	"modernc.org/sqlite"
+
+	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
 func init() {
 	sqlite.MustRegisterScalarFunction("json_array_contains", 2, jsonArrayContains)
+	sqlite.MustRegisterScalarFunction("regexp_match", 2, regexpMatchCached)
+	sqlite.MustRegisterScalarFunction("overridable_resolve", 2, overridableResolve)
 }
 
 // jsonArrayContains is an SQLite function that checks if a JSON array
@@ -55,4 +62,74 @@ func jsonArrayContains(ctx *sqlite.FunctionContext, args []driver.Value) (driver
 	}
 
 	return slices.Contains(array, item), nil
+}
+
+var reCache = struct {
+	sync.RWMutex
+	m map[string]*regexp.Regexp
+}{
+	m: make(map[string]*regexp.Regexp),
+}
+
+func regexpMatchCached(ctx *sqlite.FunctionContext, args []driver.Value) (driver.Value, error) {
+	if args[0] == nil || args[1] == nil {
+		return false, nil
+	}
+
+	str, ok := args[0].(string)
+	if !ok {
+		return nil, errors.New("both arguments to regexp_match must be strings")
+	}
+
+	pattern, ok := args[1].(string)
+	if !ok {
+		return nil, errors.New("both arguments to regexp_match must be strings")
+	}
+
+	reCache.RLock()
+	re, exists := reCache.m[pattern]
+	reCache.RUnlock()
+
+	if !exists {
+		var err error
+		re, err = regexp.Compile(pattern)
+		if err != nil {
+			return nil, err
+		}
+
+		reCache.Lock()
+		reCache.m[pattern] = re
+		reCache.Unlock()
+	}
+
+	return re.MatchString(str), nil
+}
+
+func overridableResolve(ctx *sqlite.FunctionContext, args []driver.Value) (driver.Value, error) {
+	value, ok := args[0].(string)
+	if !ok {
+		return nil, errors.New("argument to overridable_resolve must be a string")
+	}
+
+	overridesStr, ok := args[1].(string)
+	if !ok {
+		return nil, errors.New("argument to overridable_resolve must be a string")
+	}
+
+	var j map[string]interface{}
+	err := json.Unmarshal([]byte(value), &j)
+	if err != nil {
+		return nil, err
+	}
+
+	v := staplerfile.OverridableFromMap(j)
+	v.Resolve(strings.Split(overridesStr, "|"))
+	resolved := v.Resolved()
+
+	b, err := json.Marshal(resolved)
+	if err != nil {
+		return nil, err
+	}
+
+	return string(b), nil
 }

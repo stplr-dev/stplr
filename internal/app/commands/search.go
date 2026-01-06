@@ -45,24 +45,29 @@ func SearchCmd() *cli.Command {
 				Usage:   gotext.Get("Show all information, not just for the current distro"),
 			},
 			&cli.StringFlag{
+				Name:    "query",
+				Aliases: []string{"q"},
+				Usage:   gotext.Get("Search by query (CEL syntax)"),
+			},
+			&cli.StringFlag{
 				Name:    "name",
 				Aliases: []string{"n"},
-				Usage:   gotext.Get("Search by name"),
+				Usage:   gotext.Get("[DEPRECATED] Search by name"),
 			},
 			&cli.StringFlag{
 				Name:    "description",
 				Aliases: []string{"d"},
-				Usage:   gotext.Get("Search by description"),
+				Usage:   gotext.Get("[DEPRECATED] Search by description"),
 			},
 			&cli.StringFlag{
 				Name:    "repository",
 				Aliases: []string{"repo"},
-				Usage:   gotext.Get("Search by repository"),
+				Usage:   gotext.Get("[DEPRECATED] Search by repository"),
 			},
 			&cli.StringFlag{
 				Name:    "provides",
 				Aliases: []string{"p"},
-				Usage:   gotext.Get("Search by provides"),
+				Usage:   gotext.Get("[DEPRECATED] Search by provides"),
 			},
 			&cli.StringFlag{
 				Name:    "format",
@@ -77,12 +82,19 @@ func SearchCmd() *cli.Command {
 			}
 			defer f()
 
+			packageName := ""
+			if c.Args().Len() > 0 {
+				packageName = c.Args().First()
+			}
+
 			return search.New(d.Searcher, d.Info).Run(ctx, search.Options{
 				Name:        c.String("name"),
 				Description: c.String("description"),
 				Repository:  c.String("repository"),
 				Provides:    c.String("provides"),
 				Format:      c.String("format"),
+				PackageName: packageName,
+				Query:       c.String("query"),
 				All:         c.Bool("all"),
 			})
 		}),

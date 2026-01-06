@@ -58,6 +58,10 @@ func (r *Resolver) Init() error {
 	return nil
 }
 
+func (r *Resolver) Names() []string {
+	return r.names
+}
+
 func (r *Resolver) Resolve(pkg *Package) {
 	ResolvePackage(pkg, r.names)
 }

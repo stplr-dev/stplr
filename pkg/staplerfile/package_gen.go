@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Stapler
-// Copyright (C) 2025 The Stapler Authors
+// Copyright (C) 2026 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
 
 // DO NOT EDIT MANUALLY. This file is generated.
 package staplerfile
+
+import "go.stplr.dev/stplr/internal/cel2sqlite"
 
 type packageResolved struct {
 	Repository        string            `json:"repository"`
@@ -133,4 +135,33 @@ func ResolvePackage(pkg *Package, overrides []string) {
 	pkg.FireJailed.Resolve(overrides)
 	pkg.FireJailProfiles.Resolve(overrides)
 	pkg.DisableNetwork.Resolve(overrides)
+}
+
+// GetCELColumnMap returns a map of CEL field names to their SQL column information
+func GetCELColumnMap() map[string]cel2sqlite.ColumnInfo {
+	return map[string]cel2sqlite.ColumnInfo{
+		"repository":         {SQLName: "repository", Type: cel2sqlite.ColumnTypeString},
+		"name":               {SQLName: "name", Type: cel2sqlite.ColumnTypeString},
+		"basepkgname":        {SQLName: "basepkg_name", Type: cel2sqlite.ColumnTypeString},
+		"version":            {SQLName: "version", Type: cel2sqlite.ColumnTypeString},
+		"release":            {SQLName: "release", Type: cel2sqlite.ColumnTypeInt},
+		"epoch":              {SQLName: "epoch", Type: cel2sqlite.ColumnTypeInt},
+		"architectures":      {SQLName: "architectures", Type: cel2sqlite.ColumnTypeJSONArray},
+		"license":            {SQLName: "licenses", Type: cel2sqlite.ColumnTypeJSONArray},
+		"provides":           {SQLName: "provides", Type: cel2sqlite.ColumnTypeJSONArray},
+		"conflicts":          {SQLName: "conflicts", Type: cel2sqlite.ColumnTypeJSONArray},
+		"replaces":           {SQLName: "replaces", Type: cel2sqlite.ColumnTypeJSONArray},
+		"appstream_app_id":   {SQLName: "appstream_app_id", Type: cel2sqlite.ColumnTypeOverridableField},
+		"appstream_metainfo": {SQLName: "appstream_metainfo", Type: cel2sqlite.ColumnTypeOverridableField},
+		"nonfree":            {SQLName: "nonfree", Type: cel2sqlite.ColumnTypeBool},
+		"nonfree_url":        {SQLName: "nonfree_url", Type: cel2sqlite.ColumnTypeOverridableField},
+		"summary":            {SQLName: "summary", Type: cel2sqlite.ColumnTypeOverridableField},
+		"desc":               {SQLName: "description", Type: cel2sqlite.ColumnTypeOverridableField},
+		"group":              {SQLName: "group_name", Type: cel2sqlite.ColumnTypeOverridableField},
+		"homepage":           {SQLName: "homepage", Type: cel2sqlite.ColumnTypeOverridableField},
+		"maintainer":         {SQLName: "maintainer", Type: cel2sqlite.ColumnTypeOverridableField},
+		"deps":               {SQLName: "depends", Type: cel2sqlite.ColumnTypeOverridableFieldArray},
+		"build_deps":         {SQLName: "builddepends", Type: cel2sqlite.ColumnTypeOverridableFieldArray},
+		"opt_deps":           {SQLName: "optdepends", Type: cel2sqlite.ColumnTypeOverridableFieldArray},
+	}
 }

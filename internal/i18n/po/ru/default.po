@@ -222,19 +222,28 @@ msgid "Search packages"
 msgstr "Поиск пакетов"
 
 #: internal/app/commands/search.go:50
-msgid "Search by name"
+#, fuzzy
+msgid "Search by query (CEL syntax)"
 msgstr "Искать по имени"
 
 #: internal/app/commands/search.go:55
-msgid "Search by description"
-msgstr "Искать по описанию"
+#, fuzzy
+msgid "[DEPRECATED] Search by name"
+msgstr "Искать по имени"
 
 #: internal/app/commands/search.go:60
-msgid "Search by repository"
-msgstr "Искать по репозиторию"
+#, fuzzy
+msgid "[DEPRECATED] Search by description"
+msgstr "Искать по описанию"
 
 #: internal/app/commands/search.go:65
-msgid "Search by provides"
+#, fuzzy
+msgid "[DEPRECATED] Search by repository"
+msgstr "Искать по репозиторию"
+
+#: internal/app/commands/search.go:70
+#, fuzzy
+msgid "[DEPRECATED] Search by provides"
 msgstr "Иcкать по provides"
 
 #: internal/app/commands/support.go:35
@@ -702,7 +711,7 @@ msgstr "Ошибка при удалении каталога репозитор
 msgid "Error removing packages from database"
 msgstr "Ошибка при удалении пакетов из базы данных"
 
-#: internal/usecase/search/search.go:86
+#: internal/usecase/search/search.go:96
 msgid "Error while executing search"
 msgstr "Ошибка при выполнении поиска"
 
