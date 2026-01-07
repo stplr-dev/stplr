@@ -30,20 +30,26 @@ import (
 func TestE2ESearch(t *testing.T) {
 	t.Parallel()
 
-	t.Run("stplr search --query works", matrixSuite(COMMON_SYSTEMS, func(t *testing.T, r capytest.Runner) {
+	t.Run("stplr search works", matrixSuite(COMMON_SYSTEMS, func(t *testing.T, r capytest.Runner) {
 		defaultPrepare(t, r)
+
+		r.Command("stplr", "search", "foo-pkg").
+			ExpectStdoutRegex(fmt.Sprintf("^%s/foo-pkg ", REPO_NAME_FOR_E2E_TESTS)).
+			ExpectSuccess().
+			Run(t)
 
 		r.Command("stplr", "search", "--query", "name == 'foo-pkg'", "--format", "{{.Name}}").
 			ExpectStdoutRegex("^foo-pkg$").
 			ExpectSuccess().
 			Run(t)
-	}))
 
-	t.Run("stplr simple search", matrixSuite(COMMON_SYSTEMS, func(t *testing.T, r capytest.Runner) {
-		defaultPrepare(t, r)
+		r.Command("stplr", "search", "--query", "appstream_app_id == 'com.example.app'").
+			ExpectStdoutRegex(fmt.Sprintf("^%s/test-appstream-app-id ", REPO_NAME_FOR_E2E_TESTS)).
+			ExpectSuccess().
+			Run(t)
 
-		r.Command("stplr", "search", "foo-pkg").
-			ExpectStdoutRegex(fmt.Sprintf("^%s/foo-pkg", REPO_NAME_FOR_E2E_TESTS)).
+		r.Command("stplr", "search", "--query", "'libfoo' in provides").
+			ExpectStdoutRegex(fmt.Sprintf("^%s/test-provides ", REPO_NAME_FOR_E2E_TESTS)).
 			ExpectSuccess().
 			Run(t)
 	}))

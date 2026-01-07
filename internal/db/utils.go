@@ -126,10 +126,24 @@ func overridableResolve(ctx *sqlite.FunctionContext, args []driver.Value) (drive
 	v.Resolve(strings.Split(overridesStr, "|"))
 	resolved := v.Resolved()
 
-	b, err := json.Marshal(resolved)
-	if err != nil {
-		return nil, err
+	switch v := resolved.(type) {
+	case string:
+		return v, nil
+	case bool:
+		return v, nil
+	case int:
+		return int64(v), nil
+	case int64:
+		return v, nil
+	case float64:
+		return v, nil
+	case nil:
+		return nil, nil
+	default:
+		b, err := json.Marshal(v)
+		if err != nil {
+			return nil, err
+		}
+		return string(b), nil
 	}
-
-	return string(b), nil
 }
