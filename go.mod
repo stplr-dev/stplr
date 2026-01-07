@@ -52,7 +52,7 @@ require (
 	golang.org/x/exp v0.0.0-20251219203646-944ab1f22d93
 	golang.org/x/sys v0.39.0
 	golang.org/x/text v0.32.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20240826202546-f6391c0de4c7
+	google.golang.org/genproto/googleapis/api v0.0.0-20251222181119-0a764e51fe1b
 	modernc.org/sqlite v1.42.2
 	mvdan.cc/sh/v3 v3.12.1-0.20251005234102-d3ff6f655a6a
 	xorm.io/xorm v1.3.11
@@ -173,9 +173,9 @@ require (
 	go4.org v0.0.0-20200411211856-f5505b9728dd // indirect
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/term v0.38.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20241223144023-3abc09e42ca8 // indirect
-	google.golang.org/grpc v1.67.3 // indirect
-	google.golang.org/protobuf v1.36.8 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251213004720-97cd9d5aeac2 // indirect
+	google.golang.org/grpc v1.71.0 // indirect
+	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/libc v1.66.10 // indirect
