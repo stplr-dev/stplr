@@ -1,0 +1,7 @@
+Name: alr-repo
+URL: https://altlinux.space/stapler/repo-for-tests.git
+Ref: main
+Mirrors: 
+  - https://github.com/example/example.git
+Report: https://altlinux.space/stapler/repo-for-tests.git?package={{ .BasePackageName }}
+

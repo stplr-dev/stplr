@@ -151,35 +151,43 @@ msgstr ""
 msgid "Remove an installed package"
 msgstr ""
 
-#: internal/app/commands/repo.go:64
+#: internal/app/commands/repo.go:65
 msgid "Manage repos"
 msgstr ""
 
-#: internal/app/commands/repo.go:78
+#: internal/app/commands/repo.go:80
 msgid "Remove an existing repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:80
+#: internal/app/commands/repo.go:82
 msgid "<name>"
 msgstr ""
 
-#: internal/app/commands/repo.go:101
+#: internal/app/commands/repo.go:103
 msgid "Add a new repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:102 internal/app/commands/repo.go:153
+#: internal/app/commands/repo.go:104 internal/app/commands/repo.go:187
 msgid "<name> <url>"
 msgstr ""
 
-#: internal/app/commands/repo.go:125
+#: internal/app/commands/repo.go:127
+msgid "List repositories"
+msgstr ""
+
+#: internal/app/commands/repo.go:137
+msgid "Output in JSON format"
+msgstr ""
+
+#: internal/app/commands/repo.go:159
 msgid "Set the reference of the repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:126
+#: internal/app/commands/repo.go:160
 msgid "<name> <ref>"
 msgstr ""
 
-#: internal/app/commands/repo.go:152
+#: internal/app/commands/repo.go:186
 msgid "Set the main url of the repository"
 msgstr ""
 
@@ -658,6 +666,30 @@ msgstr ""
 
 #: internal/usecase/repo/add/add.go:69
 msgid "Error saving config"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:58
+msgid "Error encoding repos to JSON"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:74
+msgid "Name"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:74
+msgid "URL"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:74
+msgid "Ref"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:74
+msgid "Mirrors"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:74
+msgid "Report"
 msgstr ""
 
 #: internal/usecase/repo/mirrors/remove/remove.go:111

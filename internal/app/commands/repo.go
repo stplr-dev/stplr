@@ -36,6 +36,7 @@ import (
 
 	"go.stplr.dev/stplr/internal/cliutils2"
 	"go.stplr.dev/stplr/internal/usecase/repo/add"
+	"go.stplr.dev/stplr/internal/usecase/repo/list"
 	"go.stplr.dev/stplr/internal/usecase/repo/remove"
 	"go.stplr.dev/stplr/internal/usecase/repo/setref"
 	"go.stplr.dev/stplr/internal/usecase/repo/seturl"
@@ -63,6 +64,7 @@ func RepoCmd() *cli.Command {
 		Name:  "repo",
 		Usage: gotext.Get("Manage repos"),
 		Commands: []*cli.Command{
+			ListReposCmd(),
 			RemoveRepoCmd(),
 			AddRepoCmd(),
 			SetRepoRefCmd(),
@@ -114,6 +116,38 @@ func AddRepoCmd() *cli.Command {
 			return add.New(d.Config, d.Repos).Run(ctx, add.Options{
 				Name: c.Args().Get(0),
 				URL:  c.Args().Get(1),
+			})
+		}),
+	}
+}
+
+func ListReposCmd() *cli.Command {
+	return &cli.Command{
+		Name:    "list",
+		Usage:   gotext.Get("List repositories"),
+		Aliases: []string{"ls"},
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "format",
+				Aliases: []string{"f"},
+				Usage:   gotext.Get("Format output using a Go template"),
+			},
+			&cli.BoolFlag{
+				Name:  "json",
+				Usage: gotext.Get("Output in JSON format"),
+			},
+		},
+		ShellComplete: ShellCompleteRepoName,
+		Action: cliutils2.ReadonlyAction(func(ctx context.Context, c *cli.Command) error {
+			d, f, err := deps.ForConfigShowAction(ctx)
+			if err != nil {
+				return err
+			}
+			defer f()
+
+			return list.New(d.Config).Run(ctx, list.Options{
+				Format: c.String("format"),
+				Json:   c.Bool("json"),
 			})
 		}),
 	}

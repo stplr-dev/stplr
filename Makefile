@@ -125,7 +125,8 @@ update-deps-cve:
 mocks: \
 	internal/service/repos/internal/gitmanager/gitmanager.go \
 	internal/build/utils.go \
-	internal/usecase/support/archive.go
+	internal/usecase/support/archive.go \
+	internal/usecase/repo/list/list.go
 	@echo "Generating mocks..."
 	@for file in $^; do \
 		mockgen -source=$$file -destination=$$(dirname $$file)/mock_$$(basename $$file .go)_test.go -package=$$(basename $$(dirname $$file)); \

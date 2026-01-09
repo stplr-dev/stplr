@@ -161,35 +161,44 @@ msgstr "Скачать все изменённые репозитории"
 msgid "Remove an installed package"
 msgstr "Удалить установленный пакет"
 
-#: internal/app/commands/repo.go:64
+#: internal/app/commands/repo.go:65
 msgid "Manage repos"
 msgstr "Управление репозиториями"
 
-#: internal/app/commands/repo.go:78
+#: internal/app/commands/repo.go:80
 msgid "Remove an existing repository"
 msgstr "Удалить существующий репозиторий"
 
-#: internal/app/commands/repo.go:80
+#: internal/app/commands/repo.go:82
 msgid "<name>"
 msgstr "<имя>"
 
-#: internal/app/commands/repo.go:101
+#: internal/app/commands/repo.go:103
 msgid "Add a new repository"
 msgstr "Добавить новый репозиторий"
 
-#: internal/app/commands/repo.go:102 internal/app/commands/repo.go:153
+#: internal/app/commands/repo.go:104 internal/app/commands/repo.go:187
 msgid "<name> <url>"
 msgstr "<имя> <url>"
 
-#: internal/app/commands/repo.go:125
+#: internal/app/commands/repo.go:127
+#, fuzzy
+msgid "List repositories"
+msgstr "Ошибка при извлечении репозиториев"
+
+#: internal/app/commands/repo.go:137
+msgid "Output in JSON format"
+msgstr ""
+
+#: internal/app/commands/repo.go:159
 msgid "Set the reference of the repository"
 msgstr "Установить ссылку на версию репозитория"
 
-#: internal/app/commands/repo.go:126
+#: internal/app/commands/repo.go:160
 msgid "<name> <ref>"
 msgstr "<имя> <ссылка_на_версию>"
 
-#: internal/app/commands/repo.go:152
+#: internal/app/commands/repo.go:186
 msgid "Set the main url of the repository"
 msgstr "Установить главный URL репозитория"
 
@@ -686,6 +695,31 @@ msgstr "Репозиторий \"%s\" уже существует"
 #: internal/usecase/repo/add/add.go:69
 msgid "Error saving config"
 msgstr "Ошибка при сохранении конфигурации"
+
+#: internal/usecase/repo/list/list.go:58
+#, fuzzy
+msgid "Error encoding repos to JSON"
+msgstr "Ошибка при удалении каталога репозитория"
+
+#: internal/usecase/repo/list/list.go:74
+msgid "Name"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:74
+msgid "URL"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:74
+msgid "Ref"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:74
+msgid "Mirrors"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:74
+msgid "Report"
+msgstr ""
 
 #: internal/usecase/repo/mirrors/remove/remove.go:111
 msgid "No mirrors containing \"%s\" found in repo \"%s\""
