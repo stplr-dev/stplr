@@ -51,10 +51,10 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.25'
-          cache: false
 
       - name: Run E2E tests
         env:
           IGNORE_ROOT_CHECK: 1
+          GENERATE: 0
         run: |
           make test-e2e
