@@ -32,6 +32,8 @@ import (
 )
 
 type Builder struct {
+	cfg commonbuild.Config
+
 	scriptResolver       ScriptResolverExecutor
 	scriptExecutor       scripter.ScriptExecutor
 	cacheExecutor        CacheExecutor
@@ -45,6 +47,7 @@ type Builder struct {
 }
 
 func NewBuilder(
+	cfg commonbuild.Config,
 	scriptResolver ScriptResolverExecutor,
 	scriptExecutor scripter.ScriptExecutor,
 	cacheExecutor CacheExecutor,
@@ -56,6 +59,7 @@ func NewBuilder(
 	scriptViewerExecutor ScriptViewerExecutor,
 ) *Builder {
 	return &Builder{
+		cfg:                  cfg,
 		scriptResolver:       scriptResolver,
 		scriptExecutor:       scriptExecutor,
 		cacheExecutor:        cacheExecutor,

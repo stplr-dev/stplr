@@ -19,15 +19,17 @@
 package common
 
 const (
-	ROOT_CMD                 = "rootCmd"
-	USE_ROOT_CMD             = "useRootCmd"
-	PAGER_STYLE              = "pagerStyle"
-	IGNORE_PKG_UPDATES       = "ignorePkgUpdates"
-	LOG_LEVEL                = "logLevel"
-	AUTO_PULL                = "autoPull"
-	REPO                     = "repo"
-	FORBID_SKIP_IN_CHECKSUMS = "forbidSkipInChecksums"
-	FORBID_BUILD_COMMAND     = "forbidBuildCommand"
+	ROOT_CMD                      = "rootCmd"
+	USE_ROOT_CMD                  = "useRootCmd"
+	PAGER_STYLE                   = "pagerStyle"
+	IGNORE_PKG_UPDATES            = "ignorePkgUpdates"
+	LOG_LEVEL                     = "logLevel"
+	AUTO_PULL                     = "autoPull"
+	REPO                          = "repo"
+	FORBID_SKIP_IN_CHECKSUMS      = "forbidSkipInChecksums"
+	FORBID_BUILD_COMMAND          = "forbidBuildCommand"
+	FIREJAIL_EXCLUDE              = "firejailExclude"
+	HIDE_FIREJAIL_EXCLUDE_WARNING = "hideFirejailExcludeWarning"
 )
 
 const (

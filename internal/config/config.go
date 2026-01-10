@@ -170,16 +170,18 @@ func (c *ALRConfig) ToYAML() (string, error) {
 	return string(data), nil
 }
 
-func (c *ALRConfig) RootCmd() string             { return c.cfg.RootCmd }
-func (c *ALRConfig) PagerStyle() string          { return c.cfg.PagerStyle }
-func (c *ALRConfig) AutoPull() bool              { return c.cfg.AutoPull }
-func (c *ALRConfig) Repos() []types.Repo         { return c.cfg.Repos }
-func (c *ALRConfig) IgnorePkgUpdates() []string  { return c.cfg.IgnorePkgUpdates }
-func (c *ALRConfig) LogLevel() string            { return c.cfg.LogLevel }
-func (c *ALRConfig) UseRootCmd() bool            { return c.cfg.UseRootCmd }
-func (c *ALRConfig) ForbidSkipInChecksums() bool { return c.cfg.ForbidSkipInChecksums }
-func (c *ALRConfig) ForbidBuildCommand() bool    { return c.cfg.ForbidBuildCommand }
-func (c *ALRConfig) GetPaths() *Paths            { return c.paths }
+func (c *ALRConfig) RootCmd() string                  { return c.cfg.RootCmd }
+func (c *ALRConfig) PagerStyle() string               { return c.cfg.PagerStyle }
+func (c *ALRConfig) AutoPull() bool                   { return c.cfg.AutoPull }
+func (c *ALRConfig) Repos() []types.Repo              { return c.cfg.Repos }
+func (c *ALRConfig) IgnorePkgUpdates() []string       { return c.cfg.IgnorePkgUpdates }
+func (c *ALRConfig) LogLevel() string                 { return c.cfg.LogLevel }
+func (c *ALRConfig) UseRootCmd() bool                 { return c.cfg.UseRootCmd }
+func (c *ALRConfig) FirejailExclude() []string        { return c.cfg.FirejailExclude }
+func (c *ALRConfig) HideFirejailExcludeWarning() bool { return c.cfg.HideFirejailExcludeWarning }
+func (c *ALRConfig) ForbidSkipInChecksums() bool      { return c.cfg.ForbidSkipInChecksums }
+func (c *ALRConfig) ForbidBuildCommand() bool         { return c.cfg.ForbidBuildCommand }
+func (c *ALRConfig) GetPaths() *Paths                 { return c.paths }
 
 // TODO: refactor
 func PatchToUserDirs(c *ALRConfig) error {
@@ -194,7 +196,7 @@ func PatchToUserDirs(c *ALRConfig) error {
 	return nil
 }
 
-func (c *ALRConfig) AllowedKeys() []string {
+func AllowedKeys() []string {
 	return []string{
 		common.ROOT_CMD,
 		common.PAGER_STYLE,
@@ -204,6 +206,8 @@ func (c *ALRConfig) AllowedKeys() []string {
 		common.IGNORE_PKG_UPDATES,
 		common.FORBID_SKIP_IN_CHECKSUMS,
 		common.FORBID_BUILD_COMMAND,
+		common.FIREJAIL_EXCLUDE,
+		common.HIDE_FIREJAIL_EXCLUDE_WARNING,
 	}
 }
 
@@ -217,7 +221,7 @@ func (c *ALRConfig) ConvertValue(key, v string) (any, error) {
 		}
 		return val, nil
 
-	case common.IGNORE_PKG_UPDATES:
+	case common.IGNORE_PKG_UPDATES, common.FIREJAIL_EXCLUDE:
 		if v == "" {
 			return []string{}, nil
 		}

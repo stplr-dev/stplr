@@ -86,6 +86,7 @@ var testPkg = staplerfile.Package{
 	NonFreeUrl:        staplerfile.OverridableFromMap(map[string]string{}),
 	AppStreamAppID:    staplerfile.OverridableFromMap(map[string]string{}),
 	AppStreamMetaInfo: staplerfile.OverridableFromMap(map[string]string{}),
+	FireJailed:        staplerfile.OverridableFromMap(map[string]bool{}),
 }
 
 func TestInit(t *testing.T) {

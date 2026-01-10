@@ -76,7 +76,7 @@ func (u *useCase) Run(ctx context.Context) error {
 	}
 
 	for _, pkg := range res {
-		pkgFullName := fmt.Sprintf("%s/%s", pkg.Repository, pkg.Name)
+		pkgFullName := pkg.FormatFullName()
 		_, ok := installedMap[pkgFullName]
 		if !ok {
 			continue

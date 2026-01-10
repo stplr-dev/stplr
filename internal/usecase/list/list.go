@@ -200,7 +200,7 @@ func (u *useCase) processAndOutputPackages(opts Options, pkgs []staplerfile.Pack
 
 		pkgInfo := &PackageInfo{Package: &pkg}
 		if opts.Installed {
-			if instVersion, ok := installedPkgs[fmt.Sprintf("%s/%s", pkg.Repository, pkg.Name)]; ok {
+			if instVersion, ok := installedPkgs[pkg.FormatFullName()]; ok {
 				pkg.Version = instVersion.Version
 				pkg.Release = instVersion.Release
 			} else {

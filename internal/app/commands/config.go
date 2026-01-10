@@ -34,6 +34,7 @@ import (
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/cliutils2"
+	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/usecase/config/get"
 	"go.stplr.dev/stplr/internal/usecase/config/set"
 	"go.stplr.dev/stplr/internal/usecase/config/show"
@@ -66,17 +67,6 @@ func ShowCmd() *cli.Command {
 	}
 }
 
-var configKeys = []string{
-	"rootCmd",
-	"useRootCmd",
-	"pagerStyle",
-	"autoPull",
-	"logLevel",
-	"ignorePkgUpdates",
-	"forbidSkipInChecksums",
-	"forbidBuildCommand",
-}
-
 func SetConfig() *cli.Command {
 	return &cli.Command{
 		Name:      "set",
@@ -84,7 +74,7 @@ func SetConfig() *cli.Command {
 		ArgsUsage: gotext.Get("<key> <value>"),
 		ShellComplete: cliutils.BashCompleteWithError(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() == 0 {
-				for _, key := range configKeys {
+				for _, key := range config.AllowedKeys() {
 					fmt.Println(key)
 				}
 				return nil
@@ -123,7 +113,7 @@ func GetConfig() *cli.Command {
 		ArgsUsage: gotext.Get("<key>"),
 		ShellComplete: cliutils.BashCompleteWithError(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() == 0 {
-				for _, key := range configKeys {
+				for _, key := range config.AllowedKeys() {
 					fmt.Println(key)
 				}
 				return nil

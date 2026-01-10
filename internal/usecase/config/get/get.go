@@ -28,6 +28,7 @@ import (
 
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/config/common"
 )
 
 type useCase struct {
@@ -42,20 +43,28 @@ func New(cfg *config.ALRConfig) *useCase {
 
 func (u *useCase) Run(ctx context.Context, key string) error {
 	stringGetters := map[string]func() string{
-		"rootCmd":    u.cfg.RootCmd,
-		"pagerStyle": u.cfg.PagerStyle,
-		"logLevel":   u.cfg.LogLevel,
+		common.ROOT_CMD:    u.cfg.RootCmd,
+		common.PAGER_STYLE: u.cfg.PagerStyle,
+		common.LOG_LEVEL:   u.cfg.LogLevel,
 	}
 
 	boolGetters := map[string]func() bool{
-		"useRootCmd":            u.cfg.UseRootCmd,
-		"autoPull":              u.cfg.AutoPull,
-		"forbidSkipInChecksums": u.cfg.ForbidSkipInChecksums,
-		"forbidBuildCommand":    u.cfg.ForbidBuildCommand,
+		common.USE_ROOT_CMD:                  u.cfg.UseRootCmd,
+		common.AUTO_PULL:                     u.cfg.AutoPull,
+		common.FORBID_SKIP_IN_CHECKSUMS:      u.cfg.ForbidSkipInChecksums,
+		common.FORBID_BUILD_COMMAND:          u.cfg.ForbidBuildCommand,
+		common.HIDE_FIREJAIL_EXCLUDE_WARNING: u.cfg.HideFirejailExcludeWarning,
 	}
 
 	switch key {
-	case "ignorePkgUpdates":
+	case common.FIREJAIL_EXCLUDE:
+		updates := u.cfg.FirejailExclude()
+		if len(updates) == 0 {
+			fmt.Println("[]")
+		} else {
+			fmt.Println(strings.Join(updates, ", "))
+		}
+	case common.IGNORE_PKG_UPDATES:
 		updates := u.cfg.IgnorePkgUpdates()
 		if len(updates) == 0 {
 			fmt.Println("[]")
