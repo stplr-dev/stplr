@@ -42,7 +42,7 @@ func (r *Resolver) Init() error {
 	if err != nil {
 		return errors.WrapIntoI18nError(err, gotext.Get("Can't detect system language"))
 	}
-	if systemLang == "" {
+	if systemLang == "" || systemLang == "C" {
 		systemLang = "en"
 	}
 
