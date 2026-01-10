@@ -470,7 +470,7 @@ msgstr ""
 msgid "Attempting to run as root using '%s'..."
 msgstr ""
 
-#: internal/scripter/firejail.go:153
+#: internal/scripter/firejail.go:154
 msgid "Applying FireJail integration for %q package"
 msgstr ""
 
