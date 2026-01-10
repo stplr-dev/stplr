@@ -544,7 +544,7 @@ msgstr ""
 msgid "Your settings do not allow build command"
 msgstr ""
 
-#: internal/usecase/config/get/get.go:91
+#: internal/usecase/config/get/get.go:110
 msgid "unknown config key: %s"
 msgstr ""
 

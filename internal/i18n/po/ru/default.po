@@ -562,7 +562,7 @@ msgstr "Ошибка при перемещении пакета"
 msgid "Your settings do not allow build command"
 msgstr "Ваши настройки не позволяют использовать команду build"
 
-#: internal/usecase/config/get/get.go:91
+#: internal/usecase/config/get/get.go:110
 msgid "unknown config key: %s"
 msgstr "неизвестный ключ конфигурации: %s"
 

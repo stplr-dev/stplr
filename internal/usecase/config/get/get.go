@@ -21,6 +21,8 @@ package get
 import (
 	"context"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 
 	"github.com/goccy/go-yaml"
@@ -29,15 +31,33 @@ import (
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/config/common"
+	"go.stplr.dev/stplr/pkg/types"
 )
 
 type useCase struct {
-	cfg *config.ALRConfig
+	cfg ConfigGetter
+	out io.Writer
 }
 
-func New(cfg *config.ALRConfig) *useCase {
+type ConfigGetter interface {
+	RootCmd() string
+	PagerStyle() string
+	AutoPull() bool
+	Repos() []types.Repo
+	IgnorePkgUpdates() []string
+	LogLevel() string
+	UseRootCmd() bool
+	FirejailExclude() []string
+	HideFirejailExcludeWarning() bool
+	ForbidSkipInChecksums() bool
+	ForbidBuildCommand() bool
+	GetPaths() *config.Paths
+}
+
+func New(cfg ConfigGetter) *useCase {
 	return &useCase{
 		cfg: cfg,
+		out: os.Stdout,
 	}
 }
 
@@ -56,25 +76,17 @@ func (u *useCase) Run(ctx context.Context, key string) error {
 		common.HIDE_FIREJAIL_EXCLUDE_WARNING: u.cfg.HideFirejailExcludeWarning,
 	}
 
+	listGetters := map[string]func() []string{
+		common.IGNORE_PKG_UPDATES: u.cfg.IgnorePkgUpdates,
+		common.FIREJAIL_EXCLUDE:   u.cfg.FirejailExclude,
+	}
+
 	switch key {
-	case common.FIREJAIL_EXCLUDE:
-		updates := u.cfg.FirejailExclude()
-		if len(updates) == 0 {
-			fmt.Println("[]")
-		} else {
-			fmt.Println(strings.Join(updates, ", "))
-		}
-	case common.IGNORE_PKG_UPDATES:
-		updates := u.cfg.IgnorePkgUpdates()
-		if len(updates) == 0 {
-			fmt.Println("[]")
-		} else {
-			fmt.Println(strings.Join(updates, ", "))
-		}
-	case "repo", "repos":
+	// TODO: remove legacy keys
+	case common.REPO, "repos":
 		repos := u.cfg.Repos()
 		if len(repos) == 0 {
-			fmt.Println("[]")
+			fmt.Fprintln(u.out, "[]")
 		} else {
 			repoData, err := yaml.Marshal(repos)
 			if err != nil {
@@ -84,9 +96,16 @@ func (u *useCase) Run(ctx context.Context, key string) error {
 		}
 	default:
 		if getter, ok := boolGetters[key]; ok {
-			fmt.Println(getter())
+			fmt.Fprintln(u.out, getter())
 		} else if getter, ok := stringGetters[key]; ok {
-			fmt.Println(getter())
+			fmt.Fprintln(u.out, getter())
+		} else if getter, ok := listGetters[key]; ok {
+			listValue := getter()
+			if len(listValue) == 0 {
+				fmt.Fprintln(u.out, "[]")
+			} else {
+				fmt.Fprintln(u.out, strings.Join(listValue, ", "))
+			}
 		} else {
 			return errors.NewI18nError(gotext.Get("unknown config key: %s", key))
 		}
