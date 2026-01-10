@@ -84,32 +84,55 @@ func (u *useCase) Run(ctx context.Context, key string) error {
 	switch key {
 	// TODO: remove legacy keys
 	case common.REPO, "repos":
-		repos := u.cfg.Repos()
-		if len(repos) == 0 {
-			fmt.Fprintln(u.out, "[]")
-		} else {
-			repoData, err := yaml.Marshal(repos)
-			if err != nil {
-				return fmt.Errorf("failed to serialize repos: %w", err)
-			}
-			fmt.Print(string(repoData))
-		}
+		return u.handleReposKey()
 	default:
-		if getter, ok := boolGetters[key]; ok {
-			fmt.Fprintln(u.out, getter())
-		} else if getter, ok := stringGetters[key]; ok {
-			fmt.Fprintln(u.out, getter())
-		} else if getter, ok := listGetters[key]; ok {
-			listValue := getter()
-			if len(listValue) == 0 {
-				fmt.Fprintln(u.out, "[]")
-			} else {
-				fmt.Fprintln(u.out, strings.Join(listValue, ", "))
-			}
-		} else {
-			return errors.NewI18nError(gotext.Get("unknown config key: %s", key))
-		}
+		return u.handleConfigKey(key, boolGetters, stringGetters, listGetters)
+	}
+}
+
+func (u *useCase) handleReposKey() error {
+	repos := u.cfg.Repos()
+	if len(repos) == 0 {
+		fmt.Fprintln(u.out, "[]")
+		return nil
 	}
 
+	repoData, err := yaml.Marshal(repos)
+	if err != nil {
+		return fmt.Errorf("failed to serialize repos: %w", err)
+	}
+	fmt.Fprint(u.out, string(repoData))
 	return nil
+}
+
+func (u *useCase) handleConfigKey(
+	key string,
+	boolGetters map[string]func() bool,
+	stringGetters map[string]func() string,
+	listGetters map[string]func() []string,
+) error {
+	if getter, ok := boolGetters[key]; ok {
+		fmt.Fprintln(u.out, getter())
+		return nil
+	}
+
+	if getter, ok := stringGetters[key]; ok {
+		fmt.Fprintln(u.out, getter())
+		return nil
+	}
+
+	if getter, ok := listGetters[key]; ok {
+		u.printList(getter())
+		return nil
+	}
+
+	return errors.NewI18nError(gotext.Get("unknown config key: %s", key))
+}
+
+func (u *useCase) printList(listValue []string) {
+	if len(listValue) == 0 {
+		fmt.Fprintln(u.out, "[]")
+	} else {
+		fmt.Fprintln(u.out, strings.Join(listValue, ", "))
+	}
 }

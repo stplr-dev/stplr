@@ -26,6 +26,7 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/config/common"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
@@ -69,4 +70,114 @@ func TestLegacyKeysHandled(t *testing.T) {
 		useCase.Run(t.Context(), key)
 		assert.NotEmpty(t, buf)
 	}
+}
+
+func TestStringKeyOutput(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockConfig := NewMockConfigGetter(ctrl)
+	mockConfig.EXPECT().RootCmd().Return("test-cmd")
+
+	useCase := New(mockConfig)
+	buf := bytes.NewBuffer(nil)
+	useCase.out = buf
+	useCase.Run(t.Context(), common.ROOT_CMD)
+
+	assert.Equal(t, "test-cmd\n", buf.String())
+}
+
+func TestBoolKeyOutput(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockConfig := NewMockConfigGetter(ctrl)
+	mockConfig.EXPECT().AutoPull().Return(true)
+
+	useCase := New(mockConfig)
+	buf := bytes.NewBuffer(nil)
+	useCase.out = buf
+	useCase.Run(t.Context(), common.AUTO_PULL)
+
+	assert.Equal(t, "true\n", buf.String())
+}
+
+func TestListKeyOutputEmpty(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockConfig := NewMockConfigGetter(ctrl)
+	mockConfig.EXPECT().IgnorePkgUpdates().Return([]string{})
+
+	useCase := New(mockConfig)
+	buf := bytes.NewBuffer(nil)
+	useCase.out = buf
+	useCase.Run(t.Context(), common.IGNORE_PKG_UPDATES)
+
+	assert.Equal(t, "[]\n", buf.String())
+}
+
+func TestListKeyOutputWithValues(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockConfig := NewMockConfigGetter(ctrl)
+	mockConfig.EXPECT().IgnorePkgUpdates().Return([]string{"pkg1", "pkg2", "pkg3"})
+
+	useCase := New(mockConfig)
+	buf := bytes.NewBuffer(nil)
+	useCase.out = buf
+	useCase.Run(t.Context(), common.IGNORE_PKG_UPDATES)
+
+	assert.Equal(t, "pkg1, pkg2, pkg3\n", buf.String())
+}
+
+func TestReposKeyEmptyOutput(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockConfig := NewMockConfigGetter(ctrl)
+	mockConfig.EXPECT().Repos().Return([]types.Repo{})
+
+	useCase := New(mockConfig)
+	buf := bytes.NewBuffer(nil)
+	useCase.out = buf
+	useCase.Run(t.Context(), "repo")
+
+	assert.Equal(t, "[]\n", buf.String())
+}
+
+func TestReposKeyWithValues(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockConfig := NewMockConfigGetter(ctrl)
+	mockConfig.EXPECT().Repos().Return([]types.Repo{
+		{Name: "repo1", URL: "https://example.com/repo1"},
+		{Name: "repo2", URL: "https://example.com/repo2"},
+	})
+
+	useCase := New(mockConfig)
+	buf := bytes.NewBuffer(nil)
+	useCase.out = buf
+	err := useCase.Run(t.Context(), "repo")
+
+	assert.NoError(t, err)
+	assert.Contains(t, buf.String(), "repo1")
+	assert.Contains(t, buf.String(), "repo2")
+}
+
+func TestUnknownKeyReturnsError(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockConfig := NewMockConfigGetter(ctrl)
+
+	useCase := New(mockConfig)
+	buf := bytes.NewBuffer(nil)
+	useCase.out = buf
+	err := useCase.Run(t.Context(), "unknown_key")
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "unknown config key")
 }
