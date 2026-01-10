@@ -1,21 +1,20 @@
 #
 # x1z53 <x1z53@yandex.ru>, 2025.
-# Maxim Slipenko <maks1ms@alt-gnome.ru>, 2025.
+# Maxim Slipenko <maks1ms@alt-gnome.ru>, 2025-2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2025-12-11 06:56+0000\n"
-"Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
-"Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
-"stplr/ru/>\n"
+"PO-Revision-Date: 2026-01-09 14:44+0300\n"
+"Last-Translator: Maxim Slipenko <maks1ms@alt-gnome.ru>\n"
+"Language-Team: Russian\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.14.3\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Gtranslator 48.0\n"
 
 #: cmd/stplr/main.go:71
 msgid ""
@@ -177,28 +176,27 @@ msgstr "<имя>"
 msgid "Add a new repository"
 msgstr "Добавить новый репозиторий"
 
-#: internal/app/commands/repo.go:104 internal/app/commands/repo.go:187
+#: internal/app/commands/repo.go:104 internal/app/commands/repo.go:186
 msgid "<name> <url>"
 msgstr "<имя> <url>"
 
 #: internal/app/commands/repo.go:127
-#, fuzzy
 msgid "List repositories"
-msgstr "Ошибка при извлечении репозиториев"
+msgstr "Список репозиториев"
 
 #: internal/app/commands/repo.go:137
 msgid "Output in JSON format"
-msgstr ""
+msgstr "Вывод в JSON формате"
 
-#: internal/app/commands/repo.go:159
+#: internal/app/commands/repo.go:158
 msgid "Set the reference of the repository"
 msgstr "Установить ссылку на версию репозитория"
 
-#: internal/app/commands/repo.go:160
+#: internal/app/commands/repo.go:159
 msgid "<name> <ref>"
 msgstr "<имя> <ссылка_на_версию>"
 
-#: internal/app/commands/repo.go:186
+#: internal/app/commands/repo.go:185
 msgid "Set the main url of the repository"
 msgstr "Установить главный URL репозитория"
 
@@ -231,29 +229,24 @@ msgid "Search packages"
 msgstr "Поиск пакетов"
 
 #: internal/app/commands/search.go:50
-#, fuzzy
 msgid "Search by query (CEL syntax)"
-msgstr "Искать по имени"
+msgstr "Поиск по запросу (CEL синтаксис)"
 
 #: internal/app/commands/search.go:55
-#, fuzzy
 msgid "[DEPRECATED] Search by name"
-msgstr "Искать по имени"
+msgstr "[УСТАРЕЛ] Искать по имени"
 
 #: internal/app/commands/search.go:60
-#, fuzzy
 msgid "[DEPRECATED] Search by description"
-msgstr "Искать по описанию"
+msgstr "[УСТАРЕЛ] Искать по описанию"
 
 #: internal/app/commands/search.go:65
-#, fuzzy
 msgid "[DEPRECATED] Search by repository"
-msgstr "Искать по репозиторию"
+msgstr "[УСТАРЕЛ] Искать по репозиторию"
 
 #: internal/app/commands/search.go:70
-#, fuzzy
 msgid "[DEPRECATED] Search by provides"
-msgstr "Иcкать по provides"
+msgstr "[УСТАРЕЛ] Иcкать по provides"
 
 #: internal/app/commands/support.go:35
 msgid "Dump debug information"
@@ -616,9 +609,8 @@ msgid "Package not found"
 msgstr "Пакет не найден"
 
 #: internal/usecase/info/info.go:80
-#, fuzzy
 msgid "Error initializing resolver"
-msgstr "Ошибка инициализации базы данных"
+msgstr "Ошибка инициализации resolver"
 
 #: internal/usecase/info/info.go:89
 msgid "Error encoding script variables"
@@ -697,29 +689,28 @@ msgid "Error saving config"
 msgstr "Ошибка при сохранении конфигурации"
 
 #: internal/usecase/repo/list/list.go:58
-#, fuzzy
 msgid "Error encoding repos to JSON"
-msgstr "Ошибка при удалении каталога репозитория"
+msgstr "Ошибка при кодировании репозиториев в JSON"
 
 #: internal/usecase/repo/list/list.go:74
 msgid "Name"
-msgstr ""
+msgstr "Имя"
 
 #: internal/usecase/repo/list/list.go:74
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: internal/usecase/repo/list/list.go:74
 msgid "Ref"
-msgstr ""
+msgstr "Ревизия"
 
 #: internal/usecase/repo/list/list.go:74
 msgid "Mirrors"
-msgstr ""
+msgstr "Зеркала"
 
 #: internal/usecase/repo/list/list.go:74
 msgid "Report"
-msgstr ""
+msgstr "Сообщить об ошибке"
 
 #: internal/usecase/repo/mirrors/remove/remove.go:111
 msgid "No mirrors containing \"%s\" found in repo \"%s\""

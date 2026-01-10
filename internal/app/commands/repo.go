@@ -137,7 +137,6 @@ func ListReposCmd() *cli.Command {
 				Usage: gotext.Get("Output in JSON format"),
 			},
 		},
-		ShellComplete: ShellCompleteRepoName,
 		Action: cliutils2.ReadonlyAction(func(ctx context.Context, c *cli.Command) error {
 			d, f, err := deps.ForConfigShowAction(ctx)
 			if err != nil {

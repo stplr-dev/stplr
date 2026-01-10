@@ -167,7 +167,7 @@ msgstr ""
 msgid "Add a new repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:104 internal/app/commands/repo.go:187
+#: internal/app/commands/repo.go:104 internal/app/commands/repo.go:186
 msgid "<name> <url>"
 msgstr ""
 
@@ -179,15 +179,15 @@ msgstr ""
 msgid "Output in JSON format"
 msgstr ""
 
-#: internal/app/commands/repo.go:159
+#: internal/app/commands/repo.go:158
 msgid "Set the reference of the repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:160
+#: internal/app/commands/repo.go:159
 msgid "<name> <ref>"
 msgstr ""
 
-#: internal/app/commands/repo.go:186
+#: internal/app/commands/repo.go:185
 msgid "Set the main url of the repository"
 msgstr ""
 
