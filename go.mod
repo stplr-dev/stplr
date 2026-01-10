@@ -53,7 +53,7 @@ require (
 	golang.org/x/sys v0.40.0
 	golang.org/x/text v0.33.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20251222181119-0a764e51fe1b
-	modernc.org/sqlite v1.42.2
+	modernc.org/sqlite v1.43.0
 	mvdan.cc/sh/v3 v3.12.1-0.20251005234102-d3ff6f655a6a
 	xorm.io/xorm v1.3.11
 )
