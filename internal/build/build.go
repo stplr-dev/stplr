@@ -28,8 +28,8 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"path"
 
+	"github.com/gobwas/glob"
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/output"
@@ -101,6 +101,17 @@ func (b *Builder) BuildPackageFromDb(
 	name := args.Package.BasePkgName
 	if name == "" {
 		name = args.Package.Name
+	}
+
+	r := staplerfile.NewResolver(args.Info)
+	err := r.Init()
+	if err != nil {
+		return nil, err
+	}
+	r.Resolve(args.Package)
+
+	if isFirejailExcluded(args.Package, b.cfg, b.out) {
+		args.Opts.DisableFirejail = true
 	}
 
 	return b.BuildPackage(ctx, &commonbuild.BuildInput{
@@ -203,8 +214,6 @@ func (i *Builder) InstallPkgs(
 }
 
 func (b *Builder) BuildALRDeps(ctx context.Context, input InstallInput, depends []string) (buildDeps []*commonbuild.BuiltDep, repoDeps []string, err error) {
-	r := staplerfile.NewResolver(input.OSRelease())
-	err = r.Init()
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed init resolver: %w", err)
 	}
@@ -228,12 +237,6 @@ func (b *Builder) BuildALRDeps(ctx context.Context, input InstallInput, depends 
 
 		for basePkgName := range pkgsMap {
 			pkg := pkgsMap[basePkgName].pkg
-			r.Resolve(pkg)
-
-			buildOpts := input.BuildOpts()
-			if isFirejailExcluded(pkg, b.cfg, b.out) {
-				buildOpts.DisableFirejail = true
-			}
 
 			res, err := b.BuildPackageFromDb(
 				ctx,
@@ -261,6 +264,14 @@ func (b *Builder) BuildALRDeps(ctx context.Context, input InstallInput, depends 
 	return buildDeps, repoDeps, nil
 }
 
+func firejailedPatternMatch(fullName, pattern string) (bool, error) {
+	g, err := glob.Compile(pattern)
+	if err != nil {
+		return false, err
+	}
+	return g.Match(fullName), nil
+}
+
 func isFirejailExcluded(pkg *staplerfile.Package, cfg commonbuild.Config, out output.Output) bool {
 	if pkg.FireJailed.Resolved() {
 		disableFirejail := false
@@ -269,9 +280,10 @@ func isFirejailExcluded(pkg *staplerfile.Package, cfg commonbuild.Config, out ou
 		fullName := pkg.FormatFullName()
 
 		for _, pattern := range cfg.FirejailExclude() {
-			matched, err := path.Match(pattern, fullName)
+			matched, err := firejailedPatternMatch(fullName, pattern)
 			if err != nil {
 				slog.Debug("failed to match pattern", "err", err)
+				continue
 			}
 			if matched {
 				disableFirejail = true
@@ -282,7 +294,7 @@ func isFirejailExcluded(pkg *staplerfile.Package, cfg commonbuild.Config, out ou
 
 		if disableFirejail && !cfg.HideFirejailExcludeWarning() {
 			out.Warn(gotext.Get(
-				"Firejail is disabled for %q package due to ignore pattern %q. Security isolation will not be applied. Ensure you understand the risks.",
+				"Firejail is disabled for %q package due to ignore pattern %q in config. Security isolation will not be applied. Ensure you understand the risks.",
 				fullName, disabledPattern,
 			))
 		}

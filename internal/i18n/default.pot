@@ -291,14 +291,14 @@ msgstr ""
 msgid "Full license available at: %s"
 msgstr ""
 
-#: internal/build/build.go:213
+#: internal/build/build.go:222
 msgid "Installing dependencies"
 msgstr ""
 
-#: internal/build/build.go:285
+#: internal/build/build.go:297
 msgid ""
-"Firejail is disabled for %q package due to ignore pattern %q. Security "
-"isolation will not be applied. Ensure you understand the risks."
+"Firejail is disabled for %q package due to ignore pattern %q in config. "
+"Security isolation will not be applied. Ensure you understand the risks."
 msgstr ""
 
 #: internal/build/check_executor.go:56

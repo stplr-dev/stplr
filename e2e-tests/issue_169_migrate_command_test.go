@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	"go.alt-gnome.ru/capytest"
+
 	"go.stplr.dev/stplr/internal/db"
 )
 
