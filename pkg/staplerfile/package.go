@@ -89,7 +89,7 @@ type Package struct {
 	AutoProvSkipList  OverridableField[[]string] `sh:"auto_prov_skiplist" xorm:"-" json:"auto_prov_skiplist,omitempty"`
 	AutoProvFilter    OverridableField[[]string] `sh:"auto_prov_filter" xorm:"-" json:"auto_prov_filter,omitempty"`
 
-	FireJailed       OverridableField[bool]              `sh:"firejailed" xorm:"-" json:"firejailed"`
+	FireJailed       OverridableField[bool]              `sh:"firejailed" xorm:"firejailed" json:"firejailed"`
 	FireJailProfiles OverridableField[map[string]string] `sh:"firejail_profiles" xorm:"-" json:"firejail_profiles,omitempty"`
 
 	DisableNetwork OverridableField[bool] `sh:"disable_network" xorm:"-" json:"disable_network"`
@@ -201,4 +201,8 @@ func (p Package) MarshalJSONWithOptions(includeOverrides bool) ([]byte, error) {
 	}
 
 	return json.Marshal(result)
+}
+
+func (pkg *Package) FormatFullName() string {
+	return fmt.Sprintf("%s/%s", pkg.Repository, pkg.Name)
 }

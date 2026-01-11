@@ -163,5 +163,6 @@ func GetCELColumnMap() map[string]cel2sqlite.ColumnInfo {
 		"deps":               {SQLName: "depends", Type: cel2sqlite.ColumnTypeOverridableFieldArray},
 		"build_deps":         {SQLName: "builddepends", Type: cel2sqlite.ColumnTypeOverridableFieldArray},
 		"opt_deps":           {SQLName: "optdepends", Type: cel2sqlite.ColumnTypeOverridableFieldArray},
+		"firejailed":         {SQLName: "firejailed", Type: cel2sqlite.ColumnTypeOverridableField},
 	}
 }

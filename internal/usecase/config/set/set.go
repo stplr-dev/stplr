@@ -49,11 +49,11 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 	key := opts.Field
 	valueStr := opts.Value
 
-	if !slices.Contains(u.cfg.AllowedKeys(), key) {
+	if !slices.Contains(config.AllowedKeys(), key) {
 		return errors.NewI18nError(gotext.Get("unknown config key: %s", key))
 	}
 
-	value, err := u.cfg.ConvertValue(key, valueStr)
+	value, err := config.ConvertValue(key, valueStr)
 	if err != nil {
 		return errors.NewI18nError(gotext.Get("invalid value for %s: %v", key, err))
 	}

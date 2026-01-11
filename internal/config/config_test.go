@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Stapler
-// Copyright (C) 2025 The Stapler Authors
+// Copyright (C) 2026 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,22 +16,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package common
+package config_test
 
-const (
-	ROOT_CMD                      = "rootCmd"
-	USE_ROOT_CMD                  = "useRootCmd"
-	PAGER_STYLE                   = "pagerStyle"
-	IGNORE_PKG_UPDATES            = "ignorePkgUpdates"
-	LOG_LEVEL                     = "logLevel"
-	AUTO_PULL                     = "autoPull"
-	REPO                          = "repo"
-	FORBID_SKIP_IN_CHECKSUMS      = "forbidSkipInChecksums"
-	FORBID_BUILD_COMMAND          = "forbidBuildCommand"
-	FIREJAIL_EXCLUDE              = "firejailExclude"
-	HIDE_FIREJAIL_EXCLUDE_WARNING = "hideFirejailExcludeWarning"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"go.stplr.dev/stplr/internal/config"
 )
 
-const (
-	SOURCE_SYSTEM = "system"
-)
+func TestConvertValueAllowedKeysHandled(t *testing.T) {
+	for _, key := range config.AllowedKeys() {
+		_, err := config.ConvertValue(key, "")
+		if err != nil {
+			assert.NotContains(t, err.Error(), "unknown config key", key)
+		}
+	}
+}

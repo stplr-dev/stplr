@@ -1,0 +1,4 @@
+# Enable verbose output (removes --quiet from firejail options)
+#STPLRPKG_FIREJAIL_VERBOSE=1
+# Disable firejail
+#STPLRPKG_FIREJAIL_DISABLE=1

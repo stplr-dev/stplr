@@ -44,6 +44,7 @@ func NewMainBuilder(
 	out output.Output,
 ) (*Builder, error) {
 	builder := NewBuilder(
+		cfg,
 		NewScriptResolver(cfg),
 		scriptExecutor,
 		NewLocalCacheExecutor(cfg),

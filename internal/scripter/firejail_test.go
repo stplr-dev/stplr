@@ -91,19 +91,45 @@ func TestCreateWrapperScript(t *testing.T) {
 		name            string
 		origFilePath    string
 		profilePath     string
+		configPath      string
 		expectedContent string
 	}{
 		{
 			"basic wrapper",
-			"/usr/lib/sta/firejailed/_usr_bin_test",
-			"/usr/lib/sta/firejailed/_usr_bin_test.profile",
-			"#!/bin/bash\nexec firejail --profile=\"/usr/lib/sta/firejailed/_usr_bin_test.profile\" \"/usr/lib/sta/firejailed/_usr_bin_test\" \"$@\"\n",
-		},
-		{
-			"path with spaces",
-			"/usr/lib/sta/firejailed/_usr_bin_my_app",
-			"/usr/lib/sta/firejailed/_usr_bin_my_app.profile",
-			"#!/bin/bash\nexec firejail --profile=\"/usr/lib/sta/firejailed/_usr_bin_my_app.profile\" \"/usr/lib/sta/firejailed/_usr_bin_my_app\" \"$@\"\n",
+			"/usr/lib/stplr/firejailed/_usr_bin_test",
+			"/usr/lib/stplr/firejailed/_usr_bin_test.profile",
+			"/etc/stplr/firejailed/_usr_bin_test",
+			`#!/bin/bash
+set -e
+
+STPLRPKG_FIREJAIL_DISABLE=0
+_GLOBAL="/etc/stplr/firejailed/global"
+_LOCAL="/etc/stplr/firejailed/_usr_bin_test"
+_ORIG="/usr/lib/stplr/firejailed/_usr_bin_test"
+_FIREJAIL_PROFILE="/usr/lib/stplr/firejailed/_usr_bin_test.profile"
+_FIREJAIL="/usr/bin/firejail"
+
+_ENV_VERBOSE="${STPLRPKG_FIREJAIL_VERBOSE:-}"
+
+if [ -f "${_GLOBAL}" ]; then . "${_GLOBAL}"; fi
+if [ -f "${_LOCAL}" ]; then . "${_LOCAL}"; fi
+
+if [ -n "${_ENV_VERBOSE}" ]; then
+	STPLRPKG_FIREJAIL_VERBOSE="${_ENV_VERBOSE}"
+fi
+
+if [ "${STPLRPKG_FIREJAIL_DISABLE:-0}" = "1" ];  then
+	exec "${_ORIG}" "$@"
+fi
+
+FIREJAIL_OPTS=(--profile="${_FIREJAIL_PROFILE}")
+
+if [ "${STPLRPKG_FIREJAIL_VERBOSE:-0}" != "1" ]; then
+	FIREJAIL_OPTS+=(--quiet)
+fi
+
+exec ${_FIREJAIL} "${FIREJAIL_OPTS[@]}" "${_ORIG}" "$@"
+`,
 		},
 	}
 
@@ -112,7 +138,7 @@ func TestCreateWrapperScript(t *testing.T) {
 			tmpDir := t.TempDir()
 			scriptPath := filepath.Join(tmpDir, "wrapper.sh")
 
-			err := createWrapperScript(scriptPath, tt.origFilePath, tt.profilePath)
+			err := createWrapperScript(scriptPath, tt.origFilePath, tt.profilePath, tt.configPath)
 
 			assert.NoError(t, err)
 			assert.FileExists(t, scriptPath)
@@ -305,7 +331,7 @@ func TestCreateFirejailedBinary(t *testing.T) {
 				assert.Nil(t, result)
 			} else {
 				assert.NoError(t, err)
-				assert.Len(t, result, 2)
+				assert.Len(t, result, 3)
 
 				binContent := result[0]
 				assert.Contains(t, binContent.Destination, "usr/lib/stplr/firejailed/")
@@ -321,7 +347,12 @@ func TestCreateFirejailedBinary(t *testing.T) {
 				assert.NoError(t, err)
 				wrapper := string(wrapperBytes)
 				assert.Contains(t, wrapper, "#!/bin/bash")
-				assert.Contains(t, wrapper, "firejail --profile=")
+				assert.Contains(t, wrapper, `_FIREJAIL="/usr/bin/firejail"`)
+				assert.Contains(t, wrapper, `exec ${_FIREJAIL} "${FIREJAIL_OPTS[@]}" "${_ORIG}" "$@"`)
+
+				configContent := result[2]
+				assert.Contains(t, configContent.Destination, "etc/stplr/firejailed/")
+				assert.FileExists(t, configContent.Source)
 			}
 		})
 	}

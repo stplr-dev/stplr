@@ -41,9 +41,10 @@ import (
 )
 
 const (
-	firejailedDir     = constants.FirejailedDir
-	defaultDirMode    = 0o755
-	defaultScriptMode = 0o755
+	firejailedDir          = constants.FirejailedDir
+	firejailedConfigDir    = constants.FirejailedConfigDir
+	firejailedGlobalConfig = constants.FirejailedGlobalConfig
+	defaultDirMode         = 0o755
 )
 
 var (
@@ -216,6 +217,11 @@ func createFirejailedBinary(
 		return nil, err
 	}
 
+	wrapperConfigPath, err := generateConfigPath(content.Destination)
+	if err != nil {
+		return nil, err
+	}
+
 	profiles := pkg.FireJailProfiles.Resolved()
 	sourceProfilePath, ok := profiles[content.Destination]
 
@@ -245,13 +251,19 @@ func createFirejailedBinary(
 	content.Source = filepath.Join(dirs.PkgDir, content.Destination)
 
 	// Create wrapper script
-	if err := createWrapperScript(filepath.Join(dirs.PkgDir, content.Destination), origFilePath, dest); err != nil {
+	if err := createWrapperScript(filepath.Join(dirs.PkgDir, content.Destination), origFilePath, dest, wrapperConfigPath); err != nil {
 		return nil, fmt.Errorf("failed to create wrapper script: %w", err)
+	}
+
+	// create config file
+	if err := createConfigFile(filepath.Join(dirs.PkgDir, wrapperConfigPath)); err != nil {
+		return nil, fmt.Errorf("failed to create config file: %w", err)
 	}
 
 	return buildContents(pkg, dirs, &[]string{
 		origFilePath,
 		dest,
+		wrapperConfigPath,
 	})
 }
 
@@ -269,6 +281,14 @@ func generateFirejailedPath(destination string) (string, error) {
 		return "", err
 	}
 	return filepath.Join(firejailedDir, safeName), nil
+}
+
+func generateConfigPath(destination string) (string, error) {
+	safeName, err := generateSafeName(destination)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(firejailedConfigDir, safeName), nil
 }
 
 func createProfile(destProfilePath, profilePath string) error {
@@ -291,8 +311,52 @@ func createProfile(destProfilePath, profilePath string) error {
 	return destFile.Sync()
 }
 
-func createWrapperScript(scriptPath, origFilePath, profilePath string) error {
-	scriptContent := fmt.Sprintf("#!/bin/bash\nexec firejail --profile=%q %q \"$@\"\n", profilePath, origFilePath)
+func createConfigFile(p string) error {
+	if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+		return err
+	}
+
+	defaultContent := `# Enable verbose output (removes --quiet from firejail options)
+#STPLRPKG_FIREJAIL_VERBOSE=1
+# Disable firejail
+#STPLRPKG_FIREJAIL_DISABLE=1
+`
+	return os.WriteFile(p, []byte(defaultContent), 0o644) //gosec:disable G306 -- Expected
+}
+
+func createWrapperScript(scriptPath, origFilePath, profilePath, configPath string) error {
+	scriptContent := fmt.Sprintf(`#!/bin/bash
+set -e
+
+STPLRPKG_FIREJAIL_DISABLE=0
+_GLOBAL=%q
+_LOCAL=%q
+_ORIG=%q
+_FIREJAIL_PROFILE=%q
+_FIREJAIL="/usr/bin/firejail"
+
+_ENV_VERBOSE="${STPLRPKG_FIREJAIL_VERBOSE:-}"
+
+if [ -f "${_GLOBAL}" ]; then . "${_GLOBAL}"; fi
+if [ -f "${_LOCAL}" ]; then . "${_LOCAL}"; fi
+
+if [ -n "${_ENV_VERBOSE}" ]; then
+	STPLRPKG_FIREJAIL_VERBOSE="${_ENV_VERBOSE}"
+fi
+
+if [ "${STPLRPKG_FIREJAIL_DISABLE:-0}" = "1" ];  then
+	exec "${_ORIG}" "$@"
+fi
+
+FIREJAIL_OPTS=(--profile="${_FIREJAIL_PROFILE}")
+
+if [ "${STPLRPKG_FIREJAIL_VERBOSE:-0}" != "1" ]; then
+	FIREJAIL_OPTS+=(--quiet)
+fi
+
+exec ${_FIREJAIL} "${FIREJAIL_OPTS[@]}" "${_ORIG}" "$@"
+`, firejailedGlobalConfig, configPath, origFilePath, profilePath)
+
 	return os.WriteFile(scriptPath, []byte(scriptContent), defaultDirMode)
 }
 

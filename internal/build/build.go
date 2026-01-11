@@ -27,9 +27,12 @@ package build
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
+	"github.com/gobwas/glob"
 	"github.com/leonelquinteros/gotext"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/cliprompts"
 	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/internal/manager"
@@ -98,6 +101,17 @@ func (b *Builder) BuildPackageFromDb(
 	name := args.Package.BasePkgName
 	if name == "" {
 		name = args.Package.Name
+	}
+
+	r := staplerfile.NewResolver(args.Info)
+	err := r.Init()
+	if err != nil {
+		return nil, err
+	}
+	r.Resolve(args.Package)
+
+	if isFirejailExcluded(args.Package, b.cfg, b.out) {
+		args.Opts.DisableFirejail = true
 	}
 
 	return b.BuildPackage(ctx, &commonbuild.BuildInput{
@@ -200,6 +214,10 @@ func (i *Builder) InstallPkgs(
 }
 
 func (b *Builder) BuildALRDeps(ctx context.Context, input InstallInput, depends []string) (buildDeps []*commonbuild.BuiltDep, repoDeps []string, err error) {
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed init resolver: %w", err)
+	}
+
 	if len(depends) > 0 {
 		b.out.Info(gotext.Get("Installing dependencies"))
 
@@ -219,6 +237,7 @@ func (b *Builder) BuildALRDeps(ctx context.Context, input InstallInput, depends 
 
 		for basePkgName := range pkgsMap {
 			pkg := pkgsMap[basePkgName].pkg
+
 			res, err := b.BuildPackageFromDb(
 				ctx,
 				&BuildPackageFromDbArgs{
@@ -243,6 +262,47 @@ func (b *Builder) BuildALRDeps(ctx context.Context, input InstallInput, depends 
 	buildDeps = removeDuplicates(buildDeps)
 
 	return buildDeps, repoDeps, nil
+}
+
+func firejailedPatternMatch(fullName, pattern string) (bool, error) {
+	g, err := glob.Compile(pattern)
+	if err != nil {
+		return false, err
+	}
+	return g.Match(fullName), nil
+}
+
+func isFirejailExcluded(pkg *staplerfile.Package, cfg commonbuild.Config, out output.Output) bool {
+	if pkg.FireJailed.Resolved() {
+		disableFirejail := false
+		disabledPattern := ""
+
+		fullName := pkg.FormatFullName()
+
+		for _, pattern := range cfg.FirejailExclude() {
+			matched, err := firejailedPatternMatch(fullName, pattern)
+			if err != nil {
+				slog.Debug("failed to match pattern", "err", err)
+				continue
+			}
+			if matched {
+				disableFirejail = true
+				disabledPattern = pattern
+				break
+			}
+		}
+
+		if disableFirejail && !cfg.HideFirejailExcludeWarning() {
+			out.Warn(gotext.Get(
+				"Firejail is disabled for %q package due to ignore pattern %q in config. Security isolation will not be applied. Ensure you understand the risks.",
+				fullName, disabledPattern,
+			))
+		}
+
+		return disableFirejail
+	}
+
+	return false
 }
 
 type pkgItem struct {

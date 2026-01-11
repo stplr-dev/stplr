@@ -24,6 +24,7 @@ TMPFILES_DIR ?= /usr/lib/tmpfiles.d
 SYSUSERS_CONF := packaging/stplr.sysusers
 TMPFILES_CONF := packaging/stplr.tmpfiles
 DEFAULT_CONF := packaging/stplr.toml
+DEFAULT_FIREJAILED_CONF := packaging/firejailed/global
 
 ADD_LICENSE_BIN := go run github.com/google/addlicense@4caba19b7ed7818bb86bc4cd20411a246aa4a524
 GOLANGCI_LINT_BIN := go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.3.1
@@ -60,6 +61,8 @@ endif
 install-config:
 	install -d -m 755 $(DESTDIR)$(sysconfdir)/stplr
 	[ -f $(DESTDIR)$(sysconfdir)/stplr/stplr.toml ] || install -m 644 $(DEFAULT_CONF) $(DESTDIR)$(sysconfdir)/stplr/stplr.toml
+	install -d -m 755 $(DESTDIR)$(sysconfdir)/stplr/firejailed
+	[ -f $(DESTDIR)$(sysconfdir)/stplr/firejailed/global ] || install -m 644 $(DEFAULT_FIREJAILED_CONF) $(DESTDIR)$(sysconfdir)/stplr/firejailed/global
 
 install-sysusers:
 	install -Dpm644 $(SYSUSERS_CONF) $(DESTDIR)$(SYSUSERS_DIR)/stplr.conf
@@ -126,7 +129,8 @@ mocks: \
 	internal/service/repos/internal/gitmanager/gitmanager.go \
 	internal/build/utils.go \
 	internal/usecase/support/archive.go \
-	internal/usecase/repo/list/list.go
+	internal/usecase/repo/list/list.go \
+	internal/usecase/config/get/get.go
 	@echo "Generating mocks..."
 	@for file in $^; do \
 		mockgen -source=$$file -destination=$$(dirname $$file)/mock_$$(basename $$file .go)_test.go -package=$$(basename $$(dirname $$file)); \

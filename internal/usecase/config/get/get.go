@@ -21,6 +21,8 @@ package get
 import (
 	"context"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 
 	"github.com/goccy/go-yaml"
@@ -28,60 +30,109 @@ import (
 
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/config"
+	"go.stplr.dev/stplr/internal/config/common"
+	"go.stplr.dev/stplr/pkg/types"
 )
 
 type useCase struct {
-	cfg *config.ALRConfig
+	cfg ConfigGetter
+	out io.Writer
 }
 
-func New(cfg *config.ALRConfig) *useCase {
+type ConfigGetter interface {
+	RootCmd() string
+	PagerStyle() string
+	AutoPull() bool
+	Repos() []types.Repo
+	IgnorePkgUpdates() []string
+	LogLevel() string
+	UseRootCmd() bool
+	FirejailExclude() []string
+	HideFirejailExcludeWarning() bool
+	ForbidSkipInChecksums() bool
+	ForbidBuildCommand() bool
+	GetPaths() *config.Paths
+}
+
+func New(cfg ConfigGetter) *useCase {
 	return &useCase{
 		cfg: cfg,
+		out: os.Stdout,
 	}
 }
 
 func (u *useCase) Run(ctx context.Context, key string) error {
 	stringGetters := map[string]func() string{
-		"rootCmd":    u.cfg.RootCmd,
-		"pagerStyle": u.cfg.PagerStyle,
-		"logLevel":   u.cfg.LogLevel,
+		common.ROOT_CMD:    u.cfg.RootCmd,
+		common.PAGER_STYLE: u.cfg.PagerStyle,
+		common.LOG_LEVEL:   u.cfg.LogLevel,
 	}
 
 	boolGetters := map[string]func() bool{
-		"useRootCmd":            u.cfg.UseRootCmd,
-		"autoPull":              u.cfg.AutoPull,
-		"forbidSkipInChecksums": u.cfg.ForbidSkipInChecksums,
-		"forbidBuildCommand":    u.cfg.ForbidBuildCommand,
+		common.USE_ROOT_CMD:                  u.cfg.UseRootCmd,
+		common.AUTO_PULL:                     u.cfg.AutoPull,
+		common.FORBID_SKIP_IN_CHECKSUMS:      u.cfg.ForbidSkipInChecksums,
+		common.FORBID_BUILD_COMMAND:          u.cfg.ForbidBuildCommand,
+		common.HIDE_FIREJAIL_EXCLUDE_WARNING: u.cfg.HideFirejailExcludeWarning,
+	}
+
+	listGetters := map[string]func() []string{
+		common.IGNORE_PKG_UPDATES: u.cfg.IgnorePkgUpdates,
+		common.FIREJAIL_EXCLUDE:   u.cfg.FirejailExclude,
 	}
 
 	switch key {
-	case "ignorePkgUpdates":
-		updates := u.cfg.IgnorePkgUpdates()
-		if len(updates) == 0 {
-			fmt.Println("[]")
-		} else {
-			fmt.Println(strings.Join(updates, ", "))
-		}
-	case "repo", "repos":
-		repos := u.cfg.Repos()
-		if len(repos) == 0 {
-			fmt.Println("[]")
-		} else {
-			repoData, err := yaml.Marshal(repos)
-			if err != nil {
-				return fmt.Errorf("failed to serialize repos: %w", err)
-			}
-			fmt.Print(string(repoData))
-		}
+	// TODO: remove legacy keys
+	case common.REPO, "repos":
+		return u.handleReposKey()
 	default:
-		if getter, ok := boolGetters[key]; ok {
-			fmt.Println(getter())
-		} else if getter, ok := stringGetters[key]; ok {
-			fmt.Println(getter())
-		} else {
-			return errors.NewI18nError(gotext.Get("unknown config key: %s", key))
-		}
+		return u.handleConfigKey(key, boolGetters, stringGetters, listGetters)
+	}
+}
+
+func (u *useCase) handleReposKey() error {
+	repos := u.cfg.Repos()
+	if len(repos) == 0 {
+		fmt.Fprintln(u.out, "[]")
+		return nil
 	}
 
+	repoData, err := yaml.Marshal(repos)
+	if err != nil {
+		return fmt.Errorf("failed to serialize repos: %w", err)
+	}
+	fmt.Fprint(u.out, string(repoData))
 	return nil
+}
+
+func (u *useCase) handleConfigKey(
+	key string,
+	boolGetters map[string]func() bool,
+	stringGetters map[string]func() string,
+	listGetters map[string]func() []string,
+) error {
+	if getter, ok := boolGetters[key]; ok {
+		fmt.Fprintln(u.out, getter())
+		return nil
+	}
+
+	if getter, ok := stringGetters[key]; ok {
+		fmt.Fprintln(u.out, getter())
+		return nil
+	}
+
+	if getter, ok := listGetters[key]; ok {
+		u.printList(getter())
+		return nil
+	}
+
+	return errors.NewI18nError(gotext.Get("unknown config key: %s", key))
+}
+
+func (u *useCase) printList(listValue []string) {
+	if len(listValue) == 0 {
+		fmt.Fprintln(u.out, "[]")
+	} else {
+		fmt.Fprintln(u.out, strings.Join(listValue, ", "))
+	}
 }

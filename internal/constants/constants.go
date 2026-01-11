@@ -23,12 +23,14 @@
 package constants
 
 const (
-	SystemConfigPath = "/etc/stplr/stplr.toml"
-	SystemCachePath  = "/var/cache/stplr"
-	SocketDirPath    = "/tmp/.stplr-socket"
-	PrivilegedGroup  = "wheel"
-	BuilderUser      = "stapler-builder"
-	BuilderGroup     = "stapler-builder"
-	RepoConfigFile   = "stapler-repo.toml"
-	FirejailedDir    = "/usr/lib/stplr/firejailed"
+	SystemConfigPath       = "/etc/stplr/stplr.toml"
+	SystemCachePath        = "/var/cache/stplr"
+	SocketDirPath          = "/tmp/.stplr-socket"
+	PrivilegedGroup        = "wheel"
+	BuilderUser            = "stapler-builder"
+	BuilderGroup           = "stapler-builder"
+	RepoConfigFile         = "stapler-repo.toml"
+	FirejailedDir          = "/usr/lib/stplr/firejailed"
+	FirejailedConfigDir    = "/etc/stplr/firejailed"
+	FirejailedGlobalConfig = "/etc/stplr/firejailed/global"
 )

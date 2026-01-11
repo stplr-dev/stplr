@@ -166,3 +166,33 @@ func TestGroupPackagesPreservesFirstPackage(t *testing.T) {
 	assert.Equal(t, "first", result["base1"].pkg.Name, "should preserve first package")
 	assert.Equal(t, []string{"first", "second", "third"}, result["base1"].packages)
 }
+
+func TestFirejailedPatternMatch(t *testing.T) {
+	tests := []struct {
+		name     string
+		pkg      string
+		pattern  string
+		expected bool
+	}{
+		{
+			name:     "all",
+			pkg:      "stplr-repo/test",
+			pattern:  "*",
+			expected: true,
+		},
+		{
+			name:     "match by part",
+			pkg:      "stplr-repo/test",
+			pattern:  "*test",
+			expected: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, _ := firejailedPatternMatch(tt.pkg, tt.pattern)
+
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}

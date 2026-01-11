@@ -188,6 +188,7 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 
 		pkgInfo, err := buildPkgMetadata(
 			ctx,
+			e.cfg,
 			e.out,
 			input,
 			vars,
@@ -235,6 +236,7 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 
 func buildPkgMetadata(
 	ctx context.Context,
+	cfg commonbuild.Config,
 	out output.Output,
 	input interface {
 		commonbuild.OsInfoProvider
@@ -299,7 +301,7 @@ func buildPkgMetadata(
 
 	normalizeContents(contents)
 
-	if vars.FireJailed.Resolved() {
+	if vars.FireJailed.Resolved() && !input.BuildOpts().DisableFirejail {
 		contents, err = applyFirejailIntegration(out, vars, dirs, contents)
 		if err != nil {
 			return nil, err

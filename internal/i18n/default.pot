@@ -55,31 +55,31 @@ msgstr ""
 msgid "Do not add suffix to package name"
 msgstr ""
 
-#: internal/app/commands/config.go:45
+#: internal/app/commands/config.go:46
 msgid "Manage config"
 msgstr ""
 
-#: internal/app/commands/config.go:57
+#: internal/app/commands/config.go:58
 msgid "Show config"
 msgstr ""
 
-#: internal/app/commands/config.go:83
+#: internal/app/commands/config.go:73
 msgid "Set config value"
 msgstr ""
 
-#: internal/app/commands/config.go:84
+#: internal/app/commands/config.go:74
 msgid "<key> <value>"
 msgstr ""
 
-#: internal/app/commands/config.go:103
+#: internal/app/commands/config.go:93
 msgid "use 'repo add/remove' commands to manage repositories"
 msgstr ""
 
-#: internal/app/commands/config.go:122
+#: internal/app/commands/config.go:112
 msgid "Get config value"
 msgstr ""
 
-#: internal/app/commands/config.go:123
+#: internal/app/commands/config.go:113
 msgid "<key>"
 msgstr ""
 
@@ -291,8 +291,14 @@ msgstr ""
 msgid "Full license available at: %s"
 msgstr ""
 
-#: internal/build/build.go:204
+#: internal/build/build.go:222
 msgid "Installing dependencies"
+msgstr ""
+
+#: internal/build/build.go:297
+msgid ""
+"Firejail is disabled for %q package due to ignore pattern %q in config. "
+"Security isolation will not be applied. Ensure you understand the risks."
 msgstr ""
 
 #: internal/build/check_executor.go:56
@@ -470,7 +476,7 @@ msgstr ""
 msgid "Attempting to run as root using '%s'..."
 msgstr ""
 
-#: internal/scripter/firejail.go:153
+#: internal/scripter/firejail.go:154
 msgid "Applying FireJail integration for %q package"
 msgstr ""
 
@@ -478,7 +484,7 @@ msgstr ""
 msgid "Building metadata for package %q"
 msgstr ""
 
-#: internal/scripter/scripter.go:372 internal/scripter/scripter.go:426
+#: internal/scripter/scripter.go:374 internal/scripter/scripter.go:428
 msgid "Executing %s()"
 msgstr ""
 
@@ -538,7 +544,7 @@ msgstr ""
 msgid "Your settings do not allow build command"
 msgstr ""
 
-#: internal/usecase/config/get/get.go:82
+#: internal/usecase/config/get/get.go:129
 msgid "unknown config key: %s"
 msgstr ""
 

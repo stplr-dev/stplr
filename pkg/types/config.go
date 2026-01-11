@@ -34,6 +34,9 @@ type Config struct {
 	AutoPull         bool     `json:"autoPull" koanf:"autoPull"`
 	LogLevel         string   `json:"logLevel" koanf:"logLevel"`
 
+	FirejailExclude            []string `json:"firejailExclude" koanf:"firejailExclude"`
+	HideFirejailExcludeWarning bool     `json:"hideFirejailExcludeWarning" koanf:"hideFirejailExcludeWarning"`
+
 	ForbidSkipInChecksums bool `json:"forbidSkipInChecksums" koanf:"forbidSkipInChecksums"`
 	ForbidBuildCommand    bool `json:"forbidBuildCommand" koanf:"forbidBuildCommand"`
 }

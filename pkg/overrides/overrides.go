@@ -172,7 +172,7 @@ func parseLangs(langs []string, tags []language.Tag) ([]string, error) {
 	for i, lang := range langs {
 		tag, err := language.Parse(lang)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to parse %q: %w", lang, err)
 		}
 		base, _ := tag.Base()
 		out[len(tags)+i] = base.String()

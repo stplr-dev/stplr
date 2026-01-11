@@ -48,6 +48,8 @@ type RepositoryProvider interface {
 type Config interface {
 	GetPaths() *config.Paths
 	PagerStyle() string
+	FirejailExclude() []string
+	HideFirejailExcludeWarning() bool
 }
 
 type FunctionsOutput struct {

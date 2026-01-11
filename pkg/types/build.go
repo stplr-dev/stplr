@@ -25,9 +25,10 @@
 package types
 
 type BuildOpts struct {
-	Clean       bool
-	Interactive bool
-	NoSuffix    bool
+	Clean           bool
+	Interactive     bool
+	NoSuffix        bool
+	DisableFirejail bool
 }
 
 type Scripts struct {

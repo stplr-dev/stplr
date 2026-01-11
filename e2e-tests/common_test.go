@@ -69,9 +69,11 @@ func execShouldError(t *testing.T, r capytest.Runner, cmd string, args ...string
 	r.Command(cmd, args...).ExpectFailure().Run(t)
 }
 
-const REPO_NAME_FOR_E2E_TESTS = "alr-repo"
-const REPO_URL_FOR_E2E_TESTS = "https://altlinux.space/stapler/repo-for-tests.git"
-const REPO_URL_FOR_E2E_TESTS_SINGLE_PACKAGE = "https://altlinux.space/stapler/repo-for-tests-single-package.git"
+const (
+	REPO_NAME_FOR_E2E_TESTS               = "alr-repo"
+	REPO_URL_FOR_E2E_TESTS                = "https://altlinux.space/stapler/repo-for-tests.git"
+	REPO_URL_FOR_E2E_TESTS_SINGLE_PACKAGE = "https://altlinux.space/stapler/repo-for-tests-single-package.git"
+)
 
 func defaultPrepare(t *testing.T, r capytest.Runner) {
 	execShouldNoError(t, r,
