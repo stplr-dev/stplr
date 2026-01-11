@@ -47,10 +47,15 @@ jobs:
           apt-get update
           apt-get install -y libsystemd-devel
 
+      - name: Cache Go
+        uses: actions/cache-tools-go@v1
+        with:
+          go-version-file: 'go.mod'
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.25'
+          go-version-file: 'go.mod'
 
       - name: Run E2E tests
         env:

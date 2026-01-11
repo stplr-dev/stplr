@@ -44,10 +44,15 @@ jobs:
           apt-get update
           apt-get install -y libsystemd-dev
 
+      - name: Cache Go
+        uses: actions/cache-tools-go@v1
+        with:
+          go-version-file: 'go.mod'
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.25'
+          go-version-file: 'go.mod'
       
       - name: Set up Python for pre-commit
         uses: actions/setup-python@v5
