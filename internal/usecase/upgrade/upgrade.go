@@ -28,6 +28,7 @@ import (
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/db"
 	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/internal/service/repos"
 	"go.stplr.dev/stplr/internal/service/updater"
 	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/staplerfile"
@@ -48,17 +49,19 @@ type useCase struct {
 	db      *db.Database
 	info    *distro.OSRelease
 	upd     *updater.Updater
+	repos   *repos.Repos
 
 	out output.Output
 }
 
-func New(builder builder, upd *updater.Updater, manager manager.Manager, db *db.Database, info *distro.OSRelease, out output.Output) *useCase {
+func New(builder builder, upd *updater.Updater, manager manager.Manager, db *db.Database, repos *repos.Repos, info *distro.OSRelease, out output.Output) *useCase {
 	return &useCase{
 		builder: builder,
 		mgr:     manager,
 		db:      db,
 		info:    info,
 		upd:     upd,
+		repos:   repos,
 		out:     out,
 	}
 }
@@ -70,6 +73,11 @@ type Options struct {
 }
 
 func (u *useCase) Run(ctx context.Context, opts Options) error {
+	err := u.repos.PullAll(ctx)
+	if err != nil {
+		return errors.WrapIntoI18nError(err, gotext.Get("Error pulling repositories"))
+	}
+
 	updates, err := u.upd.CheckForUpdates(ctx)
 	if err != nil {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error checking for updates"))

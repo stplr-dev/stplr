@@ -735,12 +735,12 @@ msgid ""
 "Support archive %s has been created. You can send it to whoever needs it."
 msgstr ""
 
-#: internal/usecase/upgrade/upgrade.go:75
-#: internal/usecase/upgrade/upgrade.go:92
+#: internal/usecase/upgrade/upgrade.go:83
+#: internal/usecase/upgrade/upgrade.go:100
 msgid "Error checking for updates"
 msgstr ""
 
-#: internal/usecase/upgrade/upgrade.go:95
+#: internal/usecase/upgrade/upgrade.go:103
 msgid "There is nothing to do."
 msgstr ""
 

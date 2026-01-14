@@ -756,12 +756,12 @@ msgid ""
 msgstr ""
 "Диагностический архив %s создан. Вы можете отправить его тем, кому он нужен."
 
-#: internal/usecase/upgrade/upgrade.go:75
-#: internal/usecase/upgrade/upgrade.go:92
+#: internal/usecase/upgrade/upgrade.go:83
+#: internal/usecase/upgrade/upgrade.go:100
 msgid "Error checking for updates"
 msgstr "Ошибка при проверке обновлений"
 
-#: internal/usecase/upgrade/upgrade.go:95
+#: internal/usecase/upgrade/upgrade.go:103
 msgid "There is nothing to do."
 msgstr "Здесь нечего делать."
 

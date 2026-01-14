@@ -145,6 +145,7 @@ type UpgradeDeps struct {
 	Info    *distro.OSRelease
 	DB      *db.Database
 	Updater *updater.Updater
+	Repos   *repos.Repos
 }
 
 func ForUpgradeAction(ctx context.Context) (*UpgradeDeps, Cleanup, error) {
@@ -155,6 +156,7 @@ func ForUpgradeAction(ctx context.Context) (*UpgradeDeps, Cleanup, error) {
 		DropCaps().
 		PluginProvider().
 		ScripterFromPlugin().
+		PullerFromPlugin().
 		Config().
 		Manager().
 		DB().
@@ -174,6 +176,7 @@ func ForUpgradeAction(ctx context.Context) (*UpgradeDeps, Cleanup, error) {
 		Info:    b.Info,
 		DB:      b.DB,
 		Updater: b.Updater,
+		Repos:   b.Repos,
 	}, b.Cleanup, nil
 }
 
