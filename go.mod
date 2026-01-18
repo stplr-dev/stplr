@@ -45,8 +45,8 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.6.2
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	go.alt-gnome.ru/capytest v0.0.4-0.20260111082332-6f1bfa907934
-	go.alt-gnome.ru/capytest/providers/podman v0.0.3
+	go.alt-gnome.ru/capytest v0.0.4
+	go.alt-gnome.ru/capytest/providers/podman v0.0.4
 	go.elara.ws/vercmp v0.0.0-20250912200949-2e97859b8794
 	go.uber.org/mock v0.6.0
 	golang.org/x/crypto v0.47.0
@@ -97,7 +97,6 @@ require (
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/gkampitakis/ciinfo v0.3.3 // indirect
-	github.com/gkampitakis/go-diff v1.3.2 // indirect
 	github.com/gkampitakis/go-snaps v0.5.19 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
