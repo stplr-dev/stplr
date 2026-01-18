@@ -33,7 +33,11 @@ type SourceDownloaderExecutor interface {
 	DownloadSources(
 		ctx context.Context,
 		input *commonbuild.BuildInput,
+		repo string,
 		basePkg string,
+		version string,
 		si SourcesInput,
 	) error
+
+	RemoveOldSourcesFromCache(ctx context.Context, repo, basePkg, version string) error
 }

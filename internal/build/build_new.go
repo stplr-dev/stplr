@@ -110,6 +110,8 @@ func (e *BuildContextError) Unwrap() error {
 func (b *Builder) BuildPackage(ctx context.Context, input *commonbuild.BuildInput) ([]*commonbuild.BuiltDep, error) {
 	state := NewBuildState()
 	state.Input = input
+	state.Repository = input.Repository()
+	state.BasePackage = input.BasePkgName
 
 	steps := []BuildStep{
 		ReadScriptStep(
@@ -148,6 +150,7 @@ func (b *Builder) BuildPackage(ctx context.Context, input *commonbuild.BuildInpu
 		),
 		PostStep(
 			b.installerExecutor,
+			b.sourceExecutor,
 		),
 	}
 

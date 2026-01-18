@@ -1,11 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
-// This file was originally part of the project "ALR - Any Linux Repository"
-// created by the ALR Authors.
-// It was later modified as part of "Stapler" by Maxim Slipenko and other Stapler Authors.
-//
-// Copyright (C) 2025 The ALR Authors
-// Copyright (C) 2025 The Stapler Authors
+// Stapler
+// Copyright (C) 2026 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,19 +16,35 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package dlcache
+package local
 
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"io"
+
+	"go.stplr.dev/stplr/pkg/dl/cache"
 )
 
-func hashID(id string) (string, error) {
+func hashUrl(url string) string {
 	h := sha256.New()
-	_, err := io.WriteString(h, id)
+	_, err := io.WriteString(h, url)
 	if err != nil {
-		return "", err
+		panic(err)
 	}
-	return hex.EncodeToString(h.Sum(nil)), nil
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func toCacheId(id int64) cache.CacheID {
+	return cache.CacheID(fmt.Sprintf("%d", id))
+}
+
+func fromCacheId(cacheId cache.CacheID) (int64, error) {
+	var id int64
+	_, err := fmt.Sscanf(string(cacheId), "%d", &id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }

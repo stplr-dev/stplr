@@ -25,6 +25,7 @@ package build
 import (
 	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/commonbuild"
+	"go.stplr.dev/stplr/internal/db"
 	"go.stplr.dev/stplr/internal/installer"
 	"go.stplr.dev/stplr/internal/manager"
 	"go.stplr.dev/stplr/internal/scripter"
@@ -37,6 +38,7 @@ type mainBuilderConfig interface {
 
 func NewMainBuilder(
 	cfg mainBuilderConfig,
+	db *db.Database,
 	mgr manager.Manager,
 	repos PackageFinder,
 	scriptExecutor scripter.ScriptExecutor,

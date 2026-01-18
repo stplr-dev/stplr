@@ -31,10 +31,11 @@ import (
 
 type postStep struct {
 	installerExecutor installer.InstallerExecutor
+	downloader        SourceDownloaderExecutor
 }
 
-func PostStep(installerExecutor installer.InstallerExecutor) *postStep {
-	return &postStep{installerExecutor: installerExecutor}
+func PostStep(installerExecutor installer.InstallerExecutor, downloader SourceDownloaderExecutor) *postStep {
+	return &postStep{installerExecutor, downloader}
 }
 
 func (s *postStep) Name() string {
@@ -42,8 +43,16 @@ func (s *postStep) Name() string {
 }
 
 func (s *postStep) Run(ctx context.Context, state *BuildState) error {
-	err := s.removeBuildDeps(ctx, state.Input, state.InstalledBuildDeps)
+	err := s.removeOldCache(ctx, state)
+	if err != nil {
+		return err
+	}
+	err = s.removeBuildDeps(ctx, state.Input, state.InstalledBuildDeps)
+	return err
+}
 
+func (s *postStep) removeOldCache(ctx context.Context, state *BuildState) error {
+	err := s.downloader.RemoveOldSourcesFromCache(ctx, state.Input.Repository(), state.BasePackage, state.Version)
 	return err
 }
 

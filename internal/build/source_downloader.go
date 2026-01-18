@@ -23,22 +23,26 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/pkg/dl"
-	"go.stplr.dev/stplr/pkg/dlcache"
+	"go.stplr.dev/stplr/pkg/dl/cache/local"
 )
 
 type LocalSourceDownloader struct {
-	cfg commonbuild.Config
-	out output.Output
+	cfg        commonbuild.Config
+	localCache *local.LocalCache
+	out        output.Output
 }
 
 func NewLocalSourceDownloader(cfg commonbuild.Config, out output.Output) *LocalSourceDownloader {
+	localCache := local.NewLocalCache(filepath.Join(cfg.GetPaths().CacheDir, "dl"))
 	return &LocalSourceDownloader{
 		cfg,
+		localCache,
 		out,
 	}
 }
@@ -46,20 +50,32 @@ func NewLocalSourceDownloader(cfg commonbuild.Config, out output.Output) *LocalS
 func (s *LocalSourceDownloader) DownloadSources(
 	ctx context.Context,
 	input *commonbuild.BuildInput,
+	repo string,
 	basePkg string,
+	version string,
 	si SourcesInput,
 ) error {
+	if err := s.localCache.Init(); err != nil {
+		return err
+	}
+
 	for i, src := range si.Sources {
 		opts := dl.Options{
 			Name:        fmt.Sprintf("[%d]", i),
 			URL:         src,
 			Progress:    os.Stderr,
-			Destination: getSrcDir(s.cfg, basePkg),
-			LocalDir:    getScriptDir(input.Script),
+			Destination: commonbuild.GetSrcDir(s.cfg, basePkg),
+			LocalDir:    commonbuild.GetScriptDir(input.Script),
 			Output:      s.out,
+			DlCache:     s.localCache,
+			CacheMetadata: local.BuildMetadata(
+				local.LocalCacheMetadata{
+					Repository: repo,
+					Package:    basePkg,
+					Version:    version,
+				},
+			),
 		}
-
-		opts.DlCache = dlcache.New(s.cfg.GetPaths().CacheDir)
 
 		err := s.setHashFromChecksum(si.Checksums[i], &opts)
 		if err != nil {
@@ -73,6 +89,10 @@ func (s *LocalSourceDownloader) DownloadSources(
 	}
 
 	return nil
+}
+
+func (s *LocalSourceDownloader) RemoveOldSourcesFromCache(ctx context.Context, repo, basePkg, version string) error {
+	return s.localCache.CleanupOldPackageSources(ctx, repo, basePkg, version)
 }
 
 func IsSkipChecksum(checksum string) bool {

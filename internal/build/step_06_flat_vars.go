@@ -21,7 +21,6 @@ package build
 import (
 	"context"
 	"errors"
-	"log/slog"
 
 	"github.com/leonelquinteros/gotext"
 )
@@ -48,8 +47,7 @@ func (s *flatVarsStep) Run(ctx context.Context, state *BuildState) error {
 		checksums = append(checksums, pkg.Checksums.Resolved()...)
 	}
 	if len(sources) != len(checksums) {
-		slog.Error(gotext.Get("The checksums array must be the same length as sources"))
-		return errors.New("exit")
+		return errors.New(gotext.Get("The checksums array must be the same length as sources"))
 	}
 	sources, checksums = removeDuplicatesSources(sources, checksums)
 

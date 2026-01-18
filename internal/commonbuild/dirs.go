@@ -16,17 +16,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package scripter
+package commonbuild
 
 import (
 	"path/filepath"
 
-	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-func getDirs(
-	cfg commonbuild.Config,
+func GetDirs(
+	cfg Config,
 	scriptPath string,
 	basePkg string,
 ) (types.Directories, error) {
@@ -38,21 +37,21 @@ func getDirs(
 	}
 	baseDir := filepath.Join(pkgsDir, basePkg)
 	return types.Directories{
-		BaseDir:   getBaseDir(cfg, basePkg),
-		SrcDir:    getSrcDir(cfg, basePkg),
+		BaseDir:   GetBaseDir(cfg, basePkg),
+		SrcDir:    GetSrcDir(cfg, basePkg),
 		PkgDir:    filepath.Join(baseDir, "pkg"),
-		ScriptDir: getScriptDir(scriptPath),
+		ScriptDir: GetScriptDir(scriptPath),
 	}, nil
 }
 
-func getBaseDir(cfg commonbuild.Config, basePkg string) string {
+func GetBaseDir(cfg Config, basePkg string) string {
 	return filepath.Join(cfg.GetPaths().PkgsDir, basePkg)
 }
 
-func getSrcDir(cfg commonbuild.Config, basePkg string) string {
-	return filepath.Join(getBaseDir(cfg, basePkg), "src")
+func GetSrcDir(cfg Config, basePkg string) string {
+	return filepath.Join(GetBaseDir(cfg, basePkg), "src")
 }
 
-func getScriptDir(scriptPath string) string {
+func GetScriptDir(scriptPath string) string {
 	return filepath.Dir(scriptPath)
 }

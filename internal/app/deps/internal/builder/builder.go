@@ -293,6 +293,7 @@ func (b *builder) Builder() *builder {
 
 	builder, err := build.NewMainBuilder(
 		b.deps.Cfg,
+		b.deps.DB,
 		b.deps.Manager,
 		b.deps.Repos,
 		b.deps.Scripter,

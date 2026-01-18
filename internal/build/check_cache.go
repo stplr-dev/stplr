@@ -53,7 +53,7 @@ func (c *LocalCacheExecutor) CheckForBuiltPackage(
 		return "", false, err
 	}
 
-	pkgPath := filepath.Join(getBaseDir(c.cfg, pkg.Name), filename)
+	pkgPath := filepath.Join(commonbuild.GetBaseDir(c.cfg, pkg.Name), filename)
 
 	_, err = os.Stat(pkgPath)
 	if err != nil {

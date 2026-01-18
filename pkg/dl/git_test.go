@@ -27,6 +27,7 @@ import (
 	"encoding/hex"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -129,10 +130,10 @@ func TestGitDownloaderUpdate(t *testing.T) {
 
 	t.Run("simple", func(t *testing.T) {
 		dest := createTempDir(t, "update")
+		gitDir := filepath.Join(dest, "repo-for-tests")
+		setupOldRepo(t, gitDir)
 
-		setupOldRepo(t, dest)
-
-		cmd := exec.Command("git", "-C", dest, "rev-parse", "HEAD")
+		cmd := exec.Command("git", "-C", gitDir, "rev-parse", "HEAD")
 		oldHash, err := cmd.Output()
 		assert.NoError(t, err)
 
@@ -144,7 +145,7 @@ func TestGitDownloaderUpdate(t *testing.T) {
 		assert.NoError(t, err)
 		assert.True(t, updated)
 
-		cmd = exec.Command("git", "-C", dest, "rev-parse", "HEAD")
+		cmd = exec.Command("git", "-C", gitDir, "rev-parse", "HEAD")
 		newHash, err := cmd.Output()
 		assert.NoError(t, err)
 		assert.NotEqual(t, string(oldHash), string(newHash), "Repository should be updated")
@@ -152,8 +153,9 @@ func TestGitDownloaderUpdate(t *testing.T) {
 
 	t.Run("with hash", func(t *testing.T) {
 		dest := createTempDir(t, "update")
+		gitDir := filepath.Join(dest, "repo-for-tests")
 
-		setupOldRepo(t, dest)
+		setupOldRepo(t, gitDir)
 
 		hsh, err := hex.DecodeString("0dc4f3c68c435d0cd7a5ee960f965815fa9c4ee0571839cdb8f9de56e06f91eb")
 		assert.NoError(t, err)
@@ -171,8 +173,9 @@ func TestGitDownloaderUpdate(t *testing.T) {
 
 	t.Run("with hash (checksum mismatch)", func(t *testing.T) {
 		dest := createTempDir(t, "update")
+		gitDir := filepath.Join(dest, "repo-for-tests")
 
-		setupOldRepo(t, dest)
+		setupOldRepo(t, gitDir)
 
 		hsh, err := hex.DecodeString("33c912b855352663550003ca6b948ae3df1f38e2c036f5a85775df5967e143bf")
 		assert.NoError(t, err)

@@ -40,7 +40,7 @@ func Move(sourcePath, destPath string) error {
 	}
 
 	// Rename failed, so copy the source to the destination
-	err = copyDirOrFile(sourcePath, destPath)
+	err = CopyDirOrFile(sourcePath, destPath)
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,8 @@ func Move(sourcePath, destPath string) error {
 	return nil
 }
 
-func copyDirOrFile(sourcePath, destPath string) error {
+// CopyDirOrFile copies a directory or file from sourcePath to destPath.
+func CopyDirOrFile(sourcePath, destPath string) error {
 	sourceInfo, err := os.Stat(sourcePath)
 	if err != nil {
 		return err
@@ -85,7 +86,7 @@ func copyDir(sourcePath, destPath string, sourceInfo os.FileInfo) error {
 		sourceEntry := filepath.Join(sourcePath, entry.Name())
 		destEntry := filepath.Join(destPath, entry.Name())
 
-		err = copyDirOrFile(sourceEntry, destEntry)
+		err = CopyDirOrFile(sourceEntry, destEntry)
 		if err != nil {
 			return err
 		}

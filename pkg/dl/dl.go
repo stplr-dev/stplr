@@ -37,22 +37,21 @@ import (
 	"hash"
 	"io"
 	"log/slog"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/PuerkitoBio/purell"
 	"github.com/leonelquinteros/gotext"
-	"github.com/vmihailenco/msgpack/v5"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/blake2s"
-	"golang.org/x/exp/slices"
 
 	"go.stplr.dev/stplr/internal/app/output"
-)
 
-// Константа для имени файла манифеста кэша
-const manifestFileName = ".alr_cache_manifest"
+	"go.stplr.dev/stplr/pkg/dl/cache"
+	"go.stplr.dev/stplr/pkg/dl/cache/local"
+)
 
 // Объявление ошибок для несоответствия контрольной суммы и отсутствия алгоритма хеширования
 var (
@@ -87,11 +86,6 @@ func (t Type) String() string {
 	return "<unknown>"
 }
 
-type DlCache interface {
-	Get(context.Context, string) (string, bool)
-	New(context.Context, string) (string, error)
-}
-
 // Структура Options содержит параметры для загрузки файлов и каталогов
 type Options struct {
 	Hash             []byte
@@ -103,9 +97,12 @@ type Options struct {
 	PostprocDisabled bool
 	Progress         io.Writer
 	LocalDir         string
-	DlCache          DlCache
+	DlCache          cache.DlCache
+	CacheMetadata    cache.Metadata
 	Output           output.Output
 }
+
+var _ cache.DlCache = new(local.LocalCache)
 
 // Метод для создания нового хеша на основе указанного алгоритма хеширования
 func (opts Options) NewHash() (hash.Hash, error) {
@@ -164,6 +161,20 @@ func Download(ctx context.Context, opts Options) (err error) {
 
 	d := getDownloader(opts.URL)
 
+	u, err := url.Parse(opts.URL)
+	if err != nil {
+		return fmt.Errorf("failed to parse URL: %w", err)
+	}
+
+	query := u.Query()
+	name := query.Get("~name")
+	if name != "" {
+		opts.Name = name
+		if opts.CacheMetadata != nil {
+			opts.CacheMetadata[cache.MetdataRestoreName] = name
+		}
+	}
+
 	if opts.CacheDisabled {
 		_, _, err = d.Download(ctx, opts)
 		return err
@@ -174,45 +185,36 @@ func Download(ctx context.Context, opts Options) (err error) {
 
 // downloadWithCache handles downloading with cache logic.
 func downloadWithCache(ctx context.Context, opts Options, d Downloader) error {
-	cacheDir, cached := opts.DlCache.Get(ctx, opts.URL)
-	if !cached {
-		return performDownload(ctx, opts, d)
+	id, err := opts.DlCache.Resolve(ctx, opts.URL, opts.CacheMetadata)
+	if err != nil {
+		if errors.Is(err, cache.ErrEntryNotFound) {
+			return performDownload(ctx, opts, d)
+		}
+		return fmt.Errorf("failed to resolve cache id: %w", err)
 	}
 
-	return handleCachedSource(ctx, opts, d, cacheDir)
+	return handleCachedSource(ctx, opts, d, id)
 }
 
 // handleCachedSource processes a cached source, updating it if necessary.
-func handleCachedSource(ctx context.Context, opts Options, d Downloader, cacheDir string) error {
-	manifest, err := getManifest(cacheDir)
+func handleCachedSource(ctx context.Context, opts Options, d Downloader, cid cache.CacheID) error {
+	updated, err := updateSourceIfNeeded(ctx, opts, d, cid)
 	if err != nil {
-		if removeErr := os.RemoveAll(cacheDir); removeErr != nil {
-			return removeErr
+		return err
+	}
+
+	err = opts.DlCache.Restore(ctx, cid, opts.Destination)
+	if err != nil {
+		if errors.Is(err, cache.ErrEntryNotFound) {
+			return performDownload(ctx, opts, d)
 		}
-		return performDownload(ctx, opts, d)
-	}
-
-	updated, err := updateSourceIfNeeded(ctx, opts, d, cacheDir)
-	if err != nil {
 		return err
 	}
-
-	dest := filepath.Join(opts.Destination, manifest.Name)
-	ok, err := handleCache(cacheDir, dest, manifest.Name, manifest.Type)
-	if err != nil {
-		return err
-	}
-
-	if ok {
-		logCacheHit(opts, manifest.Type, updated)
-		return nil
-	}
-
-	return performDownload(ctx, opts, d)
+	logCacheHit(opts, updated)
+	return nil
 }
 
-// updateSourceIfNeeded updates the source if the downloader supports updates.
-func updateSourceIfNeeded(ctx context.Context, opts Options, d Downloader, cacheDir string) (bool, error) {
+func updateSourceIfNeeded(ctx context.Context, opts Options, d Downloader, cid cache.CacheID) (bool, error) {
 	if updater, ok := d.(UpdatingDownloader); ok {
 		if opts.Output != nil {
 			opts.Output.Info(gotext.Get(
@@ -220,14 +222,47 @@ func updateSourceIfNeeded(ctx context.Context, opts Options, d Downloader, cache
 				opts.Name, d.Name(),
 			))
 		}
+
+		tmpDir, err := os.MkdirTemp(opts.Destination, ".tmp.updater-*")
+		if err != nil {
+			return false, err
+		}
+		defer os.RemoveAll(tmpDir)
+
+		err = opts.DlCache.Restore(ctx, cid, tmpDir)
+		if err != nil {
+			return false, err
+		}
+
 		newOpts := opts
-		newOpts.Destination = cacheDir
-		return updater.Update(newOpts)
+		newOpts.Destination = tmpDir
+		updated, err := updater.Update(newOpts)
+		if err != nil {
+			return false, fmt.Errorf("failed to update source: %w", err)
+		}
+
+		if !updated {
+			return false, nil
+		}
+
+		src, err := opts.DlCache.Get(ctx, cid)
+		if err != nil {
+			return false, err
+		}
+
+		if _, err = opts.DlCache.Put(ctx, cache.CachePutRequest{
+			Id:   src.Id,
+			Path: filepath.Join(tmpDir, src.Manifest.Name),
+		}); err != nil {
+			return false, err
+		}
+
+		return true, nil
 	}
 	return false, nil
 }
 
-// performDownload executes the download and writes the manifest.
+// performDownload executes the download and writes to the cache.
 func performDownload(ctx context.Context, opts Options, d Downloader) error {
 	slog.Debug(
 		"downloading source",
@@ -242,123 +277,51 @@ func performDownload(ctx context.Context, opts Options, d Downloader) error {
 		))
 	}
 
-	cacheDir, err := opts.DlCache.New(ctx, opts.URL)
+	tmpDir, err := os.MkdirTemp("/tmp", "dlcache-*")
 	if err != nil {
 		return err
 	}
+	// defer os.RemoveAll(tmpDir)
 
 	newOpts := opts
-	newOpts.Destination = cacheDir
+	newOpts.Destination = tmpDir
 
-	t, name, err := d.Download(ctx, newOpts)
+	_, name, err := d.Download(ctx, newOpts)
 	if err != nil {
 		return err
 	}
 
-	if err = writeManifest(cacheDir, Manifest{t, name}); err != nil {
+	cid, err := opts.DlCache.Put(ctx, cache.CachePutRequest{
+		Path:     filepath.Join(tmpDir, name),
+		URL:      opts.URL,
+		Metadata: opts.CacheMetadata,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to put cache: %w", err)
+	}
+	// os.RemoveAll(tmpDir)
+
+	err = opts.DlCache.Restore(ctx, cid, opts.Destination)
+	if err != nil {
 		return err
 	}
 
-	dest := filepath.Join(opts.Destination, name)
-	_, err = handleCache(cacheDir, dest, name, t)
-	return err
+	return nil
 }
 
 // logCacheHit logs when a cached source is used or updated.
-func logCacheHit(opts Options, t Type, updated bool) {
+func logCacheHit(opts Options, updated bool) {
 	if opts.Output == nil {
 		return
 	}
 
 	var msg string
 	if updated {
-		msg = gotext.Get("Source %q was updated and linked to destination (type: %s)", opts.Name, t)
+		msg = gotext.Get("Source %q was updated and linked to destination", opts.Name)
 	} else {
-		msg = gotext.Get("Source %q found in cache and linked to destination (type: %s)", opts.Name, t)
+		msg = gotext.Get("Source %q found in cache and linked to destination", opts.Name)
 	}
 	opts.Output.Info("%s", msg)
-}
-
-// Функция writeManifest записывает манифест в указанный каталог кэша
-func writeManifest(cacheDir string, m Manifest) error {
-	fl, err := os.Create(filepath.Join(cacheDir, manifestFileName))
-	if err != nil {
-		return err
-	}
-	defer fl.Close()
-	return msgpack.NewEncoder(fl).Encode(m)
-}
-
-// Функция getManifest считывает манифест из указанного каталога кэша
-func getManifest(cacheDir string) (m Manifest, err error) {
-	fl, err := os.Open(filepath.Join(cacheDir, manifestFileName))
-	if err != nil {
-		return Manifest{}, err
-	}
-	defer fl.Close()
-
-	err = msgpack.NewDecoder(fl).Decode(&m)
-	return
-}
-
-// Функция handleCache создает жесткие ссылки для файлов из каталога кэша в каталог назначения
-func handleCache(cacheDir, dest, name string, t Type) (bool, error) {
-	switch t {
-	case TypeFile:
-		cd, err := os.Open(cacheDir)
-		if err != nil {
-			return false, err
-		}
-
-		names, err := cd.Readdirnames(0)
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			return false, err
-		}
-
-		cd.Close()
-
-		if slices.Contains(names, name) {
-			err = os.Link(filepath.Join(cacheDir, name), dest)
-			if err != nil {
-				return false, err
-			}
-			return true, nil
-		}
-	case TypeDir:
-		err := linkDir(cacheDir, dest)
-		if err != nil {
-			return false, err
-		}
-		return true, nil
-	}
-	return false, nil
-}
-
-// Функция linkDir рекурсивно создает жесткие ссылки для файлов из каталога src в каталог dest
-func linkDir(src, dest string) error {
-	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if info.Name() == manifestFileName {
-			return nil
-		}
-
-		rel, err := filepath.Rel(src, path)
-		if err != nil {
-			return err
-		}
-
-		newPath := filepath.Join(dest, rel)
-		if info.IsDir() {
-			return os.MkdirAll(newPath, info.Mode())
-		}
-
-		return os.Link(path, newPath)
-	})
 }
 
 // Функция getDownloader возвращает загрузчик, соответствующий URL

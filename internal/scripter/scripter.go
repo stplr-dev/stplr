@@ -84,7 +84,7 @@ func (e *LocalScriptExecutor) PrepareDirs(
 	input *commonbuild.BuildInput,
 	basePkg string,
 ) error {
-	dirs, err := getDirs(
+	dirs, err := commonbuild.GetDirs(
 		e.cfg,
 		input.Script,
 		basePkg,
@@ -110,7 +110,7 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 	builtDeps []*commonbuild.BuiltDep,
 	basePkg string,
 ) ([]*commonbuild.BuiltDep, error) {
-	dirs, err := getDirs(e.cfg, sf.Path(), basePkg)
+	dirs, err := commonbuild.GetDirs(e.cfg, sf.Path(), basePkg)
 	if err != nil {
 		return nil, err
 	}

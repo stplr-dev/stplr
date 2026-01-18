@@ -112,5 +112,5 @@ func TestFlatVarsStepRunChecksumMismatch(t *testing.T) {
 
 	err := step.Run(ctx, state)
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "exit")
+	assert.Contains(t, err.Error(), "checksums array must be the same length")
 }

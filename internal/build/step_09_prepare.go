@@ -61,7 +61,9 @@ func (b *prepareStep) Run(ctx context.Context, state *BuildState) error {
 	err = b.sourceDownloader.DownloadSources(
 		ctx,
 		state.Input,
+		state.Repository,
 		state.BasePackage,
+		state.Version,
 		SourcesInput{
 			Sources:   state.FlatVars.Sources,
 			Checksums: state.FlatVars.Checksums,

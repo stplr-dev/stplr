@@ -315,25 +315,25 @@ msgstr ""
 msgid "This package is already installed"
 msgstr ""
 
-#: internal/build/step_checks.go:45
-msgid "Building the %q package"
-msgstr ""
-
-#: internal/build/step_flat_vars.go:51
-msgid "The checksums array must be the same length as sources"
-msgstr ""
-
-#: internal/build/step_nonfree_view.go:103
+#: internal/build/step_04_nonfree_view.go:103
 msgid ""
 "This package contains non-free software that requires license acceptance."
 msgstr ""
 
-#: internal/build/step_post.go:55
-msgid "Would you like to remove the build dependencies?"
+#: internal/build/step_05_checks.go:45
+msgid "Building the %q package"
 msgstr ""
 
-#: internal/build/step_prepare.go:59
+#: internal/build/step_06_flat_vars.go:50
+msgid "The checksums array must be the same length as sources"
+msgstr ""
+
+#: internal/build/step_09_prepare.go:59
 msgid "Downloading sources"
+msgstr ""
+
+#: internal/build/step_11_post.go:64
+msgid "Would you like to remove the build dependencies?"
 msgstr ""
 
 #: internal/cliprompts/prompt.go:69
@@ -744,20 +744,20 @@ msgstr ""
 msgid "There is nothing to do."
 msgstr ""
 
-#: pkg/dl/dl.go:219
+#: pkg/dl/dl.go:221
 msgid "Source %q can be updated using %s — updating if required"
 msgstr ""
 
-#: pkg/dl/dl.go:240
+#: pkg/dl/dl.go:275
 msgid "Downloading source %s from %s using %s downloader"
 msgstr ""
 
-#: pkg/dl/dl.go:275
-msgid "Source %q was updated and linked to destination (type: %s)"
+#: pkg/dl/dl.go:320
+msgid "Source %q was updated and linked to destination"
 msgstr ""
 
-#: pkg/dl/dl.go:277
-msgid "Source %q found in cache and linked to destination (type: %s)"
+#: pkg/dl/dl.go:322
+msgid "Source %q found in cache and linked to destination"
 msgstr ""
 
 #: pkg/dl/progress_tui.go:106

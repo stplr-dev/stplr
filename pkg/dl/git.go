@@ -31,6 +31,7 @@ import (
 	"io"
 	"net/url"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -166,6 +167,10 @@ func (d *GitDownloader) Download(ctx context.Context, opts Options) (Type, strin
 	query.Del("~name")
 	u.RawQuery = query.Encode()
 
+	if name == "" {
+		name = strings.TrimSuffix(path.Base(u.Path), ".git")
+	}
+
 	co := &git.CloneOptions{
 		URL:               u.String(),
 		Depth:             depth,
@@ -176,7 +181,7 @@ func (d *GitDownloader) Download(ctx context.Context, opts Options) (Type, strin
 		co.RecurseSubmodules = git.DefaultSubmoduleRecursionDepth
 	}
 
-	r, err := git.PlainCloneContext(ctx, opts.Destination, false, co)
+	r, err := git.PlainCloneContext(ctx, filepath.Join(opts.Destination, name), false, co)
 	if err != nil {
 		return 0, "", err
 	}
@@ -211,12 +216,21 @@ func (d *GitDownloader) Download(ctx context.Context, opts Options) (Type, strin
 // true if update was successful and false if the
 // repository is already up-to-date
 func (d *GitDownloader) Update(opts Options) (bool, error) {
-	_, rev, depth, recursive, err := parseGitURL(opts.URL)
+	u, rev, depth, recursive, err := parseGitURL(opts.URL)
 	if err != nil {
 		return false, err
 	}
 
-	r, err := git.PlainOpen(opts.Destination)
+	query := u.Query()
+	name := query.Get("~name")
+	query.Del("~name")
+	u.RawQuery = query.Encode()
+
+	if name == "" {
+		name = strings.TrimSuffix(path.Base(u.Path), ".git")
+	}
+
+	r, err := git.PlainOpen(filepath.Join(opts.Destination, name))
 	if err != nil {
 		return false, err
 	}
@@ -225,9 +239,6 @@ func (d *GitDownloader) Update(opts Options) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-
-	m, err := getManifest(opts.Destination)
-	manifestOK := err == nil
 
 	err = performFetch(r, depth, opts.Progress)
 	if err != nil {
@@ -248,13 +259,9 @@ func (d *GitDownloader) Update(opts Options) (bool, error) {
 		}
 	}
 
-	err = VerifyHashFromLocal("", opts)
+	err = VerifyHashFromLocal(name, opts)
 	if err != nil {
 		return false, err
-	}
-
-	if manifestOK {
-		err = writeManifest(opts.Destination, m)
 	}
 
 	return updated, err

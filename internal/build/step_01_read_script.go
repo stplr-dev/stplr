@@ -53,6 +53,7 @@ func (s *readScriptStep) Run(ctx context.Context, state *BuildState) error {
 	if err != nil {
 		return err
 	}
+	state.Version = state.Packages[0].Version
 	state.ScriptFile = f
 	return nil
 }

@@ -20,6 +20,7 @@ package deps
 
 import (
 	"context"
+	"path/filepath"
 
 	"go.stplr.dev/stplr/internal/app/deps/internal/builder"
 	"go.stplr.dev/stplr/internal/app/output"
@@ -36,7 +37,7 @@ import (
 	"go.stplr.dev/stplr/internal/service/updater"
 	"go.stplr.dev/stplr/internal/utils"
 	"go.stplr.dev/stplr/pkg/distro"
-	"go.stplr.dev/stplr/pkg/dlcache"
+	"go.stplr.dev/stplr/pkg/dl/cache/local"
 )
 
 type WithRepos struct {
@@ -571,10 +572,14 @@ func ForRefreshAction(ctx context.Context) (*RefreshActionDeps, Cleanup, error) 
 	}, b.Cleanup, nil
 }
 
+type DlCacheReseter interface {
+	Reset(ctx context.Context) error
+}
+
 type MigrateActionDeps struct {
 	DbResetter      *db.Resetter
-	DlCacheResetter *dlcache.Resetter
 	Repos           *repos.Repos
+	DlCacheResetter DlCacheReseter
 }
 
 func ForMigrateAction(ctx context.Context) (*MigrateActionDeps, Cleanup, error) {
@@ -589,7 +594,7 @@ func ForMigrateAction(ctx context.Context) (*MigrateActionDeps, Cleanup, error) 
 
 	return &MigrateActionDeps{
 		DbResetter:      db.NewResetter(b.Cfg),
-		DlCacheResetter: dlcache.NewResetter(b.Cfg),
+		DlCacheResetter: local.NewLocalCache(filepath.Join(b.Cfg.GetPaths().CacheDir, "dl")),
 	}, b.Cleanup, nil
 }
 

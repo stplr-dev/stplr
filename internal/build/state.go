@@ -29,7 +29,9 @@ type BuildState struct {
 	BuiltDeps  []*commonbuild.BuiltDep
 	Packages   []*staplerfile.Package
 
+	Repository  string
 	BasePackage string
+	Version     string
 
 	FlatVars flatVars
 
@@ -50,6 +52,7 @@ type flatVars struct {
 
 func NewBuildState() *BuildState {
 	return &BuildState{
-		FlatVars: flatVars{},
+		FlatVars:   flatVars{},
+		Repository: "default",
 	}
 }

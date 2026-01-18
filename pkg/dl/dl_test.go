@@ -39,7 +39,7 @@ import (
 
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/pkg/dl"
-	"go.stplr.dev/stplr/pkg/dlcache"
+	"go.stplr.dev/stplr/pkg/dl/cache/local"
 )
 
 type TestALRConfig struct{}
@@ -58,7 +58,7 @@ func TestDownloadWithoutCache(t *testing.T) {
 	}
 
 	prepareServer := func() *httptest.Server {
-		gitServerURL, err := url.Parse("https://codeberg.org")
+		gitServerURL, err := url.Parse("https://altlinux.space")
 		if err != nil {
 			log.Fatalf("Failed to parse git server URL: %v", err)
 		}
@@ -100,7 +100,7 @@ func TestDownloadWithoutCache(t *testing.T) {
 			expected: func(t *testing.T, err error, tmpdir string) {
 				assert.NoError(t, err)
 
-				_, err = os.Stat(path.Join(tmpdir, "stapler-repo.toml"))
+				_, err = os.Stat(path.Join(tmpdir, "repo-for-tests", "stapler-repo.toml"))
 				assert.NoError(t, err)
 			},
 		},
@@ -155,12 +155,14 @@ func TestDownloadFileWithCache(t *testing.T) {
 			defer os.RemoveAll(tmpdir)
 
 			cfg := &TestALRConfig{}
+			cache := local.NewLocalCache(cfg.GetPaths().CacheDir)
+			cache.Init()
 
 			opts := dl.Options{
 				CacheDisabled: false,
 				URL:           server.URL + "/file",
 				Destination:   tmpdir,
-				DlCache:       dlcache.New(cfg.GetPaths().CacheDir),
+				DlCache:       cache,
 			}
 
 			outputFile := path.Join(tmpdir, "file")
