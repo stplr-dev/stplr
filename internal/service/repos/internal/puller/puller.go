@@ -124,35 +124,43 @@ func (p *Puller) Read(ctx context.Context, repo types.Repo, report PullReporter)
 func (p *Puller) pull(ctx context.Context, rawRepoUrl string, repo *types.Repo, report PullReporter) error {
 	repoURL, err := url.Parse(rawRepoUrl)
 	if err != nil {
-		return fmt.Errorf("invalid URL %s: %w", rawRepoUrl, err)
+		return fmt.Errorf("parse repo URL %q: %w", rawRepoUrl, err)
 	}
 
 	repoDir := filepath.Join(p.cfg.GetPaths().RepoDir, repo.Name)
 
 	r, isGitFresh, err := p.gm.ReadGitRepo(repoDir, repoURL.String())
 	if err != nil {
-		return fmt.Errorf("failed to open repo")
+		return fmt.Errorf("open git repo %q at %s: %w", repo.Name, repoDir, err)
 	}
 
-	err = p.gm.FetchRepoWithProgress(ctx, r, repo.Ref, shared.ToIoWriter(report, EventGitPullProgress))
-	if err != nil {
-		return err
+	if err := p.gm.FetchRepoWithProgress(
+		ctx,
+		r,
+		repo.Ref,
+		shared.ToIoWriter(report, EventGitPullProgress),
+	); err != nil {
+		return fmt.Errorf("fetch repo %q (ref %q): %w", repo.Name, repo.Ref, err)
 	}
 
 	_, revHash, err := p.resolveRevision(r, *repo, isGitFresh)
 	if err != nil {
-		return err
+		return fmt.Errorf("resolve revision for repo %q: %w", repo.Name, err)
 	}
 
-	if _, err = p.gm.CheckoutRevision(r, revHash); err != nil {
-		return err
+	if _, err := p.gm.CheckoutRevision(r, revHash); err != nil {
+		return fmt.Errorf("checkout revision %s for repo %q: %w", revHash, repo.Name, err)
 	}
 
 	if err := p.processRepoChanges(ctx, *repo, repoDir); err != nil {
-		return err
+		return fmt.Errorf("process repo changes for %q: %w", repo.Name, err)
 	}
 
-	return p.loadAndUpdateConfig(repoDir, repo)
+	if err := p.loadAndUpdateConfig(repoDir, repo); err != nil {
+		return fmt.Errorf("load and update config for repo %q: %w", repo.Name, err)
+	}
+
+	return nil
 }
 
 func (p *Puller) resolveRevision(r *git.Repository, repo types.Repo, isFresh bool) (*plumbing.Reference, *plumbing.Hash, error) {
@@ -185,7 +193,7 @@ func (p *Puller) processRepoChanges(ctx context.Context, repo types.Repo, repoDi
 
 	for _, pkg := range pkgs {
 		if err := p.db.InsertPackage(ctx, *pkg); err != nil {
-			return err
+			return fmt.Errorf("failed to insert package: %w", err)
 		}
 	}
 

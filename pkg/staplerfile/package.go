@@ -47,7 +47,22 @@ func ParseNames(dec *decoder.Decoder) (*PackageNames, error) {
 	return &pkgs, nil
 }
 
+type ScriptOptions struct {
+	SFE249NewExtractor bool `sh:"sfe_249_new_extractor"`
+}
+
+func ParseScriptOptions(dec *decoder.Decoder) (*ScriptOptions, error) {
+	var opts ScriptOptions
+	err := dec.DecodeVars(&opts)
+	if err != nil {
+		return nil, fmt.Errorf("fail parse names: %w", err)
+	}
+	return &opts, nil
+}
+
 type Package struct {
+	Options *ScriptOptions `xorm:"-"`
+
 	Repository  string `xorm:"pk 'repository'" json:"repository"`
 	Name        string `xorm:"pk 'name'" json:"name"`
 	BasePkgName string `xorm:"notnull 'basepkg_name'" json:"basepkg_name"`

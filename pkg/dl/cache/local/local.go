@@ -25,6 +25,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"go.stplr.dev/stplr/internal/osutils"
 	"go.stplr.dev/stplr/pkg/dl/cache"
@@ -34,9 +35,10 @@ import (
 )
 
 const (
-	metadataRepository = "repository"
-	metadataPackage    = "package"
-	metadataVersion    = "version"
+	metadataRepository         = "repository"
+	metadataPackage            = "package"
+	metadataVersion            = "version"
+	metadataSFE249NewExtractor = "sfe_249_new_extractor"
 )
 
 type LocalCache struct {
@@ -49,13 +51,14 @@ func NewLocalCache(baseDir string) *LocalCache {
 }
 
 type cacheRecord struct {
-	ID   int64  `xorm:"pk autoincr"`
-	Hash string `xorm:"index"`
-	Repo string `xorm:"index"`
-	Pkg  string `xorm:"index"`
-	Ver  string `xorm:"index"`
-	Name string
-	Type cache.Type
+	ID                 int64  `xorm:"pk autoincr"`
+	Hash               string `xorm:"index"`
+	Repo               string `xorm:"index"`
+	Pkg                string `xorm:"index"`
+	Ver                string `xorm:"index"`
+	SFE249NewExtractor bool   `xorm:"'sfe_249_new_extractor'"`
+	Name               string
+	Type               cache.Type
 }
 
 func (c *LocalCache) Init() error {
@@ -116,8 +119,8 @@ func (c *LocalCache) Resolve(ctx context.Context, url string, metadata cache.Met
 		return toCacheId(exactMatch.ID), nil
 	}
 
-	urlOnlyMatch := &cacheRecord{Hash: urlHash}
-	has, err = c.engine.Context(ctx).Get(urlOnlyMatch)
+	hashOnlyMatch := &cacheRecord{Hash: urlHash}
+	has, err = c.engine.Context(ctx).Get(hashOnlyMatch)
 	if err != nil {
 		return "", fmt.Errorf("failed to resolve cache ID: %w", err)
 	}
@@ -126,12 +129,13 @@ func (c *LocalCache) Resolve(ctx context.Context, url string, metadata cache.Met
 	}
 
 	newRecord := &cacheRecord{
-		Hash: urlOnlyMatch.Hash,
-		Type: urlOnlyMatch.Type,
-		Repo: repo,
-		Pkg:  pkg,
-		Ver:  ver,
-		Name: urlOnlyMatch.Name,
+		Hash:               hashOnlyMatch.Hash,
+		Type:               hashOnlyMatch.Type,
+		SFE249NewExtractor: hashOnlyMatch.SFE249NewExtractor,
+		Name:               hashOnlyMatch.Name,
+		Repo:               repo,
+		Pkg:                pkg,
+		Ver:                ver,
 	}
 	if v, ok := metadata[cache.MetdataRestoreName]; ok {
 		newRecord.Name = v
@@ -168,6 +172,12 @@ func (c *LocalCache) Get(ctx context.Context, cid cache.CacheID) (cache.CachedSo
 	src.Id = toCacheId(record.ID)
 	src.Manifest.Name = record.Name
 	src.Manifest.Type = record.Type
+	src.Metadata = BuildMetadata(LocalCacheMetadata{
+		Repository:         record.Repo,
+		Package:            record.Pkg,
+		Version:            record.Ver,
+		SFE249NewExtractor: record.SFE249NewExtractor,
+	})
 
 	return src, nil
 }
@@ -176,13 +186,22 @@ func (c *LocalCache) Put(ctx context.Context, req cache.CachePutRequest) (cache.
 	hash := hashUrl(req.URL)
 	record := &cacheRecord{
 		Hash: hash,
-		Name: filepath.Base(req.Path),
-		Type: typeFromPath(req.Path),
+	}
+
+	if req.UsePathAsRoot {
+		record.Name = ""
+		record.Type = cache.TypeDir
+	} else {
+		record.Name = filepath.Base(req.Path)
+		record.Type = typeFromPath(req.Path)
 	}
 
 	if req.Metadata != nil {
 		m := ParseMetadata(req.Metadata)
-		record.Repo, record.Pkg, record.Ver = m.Repository, m.Package, m.Version
+		record.Repo = m.Repository
+		record.Pkg = m.Package
+		record.Ver = m.Version
+		record.SFE249NewExtractor = m.SFE249NewExtractor
 	}
 
 	dest := c.recordEntry(*record)
@@ -257,7 +276,10 @@ func (c *LocalCache) Delete(ctx context.Context, cid cache.CacheID) error {
 	}
 
 	if count == 0 {
-		os.RemoveAll(c.recordEntry(*record))
+		err := os.RemoveAll(c.recordDir(*record))
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -283,28 +305,36 @@ func (c *LocalCache) CleanupOldPackageSources(ctx context.Context, repository, b
 }
 
 func (c *LocalCache) recordEntry(r cacheRecord) string {
-	return filepath.Join(c.baseDir, r.Hash, r.Name)
+	return filepath.Join(c.recordDir(r), r.Name)
+}
+
+func (c *LocalCache) recordDir(r cacheRecord) string {
+	return filepath.Join(c.baseDir, r.Hash, fmt.Sprintf("%d", btoi(r.SFE249NewExtractor)))
 }
 
 type LocalCacheMetadata struct {
-	Repository string
-	Package    string
-	Version    string
+	Repository         string
+	Package            string
+	Version            string
+	SFE249NewExtractor bool
 }
 
 func BuildMetadata(m LocalCacheMetadata) cache.Metadata {
 	return cache.Metadata{
-		metadataRepository: m.Repository,
-		metadataPackage:    m.Package,
-		metadataVersion:    m.Version,
+		metadataRepository:         m.Repository,
+		metadataPackage:            m.Package,
+		metadataVersion:            m.Version,
+		metadataSFE249NewExtractor: fmt.Sprintf("%t", m.SFE249NewExtractor),
 	}
 }
 
 func ParseMetadata(metadata cache.Metadata) LocalCacheMetadata {
+	sfe249, _ := strconv.ParseBool(metadata[metadataSFE249NewExtractor])
 	return LocalCacheMetadata{
-		Repository: metadata[metadataRepository],
-		Package:    metadata[metadataPackage],
-		Version:    metadata[metadataVersion],
+		Repository:         metadata[metadataRepository],
+		Package:            metadata[metadataPackage],
+		Version:            metadata[metadataVersion],
+		SFE249NewExtractor: sfe249,
 	}
 }
 
@@ -313,4 +343,11 @@ func typeFromPath(path string) cache.Type {
 		return cache.TypeDir
 	}
 	return cache.TypeFile
+}
+
+func btoi(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }

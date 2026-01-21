@@ -65,6 +65,7 @@ type Manifest struct {
 type CachedSource struct {
 	Id       CacheID
 	Manifest Manifest
+	Metadata Metadata
 }
 
 type CachePutRequest struct {
@@ -72,6 +73,8 @@ type CachePutRequest struct {
 	Path     string
 	URL      string
 	Metadata Metadata
+
+	UsePathAsRoot bool
 }
 
 type DlCache interface {

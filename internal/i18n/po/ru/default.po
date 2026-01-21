@@ -300,11 +300,11 @@ msgstr "СОГЛАШЕНИЕ О НЕСВОБОДНОМ ПО"
 msgid "Full license available at: %s"
 msgstr "Полный текст лицензии доступен по адресу: %s"
 
-#: internal/build/build.go:222
+#: internal/build/build.go:223
 msgid "Installing dependencies"
 msgstr "Установка зависимостей"
 
-#: internal/build/build.go:297
+#: internal/build/build.go:298
 msgid ""
 "Firejail is disabled for %q package due to ignore pattern %q in config. "
 "Security isolation will not be applied. Ensure you understand the risks."
@@ -502,11 +502,11 @@ msgstr "Сборка метаданных пакета %q"
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
 
-#: internal/service/repos/internal/puller/puller.go:199
+#: internal/service/repos/internal/puller/puller.go:207
 msgid "Git repository does not appear to be a valid Stapler repo"
 msgstr "Git-репозиторий не выглядит корректным репозиторием Stapler"
 
-#: internal/service/repos/internal/puller/puller.go:230
+#: internal/service/repos/internal/puller/puller.go:238
 msgid ""
 "Stapler repo's minimum Stapler version is greater than the current version. "
 "Try updating Stapler if something doesn't work."
@@ -765,22 +765,22 @@ msgstr "Ошибка при проверке обновлений"
 msgid "There is nothing to do."
 msgstr "Здесь нечего делать."
 
-#: pkg/dl/dl.go:221
+#: pkg/dl/dl.go:240
 msgid "Source %q can be updated using %s — updating if required"
 msgstr ""
 "Источник %q можно обновить с помощью %s — обновление будет выполнено при "
 "необходимости"
 
-#: pkg/dl/dl.go:275
+#: pkg/dl/dl.go:299
 msgid "Downloading source %s from %s using %s downloader"
 msgstr "Загрузка источника %s из %s с помощью загрузчика %s"
 
-#: pkg/dl/dl.go:320
+#: pkg/dl/dl.go:352
 #, fuzzy
 msgid "Source %q was updated and linked to destination"
 msgstr "Источник %q был обновлён и связан с пунктом назначения (тип: %s)"
 
-#: pkg/dl/dl.go:322
+#: pkg/dl/dl.go:354
 #, fuzzy
 msgid "Source %q found in cache and linked to destination"
 msgstr "Источник %q найден в кэше и связан с пунктом назначения (тип: %s)"

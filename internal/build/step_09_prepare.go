@@ -65,8 +65,9 @@ func (b *prepareStep) Run(ctx context.Context, state *BuildState) error {
 		state.BasePackage,
 		state.Version,
 		SourcesInput{
-			Sources:   state.FlatVars.Sources,
-			Checksums: state.FlatVars.Checksums,
+			Sources:      state.FlatVars.Sources,
+			Checksums:    state.FlatVars.Checksums,
+			NewExtractor: state.SFE249NewExtractor,
 		},
 	)
 	if err != nil {

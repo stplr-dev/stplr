@@ -100,9 +100,18 @@ func (s *ScriptFile) ParseBuildVars(ctx context.Context, info *distro.OSRelease,
 		targetPackages = pkgNames.Names
 	}
 
-	varsOfPackages, err := s.createPackagesForBuildVars(ctx, dec, info, pkgNames, targetPackages)
+	scriptOpts, err := ParseScriptOptions(dec)
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to parse names: %w", err)
+	}
+
+	pkgs, err := s.createPackagesForBuildVars(ctx, dec, info, pkgNames, targetPackages)
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to createPackagesForBuildVars: %w", err)
+	}
+
+	for _, p := range pkgs {
+		p.Options = scriptOpts
 	}
 
 	baseName := pkgNames.BasePkgName
@@ -110,7 +119,7 @@ func (s *ScriptFile) ParseBuildVars(ctx context.Context, info *distro.OSRelease,
 		baseName = pkgNames.Names[0]
 	}
 
-	return baseName, varsOfPackages, nil
+	return baseName, pkgs, nil
 }
 
 func (s *ScriptFile) createRunner(info *distro.OSRelease) (*interp.Runner, error) {
@@ -144,6 +153,7 @@ func (s *ScriptFile) createPackagesForBuildVars(
 	if len(pkgNames.Names) == 1 {
 		var pkg Package
 		pkg.Name = pkgNames.Names[0]
+		pkg.Options = &ScriptOptions{}
 		if err := dec.DecodeVars(&pkg); err != nil {
 			return nil, fmt.Errorf("failed to decode vars: %w", err)
 		}
@@ -188,6 +198,7 @@ func (s *ScriptFile) createPackageFromMeta(
 	}
 	pkg.Name = pkgName
 	pkg.BasePkgName = basePkgName
+	pkg.Options = &ScriptOptions{}
 	return &pkg, nil
 }
 

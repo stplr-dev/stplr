@@ -56,12 +56,14 @@ func Move(sourcePath, destPath string) error {
 
 // CopyDirOrFile copies a directory or file from sourcePath to destPath.
 func CopyDirOrFile(sourcePath, destPath string) error {
-	sourceInfo, err := os.Stat(sourcePath)
+	sourceInfo, err := os.Lstat(sourcePath)
 	if err != nil {
 		return err
 	}
 
 	switch {
+	case sourceInfo.Mode()&os.ModeSymlink != 0:
+		return copySymlink(sourcePath, destPath)
 	case sourceInfo.IsDir():
 		return copyDir(sourcePath, destPath, sourceInfo)
 	case sourceInfo.Mode().IsRegular():
@@ -69,6 +71,17 @@ func CopyDirOrFile(sourcePath, destPath string) error {
 	default:
 		return nil
 	}
+}
+
+func copySymlink(sourcePath, destPath string) error {
+	target, err := os.Readlink(sourcePath)
+	if err != nil {
+		return err
+	}
+
+	_ = os.Remove(destPath)
+
+	return os.Symlink(target, destPath)
 }
 
 func copyDir(sourcePath, destPath string, sourceInfo os.FileInfo) error {

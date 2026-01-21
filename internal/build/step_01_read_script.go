@@ -54,6 +54,7 @@ func (s *readScriptStep) Run(ctx context.Context, state *BuildState) error {
 		return err
 	}
 	state.Version = state.Packages[0].Version
+	state.SFE249NewExtractor = state.Packages[0].Options.SFE249NewExtractor
 	state.ScriptFile = f
 	return nil
 }

@@ -46,3 +46,19 @@ func TestParseBuildVarsWithCustomLanguage(t *testing.T) {
 	assert.Equal(t, pkgs[0].Name, "test")
 	assert.Equal(t, pkgs[0].Description.Resolved(), "japanese")
 }
+
+func TestParseBuildVarsOptions(t *testing.T) {
+	r := strings.NewReader(`sfe_249_new_extractor=1
+	name=test
+	`)
+	s, err := staplerfile.ReadFromIOReader(r, "Staplerfile")
+	assert.NoError(t, err)
+	assert.NotNil(t, s)
+
+	_, pkgs, err := s.ParseBuildVars(t.Context(), &distro.OSRelease{}, []string{}, staplerfile.WithCustomLanguage("ja"))
+	assert.NoError(t, err)
+	assert.NotNil(t, pkgs)
+
+	assert.Len(t, pkgs, 1)
+	assert.Equal(t, pkgs[0].Options.SFE249NewExtractor, true)
+}

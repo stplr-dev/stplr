@@ -27,6 +27,7 @@ package dl
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"hash"
 	"io"
@@ -39,6 +40,9 @@ import (
 	"strings"
 
 	"github.com/mholt/archiver/v4"
+	"golift.io/xtractr"
+
+	"go.stplr.dev/stplr/internal/experimental/xtract"
 )
 
 // FileDownloader загружает файлы с использованием HTTP
@@ -124,6 +128,21 @@ func (fd FileDownloader) setupOutput(fl *os.File, opts Options, size int64, name
 func (fd FileDownloader) postProcess(path string, fl *os.File, name string, opts Options, postprocDisabled bool) (Type, string, error) {
 	if postprocDisabled {
 		return TypeFile, name, nil
+	}
+
+	if opts.NewExtractor {
+		_, err := xtract.ExtractArchive(path, opts.Destination)
+		if errors.Is(err, xtractr.ErrUnknownArchiveType) {
+			return TypeFile, "", nil
+		}
+		if err != nil {
+			return 0, "", fmt.Errorf("failed to extract with new extractor: %w", err)
+		}
+		err = os.RemoveAll(path)
+		if err != nil {
+			return 0, "", fmt.Errorf("failed to remove original archive: %w", err)
+		}
+		return TypeDir, "", nil
 	}
 
 	_, err := fl.Seek(0, io.SeekStart)

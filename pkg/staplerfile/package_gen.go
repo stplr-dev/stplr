@@ -22,6 +22,7 @@ package staplerfile
 import "go.stplr.dev/stplr/internal/cel2sqlite"
 
 type packageResolved struct {
+	Options           *ScriptOptions    `json:"options"`
 	Repository        string            `json:"repository"`
 	Name              string            `json:"name"`
 	BasePkgName       string            `json:"basepkg_name"`
@@ -65,6 +66,7 @@ type packageResolved struct {
 
 func PackageToResolved(src *Package) packageResolved {
 	return packageResolved{
+		Options:           src.Options,
 		Repository:        src.Repository,
 		Name:              src.Name,
 		BasePkgName:       src.BasePkgName,

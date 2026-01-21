@@ -37,6 +37,7 @@ import (
 	"hash"
 	"io"
 	"log/slog"
+	"maps"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -100,6 +101,7 @@ type Options struct {
 	DlCache          cache.DlCache
 	CacheMetadata    cache.Metadata
 	Output           output.Output
+	NewExtractor     bool
 }
 
 var _ cache.DlCache = new(local.LocalCache)
@@ -198,6 +200,23 @@ func downloadWithCache(ctx context.Context, opts Options, d Downloader) error {
 
 // handleCachedSource processes a cached source, updating it if necessary.
 func handleCachedSource(ctx context.Context, opts Options, d Downloader, cid cache.CacheID) error {
+	s, err := opts.DlCache.Get(ctx, cid)
+	if err != nil {
+		if errors.Is(err, cache.ErrEntryNotFound) {
+			return performDownload(ctx, opts, d)
+		}
+		return err
+	}
+
+	if local.ParseMetadata(s.Metadata).SFE249NewExtractor != opts.NewExtractor {
+		err := opts.DlCache.Delete(ctx, cid)
+		if err != nil {
+			return err
+		}
+
+		return performDownload(ctx, opts, d)
+	}
+
 	updated, err := updateSourceIfNeeded(ctx, opts, d, cid)
 	if err != nil {
 		return err
@@ -250,9 +269,14 @@ func updateSourceIfNeeded(ctx context.Context, opts Options, d Downloader, cid c
 			return false, err
 		}
 
+		newMetadata := cache.Metadata{}
+		maps.Copy(src.Metadata, newMetadata)
+		maps.Copy(opts.CacheMetadata, newMetadata)
+
 		if _, err = opts.DlCache.Put(ctx, cache.CachePutRequest{
-			Id:   src.Id,
-			Path: filepath.Join(tmpDir, src.Manifest.Name),
+			Id:       src.Id,
+			Path:     filepath.Join(tmpDir, src.Manifest.Name),
+			Metadata: newMetadata,
 		}); err != nil {
 			return false, err
 		}
@@ -281,7 +305,7 @@ func performDownload(ctx context.Context, opts Options, d Downloader) error {
 	if err != nil {
 		return err
 	}
-	// defer os.RemoveAll(tmpDir)
+	defer os.RemoveAll(tmpDir)
 
 	newOpts := opts
 	newOpts.Destination = tmpDir
@@ -291,15 +315,23 @@ func performDownload(ctx context.Context, opts Options, d Downloader) error {
 		return err
 	}
 
-	cid, err := opts.DlCache.Put(ctx, cache.CachePutRequest{
-		Path:     filepath.Join(tmpDir, name),
+	creq := cache.CachePutRequest{
 		URL:      opts.URL,
 		Metadata: opts.CacheMetadata,
-	})
+	}
+
+	if name != "" {
+		creq.Path = filepath.Join(tmpDir, name)
+	} else {
+		creq.Path = tmpDir
+		creq.UsePathAsRoot = true
+	}
+
+	cid, err := opts.DlCache.Put(ctx, creq)
 	if err != nil {
 		return fmt.Errorf("failed to put cache: %w", err)
 	}
-	// os.RemoveAll(tmpDir)
+	os.RemoveAll(tmpDir)
 
 	err = opts.DlCache.Restore(ctx, cid, opts.Destination)
 	if err != nil {
