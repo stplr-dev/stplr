@@ -67,7 +67,7 @@ jobs:
           echo "Version - $version"
           echo "VERSION=$version" >> $GITHUB_ENV
           # Determine if the tag is a prerelease
-          if [[ $version =~ -(rc|beta|alpha)[0-9]+$ ]]; then
+          if [[ $version =~ -(rc|beta|alpha).[0-9]+$ ]]; then
             echo "IS_PRERELEASE=true" >> $GITHUB_ENV
           else
             echo "IS_PRERELEASE=false" >> $GITHUB_ENV
