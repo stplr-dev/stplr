@@ -23,6 +23,7 @@ import (
 	"github.com/knadh/koanf/v2"
 
 	"go.stplr.dev/stplr/internal/config/common"
+	"go.stplr.dev/stplr/internal/constants"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
@@ -42,8 +43,8 @@ func (DefaultConfig) Name() string {
 
 func (c *DefaultConfig) Load() (*koanf.Koanf, error) {
 	defaults := map[string]interface{}{
-		common.ROOT_CMD:           "sudo",
-		common.USE_ROOT_CMD:       true,
+		common.ROOT_CMD:           constants.ConfigDefaultRootCmd,
+		common.USE_ROOT_CMD:       constants.ConfigDefaultUseRootCmd,
 		common.PAGER_STYLE:        "native",
 		common.IGNORE_PKG_UPDATES: []string{},
 		common.LOG_LEVEL:          "info",

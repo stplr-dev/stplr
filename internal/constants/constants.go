@@ -35,3 +35,9 @@ const (
 	FirejailedGlobalConfig = "/etc/stplr/firejailed/global"
 	LockDir                = "/run/lock/stplr"
 )
+
+const (
+	ConfigDefaultUseRootCmd = true
+)
+
+var ConfigDefaultRootCmd = "sudo"

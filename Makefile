@@ -3,6 +3,8 @@ GIT_VERSION ?= $(shell git describe --tags )
 IGNORE_ROOT_CHECK ?= 0
 DESTDIR ?=
 
+CONFIG_DEFAULT_ROOT_CMD ?= 
+
 PREFIX ?= /usr/local
 datarootdir = $(PREFIX)/share
 datadir = $(datarootdir)
@@ -30,6 +32,11 @@ ADD_LICENSE_BIN := go run github.com/google/addlicense@4caba19b7ed7818bb86bc4cd2
 GOLANGCI_LINT_BIN := go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.3.1
 XGOTEXT_BIN := go run github.com/Tom5521/xgotext@v1.2.0
 
+LDFLAGS := -X 'go.stplr.dev/stplr/internal/config.Version=$(GIT_VERSION)'
+ifneq ($(CONFIG_DEFAULT_ROOT_CMD),)
+	LDFLAGS += -X 'go.stplr.dev/stplr/internal/constants.ConfigDefaultRootCmd=$(CONFIG_DEFAULT_ROOT_CMD)'
+endif
+
 .PHONY: build install clean clear uninstall install-config install-cachedir install-sysusers install-tmpfiles install-post
 
 build: $(BIN)
@@ -40,7 +47,7 @@ ifeq ($(GENERATE),1)
 else
 	@echo "Skipping go generate (GENERATE=0)"
 endif
-	go build -ldflags="-X 'go.stplr.dev/stplr/internal/config.Version=$(GIT_VERSION)'" -o $@ ./cmd/stplr
+	go build -ldflags="$(LDFLAGS)" -o $@ ./cmd/stplr
 
 install: build install-config install-sysusers install-tmpfiles install-cachedir
 	install -Dm755 $(BIN) $(DESTDIR)$(bindir)/$(NAME)
