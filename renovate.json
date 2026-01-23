@@ -21,7 +21,9 @@
         },
         {
             "matchPackageNames": [
-                "mvdan.cc/sh/v3"
+                "mvdan.cc/sh/v3",
+                "golift.io/xtractr",
+                "google.golang.org/genproto/googleapis/api"
             ],
             "enabled": false
         }
