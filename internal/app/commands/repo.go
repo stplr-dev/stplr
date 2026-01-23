@@ -28,6 +28,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
@@ -36,6 +38,7 @@ import (
 
 	"go.stplr.dev/stplr/internal/cliutils2"
 	"go.stplr.dev/stplr/internal/usecase/repo/add"
+	repo_import "go.stplr.dev/stplr/internal/usecase/repo/import"
 	"go.stplr.dev/stplr/internal/usecase/repo/list"
 	"go.stplr.dev/stplr/internal/usecase/repo/remove"
 	"go.stplr.dev/stplr/internal/usecase/repo/setref"
@@ -74,6 +77,7 @@ func RepoCmd() *cli.Command {
 			SetRepoRefCmd(),
 			RepoMirrorCmd(),
 			SetUrlCmd(),
+			RepoImportCmd(),
 		},
 	}
 }
@@ -203,6 +207,56 @@ func SetUrlCmd() *cli.Command {
 			return seturl.New(d.Repos).Run(ctx, seturl.Options{
 				Name: c.Args().Get(0),
 				URL:  c.Args().Get(1),
+			})
+		}),
+	}
+}
+
+func RepoImportCmd() *cli.Command {
+	return &cli.Command{
+		Name:        "import",
+		Usage:       gotext.Get("Import a repository from a stapler-repo.toml file"),
+		Description: gotext.Get("Import a repository using a stapler-repo.toml file. The file path can be a regular file or '-' to read from stdin."),
+		ArgsUsage:   gotext.Get("<name> <file>"),
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:  "no-pull",
+				Usage: gotext.Get("Skip pulling repository after import"),
+			},
+			&cli.BoolFlag{
+				Name:  "ignore-existing",
+				Usage: gotext.Get("Skip import if repository already exists"),
+			},
+		},
+		Action: repoModifyAction(func(ctx context.Context, c *cli.Command) error {
+			if c.Args().Len() < 2 {
+				return errMissingArgs
+			}
+
+			var data []byte
+			var err error
+			filePath := c.Args().Get(1)
+			if filePath == "-" {
+				data, err = io.ReadAll(os.Stdin)
+			} else {
+				data, err = os.ReadFile(filePath)
+			}
+			if err != nil {
+				return err
+			}
+			configStr := string(data)
+
+			d, cleanup, err := deps.ForUniversalReposModificationActionDeps(ctx)
+			if err != nil {
+				return err
+			}
+			defer cleanup()
+
+			return repo_import.New(d.Config, d.Repos).Run(ctx, repo_import.Options{
+				Name:           c.Args().Get(0),
+				ConfigContent:  configStr,
+				NoPull:         c.Bool("no-pull"),
+				IgnoreExisting: c.Bool("ignore-existing"),
 			})
 		}),
 	}

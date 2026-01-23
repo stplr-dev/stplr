@@ -5,17 +5,16 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2026-01-23 08:18+0000\n"
-"Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
-"Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
-"stplr/ru/>\n"
+"PO-Revision-Date: 2026-01-23 18:44+0300\n"
+"Last-Translator: Maxim Slipenko <maks1ms@alt-gnome.ru>\n"
+"Language-Team: Russian\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.15.2\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Gtranslator 49.0\n"
 
 #: cmd/stplr/main.go:71
 msgid ""
@@ -166,45 +165,69 @@ msgstr "Скачать все изменённые репозитории"
 msgid "Remove an installed package"
 msgstr "Удалить установленный пакет"
 
-#: internal/app/commands/repo.go:69
+#: internal/app/commands/repo.go:72
 msgid "Manage repos"
 msgstr "Управление репозиториями"
 
-#: internal/app/commands/repo.go:84
+#: internal/app/commands/repo.go:88
 msgid "Remove an existing repository"
 msgstr "Удалить существующий репозиторий"
 
-#: internal/app/commands/repo.go:86
+#: internal/app/commands/repo.go:90
 msgid "<name>"
 msgstr "<имя>"
 
-#: internal/app/commands/repo.go:107
+#: internal/app/commands/repo.go:111
 msgid "Add a new repository"
 msgstr "Добавить новый репозиторий"
 
-#: internal/app/commands/repo.go:108 internal/app/commands/repo.go:190
+#: internal/app/commands/repo.go:112 internal/app/commands/repo.go:194
 msgid "<name> <url>"
 msgstr "<имя> <url>"
 
-#: internal/app/commands/repo.go:131
+#: internal/app/commands/repo.go:135
 msgid "List repositories"
 msgstr "Список репозиториев"
 
-#: internal/app/commands/repo.go:141
+#: internal/app/commands/repo.go:145
 msgid "Output in JSON format"
 msgstr "Вывод в JSON формате"
 
-#: internal/app/commands/repo.go:162
+#: internal/app/commands/repo.go:166
 msgid "Set the reference of the repository"
 msgstr "Установить ссылку на версию репозитория"
 
-#: internal/app/commands/repo.go:163
+#: internal/app/commands/repo.go:167
 msgid "<name> <ref>"
 msgstr "<имя> <ссылка_на_версию>"
 
-#: internal/app/commands/repo.go:189
+#: internal/app/commands/repo.go:193
 msgid "Set the main url of the repository"
 msgstr "Установить главный URL репозитория"
+
+#: internal/app/commands/repo.go:218
+msgid "Import a repository from a stapler-repo.toml file"
+msgstr "Импортировать репозиторий из stapler-repo.toml файла"
+
+#: internal/app/commands/repo.go:219
+msgid ""
+"Import a repository using a stapler-repo.toml file. The file path can be a "
+"regular file or '-' to read from stdin."
+msgstr ""
+"Импортировать репозиторий из stapler-repo.toml файла. Путь к файлу может "
+"быть обычным файлом или '-' для чтения из stdin."
+
+#: internal/app/commands/repo.go:220
+msgid "<name> <file>"
+msgstr "<имя> <файл>"
+
+#: internal/app/commands/repo.go:224
+msgid "Skip pulling repository after import"
+msgstr "Пропустить загрузку репозитория после импорта"
+
+#: internal/app/commands/repo.go:228
+msgid "Skip import if repository already exists"
+msgstr "Пропустить импорт, если репозиторий уже существует"
 
 #: internal/app/commands/repo_mirror.go:37
 msgid "Manage mirrors of repos"
@@ -704,6 +727,21 @@ msgstr "Репозиторий \"%s\" уже существует"
 msgid "Error saving config"
 msgstr "Ошибка при сохранении конфигурации"
 
+#: internal/usecase/repo/import/import.go:59
+#, fuzzy
+msgid "Repository %q already exists"
+msgstr "Репозиторий \"%s\" уже существует"
+
+#: internal/usecase/repo/import/import.go:65
+#, fuzzy
+msgid "Failed to read repo configuration"
+msgstr "не удалось сохранить конфигурацию: %v"
+
+#: internal/usecase/repo/import/import.go:77
+#, fuzzy
+msgid "Failed to import repository"
+msgstr "Ошибка при получении рабочего каталога"
+
 #: internal/usecase/repo/list/list.go:58
 msgid "Error encoding repos to JSON"
 msgstr "Ошибка при кодировании репозиториев в JSON"
@@ -849,9 +887,6 @@ msgstr "Ошибка устранения переорпеделений"
 
 #~ msgid "Error building package"
 #~ msgstr "Ошибка при сборке пакета"
-
-#~ msgid "Pulling repository %s from %s..."
-#~ msgstr "Скачивание репозитория %s из %s..."
 
 #~ msgid "Building package metadata"
 #~ msgstr "Сборка метаданных пакета"

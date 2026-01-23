@@ -26,6 +26,7 @@ package repos
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -33,13 +34,28 @@ import (
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-func (rs *Repos) GetRepo(name string) (types.Repo, error) {
+var ErrRepoNotFound = errors.New("repo not found")
+
+func (rs *Repos) findRepoByName(name string) (types.Repo, bool) {
 	for _, r := range rs.cfg.Repos() {
 		if r.Name == name {
-			return r, nil
+			return r, true
 		}
 	}
-	return types.Repo{}, fmt.Errorf("repo %q not found", name)
+	return types.Repo{}, false
+}
+
+func (rs *Repos) GetRepo(name string) (types.Repo, error) {
+	repo, ok := rs.findRepoByName(name)
+	if !ok {
+		return types.Repo{}, ErrRepoNotFound
+	}
+	return repo, nil
+}
+
+func (rs *Repos) HasRepo(name string) bool {
+	_, ok := rs.findRepoByName(name)
+	return ok
 }
 
 func (rs *Repos) FindPkgs(ctx context.Context, pkgs []string) (map[string][]staplerfile.Package, []string, error) {

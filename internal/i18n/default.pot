@@ -155,44 +155,66 @@ msgstr ""
 msgid "Remove an installed package"
 msgstr ""
 
-#: internal/app/commands/repo.go:69
+#: internal/app/commands/repo.go:72
 msgid "Manage repos"
 msgstr ""
 
-#: internal/app/commands/repo.go:84
+#: internal/app/commands/repo.go:88
 msgid "Remove an existing repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:86
+#: internal/app/commands/repo.go:90
 msgid "<name>"
 msgstr ""
 
-#: internal/app/commands/repo.go:107
+#: internal/app/commands/repo.go:111
 msgid "Add a new repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:108 internal/app/commands/repo.go:190
+#: internal/app/commands/repo.go:112 internal/app/commands/repo.go:194
 msgid "<name> <url>"
 msgstr ""
 
-#: internal/app/commands/repo.go:131
+#: internal/app/commands/repo.go:135
 msgid "List repositories"
 msgstr ""
 
-#: internal/app/commands/repo.go:141
+#: internal/app/commands/repo.go:145
 msgid "Output in JSON format"
 msgstr ""
 
-#: internal/app/commands/repo.go:162
+#: internal/app/commands/repo.go:166
 msgid "Set the reference of the repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:163
+#: internal/app/commands/repo.go:167
 msgid "<name> <ref>"
 msgstr ""
 
-#: internal/app/commands/repo.go:189
+#: internal/app/commands/repo.go:193
 msgid "Set the main url of the repository"
+msgstr ""
+
+#: internal/app/commands/repo.go:218
+msgid "Import a repository from a stapler-repo.toml file"
+msgstr ""
+
+#: internal/app/commands/repo.go:219
+msgid ""
+"Import a repository using a stapler-repo.toml file. The file path can be a "
+"regular file or '-' to read from stdin."
+msgstr ""
+
+#: internal/app/commands/repo.go:220
+msgid "<name> <file>"
+msgstr ""
+
+#: internal/app/commands/repo.go:224
+msgid "Skip pulling repository after import"
+msgstr ""
+
+#: internal/app/commands/repo.go:228
+msgid "Skip import if repository already exists"
 msgstr ""
 
 #: internal/app/commands/repo_mirror.go:37
@@ -676,6 +698,18 @@ msgstr ""
 
 #: internal/usecase/repo/add/add.go:69
 msgid "Error saving config"
+msgstr ""
+
+#: internal/usecase/repo/import/import.go:59
+msgid "Repository %q already exists"
+msgstr ""
+
+#: internal/usecase/repo/import/import.go:65
+msgid "Failed to read repo configuration"
+msgstr ""
+
+#: internal/usecase/repo/import/import.go:77
+msgid "Failed to import repository"
 msgstr ""
 
 #: internal/usecase/repo/list/list.go:58
