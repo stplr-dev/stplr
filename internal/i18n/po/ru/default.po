@@ -92,9 +92,14 @@ msgstr "Получить значение из конфигурации"
 msgid "<key>"
 msgstr "<ключ>"
 
-#: internal/app/commands/fix.go:43
+#: internal/app/commands/fix.go:46
 msgid "Attempt to fix problems with Stapler"
 msgstr "Попытка устранить проблемы с Stapler"
+
+#: internal/app/commands/fix.go:51
+#, fuzzy
+msgid "Unable to remove lock dir"
+msgstr "Невозможно удалить элемент кэша (%s)"
 
 #: internal/app/commands/helper.go:48
 msgid "List all the available helper commands"
@@ -160,43 +165,43 @@ msgstr "Скачать все изменённые репозитории"
 msgid "Remove an installed package"
 msgstr "Удалить установленный пакет"
 
-#: internal/app/commands/repo.go:65
+#: internal/app/commands/repo.go:69
 msgid "Manage repos"
 msgstr "Управление репозиториями"
 
-#: internal/app/commands/repo.go:80
+#: internal/app/commands/repo.go:84
 msgid "Remove an existing repository"
 msgstr "Удалить существующий репозиторий"
 
-#: internal/app/commands/repo.go:82
+#: internal/app/commands/repo.go:86
 msgid "<name>"
 msgstr "<имя>"
 
-#: internal/app/commands/repo.go:103
+#: internal/app/commands/repo.go:107
 msgid "Add a new repository"
 msgstr "Добавить новый репозиторий"
 
-#: internal/app/commands/repo.go:104 internal/app/commands/repo.go:186
+#: internal/app/commands/repo.go:108 internal/app/commands/repo.go:190
 msgid "<name> <url>"
 msgstr "<имя> <url>"
 
-#: internal/app/commands/repo.go:127
+#: internal/app/commands/repo.go:131
 msgid "List repositories"
 msgstr "Список репозиториев"
 
-#: internal/app/commands/repo.go:137
+#: internal/app/commands/repo.go:141
 msgid "Output in JSON format"
 msgstr "Вывод в JSON формате"
 
-#: internal/app/commands/repo.go:158
+#: internal/app/commands/repo.go:162
 msgid "Set the reference of the repository"
 msgstr "Установить ссылку на версию репозитория"
 
-#: internal/app/commands/repo.go:159
+#: internal/app/commands/repo.go:163
 msgid "<name> <ref>"
 msgstr "<имя> <ссылка_на_версию>"
 
-#: internal/app/commands/repo.go:185
+#: internal/app/commands/repo.go:189
 msgid "Set the main url of the repository"
 msgstr "Установить главный URL репозитория"
 
@@ -478,15 +483,15 @@ msgstr "введите текст для фильтрации"
 msgid "for more help"
 msgstr "для дополнительной помощи"
 
-#: internal/cliutils2/cli.go:59
+#: internal/cliutils2/cli.go:66
 msgid "You need to be root to perform this action"
 msgstr "Вы должны быть root чтобы выполнить это"
 
-#: internal/cliutils2/cli.go:67
+#: internal/cliutils2/cli.go:74
 msgid "This action requires elevated privileges."
 msgstr "Это действие требует повышенных привилегий."
 
-#: internal/cliutils2/cli.go:68
+#: internal/cliutils2/cli.go:75
 msgid "Attempting to run as root using '%s'..."
 msgstr "Попытка запустить от имени root с использованием '%s'..."
 

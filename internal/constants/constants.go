@@ -33,4 +33,5 @@ const (
 	FirejailedDir          = "/usr/lib/stplr/firejailed"
 	FirejailedConfigDir    = "/etc/stplr/firejailed"
 	FirejailedGlobalConfig = "/etc/stplr/firejailed/global"
+	LockDir                = "/run/lock/stplr"
 )

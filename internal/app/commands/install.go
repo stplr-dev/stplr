@@ -67,22 +67,24 @@ func InstallCmd() *cli.Command {
 
 			return shell.New(d.DB).Run(ctx)
 		}),
-		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
-			if err := installCmdActionChecks(ctx, c); err != nil {
-				return err
-			}
+		Action: cliutils2.RootNeededAction(cliutils2.ActionWithLocks(
+			[]string{"repo-cache", "install-pkgs"},
+			func(ctx context.Context, c *cli.Command) error {
+				if err := installCmdActionChecks(ctx, c); err != nil {
+					return err
+				}
 
-			d, f, err := deps.ForInstallAction(ctx)
-			if err != nil {
-				return err
-			}
-			defer f()
+				d, f, err := deps.ForInstallAction(ctx)
+				if err != nil {
+					return err
+				}
+				defer f()
 
-			return action.New(d.Builder, d.Manager, d.Info).Run(ctx, action.Options{
-				Pkgs:        c.Args().Slice(),
-				Clean:       c.Bool("clean"),
-				Interactive: c.Bool("interactive"),
-			})
-		}),
+				return action.New(d.Builder, d.Manager, d.Info).Run(ctx, action.Options{
+					Pkgs:        c.Args().Slice(),
+					Clean:       c.Bool("clean"),
+					Interactive: c.Bool("interactive"),
+				})
+			})),
 	}
 }

@@ -38,14 +38,16 @@ func RefreshCmd() *cli.Command {
 		Name:    "refresh",
 		Usage:   gotext.Get("Pull all repositories that have changed"),
 		Aliases: []string{"ref"},
-		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
-			d, f, err := deps.ForRefreshAction(ctx)
-			if err != nil {
-				return err
-			}
-			defer f()
+		Action: cliutils2.RootNeededAction(cliutils2.ActionWithLocks(
+			[]string{"repo-cache"},
+			func(ctx context.Context, c *cli.Command) error {
+				d, f, err := deps.ForRefreshAction(ctx)
+				if err != nil {
+					return err
+				}
+				defer f()
 
-			return refresh.New(d.Repos).Run(ctx, refresh.Options{})
-		}),
+				return refresh.New(d.Repos).Run(ctx, refresh.Options{})
+			})),
 	}
 }

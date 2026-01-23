@@ -83,8 +83,12 @@ msgstr ""
 msgid "<key>"
 msgstr ""
 
-#: internal/app/commands/fix.go:43
+#: internal/app/commands/fix.go:46
 msgid "Attempt to fix problems with Stapler"
+msgstr ""
+
+#: internal/app/commands/fix.go:51
+msgid "Unable to remove lock dir"
 msgstr ""
 
 #: internal/app/commands/helper.go:48
@@ -151,43 +155,43 @@ msgstr ""
 msgid "Remove an installed package"
 msgstr ""
 
-#: internal/app/commands/repo.go:65
+#: internal/app/commands/repo.go:69
 msgid "Manage repos"
 msgstr ""
 
-#: internal/app/commands/repo.go:80
+#: internal/app/commands/repo.go:84
 msgid "Remove an existing repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:82
+#: internal/app/commands/repo.go:86
 msgid "<name>"
 msgstr ""
 
-#: internal/app/commands/repo.go:103
+#: internal/app/commands/repo.go:107
 msgid "Add a new repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:104 internal/app/commands/repo.go:186
+#: internal/app/commands/repo.go:108 internal/app/commands/repo.go:190
 msgid "<name> <url>"
 msgstr ""
 
-#: internal/app/commands/repo.go:127
+#: internal/app/commands/repo.go:131
 msgid "List repositories"
 msgstr ""
 
-#: internal/app/commands/repo.go:137
+#: internal/app/commands/repo.go:141
 msgid "Output in JSON format"
 msgstr ""
 
-#: internal/app/commands/repo.go:158
+#: internal/app/commands/repo.go:162
 msgid "Set the reference of the repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:159
+#: internal/app/commands/repo.go:163
 msgid "<name> <ref>"
 msgstr ""
 
-#: internal/app/commands/repo.go:185
+#: internal/app/commands/repo.go:189
 msgid "Set the main url of the repository"
 msgstr ""
 
@@ -464,15 +468,15 @@ msgstr ""
 msgid "for more help"
 msgstr ""
 
-#: internal/cliutils2/cli.go:59
+#: internal/cliutils2/cli.go:66
 msgid "You need to be root to perform this action"
 msgstr ""
 
-#: internal/cliutils2/cli.go:67
+#: internal/cliutils2/cli.go:74
 msgid "This action requires elevated privileges."
 msgstr ""
 
-#: internal/cliutils2/cli.go:68
+#: internal/cliutils2/cli.go:75
 msgid "Attempting to run as root using '%s'..."
 msgstr ""
 

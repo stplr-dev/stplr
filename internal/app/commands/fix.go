@@ -26,14 +26,17 @@ package commands
 
 import (
 	"context"
+	"os"
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app/deps"
+	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/cliutils2"
+	"go.stplr.dev/stplr/internal/constants"
 	"go.stplr.dev/stplr/internal/usecase/fix"
 )
 
@@ -42,6 +45,12 @@ func FixCmd() *cli.Command {
 		Name:  "fix",
 		Usage: gotext.Get("Attempt to fix problems with Stapler"),
 		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+			// not ideal, but ok
+			err := os.RemoveAll(constants.LockDir)
+			if err != nil {
+				return errors.WrapIntoI18nError(err, gotext.Get("Unable to remove lock dir"))
+			}
+
 			if err := cliutils.ExitIfCantDropCapsToBuilderUserNoPrivs(); err != nil {
 				return err
 			}

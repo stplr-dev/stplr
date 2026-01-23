@@ -42,6 +42,10 @@ import (
 	"go.stplr.dev/stplr/internal/usecase/repo/seturl"
 )
 
+func repoModifyAction(f cli.ActionFunc) cli.ActionFunc {
+	return cliutils2.RootNeededAction(cliutils2.ActionWithLocks([]string{"repo-cache"}, f))
+}
+
 var errMissingArgs = errors.New("missing args")
 
 func ShellCompleteRepoName(ctx context.Context, c *cli.Command) {
@@ -81,7 +85,7 @@ func RemoveRepoCmd() *cli.Command {
 		Aliases:       []string{"rm"},
 		ArgsUsage:     gotext.Get("<name>"),
 		ShellComplete: ShellCompleteRepoName,
-		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+		Action: repoModifyAction(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() < 1 {
 				return errMissingArgs
 			}
@@ -102,7 +106,7 @@ func AddRepoCmd() *cli.Command {
 		Name:      "add",
 		Usage:     gotext.Get("Add a new repository"),
 		ArgsUsage: gotext.Get("<name> <url>"),
-		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+		Action: repoModifyAction(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() < 2 {
 				return errMissingArgs
 			}
@@ -158,7 +162,7 @@ func SetRepoRefCmd() *cli.Command {
 		Usage:         gotext.Get("Set the reference of the repository"),
 		ArgsUsage:     gotext.Get("<name> <ref>"),
 		ShellComplete: ShellCompleteRepoName,
-		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+		Action: repoModifyAction(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() < 2 {
 				return errMissingArgs
 			}
@@ -185,7 +189,7 @@ func SetUrlCmd() *cli.Command {
 		Usage:         gotext.Get("Set the main url of the repository"),
 		ArgsUsage:     gotext.Get("<name> <url>"),
 		ShellComplete: ShellCompleteRepoName,
-		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
+		Action: repoModifyAction(func(ctx context.Context, c *cli.Command) error {
 			if c.Args().Len() < 2 {
 				return errMissingArgs
 			}

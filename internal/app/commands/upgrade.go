@@ -48,17 +48,19 @@ func UpgradeCmd() *cli.Command {
 				Usage:   gotext.Get("Build package from scratch even if there's an already built package available"),
 			},
 		},
-		Action: cliutils2.RootNeededAction(func(ctx context.Context, c *cli.Command) error {
-			d, f, err := deps.ForUpgradeAction(ctx)
-			if err != nil {
-				return err
-			}
-			defer f()
+		Action: cliutils2.RootNeededAction(cliutils2.ActionWithLocks(
+			[]string{"repo-cache", "install-pkgs"},
+			func(ctx context.Context, c *cli.Command) error {
+				d, f, err := deps.ForUpgradeAction(ctx)
+				if err != nil {
+					return err
+				}
+				defer f()
 
-			return upgrade.New(d.Builder, d.Updater, d.Manager, d.DB, d.Repos, d.Info, output.FromContext(ctx)).Run(ctx, upgrade.Options{
-				Clean:       c.Bool("clean"),
-				Interactive: c.Bool("interactive"),
-			})
-		}),
+				return upgrade.New(d.Builder, d.Updater, d.Manager, d.DB, d.Repos, d.Info, output.FromContext(ctx)).Run(ctx, upgrade.Options{
+					Clean:       c.Bool("clean"),
+					Interactive: c.Bool("interactive"),
+				})
+			})),
 	}
 }

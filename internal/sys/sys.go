@@ -54,12 +54,12 @@ func mustInt(s string) int {
 	}
 }
 
-func (s Sys) getBuilderUser() (*user.User, error) {
+func (s Sys) GetBuilderUser() (*user.User, error) {
 	return user.Lookup(constants.BuilderUser)
 }
 
 func (s Sys) DropCapsToBuilderUser() error {
-	u, err := s.getBuilderUser()
+	u, err := s.GetBuilderUser()
 	if err != nil {
 		return fmt.Errorf("failed get builder user: %w", err)
 	}
@@ -73,7 +73,7 @@ func (s Sys) DropCapsToBuilderUser() error {
 		return err
 	}
 
-	u, err = s.getBuilderUser()
+	u, err = s.GetBuilderUser()
 	if err != nil {
 		return fmt.Errorf("failed get builder user after drop: %w", err)
 	}

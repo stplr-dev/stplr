@@ -20,16 +20,23 @@ package cliutils2
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strconv"
+	"time"
 
+	"github.com/gofrs/flock"
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app/deps"
 	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/cliutils"
+	"go.stplr.dev/stplr/internal/constants"
+	"go.stplr.dev/stplr/internal/sys"
 	"go.stplr.dev/stplr/internal/utils"
 
 	"go.stplr.dev/stplr/internal/config"
@@ -100,5 +107,71 @@ func ReadonlyAction(f cli.ActionFunc) cli.ActionFunc {
 		}
 
 		return f(ctx, c)
+	}
+}
+
+func mustInt(s string) int {
+	if i, err := strconv.Atoi(s); err != nil {
+		panic(err)
+	} else {
+		return i
+	}
+}
+
+func ActionWithLocks(names []string, f cli.ActionFunc) cli.ActionFunc {
+	return func(ctx context.Context, c *cli.Command) error {
+		if err := os.MkdirAll(constants.LockDir, 0o775); err != nil {
+			return err
+		}
+
+		u, err := sys.Sys{}.GetBuilderUser()
+		if err != nil {
+			return err
+		}
+
+		err = os.Chown(constants.LockDir, -1, mustInt(u.Gid))
+		if err != nil {
+			return err
+		}
+
+		lockCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
+		defer cancel()
+
+		locks, err := acquireLocks(lockCtx, names)
+		if err != nil {
+			return err
+		}
+		defer releaseLocks(locks)
+
+		return f(ctx, c)
+	}
+}
+
+func acquireLocks(ctx context.Context, names []string) ([]*flock.Flock, error) {
+	locks := make([]*flock.Flock, 0, len(names))
+
+	for _, name := range names {
+		fl := flock.New(filepath.Join(constants.LockDir, name+".lock"))
+
+		locked, err := fl.TryLockContext(ctx, 500*time.Millisecond)
+		if err != nil {
+			releaseLocks(locks)
+			return nil, err
+		}
+
+		if !locked {
+			releaseLocks(locks)
+			return nil, fmt.Errorf("failed to lock %s", name)
+		}
+
+		locks = append(locks, fl)
+	}
+
+	return locks, nil
+}
+
+func releaseLocks(locks []*flock.Flock) {
+	for i := len(locks) - 1; i >= 0; i-- {
+		_ = locks[i].Unlock()
 	}
 }
