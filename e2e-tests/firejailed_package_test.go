@@ -55,4 +55,14 @@ func TestE2EFirejailedPackage(t *testing.T) {
 				Run(t)
 		},
 	)
+
+	t.Run("firejail wrapper config is marked as config", matrixSuite(RPM_SYSTEMS, func(t *testing.T, r capytest.Runner) {
+		defaultPrepare(t, r)
+		execShouldNoError(t, r, "stplr", "build", "-p", fmt.Sprintf("%s/firejailed-pkg", REPO_NAME_FOR_E2E_TESTS))
+
+		r.Command("sh", "-c", "rpm -qcp -c *.rpm").
+			ExpectSuccess().
+			ExpectStdoutRegex("(?m)^/etc/stplr/firejailed/_usr_bin_danger.sh$").
+			Run(t)
+	}))
 }

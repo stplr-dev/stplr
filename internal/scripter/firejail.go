@@ -260,11 +260,17 @@ func createFirejailedBinary(
 		return nil, fmt.Errorf("failed to create config file: %w", err)
 	}
 
-	return buildContents(pkg, dirs, &[]string{
+	configFiles := []string{
+		wrapperConfigPath,
+	}
+
+	configFiles = append(configFiles, pkg.Backup.Resolved()...)
+
+	return buildContents(dirs, &[]string{
 		origFilePath,
 		dest,
 		wrapperConfigPath,
-	})
+	}, configFiles)
 }
 
 func generateSafeName(destination string) (string, error) {

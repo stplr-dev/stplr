@@ -294,7 +294,7 @@ func buildPkgMetadata(
 		pkgInfo.Arch = "all"
 	}
 
-	contents, err := buildContents(vars, dirs, preferedContents)
+	contents, err := buildContents(dirs, preferedContents, vars.Backup.Resolved())
 	if err != nil {
 		return nil, err
 	}

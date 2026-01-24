@@ -104,7 +104,7 @@ func createSymlinkContent(fi os.FileInfo, path, trimmed, pkgDir string) (*files.
 	}, nil
 }
 
-func createFileContent(fi os.FileInfo, path, trimmed string, vars *staplerfile.Package) (*files.Content, error) {
+func createFileContent(fi os.FileInfo, path, trimmed string, configFiles []string) (*files.Content, error) {
 	content := &files.Content{
 		Source:      path,
 		Destination: trimmed,
@@ -115,18 +115,18 @@ func createFileContent(fi os.FileInfo, path, trimmed string, vars *staplerfile.P
 		},
 	}
 
-	if slices.Contains(vars.Backup.Resolved(), trimmed) {
+	if slices.Contains(configFiles, trimmed) {
 		content.Type = "config|noreplace"
 	}
 
 	return content, nil
 }
 
-func processPreferredContents(preferedContents []string, pkgDir string, pkg *staplerfile.Package) ([]*files.Content, error) {
+func processPreferredContents(preferedContents []string, pkgDir string, configFiles []string) ([]*files.Content, error) {
 	contents := []*files.Content{}
 	for _, trimmed := range preferedContents {
 		path := filepath.Join(pkgDir, trimmed)
-		content, err := processPath(path, trimmed, true, pkgDir, pkg)
+		content, err := processPath(path, trimmed, true, pkgDir, configFiles)
 		if err != nil {
 			return nil, err
 		}
@@ -137,14 +137,14 @@ func processPreferredContents(preferedContents []string, pkgDir string, pkg *sta
 	return contents, nil
 }
 
-func processAllContents(pkgDir string, pkg *staplerfile.Package) ([]*files.Content, error) {
+func processAllContents(pkgDir string, configFiles []string) ([]*files.Content, error) {
 	contents := []*files.Content{}
 	err := filepath.Walk(pkgDir, func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		trimmed := strings.TrimPrefix(path, pkgDir)
-		content, err := processPath(path, trimmed, true, pkgDir, pkg)
+		content, err := processPath(path, trimmed, true, pkgDir, configFiles)
 		if err != nil {
 			return err
 		}
@@ -159,7 +159,7 @@ func processAllContents(pkgDir string, pkg *staplerfile.Package) ([]*files.Conte
 	return contents, nil
 }
 
-func processPath(path, trimmed string, prefered bool, pkgDir string, pkg *staplerfile.Package) (*files.Content, error) {
+func processPath(path, trimmed string, prefered bool, pkgDir string, configFiles []string) (*files.Content, error) {
 	fi, err := os.Lstat(path)
 	if err != nil {
 		return nil, err
@@ -173,17 +173,17 @@ func processPath(path, trimmed string, prefered bool, pkgDir string, pkg *staple
 		return createSymlinkContent(fi, path, trimmed, pkgDir)
 	}
 
-	return createFileContent(fi, path, trimmed, pkg)
+	return createFileContent(fi, path, trimmed, configFiles)
 }
 
 // Функция buildContents создает секцию содержимого пакета, которая содержит файлы,
 // которые будут включены в конечный пакет.
-func buildContents(vars *staplerfile.Package, dirs types.Directories, preferedContents *[]string) ([]*files.Content, error) {
+func buildContents(dirs types.Directories, preferedContents *[]string, configFiles []string) ([]*files.Content, error) {
 	if preferedContents != nil {
-		return processPreferredContents(*preferedContents, dirs.PkgDir, vars)
+		return processPreferredContents(*preferedContents, dirs.PkgDir, configFiles)
 	}
 
-	return processAllContents(dirs.PkgDir, vars)
+	return processAllContents(dirs.PkgDir, configFiles)
 }
 
 type getBasePkgInfoInput interface {
