@@ -50,10 +50,6 @@ type ExtractResult struct {
 
 // ExtractArchive extracts an archive file using the xtractr library.
 func ExtractArchive(filepath, outputDir string) (*ExtractResult, error) {
-	if !IsSupported(filepath) {
-		return nil, fmt.Errorf("unsupported archive type: %s", filepath)
-	}
-
 	x := &xtractr.XFile{
 		FilePath:  filepath,
 		OutputDir: outputDir,
