@@ -96,7 +96,7 @@ func runMatrixSuite(t *testing.T, name string, images []string, test func(t *tes
 	t.Helper()
 	for _, image := range images {
 		ts := capytest.NewTestSuite(t, podman.Provider(
-			podman.WithImage(fmt.Sprintf("ghcr.io/maks1ms/stplr-e2e-test-image-%s", image)),
+			podman.WithImage(fmt.Sprintf("altlinux.space/stapler/stplr-e2e-test-image-%s", image)),
 			podman.WithVolumes("./stplr:/tmp/stplr"),
 			podman.WithPrivileged(true),
 		))

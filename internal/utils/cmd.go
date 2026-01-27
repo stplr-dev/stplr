@@ -76,7 +76,7 @@ func DropCapsToBuilderUser() error {
 }
 
 func IsNotRoot() bool {
-	return os.Getuid() != 0
+	return os.Geteuid() != 0
 }
 
 func IsRoot() bool {
