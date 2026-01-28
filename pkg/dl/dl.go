@@ -301,7 +301,7 @@ func performDownload(ctx context.Context, opts Options, d Downloader) error {
 		))
 	}
 
-	tmpDir, err := os.MkdirTemp("/tmp", "dlcache-*")
+	tmpDir, err := os.MkdirTemp(opts.Destination, ".dl-cache-*")
 	if err != nil {
 		return err
 	}

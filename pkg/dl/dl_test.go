@@ -172,12 +172,22 @@ func TestDownloadFileWithCache(t *testing.T) {
 			_, err = os.Stat(outputFile)
 			assert.NoError(t, err)
 
+			entries, err := os.ReadDir(tmpdir)
+			assert.NoError(t, err)
+			assert.Len(t, entries, 1, "should only contain the downloaded file")
+			assert.Equal(t, "file", entries[0].Name())
+
 			err = os.Remove(outputFile)
 			assert.NoError(t, err)
 
 			err = dl.Download(context.Background(), opts)
 			assert.NoError(t, err)
 			assert.Equal(t, 1, called)
+
+			entries, err = os.ReadDir(tmpdir)
+			assert.NoError(t, err)
+			assert.Len(t, entries, 1, "should only contain the downloaded file")
+			assert.Equal(t, "file", entries[0].Name())
 		})
 	}
 }
