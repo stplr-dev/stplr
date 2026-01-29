@@ -88,7 +88,7 @@ func RootNeededAction(f cli.ActionFunc) cli.ActionFunc {
 		}
 		defer cleanup()
 
-		if utils.IsNotRoot() {
+		if os.Getenv("FAKEROOTKEY") == "" && utils.IsNotRoot() {
 			return handleNonRoot(ctx, out, deps.Config)
 		}
 
