@@ -21,6 +21,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"os/user"
@@ -43,12 +44,28 @@ import (
 )
 
 func SandboxHandler(killTimeout time.Duration, srcDir, pkgDir string, disableNetwork bool) (interp.ExecHandlerFunc, func(), error) {
-	container, cleanup, err := createContainer(srcDir, pkgDir, disableNetwork)
+	container, cleanup, err := createContainer(srcDir, pkgDir, disableNetwork, true)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	if err := startInitProcess(container); err != nil {
+	err = startInitProcess(container)
+	if err != nil && isMountError(err) {
+		cleanup()
+
+		slog.Debug("cannot create isolated /proc, retrying bind mount")
+
+		container, cleanup, err = createContainer(srcDir, pkgDir, disableNetwork, false)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		err = startInitProcess(container)
+		if err != nil {
+			cleanup()
+			return nil, nil, err
+		}
+	} else if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
@@ -57,42 +74,7 @@ func SandboxHandler(killTimeout time.Duration, srcDir, pkgDir string, disableNet
 	return handler, cleanup, nil
 }
 
-func generateMappings() ([]specs.LinuxIDMapping, []specs.LinuxIDMapping, error) {
-	u, err := user.Current()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	uid, err := strconv.ParseUint(u.Uid, 10, 32)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	gid, err := strconv.ParseUint(u.Gid, 10, 32)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	uidMappings := []specs.LinuxIDMapping{
-		{
-			ContainerID: 0,
-			HostID:      uint32(uid),
-			Size:        1,
-		},
-	}
-
-	gidMappings := []specs.LinuxIDMapping{
-		{
-			ContainerID: 0,
-			HostID:      uint32(gid),
-			Size:        1,
-		},
-	}
-
-	return uidMappings, gidMappings, nil
-}
-
-func createContainer(srcDir, pkgDir string, disableNetwork bool) (*libcontainer.Container, func(), error) {
+func createContainer(srcDir, pkgDir string, disableNetwork, isolatedProc bool) (*libcontainer.Container, func(), error) {
 	rootfsDir, containerDir, err := createTempDirs()
 	if err != nil {
 		return nil, nil, err
@@ -103,7 +85,7 @@ func createContainer(srcDir, pkgDir string, disableNetwork bool) (*libcontainer.
 		os.RemoveAll(containerDir)
 	}
 
-	spec, err := buildContainerSpec(rootfsDir, srcDir, pkgDir, disableNetwork)
+	spec, err := buildContainerSpec(rootfsDir, srcDir, pkgDir, disableNetwork, isolatedProc)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -145,7 +127,7 @@ func createTempDirs() (string, string, error) {
 	return rootfsDir, containerDir, nil
 }
 
-func buildContainerSpec(rootfsDir, srcDir, pkgDir string, disableNetwork bool) (*specs.Spec, error) {
+func buildContainerSpec(rootfsDir, srcDir, pkgDir string, disableNetwork, isolatedProc bool) (*specs.Spec, error) {
 	uidMappings, gidMappings, err := generateMappings()
 	if err != nil {
 		return nil, err
@@ -162,7 +144,7 @@ func buildContainerSpec(rootfsDir, srcDir, pkgDir string, disableNetwork bool) (
 			Path:     rootfsDir,
 			Readonly: false,
 		},
-		Mounts: buildMounts(homeDir, srcDir, pkgDir),
+		Mounts: buildMounts(homeDir, srcDir, pkgDir, isolatedProc),
 		Linux: &specs.Linux{
 			UIDMappings: uidMappings,
 			GIDMappings: gidMappings,
@@ -174,9 +156,8 @@ func buildContainerSpec(rootfsDir, srcDir, pkgDir string, disableNetwork bool) (
 	return spec, nil
 }
 
-func buildMounts(homeDir, srcDir, pkgDir string) []specs.Mount {
+func buildMounts(homeDir, srcDir, pkgDir string, isolatedProc bool) []specs.Mount {
 	mounts := []specs.Mount{
-		{Destination: "/proc", Type: "proc", Source: "proc"},
 		{
 			Destination: "/dev",
 			Type:        "tmpfs",
@@ -185,11 +166,49 @@ func buildMounts(homeDir, srcDir, pkgDir string) []specs.Mount {
 		},
 	}
 
+	if isolatedProc {
+		mounts = append(mounts, []specs.Mount{
+			{
+				Destination: "/proc",
+				Type:        "proc",
+				Source:      "proc",
+			},
+		}...)
+		slog.Debug("mounting /proc with proc filesystem")
+	} else {
+		// fallback
+		mounts = append(mounts, []specs.Mount{
+			{
+				Destination: "/proc",
+				Type:        "bind",
+				Source:      "/proc",
+				Options:     []string{"rbind", "ro"},
+			},
+		}...)
+		slog.Debug("mounting /proc with bind mount")
+	}
+
 	mounts = append(mounts, buildSystemMounts()...)
 	mounts = append(mounts, buildTmpfsMounts(homeDir)...)
 	mounts = append(mounts, buildWorkspaceMounts(srcDir, pkgDir)...)
 
 	return mounts
+}
+
+func isMountError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errStr := strings.ToLower(err.Error())
+
+	if strings.Contains(errStr, "operation not permitted") ||
+		strings.Contains(errStr, "permission denied") ||
+		strings.Contains(errStr, "mount") && strings.Contains(errStr, "proc") {
+		return true
+	}
+
+	return false
 }
 
 func buildSystemMounts() []specs.Mount {
@@ -459,4 +478,39 @@ func execEnv(env expand.Environ) []string {
 		return true
 	})
 	return list
+}
+
+func generateMappings() ([]specs.LinuxIDMapping, []specs.LinuxIDMapping, error) {
+	u, err := user.Current()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	uid, err := strconv.ParseUint(u.Uid, 10, 32)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	gid, err := strconv.ParseUint(u.Gid, 10, 32)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	uidMappings := []specs.LinuxIDMapping{
+		{
+			ContainerID: 0,
+			HostID:      uint32(uid),
+			Size:        1,
+		},
+	}
+
+	gidMappings := []specs.LinuxIDMapping{
+		{
+			ContainerID: 0,
+			HostID:      uint32(gid),
+			Size:        1,
+		},
+	}
+
+	return uidMappings, gidMappings, nil
 }
