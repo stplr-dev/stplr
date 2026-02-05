@@ -28,7 +28,7 @@ on:
 
 jobs:
   changelog:
-    runs-on: ubuntu-latest
+    runs-on: als-huge
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4

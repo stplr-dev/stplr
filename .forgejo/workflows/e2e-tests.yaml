@@ -31,7 +31,7 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    runs-on: als-huge
 
     container:
       image: altlinux.space/actions/runner/containers:sisyphus
