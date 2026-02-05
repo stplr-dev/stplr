@@ -253,6 +253,8 @@ github.com/goreleaser/nfpm/v2 v2.44.1 h1:g+QNjkEx+C2Zu8dB48t9da/VfV0CWS5TMjxT8HG
 github.com/goreleaser/nfpm/v2 v2.44.1/go.mod h1:drIYLqkla9SaOLbSnaFOmSIv5LXGfhHcbK54st97b4s=
 github.com/goreleaser/nfpm/v2 v2.44.2 h1:h1DLjxoxlA85qru1IsRrqbJw51DLJ64kAiWmlPQ3zaA=
 github.com/goreleaser/nfpm/v2 v2.44.2/go.mod h1:O0h9bB68D39NTnM9rSOJhVCYxQk7sU8i04q2bzczFdk=
+github.com/goreleaser/nfpm/v2 v2.45.0 h1:rTqqX/vqvln4x7B2HmPL57gh21iIMqyxzP8goI3Jv+Y=
+github.com/goreleaser/nfpm/v2 v2.45.0/go.mod h1:O0h9bB68D39NTnM9rSOJhVCYxQk7sU8i04q2bzczFdk=
 github.com/hashicorp/go-hclog v1.6.3 h1:Qr2kF+eVWjTiYmU7Y31tYlP1h0q/X3Nl3tPGdaB11/k=
 github.com/hashicorp/go-hclog v1.6.3/go.mod h1:W4Qnvbt70Wk/zYJryRzDRU/4r0kIg0PVHBcfoyhpF5M=
 github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=

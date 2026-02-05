@@ -30,7 +30,7 @@ require (
 	github.com/gofrs/flock v0.13.0
 	github.com/google/cel-go v0.27.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
-	github.com/goreleaser/nfpm/v2 v2.44.2
+	github.com/goreleaser/nfpm/v2 v2.45.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.7.0
 	github.com/jeandeaual/go-locale v0.0.0-20250612000132-0ef82f21eade
