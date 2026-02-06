@@ -32,12 +32,14 @@ import (
 	"hash"
 	"io"
 	"mime"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/mholt/archiver/v4"
 	"golift.io/xtractr"
@@ -81,6 +83,8 @@ func (fd FileDownloader) parseURLAndParams(opts Options) (*url.URL, string, stri
 	return u, name, archive, nil
 }
 
+var commonTimeoutDuration = 30 * time.Second
+
 // getSource retrieves the source reader, size, and filename based on whether the URL is local or remote.
 func (fd FileDownloader) getSource(ctx context.Context, u *url.URL, opts Options, name string) (io.ReadCloser, int64, string, error) {
 	if IsLocalUrl(u) {
@@ -100,11 +104,24 @@ func (fd FileDownloader) getSource(ctx context.Context, u *url.URL, opts Options
 		}
 		return localFl, size, name, nil
 	} else {
+		client := &http.Client{
+			Transport: &http.Transport{
+				DialContext: (&net.Dialer{
+					Timeout:   commonTimeoutDuration,
+					KeepAlive: commonTimeoutDuration,
+				}).DialContext,
+				TLSHandshakeTimeout:   10 * time.Second,
+				ResponseHeaderTimeout: commonTimeoutDuration,
+				ExpectContinueTimeout: 1 * time.Second,
+				IdleConnTimeout:       3 * commonTimeoutDuration,
+			},
+		}
+
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
 		if err != nil {
 			return nil, 0, "", fmt.Errorf("failed to create request: %w", err)
 		}
-		res, err := http.DefaultClient.Do(req)
+		res, err := client.Do(req)
 		if err != nil {
 			return nil, 0, "", err
 		}
