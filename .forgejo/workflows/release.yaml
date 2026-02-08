@@ -28,7 +28,7 @@ on:
 
 jobs:
   changelog:
-    runs-on: als-huge
+    runs-on: als-huge-gh
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
