@@ -38,13 +38,14 @@ import (
 	"mvdan.cc/sh/v3/interp"
 
 	"go.stplr.dev/stplr/internal/constants"
+	"go.stplr.dev/stplr/pkg/types"
 
 	_ "github.com/opencontainers/cgroups/devices"
 	"github.com/opencontainers/cgroups/devices/config"
 )
 
-func SandboxHandler(killTimeout time.Duration, srcDir, pkgDir string, disableNetwork bool) (interp.ExecHandlerFunc, func(), error) {
-	container, cleanup, err := createContainer(srcDir, pkgDir, disableNetwork, true)
+func SandboxHandler(killTimeout time.Duration, dirs types.Directories, disableNetwork bool) (interp.ExecHandlerFunc, func(), error) {
+	container, cleanup, err := createContainer(dirs, disableNetwork, true)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -55,7 +56,7 @@ func SandboxHandler(killTimeout time.Duration, srcDir, pkgDir string, disableNet
 
 		slog.Debug("cannot create isolated /proc, retrying bind mount")
 
-		container, cleanup, err = createContainer(srcDir, pkgDir, disableNetwork, false)
+		container, cleanup, err = createContainer(dirs, disableNetwork, false)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -74,7 +75,7 @@ func SandboxHandler(killTimeout time.Duration, srcDir, pkgDir string, disableNet
 	return handler, cleanup, nil
 }
 
-func createContainer(srcDir, pkgDir string, disableNetwork, isolatedProc bool) (*libcontainer.Container, func(), error) {
+func createContainer(dirs types.Directories, disableNetwork, isolatedProc bool) (*libcontainer.Container, func(), error) {
 	rootfsDir, containerDir, err := createTempDirs()
 	if err != nil {
 		return nil, nil, err
@@ -85,7 +86,7 @@ func createContainer(srcDir, pkgDir string, disableNetwork, isolatedProc bool) (
 		os.RemoveAll(containerDir)
 	}
 
-	spec, err := buildContainerSpec(rootfsDir, srcDir, pkgDir, disableNetwork, isolatedProc)
+	spec, err := buildContainerSpec(rootfsDir, dirs, disableNetwork, isolatedProc)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -127,7 +128,7 @@ func createTempDirs() (string, string, error) {
 	return rootfsDir, containerDir, nil
 }
 
-func buildContainerSpec(rootfsDir, srcDir, pkgDir string, disableNetwork, isolatedProc bool) (*specs.Spec, error) {
+func buildContainerSpec(rootfsDir string, dirs types.Directories, disableNetwork, isolatedProc bool) (*specs.Spec, error) {
 	uidMappings, gidMappings, err := generateMappings()
 	if err != nil {
 		return nil, err
@@ -144,7 +145,7 @@ func buildContainerSpec(rootfsDir, srcDir, pkgDir string, disableNetwork, isolat
 			Path:     rootfsDir,
 			Readonly: false,
 		},
-		Mounts: buildMounts(homeDir, srcDir, pkgDir, isolatedProc),
+		Mounts: buildMounts(homeDir, dirs, isolatedProc),
 		Linux: &specs.Linux{
 			UIDMappings: uidMappings,
 			GIDMappings: gidMappings,
@@ -156,7 +157,7 @@ func buildContainerSpec(rootfsDir, srcDir, pkgDir string, disableNetwork, isolat
 	return spec, nil
 }
 
-func buildMounts(homeDir, srcDir, pkgDir string, isolatedProc bool) []specs.Mount {
+func buildMounts(realHomeDir string, dirs types.Directories, isolatedProc bool) []specs.Mount {
 	mounts := []specs.Mount{
 		{
 			Destination: "/dev",
@@ -189,8 +190,8 @@ func buildMounts(homeDir, srcDir, pkgDir string, isolatedProc bool) []specs.Moun
 	}
 
 	mounts = append(mounts, buildSystemMounts()...)
-	mounts = append(mounts, buildTmpfsMounts(homeDir)...)
-	mounts = append(mounts, buildWorkspaceMounts(srcDir, pkgDir)...)
+	mounts = append(mounts, buildTmpfsMounts(realHomeDir)...)
+	mounts = append(mounts, buildWorkspaceMounts(dirs)...)
 
 	return mounts
 }
@@ -256,7 +257,7 @@ func buildTmpfsMounts(homeDir string) []specs.Mount {
 	return mounts
 }
 
-func buildWorkspaceMounts(srcDir, pkgDir string) []specs.Mount {
+func buildWorkspaceMounts(dirs types.Directories) []specs.Mount {
 	execPath, err := os.Executable()
 	if err != nil {
 		return nil
@@ -271,7 +272,7 @@ func buildWorkspaceMounts(srcDir, pkgDir string) []specs.Mount {
 		},
 	}
 
-	for _, path := range []string{srcDir, pkgDir} {
+	for _, path := range []string{dirs.SrcDir, dirs.PkgDir, dirs.HomeDir} {
 		mounts = append(mounts, specs.Mount{
 			Destination: path,
 			Type:        "bind",

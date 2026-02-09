@@ -25,6 +25,8 @@ import (
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"go.stplr.dev/stplr/pkg/types"
 )
 
 func TestBuildMounts(t *testing.T) {
@@ -59,7 +61,7 @@ func TestBuildMounts(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mounts := buildMounts(tt.homeDir, tt.srcDir, tt.pkgDir, tt.isolatedProc)
+			mounts := buildMounts(tt.homeDir, types.Directories{SrcDir: tt.srcDir, PkgDir: tt.pkgDir}, tt.isolatedProc)
 
 			require.NotEmpty(t, mounts, "buildMounts should return non-empty slice")
 
@@ -149,14 +151,16 @@ func TestIsMountError(t *testing.T) {
 }
 
 func TestBuildMountsStructure(t *testing.T) {
-	homeDir := "/home/testuser"
+	realHomeDir := "/home/testuser"
 	srcDir := "/tmp/test-src"
 	pkgDir := "/tmp/test-pkg"
+	homeDir := "/tmp/test-home"
+	dirs := types.Directories{SrcDir: srcDir, PkgDir: pkgDir, HomeDir: homeDir}
 
 	t.Run("check essential mounts present", func(t *testing.T) {
-		mounts := buildMounts(homeDir, srcDir, pkgDir, true)
+		mounts := buildMounts(realHomeDir, dirs, true)
 
-		essentialMounts := []string{"/proc", "/dev", homeDir, srcDir, pkgDir}
+		essentialMounts := []string{"/proc", "/dev", realHomeDir, srcDir, pkgDir, homeDir}
 
 		for _, essential := range essentialMounts {
 			assert.NotNil(t, findMount(mounts, essential),
@@ -165,7 +169,7 @@ func TestBuildMountsStructure(t *testing.T) {
 	})
 
 	t.Run("isolated proc has no options", func(t *testing.T) {
-		mounts := buildMounts(homeDir, srcDir, pkgDir, true)
+		mounts := buildMounts(realHomeDir, dirs, true)
 
 		procMount := findMount(mounts, "/proc")
 		require.NotNil(t, procMount)
@@ -177,7 +181,7 @@ func TestBuildMountsStructure(t *testing.T) {
 	})
 
 	t.Run("bind proc is readonly", func(t *testing.T) {
-		mounts := buildMounts(homeDir, srcDir, pkgDir, false)
+		mounts := buildMounts(realHomeDir, dirs, false)
 
 		procMount := findMount(mounts, "/proc")
 		require.NotNil(t, procMount)
@@ -189,7 +193,7 @@ func TestBuildMountsStructure(t *testing.T) {
 	})
 
 	t.Run("dev mount has correct options", func(t *testing.T) {
-		mounts := buildMounts(homeDir, srcDir, pkgDir, true)
+		mounts := buildMounts(realHomeDir, dirs, true)
 
 		devMount := findMount(mounts, "/dev")
 		require.NotNil(t, devMount)
@@ -203,20 +207,22 @@ func TestBuildMountsStructure(t *testing.T) {
 }
 
 func TestBuildMountsConsistency(t *testing.T) {
-	homeDir := "/home/testuser"
+	realHomeDir := "/home/testuser"
 	srcDir := "/tmp/test-src"
 	pkgDir := "/tmp/test-pkg"
+	homeDir := "/tmp/test-home"
+	dirs := types.Directories{SrcDir: srcDir, PkgDir: pkgDir, HomeDir: homeDir}
 
 	t.Run("isolated and bind produce same number of mounts", func(t *testing.T) {
-		isolatedMounts := buildMounts(homeDir, srcDir, pkgDir, true)
-		bindMounts := buildMounts(homeDir, srcDir, pkgDir, false)
+		isolatedMounts := buildMounts(realHomeDir, dirs, true)
+		bindMounts := buildMounts(realHomeDir, dirs, false)
 
 		assert.Equal(t, len(isolatedMounts), len(bindMounts),
 			"both mount modes should produce same number of mounts")
 	})
 
 	t.Run("all mounts have destination", func(t *testing.T) {
-		mounts := buildMounts(homeDir, srcDir, pkgDir, true)
+		mounts := buildMounts(realHomeDir, dirs, true)
 
 		for i, mount := range mounts {
 			assert.NotEmpty(t, mount.Destination,
@@ -225,7 +231,7 @@ func TestBuildMountsConsistency(t *testing.T) {
 	})
 
 	t.Run("no duplicate destinations", func(t *testing.T) {
-		mounts := buildMounts(homeDir, srcDir, pkgDir, true)
+		mounts := buildMounts(realHomeDir, dirs, true)
 
 		destinations := make(map[string]bool)
 		for _, mount := range mounts {

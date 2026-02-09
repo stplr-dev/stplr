@@ -119,7 +119,7 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 
 	options := []handlers.Option{
 		handlers.WithFilter(
-			handlers.RestrictSandbox(dirs.SrcDir, dirs.PkgDir),
+			handlers.RestrictSandbox(dirs.SrcDir, dirs.PkgDir, dirs.HomeDir),
 		),
 	}
 
@@ -129,8 +129,7 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 
 	fakeroot, cleanup, err := handlers.SandboxHandler(
 		2*time.Second,
-		dirs.SrcDir,
-		dirs.PkgDir,
+		dirs,
 		disableNet,
 	)
 	if err != nil {

@@ -40,6 +40,7 @@ func GetDirs(
 		BaseDir:   GetBaseDir(cfg, basePkg),
 		SrcDir:    GetSrcDir(cfg, basePkg),
 		PkgDir:    filepath.Join(baseDir, "pkg"),
+		HomeDir:   filepath.Join(baseDir, "home"),
 		ScriptDir: GetScriptDir(scriptPath),
 	}, nil
 }

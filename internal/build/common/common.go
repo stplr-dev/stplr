@@ -52,5 +52,9 @@ func CreateBuildEnvVars(info *distro.OSRelease, dirs types.Directories) []string
 		env = append(env, "srcdir="+dirs.SrcDir)
 	}
 
+	if dirs.HomeDir != "" {
+		env = append(env, "HOME="+dirs.HomeDir)
+	}
+
 	return env
 }

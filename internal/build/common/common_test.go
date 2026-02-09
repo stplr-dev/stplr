@@ -48,8 +48,9 @@ func TestCreateBuildEnvVars(t *testing.T) {
 				Like:       []string{"debian"},
 			},
 			dirs: types.Directories{
-				PkgDir: "/build/pkg",
-				SrcDir: "/build/src",
+				PkgDir:  "/build/pkg",
+				SrcDir:  "/build/src",
+				HomeDir: "/build/home",
 			},
 			expectedEnv: map[string]string{
 				"DISTRO_NAME":        "Ubuntu",
@@ -61,6 +62,7 @@ func TestCreateBuildEnvVars(t *testing.T) {
 				"srcdir":             "/build/src",
 				"ARCH":               "amd64",
 				"NCPU":               strconv.Itoa(runtime.NumCPU()),
+				"HOME":               "/build/home",
 			},
 		},
 		{

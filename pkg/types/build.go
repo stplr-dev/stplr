@@ -46,5 +46,6 @@ type Directories struct {
 	BaseDir   string
 	SrcDir    string
 	PkgDir    string
+	HomeDir   string
 	ScriptDir string
 }

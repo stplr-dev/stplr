@@ -47,17 +47,20 @@ import (
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-// // Функция prepareDirs подготавливает директории для сборки.
 func prepareDirs(dirs types.Directories) error {
-	err := os.RemoveAll(dirs.BaseDir) // Удаляем базовую директорию, если она существует
+	err := os.RemoveAll(dirs.BaseDir)
 	if err != nil {
 		return err
 	}
-	err = os.MkdirAll(dirs.SrcDir, 0o755) // Создаем директорию для источников
+	err = os.MkdirAll(dirs.SrcDir, 0o755)
 	if err != nil {
 		return err
 	}
-	return os.MkdirAll(dirs.PkgDir, 0o755) // Создаем директорию для пакетов
+	err = os.MkdirAll(dirs.PkgDir, 0o755)
+	if err != nil {
+		return err
+	}
+	return os.MkdirAll(dirs.HomeDir, 0o755)
 }
 
 func isDirEmpty(path string) bool {
