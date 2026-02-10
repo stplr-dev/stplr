@@ -137,7 +137,8 @@ mocks: \
 	internal/build/utils.go \
 	internal/usecase/support/archive.go \
 	internal/usecase/repo/list/list.go \
-	internal/usecase/config/get/get.go
+	internal/usecase/config/get/get.go \
+	internal/service/updater/updater.go
 	@echo "Generating mocks..."
 	@for file in $^; do \
 		mockgen -source=$$file -destination=$$(dirname $$file)/mock_$$(basename $$file .go)_test.go -package=$$(basename $$(dirname $$file)); \

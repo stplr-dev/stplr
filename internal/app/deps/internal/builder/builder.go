@@ -325,7 +325,7 @@ func (b *builder) Updater() *builder {
 		return b
 	}
 
-	b.deps.Updater = updater.New(b.deps.Manager, b.deps.Info, b.deps.Searcher)
+	b.deps.Updater = updater.New(b.deps.Cfg, b.deps.Manager, b.deps.Info, b.deps.Searcher)
 
 	return b
 }

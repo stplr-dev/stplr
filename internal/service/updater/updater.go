@@ -21,7 +21,10 @@ package updater
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"slices"
 
+	"github.com/gobwas/glob"
 	"golang.org/x/exp/maps"
 
 	"go.elara.ws/vercmp"
@@ -38,8 +41,18 @@ type Searcher interface {
 	Search(ctx context.Context, opts *search.SearchOptions) ([]staplerfile.Package, error)
 }
 
+type Manager interface {
+	ListInstalled(*manager.Opts) (map[string]string, error)
+}
+
+type IgnoreUpdatesProvider interface {
+	// returns glob with repo/pkg pattern
+	IgnorePkgUpdates() []string
+}
+
 type Updater struct {
-	mgr      manager.Manager
+	cfg      IgnoreUpdatesProvider
+	mgr      Manager
 	info     *distro.OSRelease
 	searcher Searcher
 }
@@ -51,8 +64,8 @@ type UpdateInfo struct {
 	ToVersion   string
 }
 
-func New(mgr manager.Manager, info *distro.OSRelease, searcher Searcher) *Updater {
-	return &Updater{mgr, info, searcher}
+func New(cfg IgnoreUpdatesProvider, mgr Manager, info *distro.OSRelease, searcher Searcher) *Updater {
+	return &Updater{cfg, mgr, info, searcher}
 }
 
 func (u *Updater) CheckForUpdates(
@@ -64,45 +77,103 @@ func (u *Updater) CheckForUpdates(
 	}
 
 	pkgNames := maps.Keys(installed)
+	slices.Sort(pkgNames)
 
 	var out []UpdateInfo
+
 	for _, pkgName := range pkgNames {
-		matches := build.RegexpALRPackageName.FindStringSubmatch(pkgName)
-		if matches != nil {
-			packageName := matches[build.RegexpALRPackageName.SubexpIndex("package")]
-			repoName := matches[build.RegexpALRPackageName.SubexpIndex("repo")]
-
-			pkgs, err := u.searcher.Search(
-				ctx,
-				search.NewSearchOptions().
-					WithName(packageName).
-					WithRepository(repoName).
-					Build(),
-			)
-			if err != nil {
-				return nil, err
-			}
-
-			if len(pkgs) == 0 {
-				continue
-			}
-
-			pkg := pkgs[0]
-
-			version := u.getRepoVer(&pkg)
-			c := vercmp.Compare(version, installed[pkgName])
-			if c == 1 {
-				out = append(out, UpdateInfo{
-					Package:     &pkg,
-					FromVersion: installed[pkgName],
-					ToVersion:   version,
-				})
-			}
+		updateInfo, err := u.checkPackageUpdate(ctx, pkgName, installed)
+		if err != nil {
+			return nil, err
 		}
-
+		if updateInfo != nil {
+			out = append(out, *updateInfo)
+		}
 	}
 
 	return out, nil
+}
+
+func (u *Updater) checkPackageUpdate(
+	ctx context.Context,
+	pkgName string,
+	installed map[string]string,
+) (*UpdateInfo, error) {
+	matches := build.RegexpALRPackageName.FindStringSubmatch(pkgName)
+	if matches == nil {
+		return nil, nil
+	}
+
+	packageName := matches[build.RegexpALRPackageName.SubexpIndex("package")]
+	repoName := matches[build.RegexpALRPackageName.SubexpIndex("repo")]
+
+	pkg, err := u.findPackage(ctx, packageName, repoName)
+	if err != nil {
+		return nil, err
+	}
+	if pkg == nil {
+		return nil, nil
+	}
+
+	if u.shouldIgnorePackage(pkg) {
+		return nil, nil
+	}
+
+	return u.buildUpdateInfo(pkg, installed[pkgName])
+}
+
+func (u *Updater) findPackage(
+	ctx context.Context,
+	packageName string,
+	repoName string,
+) (*staplerfile.Package, error) {
+	pkgs, err := u.searcher.Search(
+		ctx,
+		search.NewSearchOptions().
+			WithName(packageName).
+			WithRepository(repoName).
+			Build(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(pkgs) == 0 {
+		return nil, nil
+	}
+
+	return &pkgs[0], nil
+}
+
+func (u *Updater) shouldIgnorePackage(pkg *staplerfile.Package) bool {
+	fullName := pkg.FormatFullName()
+
+	for _, pattern := range u.cfg.IgnorePkgUpdates() {
+		matched, err := patternMatch(fullName, pattern)
+		if err != nil {
+			slog.Debug("failed to match pattern", "err", err)
+			continue
+		}
+		if matched {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (u *Updater) buildUpdateInfo(pkg *staplerfile.Package, installedVersion string) (*UpdateInfo, error) {
+	version := u.getRepoVer(pkg)
+
+	if vercmp.Compare(version, installedVersion) != 1 {
+		return nil, nil
+	}
+
+	return &UpdateInfo{
+		Package:     pkg,
+		FromVersion: installedVersion,
+		ToVersion:   version,
+	}, nil
 }
 
 func (u *Updater) getRepoVer(pkg *staplerfile.Package) string {
@@ -116,4 +187,12 @@ func (u *Updater) getRepoVer(pkg *staplerfile.Package) string {
 	}
 
 	return repoVer
+}
+
+func patternMatch(fullName, pattern string) (bool, error) {
+	g, err := glob.Compile(pattern)
+	if err != nil {
+		return false, err
+	}
+	return g.Match(fullName), nil
 }
