@@ -23,10 +23,11 @@
 package dl
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"math"
-	"os"
+	"sync/atomic"
 	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
@@ -163,9 +164,16 @@ type ProgressWriter struct {
 	onProgress   func(progressUpdate)
 	lastReported time.Time
 	doneChan     chan struct{}
+
+	ctx       context.Context
+	cancelled atomic.Bool
 }
 
 func (pw *ProgressWriter) Write(p []byte) (int, error) {
+	if err := pw.ctx.Err(); err != nil {
+		return 0, err
+	}
+
 	n, err := pw.baseWriter.Write(p)
 	if err != nil {
 		return n, err
@@ -197,16 +205,19 @@ func (pw *ProgressWriter) Write(p []byte) (int, error) {
 }
 
 func (pw *ProgressWriter) Close() error {
-	pw.onProgress(progressUpdate{
-		percent:    1,
-		speed:      0,
-		downloaded: pw.downloaded,
-	})
-	<-pw.doneChan
-	return nil
+	if pw.ctx.Err() == nil && !pw.cancelled.Load() {
+		pw.onProgress(progressUpdate{
+			percent:    1,
+			speed:      0,
+			downloaded: pw.downloaded,
+			total:      pw.total,
+		})
+	}
+
+	return pw.baseWriter.Close()
 }
 
-func NewProgressWriter(base io.WriteCloser, max int64, filename string, out io.Writer) *ProgressWriter {
+func NewProgressWriter(ctx context.Context, base io.WriteCloser, max int64, filename string, out io.Writer) *ProgressWriter {
 	var m *model
 	if max == -1 {
 		m = &model{
@@ -229,6 +240,7 @@ func NewProgressWriter(base io.WriteCloser, max int64, filename string, out io.W
 	p := tea.NewProgram(m,
 		tea.WithInput(nil),
 		tea.WithOutput(out),
+		tea.WithContext(ctx),
 	)
 
 	pw := &ProgressWriter{
@@ -239,13 +251,13 @@ func NewProgressWriter(base io.WriteCloser, max int64, filename string, out io.W
 		onProgress: func(update progressUpdate) {
 			p.Send(update)
 		},
+		ctx: ctx,
 	}
 
 	go func() {
 		defer close(pw.doneChan)
 		if _, err := p.Run(); err != nil {
-			fmt.Fprintf(os.Stderr, "Error running progress writer: %v\n", err)
-			os.Exit(1)
+			pw.Close()
 		}
 	}()
 

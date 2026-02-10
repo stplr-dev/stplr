@@ -26,6 +26,7 @@ import (
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/build"
+	"go.stplr.dev/stplr/internal/cliprompts"
 	"go.stplr.dev/stplr/internal/db"
 	"go.stplr.dev/stplr/internal/manager"
 	"go.stplr.dev/stplr/internal/service/repos"
@@ -83,33 +84,104 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error checking for updates"))
 	}
 
-	if len(updates) > 0 {
-		err = u.builder.InstallALRPackages(
-			ctx,
-			&build.BuildArgs{
-				Opts: &types.BuildOpts{
-					Clean:       opts.Clean,
-					Interactive: opts.Interactive,
-				},
-				Info:       u.info,
-				PkgFormat_: build.GetPkgFormat(u.mgr),
-			},
-			mapUptatesInfoToPackages(updates),
-		)
-		if err != nil {
-			return errors.WrapIntoI18nError(err, gotext.Get("Error checking for updates"))
-		}
-	} else {
+	if len(updates) == 0 {
 		u.out.Info(gotext.Get("There is nothing to do."))
+		return nil
+	}
+
+	var (
+		succeeded []string
+		failed    []struct {
+			pkg string
+			err error
+		}
+	)
+
+	for i, update := range updates {
+		pkgName := update.Package.Name
+		u.out.Info(gotext.Get("Upgrading %d/%d: %s", i+1, len(updates), pkgName))
+
+		if ctx.Err() != nil {
+			u.out.Warn(gotext.Get("Stopping upgrade process"))
+			break
+		}
+
+		pkgCtx, cancel := context.WithCancel(ctx)
+
+		errChan := make(chan error, 1)
+
+		go func() {
+			errChan <- u.builder.InstallALRPackages(
+				pkgCtx,
+				&build.BuildArgs{
+					Opts: &types.BuildOpts{
+						Clean:       opts.Clean,
+						Interactive: opts.Interactive,
+					},
+					Info:       u.info,
+					PkgFormat_: build.GetPkgFormat(u.mgr),
+				},
+				[]staplerfile.Package{*update.Package},
+			)
+		}()
+
+		select {
+		case err := <-errChan:
+			cancel()
+
+			if err != nil {
+				u.out.Warn(gotext.Get("Failed to upgrade %s: %v", pkgName, err))
+				failed = append(failed, struct {
+					pkg string
+					err error
+				}{pkgName, err})
+
+				if i+1 != len(updates) {
+					stopAll, _ := cliprompts.YesNoPrompt(context.Background(), gotext.Get("Do you want to stop the entire upgrade process?"), opts.Interactive, false)
+					if stopAll {
+						u.out.Info(gotext.Get("Stopping upgrade process"))
+						break
+					}
+					u.out.Info(gotext.Get("Continuing with next package"))
+				}
+			} else {
+				u.out.Info(gotext.Get("Successfully upgraded %s", pkgName))
+				succeeded = append(succeeded, pkgName)
+			}
+
+		case <-ctx.Done():
+			cancel()
+			u.out.Warn(gotext.Get("Upgrade process interrupted"))
+			<-errChan
+			break
+		}
+	}
+
+	u.printSummary(succeeded, failed)
+
+	if len(failed) > 0 {
+		return errors.NewI18nError(gotext.Get("Some packages failed to upgrade"))
 	}
 
 	return nil
 }
 
-func mapUptatesInfoToPackages(updates []updater.UpdateInfo) []staplerfile.Package {
-	var pkgs []staplerfile.Package
-	for _, info := range updates {
-		pkgs = append(pkgs, *info.Package)
+func (u *useCase) printSummary(succeeded []string, failed []struct {
+	pkg string
+	err error
+},
+) {
+	if len(succeeded) > 0 {
+		u.out.Info(gotext.Get("Successfully upgraded: %d package(s)", len(succeeded)))
+		for _, pkg := range succeeded {
+			u.out.Info("  - %s", pkg)
+		}
 	}
-	return pkgs
+
+	if len(failed) > 0 {
+		u.out.Warn(gotext.Get("Failed to upgrade: %d package(s)", len(failed)))
+		for _, f := range failed {
+			u.out.Warn("  - %s: %v", f.pkg, f.err)
+		}
+	}
 }

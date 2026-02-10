@@ -773,13 +773,53 @@ msgid ""
 "Support archive %s has been created. You can send it to whoever needs it."
 msgstr ""
 
-#: internal/usecase/upgrade/upgrade.go:83
-#: internal/usecase/upgrade/upgrade.go:100
+#: internal/usecase/upgrade/upgrade.go:84
 msgid "Error checking for updates"
 msgstr ""
 
-#: internal/usecase/upgrade/upgrade.go:103
+#: internal/usecase/upgrade/upgrade.go:88
 msgid "There is nothing to do."
+msgstr ""
+
+#: internal/usecase/upgrade/upgrade.go:102
+msgid "Upgrading %d/%d: %s"
+msgstr ""
+
+#: internal/usecase/upgrade/upgrade.go:105
+#: internal/usecase/upgrade/upgrade.go:142
+msgid "Stopping upgrade process"
+msgstr ""
+
+#: internal/usecase/upgrade/upgrade.go:133
+msgid "Failed to upgrade %s: %v"
+msgstr ""
+
+#: internal/usecase/upgrade/upgrade.go:140
+msgid "Do you want to stop the entire upgrade process?"
+msgstr ""
+
+#: internal/usecase/upgrade/upgrade.go:145
+msgid "Continuing with next package"
+msgstr ""
+
+#: internal/usecase/upgrade/upgrade.go:148
+msgid "Successfully upgraded %s"
+msgstr ""
+
+#: internal/usecase/upgrade/upgrade.go:154
+msgid "Upgrade process interrupted"
+msgstr ""
+
+#: internal/usecase/upgrade/upgrade.go:163
+msgid "Some packages failed to upgrade"
+msgstr ""
+
+#: internal/usecase/upgrade/upgrade.go:175
+msgid "Successfully upgraded: %d package(s)"
+msgstr ""
+
+#: internal/usecase/upgrade/upgrade.go:182
+msgid "Failed to upgrade: %d package(s)"
 msgstr ""
 
 #: pkg/dl/dl.go:240
@@ -798,11 +838,11 @@ msgstr ""
 msgid "Source %q found in cache and linked to destination"
 msgstr ""
 
-#: pkg/dl/progress_tui.go:106
+#: pkg/dl/progress_tui.go:107
 msgid "%s: done!\n"
 msgstr ""
 
-#: pkg/dl/progress_tui.go:110
+#: pkg/dl/progress_tui.go:111
 msgid "%s %s downloading at %s/s\n"
 msgstr ""
 

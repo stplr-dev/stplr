@@ -134,9 +134,9 @@ func (fd FileDownloader) getSource(ctx context.Context, u *url.URL, opts Options
 }
 
 // setupOutput configures the output writer, using a progress writer if applicable.
-func (fd FileDownloader) setupOutput(fl *os.File, opts Options, size int64, name string) io.WriteCloser {
+func (fd FileDownloader) setupOutput(ctx context.Context, fl *os.File, opts Options, size int64, name string) io.WriteCloser {
 	if opts.Progress != nil {
-		return NewProgressWriter(fl, size, name, opts.Progress)
+		return NewProgressWriter(ctx, fl, size, name, opts.Progress)
 	}
 	return fl
 }
@@ -204,7 +204,7 @@ func (fd FileDownloader) Download(ctx context.Context, opts Options) (Type, stri
 		return 0, "", err
 	}
 
-	out := fd.setupOutput(fl, opts, size, name)
+	out := fd.setupOutput(ctx, fl, opts, size, name)
 	defer out.Close()
 
 	var h hash.Hash

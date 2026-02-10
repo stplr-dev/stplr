@@ -804,14 +804,59 @@ msgid ""
 msgstr ""
 "Диагностический архив %s создан. Вы можете отправить его тем, кому он нужен."
 
-#: internal/usecase/upgrade/upgrade.go:83
-#: internal/usecase/upgrade/upgrade.go:100
+#: internal/usecase/upgrade/upgrade.go:84
 msgid "Error checking for updates"
 msgstr "Ошибка при проверке обновлений"
 
-#: internal/usecase/upgrade/upgrade.go:103
+#: internal/usecase/upgrade/upgrade.go:88
 msgid "There is nothing to do."
 msgstr "Здесь нечего делать."
+
+#: internal/usecase/upgrade/upgrade.go:102
+msgid "Upgrading %d/%d: %s"
+msgstr ""
+
+#: internal/usecase/upgrade/upgrade.go:105
+#: internal/usecase/upgrade/upgrade.go:142
+msgid "Stopping upgrade process"
+msgstr ""
+
+#: internal/usecase/upgrade/upgrade.go:133
+#, fuzzy
+msgid "Failed to upgrade %s: %v"
+msgstr "Не удалось извлечь из %s: %v"
+
+#: internal/usecase/upgrade/upgrade.go:140
+msgid "Do you want to stop the entire upgrade process?"
+msgstr ""
+
+#: internal/usecase/upgrade/upgrade.go:145
+#, fuzzy
+msgid "Continuing with next package"
+msgstr "Сборка пакета %q"
+
+#: internal/usecase/upgrade/upgrade.go:148
+#, fuzzy
+msgid "Successfully upgraded %s"
+msgstr "Успешно установлено %s = %s"
+
+#: internal/usecase/upgrade/upgrade.go:154
+msgid "Upgrade process interrupted"
+msgstr ""
+
+#: internal/usecase/upgrade/upgrade.go:163
+#, fuzzy
+msgid "Some packages failed to upgrade"
+msgstr "Нет пакетов к обновлению"
+
+#: internal/usecase/upgrade/upgrade.go:175
+#, fuzzy
+msgid "Successfully upgraded: %d package(s)"
+msgstr "Успешно установлено %s = %s"
+
+#: internal/usecase/upgrade/upgrade.go:182
+msgid "Failed to upgrade: %d package(s)"
+msgstr ""
 
 #: pkg/dl/dl.go:240
 msgid "Source %q can be updated using %s — updating if required"
@@ -833,11 +878,11 @@ msgstr "Источник %q был обновлён и связан с пунк�
 msgid "Source %q found in cache and linked to destination"
 msgstr "Источник %q найден в кэше и связан с пунктом назначения"
 
-#: pkg/dl/progress_tui.go:106
+#: pkg/dl/progress_tui.go:107
 msgid "%s: done!\n"
 msgstr "%s: выполнено!\n"
 
-#: pkg/dl/progress_tui.go:110
+#: pkg/dl/progress_tui.go:111
 msgid "%s %s downloading at %s/s\n"
 msgstr "%s %s загружается — %s/с\n"
 
