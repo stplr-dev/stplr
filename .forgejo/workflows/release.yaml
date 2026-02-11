@@ -50,16 +50,12 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
-      - name: Install git-chglog
-        run: go install github.com/git-chglog/git-chglog/cmd/git-chglog@v0.15.4
-
-      - name: Generate changelog
-        id: changes
-        run: |
-          git-chglog ${{ github.ref_name }} > CHANGELOG.md
-          echo "changes<<EOF" >> $GITHUB_OUTPUT
-          cat CHANGELOG.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+      - name: Generate a changelog
+        uses: https://github.com/orhun/git-cliff-action@v4
+        id: git-cliff
+        with:
+          config: cliff.toml
+          args: -vv --latest --strip header
 
       - name: Set version
         run: |
@@ -95,5 +91,5 @@ jobs:
           direction: upload
           release-dir: ./dist
           token: ${{ secrets.TOKEN }}
-          release-notes: ${{ steps.changes.outputs.changes }}
+          release-notes: ${{ steps.git-cliff.outputs.changelog }}
           prerelease: ${{ env.IS_PRERELEASE }}
