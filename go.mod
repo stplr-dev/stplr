@@ -58,7 +58,7 @@ require (
 	golang.org/x/crypto v0.47.0
 	golang.org/x/exp v0.0.0-20260209203927-2842357ff358
 	golang.org/x/sys v0.41.0
-	golang.org/x/text v0.33.0
+	golang.org/x/text v0.34.0
 	golift.io/xtractr v0.2.3-0.20260111181756-d6376a2e84ce
 	google.golang.org/genproto/googleapis/api v0.0.0-20260114163908-3f89685c29c3
 	modernc.org/sqlite v1.44.3
