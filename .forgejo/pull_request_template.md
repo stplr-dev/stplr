@@ -3,8 +3,6 @@ name: "Pull Request Template"
 about: "Template for all Pull Requests"
 ---
 
-## Description
-
 <!-- Briefly describe the purpose of this PR -->
 
 ## Checklist
