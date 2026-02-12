@@ -56,6 +56,9 @@ jobs:
         with:
           config: cliff.toml
           args: -vv --latest --strip header
+          # token used to get git-cliff release information 
+          # via the GitHub API to avoid rate limits
+          github_token: ${{ secrets.READ_ONLY_GITHUB_TOKEN }}
 
       - name: Set version
         run: |
