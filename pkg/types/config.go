@@ -41,11 +41,39 @@ type Config struct {
 	ForbidBuildCommand    bool `json:"forbidBuildCommand" koanf:"forbidBuildCommand"`
 }
 
-// Repo represents a ALR repo within a configuration file
+// Repo represents a Stapler repo within a configuration file
 type Repo struct {
 	Name      string   `json:"name" koanf:"name"`
 	URL       string   `json:"url" koanf:"url"`
 	Ref       string   `json:"ref" koanf:"ref"`
 	Mirrors   []string `json:"mirrors" koanf:"mirrors"`
 	ReportUrl string   `json:"report_url" koanf:"report_url"`
+
+	Title       string `json:"title" koanf:"title"`
+	Summary     string `json:"summary" koanf:"summary"`
+	Description string `json:"description" koanf:"description"`
+	Homepage    string `json:"homepage" koanf:"homepage"`
+	Icon        string `json:"icon" koanf:"icon"`
+}
+
+func (r *Repo) MergeFrom(other *Repo) {
+	updateIfNotEmpty := func(dst *string, src string) {
+		if src != "" {
+			*dst = src
+		}
+	}
+
+	updateIfNotEmpty(&r.Name, other.Name)
+	updateIfNotEmpty(&r.URL, other.URL)
+	updateIfNotEmpty(&r.Ref, other.Ref)
+	updateIfNotEmpty(&r.ReportUrl, other.ReportUrl)
+	updateIfNotEmpty(&r.Title, other.Title)
+	updateIfNotEmpty(&r.Summary, other.Summary)
+	updateIfNotEmpty(&r.Description, other.Description)
+	updateIfNotEmpty(&r.Homepage, other.Homepage)
+	updateIfNotEmpty(&r.Icon, other.Icon)
+
+	if len(other.Mirrors) > 0 {
+		r.Mirrors = other.Mirrors
+	}
 }

@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"text/template"
 
 	"github.com/leonelquinteros/gotext"
@@ -64,16 +65,34 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 	var err error
 	format := opts.Format
 	if format == "" {
-		format = fmt.Sprintf(`%s: {{.Name}}
+		format = fmt.Sprintf(`%s: {{.Name}}{{if .Title}}
+%s: {{.Title}}{{end}}{{if .Summary}}
+%s: {{.Summary}}{{end}}{{if .Description}}
+%s:
+{{.Description | indent}}{{end}}{{if .Homepage}}
+%s: {{.Homepage}}{{end}}{{if .Icon}}
+%s: {{.Icon}}{{end}}
 %s: {{.URL}}{{if .Ref}}
 %s: {{.Ref}}{{end}}{{if .Mirrors}}
 %s: {{range $i, $m := .Mirrors}}
   - {{$m}}{{end}}{{end}}{{if .ReportUrl}}
 %s: {{.ReportUrl}}{{end}}
 
-`, gotext.Get("Name"), gotext.Get("URL"), gotext.Get("Ref"), gotext.Get("Mirrors"), gotext.Get("Report"))
+`, gotext.Get("Name"), gotext.Get("Title"), gotext.Get("Summary"), gotext.Get("Description"),
+			gotext.Get("Homepage"), gotext.Get("Icon"), gotext.Get("URL"), gotext.Get("Ref"),
+			gotext.Get("Mirrors"), gotext.Get("Report"))
 	}
-	tmpl, err = template.New("format").Parse(format)
+	tmpl, err = template.New("format").Funcs(template.FuncMap{
+		"indent": func(s string) string {
+			lines := strings.Split(s, "\n")
+			for i, line := range lines {
+				if line != "" {
+					lines[i] = "  " + line
+				}
+			}
+			return strings.Join(lines, "\n")
+		},
+	}).Parse(format)
 	if err != nil {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error parsing format template"))
 	}

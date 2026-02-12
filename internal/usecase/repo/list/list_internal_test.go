@@ -102,12 +102,39 @@ func TestListUseCaseRun(t *testing.T) {
 		{
 			name: "Default format with additional fields",
 			repos: []types.Repo{
-				{Name: "repo1", URL: "http://repo1.com", Ref: "main", Mirrors: []string{"http://mirror1.com", "http://mirror2.com"}, ReportUrl: "http://report.com"},
+				{
+					Name:      "repo1",
+					URL:       "http://repo1.com",
+					Ref:       "main",
+					Mirrors:   []string{"http://mirror1.com", "http://mirror2.com"},
+					ReportUrl: "http://report.com",
+					Title:     "Repo1",
+					Summary:   "Short summary",
+					Description: `Long multiline
+description`,
+					Homepage: "http://repo1.com",
+					Icon:     "http://repo1.com/icon.svg",
+				},
 			},
-			format:         "",
-			json:           false,
-			expectedOutput: "Name: repo1\nURL: http://repo1.com\nRef: main\nMirrors: \n  - http://mirror1.com\n  - http://mirror2.com\nReport: http://report.com\n\n",
-			expectError:    false,
+			format: "",
+			json:   false,
+			expectedOutput: `Name: repo1
+Title: Repo1
+Summary: Short summary
+Description:
+  Long multiline
+  description
+Homepage: http://repo1.com
+Icon: http://repo1.com/icon.svg
+URL: http://repo1.com
+Ref: main
+Mirrors: 
+  - http://mirror1.com
+  - http://mirror2.com
+Report: http://report.com
+
+`,
+			expectError: false,
 		},
 	}
 

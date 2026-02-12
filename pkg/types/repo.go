@@ -24,7 +24,7 @@
 
 package types
 
-// RepoConfig represents a ALR repo's alr-repo.toml file.
+// RepoConfig represents a Stapler repo's stapler-repo.toml file.
 type RepoConfig struct {
 	Repo struct {
 		MinVersion string   `toml:"minVersion"`
@@ -32,5 +32,11 @@ type RepoConfig struct {
 		Ref        string   `toml:"ref"`
 		Mirrors    []string `toml:"mirrors"`
 		ReportUrl  string   `toml:"report_url"`
+
+		Title       string `toml:"title"`
+		Summary     string `toml:"summary"`
+		Description string `toml:"description"`
+		Homepage    string `toml:"homepage"`
+		Icon        string `toml:"icon"`
 	}
 }

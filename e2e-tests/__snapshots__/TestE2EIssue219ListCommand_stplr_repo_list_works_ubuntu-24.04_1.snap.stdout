@@ -1,4 +1,12 @@
 Name: alr-repo
+Title: Repo for tests
+Summary: Stapler repo for tests
+Description:
+  Long long description
+  Stapler repo for tests
+  Long long description
+Homepage: https://stplr.dev
+Icon: https://stplr.dev/img/logo.svg
 URL: https://altlinux.space/stapler/repo-for-tests.git
 Ref: main
 Mirrors: 

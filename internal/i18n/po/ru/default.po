@@ -523,6 +523,14 @@ msgstr "Это действие требует повышенных привил
 msgid "Attempting to run as root using '%s'..."
 msgstr "Попытка запустить от имени root с использованием '%s'..."
 
+#: internal/repoutils/repoutils.go:65
+msgid ""
+"Stapler repo's minimum Stapler version is greater than the current version. "
+"Try updating Stapler if something doesn't work."
+msgstr ""
+"Минимальная версия Stapler для репозитория выше текущей версии. Попробуйте "
+"обновить Stapler, если что-то не работает."
+
 #: internal/scripter/firejail.go:154
 msgid "Applying FireJail integration for %q package"
 msgstr "Применение интеграции FireJail для пакета %q"
@@ -535,17 +543,9 @@ msgstr "Сборка метаданных пакета %q"
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
 
-#: internal/service/repos/internal/puller/puller.go:207
+#: internal/service/repos/internal/puller/puller.go:204
 msgid "Git repository does not appear to be a valid Stapler repo"
 msgstr "Git-репозиторий не выглядит корректным репозиторием Stapler"
-
-#: internal/service/repos/internal/puller/puller.go:238
-msgid ""
-"Stapler repo's minimum Stapler version is greater than the current version. "
-"Try updating Stapler if something doesn't work."
-msgstr ""
-"Минимальная версия Stapler для репозитория выше текущей версии. Попробуйте "
-"обновить Stapler, если что-то не работает."
 
 #: internal/service/repos/repos.go:79
 msgid "Pull %s"
@@ -742,27 +742,47 @@ msgstr "не удалось сохранить конфигурацию: %v"
 msgid "Failed to import repository"
 msgstr "Ошибка при получении рабочего каталога"
 
-#: internal/usecase/repo/list/list.go:58
+#: internal/usecase/repo/list/list.go:59
 msgid "Error encoding repos to JSON"
 msgstr "Ошибка при кодировании репозиториев в JSON"
 
-#: internal/usecase/repo/list/list.go:74
+#: internal/usecase/repo/list/list.go:81
 msgid "Name"
 msgstr "Имя"
 
-#: internal/usecase/repo/list/list.go:74
+#: internal/usecase/repo/list/list.go:81
+msgid "Title"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:81
+msgid "Summary"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:81
+msgid "Description"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:82
+msgid "Homepage"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:82
+msgid "Icon"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:82
 msgid "URL"
 msgstr "URL"
 
-#: internal/usecase/repo/list/list.go:74
+#: internal/usecase/repo/list/list.go:82
 msgid "Ref"
 msgstr "Ревизия"
 
-#: internal/usecase/repo/list/list.go:74
+#: internal/usecase/repo/list/list.go:83
 msgid "Mirrors"
 msgstr "Зеркала"
 
-#: internal/usecase/repo/list/list.go:74
+#: internal/usecase/repo/list/list.go:83
 msgid "Report"
 msgstr "Сообщить об ошибке"
 

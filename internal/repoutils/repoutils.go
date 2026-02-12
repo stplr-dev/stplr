@@ -19,11 +19,15 @@
 package repoutils
 
 import (
+	"log/slog"
 	"os"
 	"strings"
 
+	"github.com/leonelquinteros/gotext"
 	"github.com/pelletier/go-toml/v2"
+	"go.elara.ws/vercmp"
 
+	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
@@ -52,18 +56,27 @@ func repoFromReader(r interface {
 		return nil, err
 	}
 
+	// If the version doesn't have a "v" prefix, it's not a standard version.
+	// It may be "unknown" or a git version, but either way, there's no way
+	// to compare it to the repo version, so only compare versions with the "v".
+	if strings.HasPrefix(config.Version, "v") {
+		if vercmp.Compare(config.Version, repocfg.Repo.MinVersion) == -1 {
+			slog.Warn(
+				gotext.Get("Stapler repo's minimum Stapler version is greater than the current version. Try updating Stapler if something doesn't work."))
+		}
+	}
+
 	var repo types.Repo
 
-	if repocfg.Repo.URL != "" {
-		repo.URL = repocfg.Repo.URL
-	}
-	if repocfg.Repo.Ref != "" {
-		repo.Ref = repocfg.Repo.Ref
-	}
-	if len(repocfg.Repo.Mirrors) > 0 {
-		repo.Mirrors = repocfg.Repo.Mirrors
-	}
+	repo.URL = repocfg.Repo.URL
+	repo.Ref = repocfg.Repo.Ref
+	repo.Mirrors = repocfg.Repo.Mirrors
 	repo.ReportUrl = repocfg.Repo.ReportUrl
+	repo.Title = repocfg.Repo.Title
+	repo.Summary = repocfg.Repo.Summary
+	repo.Description = repocfg.Repo.Description
+	repo.Homepage = repocfg.Repo.Homepage
+	repo.Icon = repocfg.Repo.Icon
 
 	return &repo, nil
 }

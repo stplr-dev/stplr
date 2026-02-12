@@ -23,22 +23,19 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
-	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/leonelquinteros/gotext"
-	"github.com/pelletier/go-toml/v2"
-	"go.elara.ws/vercmp"
 
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/constants"
 	database "go.stplr.dev/stplr/internal/db"
 	"go.stplr.dev/stplr/internal/plugins/shared"
 	"go.stplr.dev/stplr/internal/repoprocessor"
+	"go.stplr.dev/stplr/internal/repoutils"
 	"go.stplr.dev/stplr/internal/service/repos/internal/gitmanager"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
@@ -201,43 +198,16 @@ func (p *Puller) processRepoChanges(ctx context.Context, repo types.Repo, repoDi
 }
 
 func (rs *Puller) loadAndUpdateConfig(repoDir string, repo *types.Repo) error {
-	fl, err := os.Open(filepath.Join(repoDir, constants.RepoConfigFile))
-	if err != nil {
+	newRepo, err := repoutils.RepoFromConfigFile(filepath.Join(repoDir, constants.RepoConfigFile))
+	if err == nil && newRepo == nil {
 		// TODO:
 		slog.Warn(gotext.Get("Git repository does not appear to be a valid Stapler repo"), "repo", repo.Name)
 		return nil
 	}
-	defer fl.Close()
 
-	var repoCfg types.RepoConfig
-	if err := toml.NewDecoder(fl).Decode(&repoCfg); err != nil {
-		return err
-	}
+	repo.MergeFrom(newRepo)
 
-	warnAboutVersion(*repo, repoCfg)
-
-	if repoCfg.Repo.URL != "" {
-		repo.URL = repoCfg.Repo.URL
-	}
-	if repoCfg.Repo.Ref != "" {
-		repo.Ref = repoCfg.Repo.Ref
-	}
-	if len(repoCfg.Repo.Mirrors) > 0 {
-		repo.Mirrors = repoCfg.Repo.Mirrors
-	}
-	repo.ReportUrl = repoCfg.Repo.ReportUrl
 	return nil
-}
-
-func warnAboutVersion(repo types.Repo, cfg types.RepoConfig) {
-	// If the version doesn't have a "v" prefix, it's not a standard version.
-	// It may be "unknown" or a git version, but either way, there's no way
-	// to compare it to the repo version, so only compare versions with the "v".
-	if strings.HasPrefix(config.Version, "v") {
-		if vercmp.Compare(config.Version, cfg.Repo.MinVersion) == -1 {
-			slog.Warn(gotext.Get("Stapler repo's minimum Stapler version is greater than the current version. Try updating Stapler if something doesn't work."), "repo", repo.Name)
-		}
-	}
 }
 
 var _ PullExecutor = &Puller{}

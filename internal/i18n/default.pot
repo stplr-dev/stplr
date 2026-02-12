@@ -502,6 +502,12 @@ msgstr ""
 msgid "Attempting to run as root using '%s'..."
 msgstr ""
 
+#: internal/repoutils/repoutils.go:65
+msgid ""
+"Stapler repo's minimum Stapler version is greater than the current version. "
+"Try updating Stapler if something doesn't work."
+msgstr ""
+
 #: internal/scripter/firejail.go:154
 msgid "Applying FireJail integration for %q package"
 msgstr ""
@@ -514,14 +520,8 @@ msgstr ""
 msgid "Executing %s()"
 msgstr ""
 
-#: internal/service/repos/internal/puller/puller.go:207
+#: internal/service/repos/internal/puller/puller.go:204
 msgid "Git repository does not appear to be a valid Stapler repo"
-msgstr ""
-
-#: internal/service/repos/internal/puller/puller.go:238
-msgid ""
-"Stapler repo's minimum Stapler version is greater than the current version. "
-"Try updating Stapler if something doesn't work."
 msgstr ""
 
 #: internal/service/repos/repos.go:79
@@ -712,27 +712,47 @@ msgstr ""
 msgid "Failed to import repository"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:58
+#: internal/usecase/repo/list/list.go:59
 msgid "Error encoding repos to JSON"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:74
+#: internal/usecase/repo/list/list.go:81
 msgid "Name"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:74
+#: internal/usecase/repo/list/list.go:81
+msgid "Title"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:81
+msgid "Summary"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:81
+msgid "Description"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:82
+msgid "Homepage"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:82
+msgid "Icon"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:82
 msgid "URL"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:74
+#: internal/usecase/repo/list/list.go:82
 msgid "Ref"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:74
+#: internal/usecase/repo/list/list.go:83
 msgid "Mirrors"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:74
+#: internal/usecase/repo/list/list.go:83
 msgid "Report"
 msgstr ""
 
