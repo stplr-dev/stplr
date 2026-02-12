@@ -51,14 +51,18 @@ jobs:
           go-version-file: 'go.mod'
 
       - name: Generate a changelog
-        uses: https://github.com/orhun/git-cliff-action@v4
+        uses: https://github.com/orhun/git-cliff-action@e16f179f0be49ecdfe63753837f20b9531642772 # v4.7.0
         id: git-cliff
         with:
           config: cliff.toml
           args: -vv --latest --strip header
+          version: v2.12.0
           # token used to get git-cliff release information 
           # via the GitHub API to avoid rate limits
           github_token: ${{ secrets.READ_ONLY_GITHUB_TOKEN }}
+        env:
+          # https://github.com/orhun/git-cliff-action/issues/72
+          GITHUB_TOKEN: ${{ secrets.READ_ONLY_GITHUB_TOKEN }}
 
       - name: Set version
         run: |
