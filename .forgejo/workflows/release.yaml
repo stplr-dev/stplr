@@ -98,5 +98,5 @@ jobs:
           direction: upload
           release-dir: ./dist
           token: ${{ secrets.TOKEN }}
-          release-notes: ${{ steps.git-cliff.outputs.changelog }}
+          release-notes: ${{ steps.git-cliff.outputs.content }}
           prerelease: ${{ env.IS_PRERELEASE }}
