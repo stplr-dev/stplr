@@ -11,11 +11,13 @@ datadir = $(datarootdir)
 exec_prefix = $(PREFIX)
 bindir = $(exec_prefix)/bin
 sysconfdir = /etc
+mandir = $(datarootdir)/man
 
 BIN := ./$(NAME)
 COMPLETIONS_DIR := ./scripts/completion
 BASH_COMPLETION := $(COMPLETIONS_DIR)/bash
 ZSH_COMPLETION := $(COMPLETIONS_DIR)/zsh
+MAN_DIR := ./man
 
 GENERATE ?= 1
 POST_INSTALL ?= 1
@@ -49,7 +51,20 @@ else
 endif
 	go build -ldflags="$(LDFLAGS)" -o $@ ./cmd/stplr
 
-install: build install-config install-sysusers install-tmpfiles install-cachedir
+generate-man:
+	@echo "Generating man pages..."
+	@mkdir -p $(MAN_DIR)/en/man1
+	@mkdir -p $(MAN_DIR)/ru/man1
+	@LANG=en_US.UTF-8 go run ./tools/gen-docs/main.go > $(MAN_DIR)/en/man1/$(NAME).1
+	@LANG=ru_RU.UTF-8 go run ./tools/gen-docs/main.go > $(MAN_DIR)/ru/man1/$(NAME).1
+	@echo "Man pages generated in $(MAN_DIR)/"
+
+install-man:
+	@echo "Installing man pages..."
+	install -Dm644 $(MAN_DIR)/en/man1/$(NAME).1 $(DESTDIR)$(mandir)/man1/$(NAME).1
+	install -Dm644 $(MAN_DIR)/ru/man1/$(NAME).1 $(DESTDIR)$(mandir)/ru/man1/$(NAME).1
+
+install: build install-config install-sysusers install-tmpfiles install-cachedir install-man
 	install -Dm755 $(BIN) $(DESTDIR)$(bindir)/$(NAME)
 	
 	@mkdir -p $(DESTDIR)$(datadir)/bash-completion/completions
@@ -94,7 +109,9 @@ uninstall:
 		$(DESTDIR)$(bindir)/$(NAME) \
 		$(DESTDIR)$(datadir)/bash-completion/completions/$(NAME) \
 		$(DESTDIR)$(datadir)/zsh/site-functions/_$(NAME) \
-		$(DESTDIR)$(datadir)/fish/vendor_completions.d/$(NAME).fish
+		$(DESTDIR)$(datadir)/fish/vendor_completions.d/$(NAME).fish \
+		$(DESTDIR)$(mandir)/man1/$(NAME).1 \
+		$(DESTDIR)$(mandir)/ru/man1/$(NAME).1
 
 clean clear:
 	rm -f $(BIN)

@@ -28,75 +28,17 @@ import (
 	"context"
 	"log/slog"
 	"os"
-	"strings"
 
 	"github.com/leonelquinteros/gotext"
-	"github.com/mattn/go-isatty"
-	"github.com/urfave/cli/v3"
 
-	"go.stplr.dev/stplr/internal/app/commands"
+	"go.stplr.dev/stplr/internal/app"
 	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/i18n"
-	"go.stplr.dev/stplr/internal/manager"
 
 	"go.stplr.dev/stplr/internal/logger"
 )
-
-func GetApp() *cli.Command {
-	cmds := []*cli.Command{
-		commands.InstallCmd(),
-		commands.RemoveCmd(),
-		commands.UpgradeCmd(),
-		commands.InfoCmd(),
-		commands.ListCmd(),
-		commands.BuildCmd(),
-		commands.RefreshCmd(),
-		commands.FixCmd(),
-		commands.HelperCmd(),
-		commands.VersionCmd(),
-		commands.SearchCmd(),
-		commands.RepoCmd(),
-		commands.ConfigCmd(),
-		commands.MigrateCmd(),
-		commands.SupportCmd(),
-		// Internal commands
-		commands.InternalPluginProvider(),
-		commands.InternalPluginProviderRoot(),
-	}
-
-	return &cli.Command{
-		Name:  "stplr",
-		Usage: gotext.Get("Command-line interface for Stapler, a universal Linux package build system"),
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "pm-args",
-				Aliases: []string{"P"},
-				Usage:   gotext.Get("Arguments to be passed on to the package manager"),
-			},
-			&cli.BoolFlag{
-				Name:    "interactive",
-				Aliases: []string{"i"},
-				Value:   isatty.IsTerminal(os.Stdin.Fd()),
-				Usage:   gotext.Get("Enable interactive questions and prompts"),
-			},
-		},
-		Commands: cmds,
-		Before: func(ctx context.Context, c *cli.Command) (context.Context, error) {
-			slog.Debug("cli started", "args", os.Args)
-			if trimmed := strings.TrimSpace(c.String("pm-args")); trimmed != "" {
-				args := strings.Split(trimmed, " ")
-				manager.Args = append(manager.Args, args...)
-			}
-			return ctx, nil
-		},
-		EnableShellCompletion: true,
-		ExitErrHandler: func(ctx context.Context, c *cli.Command, err error) {
-			cliutils.HandleExitCoder(ctx, c, err)
-		},
-	}
-}
 
 func setLogLevel(newLevel string) {
 	level := slog.LevelInfo
@@ -123,8 +65,8 @@ func main() {
 	out := output.NewConsoleOutput()
 	ctx = output.WithOutput(ctx, out)
 
-	app := GetApp()
-	cliutils.Localize(app)
+	p := app.GetApp()
+	cliutils.Localize(p)
 
 	cfg := config.New()
 	err := cfg.Load()
@@ -134,7 +76,7 @@ func main() {
 	}
 	setLogLevel(cfg.LogLevel())
 
-	err = app.Run(ctx, os.Args)
+	err = p.Run(ctx, os.Args)
 	if err != nil {
 		out.Error("%s: %v", gotext.Get("Error while running app"), err)
 	}

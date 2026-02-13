@@ -9,25 +9,25 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: cmd/stplr/main.go:71
+#: cmd/stplr/main.go:74
+msgid "Error loading config"
+msgstr ""
+
+#: cmd/stplr/main.go:81
+msgid "Error while running app"
+msgstr ""
+
+#: internal/app/app.go:60
 msgid ""
 "Command-line interface for Stapler, a universal Linux package build system"
 msgstr ""
 
-#: cmd/stplr/main.go:76
+#: internal/app/app.go:73
 msgid "Arguments to be passed on to the package manager"
 msgstr ""
 
-#: cmd/stplr/main.go:82
+#: internal/app/app.go:79
 msgid "Enable interactive questions and prompts"
-msgstr ""
-
-#: cmd/stplr/main.go:132
-msgid "Error loading config"
-msgstr ""
-
-#: cmd/stplr/main.go:139
-msgid "Error while running app"
 msgstr ""
 
 #: internal/app/commands/build.go:41
