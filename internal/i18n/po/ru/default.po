@@ -5,16 +5,17 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2026-02-13 21:06+0300\n"
-"Last-Translator: Maxim Slipenko <maks1ms@alt-gnome.ru>\n"
-"Language-Team: Russian\n"
+"PO-Revision-Date: 2026-02-13 21:28+0000\n"
+"Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
+"Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
+"stplr/ru/>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Gtranslator 49.0\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Weblate 5.15.2\n"
 
 #: cmd/stplr/main.go:74
 msgid "Error loading config"
@@ -206,9 +207,8 @@ msgid "Disable (or enable) repository"
 msgstr "Отключить (или включить) репозиторий"
 
 #: internal/app/commands/repo.go:197
-#, fuzzy
 msgid "<name> <value>"
-msgstr "<ключ> <значение>"
+msgstr "<имя> <значение>"
 
 #: internal/app/commands/repo.go:228
 msgid "Set the main url of the repository"
@@ -737,19 +737,16 @@ msgid "Error saving config"
 msgstr "Ошибка при сохранении конфигурации"
 
 #: internal/usecase/repo/import/import.go:59
-#, fuzzy
 msgid "Repository %q already exists"
-msgstr "Репозиторий \"%s\" уже существует"
+msgstr "Репозиторий %q уже существует"
 
 #: internal/usecase/repo/import/import.go:65
-#, fuzzy
 msgid "Failed to read repo configuration"
-msgstr "не удалось сохранить конфигурацию: %v"
+msgstr "Не удалось прочитать конфигурацию репозитория"
 
 #: internal/usecase/repo/import/import.go:77
-#, fuzzy
 msgid "Failed to import repository"
-msgstr "Ошибка при получении рабочего каталога"
+msgstr "Не удалось импортировать репозиторий"
 
 #: internal/usecase/repo/list/list.go:59
 msgid "Error encoding repos to JSON"
@@ -761,27 +758,27 @@ msgstr "Имя"
 
 #: internal/usecase/repo/list/list.go:82
 msgid "Disabled"
-msgstr ""
+msgstr "Отключен"
 
 #: internal/usecase/repo/list/list.go:82
 msgid "Title"
-msgstr ""
+msgstr "Название"
 
 #: internal/usecase/repo/list/list.go:82
 msgid "Summary"
-msgstr ""
+msgstr "Кратко"
 
 #: internal/usecase/repo/list/list.go:82
 msgid "Description"
-msgstr ""
+msgstr "Описание"
 
 #: internal/usecase/repo/list/list.go:83
 msgid "Homepage"
-msgstr ""
+msgstr "Домашняя страница"
 
 #: internal/usecase/repo/list/list.go:83
 msgid "Icon"
-msgstr ""
+msgstr "Иконка"
 
 #: internal/usecase/repo/list/list.go:83
 msgid "URL"
@@ -847,40 +844,36 @@ msgstr "Здесь нечего делать."
 
 #: internal/usecase/upgrade/upgrade.go:102
 msgid "Upgrading %d/%d: %s"
-msgstr ""
+msgstr "Обновление %d/%d: %s"
 
 #: internal/usecase/upgrade/upgrade.go:105
 #: internal/usecase/upgrade/upgrade.go:142
 msgid "Stopping upgrade process"
-msgstr ""
+msgstr "Остановка процесса обновления"
 
 #: internal/usecase/upgrade/upgrade.go:133
-#, fuzzy
 msgid "Failed to upgrade %s: %v"
-msgstr "Не удалось извлечь из %s: %v"
+msgstr "Не удалось обновить %s: %v"
 
 #: internal/usecase/upgrade/upgrade.go:140
 msgid "Do you want to stop the entire upgrade process?"
-msgstr ""
+msgstr "Вы хотите полностью остановить процесс обновления?"
 
 #: internal/usecase/upgrade/upgrade.go:145
-#, fuzzy
 msgid "Continuing with next package"
-msgstr "Сборка пакета %q"
+msgstr "Переходим к следующему пакету"
 
 #: internal/usecase/upgrade/upgrade.go:148
-#, fuzzy
 msgid "Successfully upgraded %s"
-msgstr "Успешно установлено %s = %s"
+msgstr "Пакет %s успешно обновлён"
 
 #: internal/usecase/upgrade/upgrade.go:154
 msgid "Upgrade process interrupted"
-msgstr ""
+msgstr "Процесс обновления прерван"
 
 #: internal/usecase/upgrade/upgrade.go:163
-#, fuzzy
 msgid "Some packages failed to upgrade"
-msgstr "Нет пакетов к обновлению"
+msgstr "Некоторые пакеты не удалось обновить"
 
 #: internal/usecase/upgrade/upgrade.go:176
 #, fuzzy
