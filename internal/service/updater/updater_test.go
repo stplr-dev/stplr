@@ -21,6 +21,7 @@ package updater_test
 import (
 	context "context"
 	"errors"
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -306,7 +307,13 @@ func TestUpdaterCheckForUpdates(t *testing.T) {
 					Return(tt.ignorePatterns).
 					AnyTimes()
 
+				pkgNames := make([]string, 0, len(tt.installedPackages))
 				for pkgName := range tt.installedPackages {
+					pkgNames = append(pkgNames, pkgName)
+				}
+				slices.Sort(pkgNames)
+
+				for _, pkgName := range pkgNames {
 					if tt.searchResults != nil {
 						if results, ok := tt.searchResults[pkgName]; ok {
 							searcher.EXPECT().

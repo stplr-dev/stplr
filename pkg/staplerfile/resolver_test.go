@@ -43,6 +43,11 @@ func TestResolver(t *testing.T) {
 	assert.NotNil(t, pkgs)
 
 	t.Setenv("LC_ALL", "ja")
+	t.Setenv("LC_ALL", "ja")
+	t.Setenv("LC_MESSAGES", "ja")
+	t.Setenv("LANG", "ja")
+	t.Setenv("LANGUAGE", "ja")
+
 	resolver := staplerfile.NewResolver(&distro.OSRelease{})
 	err = resolver.Init()
 	assert.NoError(t, err)
