@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2026-02-13 21:28+0000\n"
+"PO-Revision-Date: 2026-02-13 21:31+0000\n"
 "Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
 "stplr/ru/>\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: cmd/stplr/main.go:74
 msgid "Error loading config"
-msgstr "Ошибка при загрузке"
+msgstr "Ошибка при загрузке конфигурации"
 
 #: cmd/stplr/main.go:81
 msgid "Error while running app"
@@ -98,9 +98,8 @@ msgid "Attempt to fix problems with Stapler"
 msgstr "Попытка устранить проблемы с Stapler"
 
 #: internal/app/commands/fix.go:51
-#, fuzzy
 msgid "Unable to remove lock dir"
-msgstr "Не удается удалить директорию блокировки"
+msgstr "Не удалось удалить каталог блокировки"
 
 #: internal/app/commands/helper.go:48
 msgid "List all the available helper commands"
@@ -343,7 +342,6 @@ msgid "Installing dependencies"
 msgstr "Установка зависимостей"
 
 #: internal/build/build.go:298
-#, fuzzy
 msgid ""
 "Firejail is disabled for %q package due to ignore pattern %q in config. "
 "Security isolation will not be applied. Ensure you understand the risks."
@@ -876,20 +874,18 @@ msgid "Some packages failed to upgrade"
 msgstr "Некоторые пакеты не удалось обновить"
 
 #: internal/usecase/upgrade/upgrade.go:176
-#, fuzzy
 msgid "Successfully upgraded: %d package"
 msgid_plural "Successfully upgraded: %d packages"
-msgstr[0] "Успешно установлено %s = %s"
-msgstr[1] "Успешно установлено %s = %s"
-msgstr[2] "Успешно установлено %s = %s"
+msgstr[0] "Успешно обновлён %d пакет"
+msgstr[1] "Успешно обновлено %d пакета"
+msgstr[2] "Успешно обновлено %d пакетов"
 
 #: internal/usecase/upgrade/upgrade.go:188
-#, fuzzy
 msgid "Failed to upgrade: %d package"
 msgid_plural "Failed to upgrade: %d packages"
-msgstr[0] "Не удалось извлечь из %s: %v"
-msgstr[1] "Не удалось извлечь из %s: %v"
-msgstr[2] "Не удалось извлечь из %s: %v"
+msgstr[0] "Не удалось обновить %d пакет"
+msgstr[1] "Не удалось обновить %d пакета"
+msgstr[2] "Не удалось обновить %d пакетов"
 
 #: pkg/dl/dl.go:240
 msgid "Source %q can be updated using %s — updating if required"
@@ -902,12 +898,10 @@ msgid "Downloading source %s from %s using %s downloader"
 msgstr "Загрузка источника %s из %s с помощью загрузчика %s"
 
 #: pkg/dl/dl.go:352
-#, fuzzy
 msgid "Source %q was updated and linked to destination"
 msgstr "Источник %q был обновлён и связан с пунктом назначения"
 
 #: pkg/dl/dl.go:354
-#, fuzzy
 msgid "Source %q found in cache and linked to destination"
 msgstr "Источник %q найден в кэше и связан с пунктом назначения"
 
