@@ -65,7 +65,8 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 	var err error
 	format := opts.Format
 	if format == "" {
-		format = fmt.Sprintf(`%s: {{.Name}}{{if .Title}}
+		format = fmt.Sprintf(`%s: {{.Name}}{{if .Disabled}}
+%s: {{.Disabled}}{{end}}{{if .Title}}
 %s: {{.Title}}{{end}}{{if .Summary}}
 %s: {{.Summary}}{{end}}{{if .Description}}
 %s:
@@ -78,7 +79,7 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
   - {{$m}}{{end}}{{end}}{{if .ReportUrl}}
 %s: {{.ReportUrl}}{{end}}
 
-`, gotext.Get("Name"), gotext.Get("Title"), gotext.Get("Summary"), gotext.Get("Description"),
+`, gotext.Get("Name"), gotext.Get("Disabled"), gotext.Get("Title"), gotext.Get("Summary"), gotext.Get("Description"),
 			gotext.Get("Homepage"), gotext.Get("Icon"), gotext.Get("URL"), gotext.Get("Ref"),
 			gotext.Get("Mirrors"), gotext.Get("Report"))
 	}

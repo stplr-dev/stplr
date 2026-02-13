@@ -21,6 +21,7 @@ package repos
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 	"syscall"
@@ -125,20 +126,23 @@ func (r *Repos) ModifySlice(ctx context.Context, c func(repos []types.Repo) ([]t
 	_ = r.cfg.Save("system")
 
 	if pull {
-		for i, repo := range newRepos {
-			updatedRepo, err := r.Pull(ctx, repo)
-			if err != nil {
-				return errors.WrapIntoI18nError(err, gotext.Get("Error pulling repositories"))
-			}
-			newRepos[i] = updatedRepo
+		if err := r.pullRepos(ctx, newRepos); err != nil {
+			return errors.WrapIntoI18nError(err, gotext.Get("Error pulling repositories"))
 		}
 	}
+
 	return nil
 }
 
-func (r *Repos) PullAll(ctx context.Context) error {
-	repos := r.cfg.Repos()
+func (r *Repos) pullRepos(ctx context.Context, repos []types.Repo) error {
 	for i, repo := range repos {
+		if repo.Disabled {
+			err := r.deleteRepoPkgs(ctx, repo.Name)
+			if err != nil {
+				slog.Warn("failed to remove packages from disabled repo", "err", err)
+			}
+			continue
+		}
 		updatedRepo, err := r.Pull(ctx, repo)
 		if err != nil {
 			return err
@@ -146,6 +150,10 @@ func (r *Repos) PullAll(ctx context.Context) error {
 		repos[i] = updatedRepo
 	}
 	return nil
+}
+
+func (r *Repos) PullAll(ctx context.Context) error {
+	return r.pullRepos(ctx, r.cfg.Repos())
 }
 
 type rereadOption func(*rereadConfig)
@@ -160,6 +168,13 @@ func WithDeleteFailed() rereadOption {
 	}
 }
 
+func (r *Repos) deleteRepoPkgs(ctx context.Context, name string) error {
+	if err := r.db.DeletePkgs(ctx, "repository = ?", name); err != nil {
+		return fmt.Errorf("failed to delete repo packages %q: %w", name, err)
+	}
+	return nil
+}
+
 func (r *Repos) RereadAll(ctx context.Context, opts ...rereadOption) error {
 	cfg := &rereadConfig{}
 	for _, opt := range opts {
@@ -168,11 +183,17 @@ func (r *Repos) RereadAll(ctx context.Context, opts ...rereadOption) error {
 
 	repos := r.cfg.Repos()
 	for i, repo := range repos {
+		if repo.Disabled {
+			if delErr := r.deleteRepoPkgs(ctx, repo.Name); delErr != nil {
+				return delErr
+			}
+			continue
+		}
 		updatedRepo, err := r.rp.Read(ctx, repo, &simpleNotifier{r.out})
 		if err != nil {
 			if cfg.deleteFailed {
-				if delErr := r.db.DeletePkgs(ctx, "repository = ?", repo.Name); delErr != nil {
-					return fmt.Errorf("failed to delete repo %q: %w", repo.Name, delErr)
+				if delErr := r.deleteRepoPkgs(ctx, repo.Name); delErr != nil {
+					return delErr
 				}
 				continue
 			}

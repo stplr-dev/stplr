@@ -12,3 +12,4 @@
     Long long description
   homepage: https://stplr.dev
   icon: https://stplr.dev/img/logo.svg
+  disabled: false

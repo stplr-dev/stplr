@@ -54,6 +54,8 @@ type Repo struct {
 	Description string `json:"description" koanf:"description"`
 	Homepage    string `json:"homepage" koanf:"homepage"`
 	Icon        string `json:"icon" koanf:"icon"`
+
+	Disabled bool `json:"disabled" koanf:"disabled"`
 }
 
 func (r *Repo) MergeFrom(other *Repo) {

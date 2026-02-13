@@ -30,6 +30,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
@@ -41,6 +42,7 @@ import (
 	repo_import "go.stplr.dev/stplr/internal/usecase/repo/import"
 	"go.stplr.dev/stplr/internal/usecase/repo/list"
 	"go.stplr.dev/stplr/internal/usecase/repo/remove"
+	"go.stplr.dev/stplr/internal/usecase/repo/setdisabled"
 	"go.stplr.dev/stplr/internal/usecase/repo/setref"
 	"go.stplr.dev/stplr/internal/usecase/repo/seturl"
 )
@@ -75,6 +77,7 @@ func RepoCmd() *cli.Command {
 			RemoveRepoCmd(),
 			AddRepoCmd(),
 			SetRepoRefCmd(),
+			SetRepoDisabledCmd(),
 			RepoMirrorCmd(),
 			SetUrlCmd(),
 			RepoImportCmd(),
@@ -182,6 +185,38 @@ func SetRepoRefCmd() *cli.Command {
 				Run(ctx, setref.Options{
 					Name: c.Args().Get(0),
 					Ref:  c.Args().Get(1),
+				})
+		}),
+	}
+}
+
+func SetRepoDisabledCmd() *cli.Command {
+	return &cli.Command{
+		Name:          "set-disabled",
+		Usage:         gotext.Get("Disable (or enable) repository"),
+		ArgsUsage:     gotext.Get("<name> <value>"),
+		ShellComplete: ShellCompleteRepoName,
+		Action: repoModifyAction(func(ctx context.Context, c *cli.Command) error {
+			if c.Args().Len() < 2 {
+				return errMissingArgs
+			}
+
+			disabled, err := strconv.ParseBool(c.Args().Get(1))
+			if err != nil {
+				return fmt.Errorf("invalid value for disabled: %w", err)
+			}
+
+			d, f, err := deps.ForUniversalReposModificationActionDeps(ctx)
+			if err != nil {
+				return err
+			}
+			defer f()
+
+			return setdisabled.
+				New(d.Repos).
+				Run(ctx, setdisabled.Options{
+					Name:     c.Args().Get(0),
+					Disabled: disabled,
 				})
 		}),
 	}
