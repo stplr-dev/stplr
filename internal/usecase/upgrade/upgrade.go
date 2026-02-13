@@ -172,14 +172,24 @@ func (u *useCase) printSummary(succeeded []string, failed []struct {
 },
 ) {
 	if len(succeeded) > 0 {
-		u.out.Info(gotext.Get("Successfully upgraded: %d package(s)", len(succeeded)))
+		u.out.Info(gotext.GetN(
+			"Successfully upgraded: %d package",
+			"Successfully upgraded: %d packages",
+			len(succeeded),
+			len(succeeded),
+		))
 		for _, pkg := range succeeded {
 			u.out.Info("  - %s", pkg)
 		}
 	}
 
 	if len(failed) > 0 {
-		u.out.Warn(gotext.Get("Failed to upgrade: %d package(s)", len(failed)))
+		u.out.Warn(gotext.GetN(
+			"Failed to upgrade: %d package",
+			"Failed to upgrade: %d packages",
+			len(failed),
+			len(failed),
+		))
 		for _, f := range failed {
 			u.out.Warn("  - %s: %v", f.pkg, f.err)
 		}

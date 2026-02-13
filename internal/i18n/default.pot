@@ -846,13 +846,17 @@ msgstr ""
 msgid "Some packages failed to upgrade"
 msgstr ""
 
-#: internal/usecase/upgrade/upgrade.go:175
-msgid "Successfully upgraded: %d package(s)"
-msgstr ""
+#: internal/usecase/upgrade/upgrade.go:176
+msgid "Successfully upgraded: %d package"
+msgid_plural "Successfully upgraded: %d packages"
+msgstr[0] ""
+msgstr[1] ""
 
-#: internal/usecase/upgrade/upgrade.go:182
-msgid "Failed to upgrade: %d package(s)"
-msgstr ""
+#: internal/usecase/upgrade/upgrade.go:188
+msgid "Failed to upgrade: %d package"
+msgid_plural "Failed to upgrade: %d packages"
+msgstr[0] ""
+msgstr[1] ""
 
 #: pkg/dl/dl.go:240
 msgid "Source %q can be updated using %s — updating if required"
