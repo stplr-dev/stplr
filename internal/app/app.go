@@ -58,14 +58,16 @@ func GetApp() *cli.Command {
 	return &cli.Command{
 		Name:  "stplr",
 		Usage: gotext.Get("Command-line interface for Stapler, a universal Linux package build system"),
-		Description: gotext.Get("Stapler is a universal Linux package build and distribution system designed for cross-distribution software delivery.\n\n" +
-			"Packages are distributed through Stapler repositories. The application ships without any repositories configured, " +
-			"so you need to add one or more repositories before installing software.\n\n" +
-			"Getting started:\n" +
-			"  stplr repo add [name] [url]    Add a Stapler repository\n" +
-			"  stplr install [package]        Install a package from configured repositories\n" +
-			"  stplr search [query]           Search for packages\n\n" +
-			"Learn more (including community repositories): https://stplr.dev/docs/intro"),
+		Description: gotext.Get(`Stapler is a universal Linux package build and distribution system designed for cross-distribution software delivery.
+
+Packages are distributed through Stapler repositories. The application ships without any repositories configured, so you need to add one or more repositories before installing software.
+
+Getting started:
+  stplr repo add [name] [url]    Add a Stapler repository
+  stplr install [package]        Install a package from configured repositories
+  stplr search [query]           Search for packages
+
+Learn more (including community repositories): https://stplr.dev/docs/intro`),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "pm-args",

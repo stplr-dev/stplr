@@ -1,11 +1,12 @@
 #
 # x1z53 <x1z53@yandex.ru>, 2025.
 # Maxim Slipenko <maks1ms@alt-gnome.ru>, 2025-2026.
+# Maks1mS <maks1ms@noreply.codeberg.org>, 2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2026-02-13 21:31+0000\n"
+"PO-Revision-Date: 2026-02-14 08:39+0300\n"
 "Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
 "stplr/ru/>\n"
@@ -13,9 +14,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.15.2\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Gtranslator 49.0\n"
 
 #: cmd/stplr/main.go:74
 msgid "Error loading config"
@@ -32,11 +33,44 @@ msgstr ""
 "Интерфейс командной строки для Stapler, универсальной системы сборки пакетов "
 "Linux"
 
-#: internal/app/app.go:73
+#: internal/app/app.go:61
+msgid ""
+"Stapler is a universal Linux package build and distribution system designed "
+"for cross-distribution software delivery.\n"
+"\n"
+"Packages are distributed through Stapler repositories. The application ships "
+"without any repositories configured, so you need to add one or more "
+"repositories before installing software.\n"
+"\n"
+"Getting started:\n"
+"  stplr repo add [name] [url]    Add a Stapler repository\n"
+"  stplr install [package]        Install a package from configured "
+"repositories\n"
+"  stplr search [query]           Search for packages\n"
+"\n"
+"Learn more (including community repositories): https://stplr.dev/docs/intro"
+msgstr ""
+"Stapler — это универсальная система сборки и распространения пакетов для "
+"Linux, предназначенная для кросс-дистрибутивной доставки программного "
+"обеспечения.\n"
+"\n"
+"Пакеты распространяются через репозитории Stapler. Приложение поставляется "
+"без настроенных репозиториев, поэтому перед установкой программ необходимо "
+"добавить один или несколько репозиториев.\n"
+"\n"
+"Начало работы:\n"
+"  stplr repo add [name] [url]    Добавить репозиторий Stapler\n"
+"  stplr install [package]        Установить пакет из настроенных "
+"репозиториев\n"
+"  stplr search [query]           Найти пакеты\n"
+"\n"
+"Подробнее (включая репозитории сообщества): https://stplr.dev/docs/intro"
+
+#: internal/app/app.go:75
 msgid "Arguments to be passed on to the package manager"
 msgstr "Аргументы, которые будут переданы менеджеру пакетов"
 
-#: internal/app/app.go:79
+#: internal/app/app.go:81
 msgid "Enable interactive questions and prompts"
 msgstr "Включение интерактивных вопросов и запросов"
 

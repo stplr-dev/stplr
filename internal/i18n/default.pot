@@ -22,11 +22,29 @@ msgid ""
 "Command-line interface for Stapler, a universal Linux package build system"
 msgstr ""
 
-#: internal/app/app.go:73
+#: internal/app/app.go:61
+msgid ""
+"Stapler is a universal Linux package build and distribution system designed "
+"for cross-distribution software delivery.\n"
+"\n"
+"Packages are distributed through Stapler repositories. The application ships "
+"without any repositories configured, so you need to add one or more "
+"repositories before installing software.\n"
+"\n"
+"Getting started:\n"
+"  stplr repo add [name] [url]    Add a Stapler repository\n"
+"  stplr install [package]        Install a package from configured "
+"repositories\n"
+"  stplr search [query]           Search for packages\n"
+"\n"
+"Learn more (including community repositories): https://stplr.dev/docs/intro"
+msgstr ""
+
+#: internal/app/app.go:75
 msgid "Arguments to be passed on to the package manager"
 msgstr ""
 
-#: internal/app/app.go:79
+#: internal/app/app.go:81
 msgid "Enable interactive questions and prompts"
 msgstr ""
 
