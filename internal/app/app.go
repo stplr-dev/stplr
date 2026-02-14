@@ -60,14 +60,15 @@ func GetApp() *cli.Command {
 		Usage: gotext.Get("Command-line interface for Stapler, a universal Linux package build system"),
 		Description: gotext.Get(`Stapler is a universal Linux package build and distribution system designed for cross-distribution software delivery.
 
-Packages are distributed through Stapler repositories. The application ships without any repositories configured, so you need to add one or more repositories before installing software.
+Packages are distributed through Stapler repositories. By default, stplr ships without any repositories configured, so you must add one or more repositories before installing software.
 
 Getting started:
   stplr repo add [name] [url]    Add a Stapler repository
+  stplr refresh                  Update repository indexes
   stplr install [package]        Install a package from configured repositories
   stplr search [query]           Search for packages
 
-Learn more (including community repositories): https://stplr.dev/docs/intro`),
+For more information and list of community repositories: https://stplr.dev/docs/intro`),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "pm-args",
