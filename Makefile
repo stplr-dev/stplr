@@ -41,7 +41,7 @@ endif
 
 .PHONY: build install clean clear uninstall install-config install-cachedir install-sysusers install-tmpfiles install-post
 
-build: $(BIN)
+build: $(BIN) $(MAN_DIR)
 
 $(BIN):
 ifeq ($(GENERATE),1)
@@ -51,7 +51,7 @@ else
 endif
 	go build -ldflags="$(LDFLAGS)" -o $@ ./cmd/stplr
 
-generate-man:
+$(MAN_DIR):
 	@echo "Generating man pages..."
 	@mkdir -p $(MAN_DIR)/en/man1
 	@mkdir -p $(MAN_DIR)/ru/man1
@@ -59,7 +59,7 @@ generate-man:
 	@LANG=ru_RU.UTF-8 go run ./tools/gen-docs/main.go > $(MAN_DIR)/ru/man1/$(NAME).1
 	@echo "Man pages generated in $(MAN_DIR)/"
 
-install-man:
+install-man: $(MAN_DIR)
 	@echo "Installing man pages..."
 	install -Dm644 $(MAN_DIR)/en/man1/$(NAME).1 $(DESTDIR)$(mandir)/man1/$(NAME).1
 	install -Dm644 $(MAN_DIR)/ru/man1/$(NAME).1 $(DESTDIR)$(mandir)/ru/man1/$(NAME).1
@@ -115,6 +115,7 @@ uninstall:
 
 clean clear:
 	rm -f $(BIN)
+	rm -rf $(MAN_DIR)
 
 # Development Targets
 
