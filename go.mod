@@ -56,7 +56,7 @@ require (
 	go.elara.ws/vercmp v0.0.0-20250912200949-2e97859b8794
 	go.uber.org/mock v0.6.0
 	golang.org/x/crypto v0.48.0
-	golang.org/x/exp v0.0.0-20260212183809-81e46e3db34a
+	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa
 	golang.org/x/sys v0.41.0
 	golang.org/x/text v0.34.0
 	golift.io/xtractr v0.2.3-0.20260111181756-d6376a2e84ce
