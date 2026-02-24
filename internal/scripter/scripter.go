@@ -113,9 +113,49 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 ) ([]*commonbuild.BuiltDep, error) {
 	dirs, err := commonbuild.GetDirs(e.cfg, sf.Path(), basePkg)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("getting dirs for %q: %w", basePkg, err)
 	}
 
+	runner, cleanup, err := e.createRunner(input, dirs, varsOfPackages)
+	if err != nil {
+		return nil, fmt.Errorf("creating runner for %q: %w", basePkg, err)
+	}
+	defer cleanup()
+
+	if err = runner.Run(ctx, sf.File()); err != nil {
+		return nil, fmt.Errorf("running script for %q: %w", basePkg, err)
+	}
+
+	dec := decoder.New(input.OSRelease(), runner)
+
+	if err = e.ExecuteFunctions(ctx, dirs, dec); err != nil {
+		return nil, fmt.Errorf("executing functions for %q: %w", basePkg, err)
+	}
+
+	return e.buildPackages(ctx, packageBuildContext{
+		input:     input,
+		dirs:      dirs,
+		dec:       dec,
+		repoDeps:  repoDeps,
+		builtDeps: builtDeps,
+		basePkg:   basePkg,
+	}, varsOfPackages)
+}
+
+type packageBuildContext struct {
+	input     *commonbuild.BuildInput
+	dirs      types.Directories
+	dec       *decoder.Decoder
+	repoDeps  []string
+	builtDeps []*commonbuild.BuiltDep
+	basePkg   string
+}
+
+func (e *LocalScriptExecutor) createRunner(
+	input *commonbuild.BuildInput,
+	dirs types.Directories,
+	varsOfPackages []*staplerfile.Package,
+) (*interp.Runner, func(), error) {
 	env := common.CreateBuildEnvVars(input.OSRelease(), dirs)
 
 	options := []handlers.Option{
@@ -128,112 +168,102 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 		return pkg.DisableNetwork.Resolved()
 	})
 
-	fakeroot, cleanup, err := handlers.SandboxHandler(
-		2*time.Second,
-		dirs,
-		disableNet,
-	)
+	fakeroot, cleanup, err := handlers.SandboxHandler(2*time.Second, dirs, disableNet)
 	if err != nil {
-		return nil, err
+		return nil, nil, fmt.Errorf("creating sandbox handler: %w", err)
 	}
-	defer cleanup()
 
 	runner, err := interp.New(
-		interp.Env(expand.ListEnviron(env...)),       // Устанавливаем окружение
-		interp.StdIO(os.Stdin, os.Stderr, os.Stderr), // Устанавливаем стандартный ввод-вывод
+		interp.Env(expand.ListEnviron(env...)),
+		interp.StdIO(os.Stdin, os.Stderr, os.Stderr),
 		interp.ReadDirHandler2(handlers.RestrictedReadDir(options...)),
 		interp.OpenHandler(handlers.RestrictedOpen(options...)),
 		interp.StatHandler(handlers.RestrictedStat(options...)),
 		interp.ExecHandlers(func(next interp.ExecHandlerFunc) interp.ExecHandlerFunc {
 			return helpers.Helpers.ExecHandler(fakeroot)
-		}), // Обрабатываем выполнение через fakeroot
+		}),
 	)
 	if err != nil {
-		return nil, err
+		cleanup()
+		return nil, nil, fmt.Errorf("creating interpreter: %w", err)
 	}
 
-	err = runner.Run(ctx, sf.File())
-	if err != nil {
-		return nil, err
-	}
+	return runner, cleanup, nil
+}
 
-	dec := decoder.New(input.OSRelease(), runner)
-
-	// var builtPaths []string
-
-	err = e.ExecuteFunctions(ctx, dirs, dec)
-	if err != nil {
-		return nil, err
-	}
-
+func (e *LocalScriptExecutor) buildPackages(
+	ctx context.Context,
+	bctx packageBuildContext,
+	varsOfPackages []*staplerfile.Package,
+) ([]*commonbuild.BuiltDep, error) {
 	for _, vars := range varsOfPackages {
-		packageName := ""
-		if vars.BasePkgName != "" {
-			packageName = vars.Name
-		}
-
-		pkgFormat := input.PkgFormat()
-
-		funcOut, err := e.ExecutePackageFunctions(
-			ctx,
-			dec,
-			dirs,
-			packageName,
-		)
+		dep, err := e.buildSinglePackage(ctx, bctx, vars)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("building package %q: %w", vars.Name, err)
 		}
+		bctx.builtDeps = append(bctx.builtDeps, dep)
+	}
+	return bctx.builtDeps, nil
+}
 
-		e.out.Info(gotext.Get("Building metadata for package %q", basePkg))
-
-		pkgInfo, err := buildPkgMetadata(
-			ctx,
-			e.cfg,
-			e.out,
-			input,
-			vars,
-			dirs,
-			append(
-				repoDeps,
-				GetBuiltName(builtDeps)...,
-			),
-			funcOut.Contents,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		packager, err := nfpm.Get(pkgFormat) // Получаем упаковщик для формата пакета
-		if err != nil {
-			return nil, err
-		}
-
-		pkgName := packager.ConventionalFileName(pkgInfo) // Получаем имя файла пакета
-		pkgPath := filepath.Join(dirs.BaseDir, pkgName)   // Определяем путь к пакету
-
-		pkgFile, err := os.Create(pkgPath)
-		if err != nil {
-			return nil, err
-		}
-
-		// google/rpmpack performs in-memory, which is critical for large rpms
-		err = packager.Package(pkgInfo, pkgFile)
-		if err != nil {
-			return nil, err
-		}
-
-		// return memory that was allocated (critical for high memory usage tasks in packager.Package)
-		pkgInfo = nil  //nolint:ineffassign // hint for GC to collect rpmpack's internal buffer
-		packager = nil //nolint:ineffassign
-		utils.ForceGC()
-
-		builtDeps = append(builtDeps, &commonbuild.BuiltDep{
-			Name: vars.Name,
-			Path: pkgPath,
-		})
+func (e *LocalScriptExecutor) buildSinglePackage(
+	ctx context.Context,
+	bctx packageBuildContext,
+	vars *staplerfile.Package,
+) (*commonbuild.BuiltDep, error) {
+	packageName := ""
+	if vars.BasePkgName != "" {
+		packageName = vars.Name
 	}
 
-	return builtDeps, nil
+	funcOut, err := e.ExecutePackageFunctions(ctx, bctx.dec, bctx.dirs, packageName)
+	if err != nil {
+		return nil, fmt.Errorf("executing package functions: %w", err)
+	}
+
+	e.out.Info(gotext.Get("Building metadata for package %q", bctx.basePkg))
+
+	pkgInfo, err := buildPkgMetadata(
+		ctx,
+		e.cfg,
+		e.out,
+		bctx.input,
+		vars,
+		bctx.dirs,
+		append(bctx.repoDeps, GetBuiltName(bctx.builtDeps)...),
+		funcOut.Contents,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("building metadata: %w", err)
+	}
+
+	format := bctx.input.PkgFormat()
+
+	packager, err := nfpm.Get(format)
+	if err != nil {
+		return nil, fmt.Errorf("getting packager for format %q: %w", format, err)
+	}
+
+	pkgPath := filepath.Join(bctx.dirs.BaseDir, packager.ConventionalFileName(pkgInfo))
+
+	pkgFile, err := os.Create(pkgPath)
+	if err != nil {
+		return nil, fmt.Errorf("creating package file %q: %w", pkgPath, err)
+	}
+
+	if err = packager.Package(pkgInfo, pkgFile); err != nil {
+		return nil, fmt.Errorf("packaging %q: %w", pkgPath, err)
+	}
+
+	// return memory that was allocated (critical for high memory usage tasks in packager.Package)
+	pkgInfo = nil  //nolint:ineffassign // hint for GC to collect rpmpack's internal buffer
+	packager = nil //nolint:ineffassign
+	utils.ForceGC()
+
+	return &commonbuild.BuiltDep{
+		Name: vars.Name,
+		Path: pkgPath,
+	}, nil
 }
 
 func buildPkgMetadata(
