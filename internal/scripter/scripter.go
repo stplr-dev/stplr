@@ -43,6 +43,7 @@ import (
 	"go.stplr.dev/stplr/internal/shutils/decoder"
 	"go.stplr.dev/stplr/internal/shutils/handlers"
 	"go.stplr.dev/stplr/internal/shutils/helpers"
+	"go.stplr.dev/stplr/internal/utils"
 	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/reqprov"
 	"go.stplr.dev/stplr/pkg/staplerfile"
@@ -215,14 +216,16 @@ func (e *LocalScriptExecutor) ExecuteSecondPass(
 			return nil, err
 		}
 
-		// utils.WriteProf("/tmp", "stplr-before")
 		// google/rpmpack performs in-memory, which is critical for large rpms
 		err = packager.Package(pkgInfo, pkgFile)
 		if err != nil {
 			return nil, err
 		}
-		// debug.FreeOSMemory()
-		// utils.WriteProf("/tmp", "stplr-after")
+
+		// return memory that was allocated (critical for high memory usage tasks in packager.Package)
+		pkgInfo = nil  //nolint:ineffassign // hint for GC to collect rpmpack's internal buffer
+		packager = nil //nolint:ineffassign
+		utils.ForceGC()
 
 		builtDeps = append(builtDeps, &commonbuild.BuiltDep{
 			Name: vars.Name,

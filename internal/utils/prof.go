@@ -18,6 +18,16 @@
 
 package utils
 
+import (
+	"runtime"
+	"runtime/debug"
+)
+
+func ForceGC() {
+	runtime.GC()
+	debug.FreeOSMemory()
+}
+
 /*
 func WriteHeapProfile(path string) error {
 	runtime.GC()
