@@ -28,6 +28,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"os"
 
 	"github.com/gobwas/glob"
 	"github.com/leonelquinteros/gotext"
@@ -198,7 +199,10 @@ func (i *Builder) InstallPkgs(
 			NoConfirm: !input.BuildOpts().Interactive,
 		})
 		if err != nil {
-			return nil, err
+			for _, dep := range builtDeps {
+				_ = os.Remove(dep.Path)
+			}
+			return nil, fmt.Errorf("failed to install: %w", err)
 		}
 	}
 

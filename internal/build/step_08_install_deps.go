@@ -22,13 +22,11 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"os"
 	"strings"
 
 	"go.stplr.dev/stplr/internal/cliprompts"
 	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/internal/installer"
-	"go.stplr.dev/stplr/internal/manager"
 )
 
 type installDepsStep struct {
@@ -178,31 +176,5 @@ func (i *installDepsStep) installOptDeps(ctx context.Context, input InstallInput
 }
 
 func (s *installDepsStep) installPkgs(ctx context.Context, input InstallInput, pkgs []string) ([]*commonbuild.BuiltDep, error) {
-	builtDeps, repoDeps, err := s.builder.BuildALRDeps(ctx, input, pkgs)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(builtDeps) > 0 {
-		err = s.installerExecutor.InstallLocal(ctx, GetBuiltPaths(builtDeps), &manager.Opts{
-			NoConfirm: !input.BuildOpts().Interactive,
-		})
-		if err != nil {
-			for _, dep := range builtDeps {
-				_ = os.Remove(dep.Path)
-			}
-			return nil, fmt.Errorf("failed to install: %w", err)
-		}
-	}
-
-	if len(repoDeps) > 0 {
-		err = s.installerExecutor.Install(ctx, repoDeps, &manager.Opts{
-			NoConfirm: !input.BuildOpts().Interactive,
-		})
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return builtDeps, nil
+	return s.builder.InstallPkgs(ctx, input, pkgs)
 }

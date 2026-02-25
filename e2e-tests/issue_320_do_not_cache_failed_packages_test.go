@@ -37,7 +37,7 @@ func TestE2EIssue320DoNotCacheFailedPackages(t *testing.T) {
 			Run(t)
 
 		r.Command("stplr", "install", "test-package-incorrect-deps").
-			ExpectStderrNotContains("Building metadata for package \"test-package-incorrect-deps\"").
+			ExpectStderrContains("Building metadata for package \"test-package-incorrect-deps\"").
 			Run(t)
 	}))
 }

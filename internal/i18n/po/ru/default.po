@@ -374,11 +374,11 @@ msgstr "СОГЛАШЕНИЕ О НЕСВОБОДНОМ ПО"
 msgid "Full license available at: %s"
 msgstr "Полный текст лицензии доступен по адресу: %s"
 
-#: internal/build/build.go:223
+#: internal/build/build.go:227
 msgid "Installing dependencies"
 msgstr "Установка зависимостей"
 
-#: internal/build/build.go:301
+#: internal/build/build.go:305
 msgid ""
 "Firejail is disabled for %q package due to ignore pattern %q in config. "
 "Security isolation will not be applied. Ensure you understand the risks."
