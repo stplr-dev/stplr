@@ -9,11 +9,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: cmd/stplr/main.go:74
+#: cmd/stplr/main.go:81
 msgid "Error loading config"
 msgstr ""
 
-#: cmd/stplr/main.go:81
+#: cmd/stplr/main.go:87
 msgid "Error while running app"
 msgstr ""
 
@@ -544,7 +544,7 @@ msgstr ""
 msgid "Building metadata for package %q"
 msgstr ""
 
-#: internal/scripter/scripter.go:412 internal/scripter/scripter.go:466
+#: internal/scripter/scripter.go:418 internal/scripter/scripter.go:472
 msgid "Executing %s()"
 msgstr ""
 

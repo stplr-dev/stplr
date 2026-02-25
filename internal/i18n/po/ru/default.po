@@ -18,11 +18,11 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Gtranslator 49.0\n"
 
-#: cmd/stplr/main.go:74
+#: cmd/stplr/main.go:81
 msgid "Error loading config"
 msgstr "Ошибка при загрузке конфигурации"
 
-#: cmd/stplr/main.go:81
+#: cmd/stplr/main.go:87
 msgid "Error while running app"
 msgstr "Ошибка при запуске приложения"
 
@@ -583,7 +583,7 @@ msgstr "Применение интеграции FireJail для пакета %
 msgid "Building metadata for package %q"
 msgstr "Сборка метаданных пакета %q"
 
-#: internal/scripter/scripter.go:412 internal/scripter/scripter.go:466
+#: internal/scripter/scripter.go:418 internal/scripter/scripter.go:472
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
 

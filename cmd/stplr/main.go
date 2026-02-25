@@ -28,6 +28,8 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -60,7 +62,12 @@ func main() {
 	setLogLevel(os.Getenv("STPLR_LOG_LEVEL"))
 	i18n.Setup()
 
-	ctx := context.Background()
+	os.Exit(run())
+}
+
+func run() int {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	out := output.NewConsoleOutput()
 	ctx = output.WithOutput(ctx, out)
@@ -72,12 +79,13 @@ func main() {
 	err := cfg.Load()
 	if err != nil {
 		out.Error("%s: %v", gotext.Get("Error loading config"), err)
-		os.Exit(1)
+		return 1
 	}
 	setLogLevel(cfg.LogLevel())
 
-	err = p.Run(ctx, os.Args)
-	if err != nil {
+	if err = p.Run(ctx, os.Args); err != nil {
 		out.Error("%s: %v", gotext.Get("Error while running app"), err)
 	}
+
+	return 0
 }

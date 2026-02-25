@@ -258,7 +258,13 @@ func (e *LocalScriptExecutor) buildSinglePackage(
 	}
 
 	if err = pkgFile.Close(); err != nil {
+		_ = os.Remove(pkgPath)
 		return nil, fmt.Errorf("closing package file %q: %w", pkgPath, err)
+	}
+
+	if err = ctx.Err(); err != nil {
+		_ = os.Remove(pkgPath)
+		return nil, err
 	}
 
 	// return memory that was allocated (critical for high memory usage tasks in packager.Package)
