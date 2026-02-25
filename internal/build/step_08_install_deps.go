@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"os"
 	"strings"
 
 	"go.stplr.dev/stplr/internal/cliprompts"
@@ -187,7 +188,10 @@ func (s *installDepsStep) installPkgs(ctx context.Context, input InstallInput, p
 			NoConfirm: !input.BuildOpts().Interactive,
 		})
 		if err != nil {
-			return nil, err
+			for _, dep := range builtDeps {
+				_ = os.Remove(dep.Path)
+			}
+			return nil, fmt.Errorf("failed to install: %w", err)
 		}
 	}
 

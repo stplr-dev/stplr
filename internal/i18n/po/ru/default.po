@@ -583,7 +583,7 @@ msgstr "Применение интеграции FireJail для пакета %
 msgid "Building metadata for package %q"
 msgstr "Сборка метаданных пакета %q"
 
-#: internal/scripter/scripter.go:406 internal/scripter/scripter.go:460
+#: internal/scripter/scripter.go:412 internal/scripter/scripter.go:466
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
 
