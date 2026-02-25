@@ -31,11 +31,12 @@ import (
 	"strconv"
 	"strings"
 
-	// Импортируем пакеты для поддержки различных форматов пакетов (APK, DEB, RPM и ARCH).
 	_ "github.com/goreleaser/nfpm/v2/apk"
 	_ "github.com/goreleaser/nfpm/v2/arch"
 	_ "github.com/goreleaser/nfpm/v2/deb"
-	_ "github.com/goreleaser/nfpm/v2/rpm"
+
+	// rpm packager with modifications from our fork
+	_ "github.com/goreleaser/nfpm/v2/rpm-lowmem"
 
 	"github.com/goreleaser/nfpm/v2"
 	"github.com/goreleaser/nfpm/v2/files"

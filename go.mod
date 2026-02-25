@@ -14,6 +14,11 @@ replace golift.io/xtractr => go.stplr.dev/xtractr v0.2.3-0.20260121075838-b3378a
 
 // replace golift.io/xtractr => ../xtractr
 
+// reduce memory usage for building rpm
+replace github.com/goreleaser/nfpm/v2 => go.stplr.dev/nfpm/v2 v2.45.1-0.20260225141612-fc422e86c040
+
+replace github.com/google/rpmpack => go.stplr.dev/rpmpack v0.0.0-20260225123040-9f1edfecb27d
+
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/PuerkitoBio/purell v1.2.1
@@ -52,6 +57,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/spf13/afero v1.15.0
 	github.com/stretchr/testify v1.11.1
+	github.com/urfave/cli-docs/v3 v3.1.0
 	github.com/urfave/cli/v3 v3.6.2
 	go.alt-gnome.ru/capytest v0.0.4
 	go.alt-gnome.ru/capytest/providers/podman v0.0.4
@@ -129,7 +135,7 @@ require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/kdomanski/iso9660 v0.4.0 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/klauspost/compress v1.18.3 // indirect
+	github.com/klauspost/compress v1.18.4 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/knadh/koanf/maps v0.1.2 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
@@ -170,7 +176,6 @@ require (
 	github.com/sorairolake/lzip-go v0.3.8 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/sshaman1101/dcompress v0.0.0-20200109162717-50436a6332de // indirect
-	github.com/stoewer/go-strcase v1.2.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/therootcompany/xz v1.0.1 // indirect
@@ -179,7 +184,6 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/ulikunitz/xz v0.5.15 // indirect
-	github.com/urfave/cli-docs/v3 v3.1.0 // indirect
 	github.com/vishvananda/netlink v1.3.1 // indirect
 	github.com/vishvananda/netns v0.0.5 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
