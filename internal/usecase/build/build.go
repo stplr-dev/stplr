@@ -145,7 +145,10 @@ func (u *useCase) runForDb(ctx context.Context, o RunOptions) ([]*commonbuild.Bu
 		return nil, fmt.Errorf("failed to find pkgs: %w", err)
 	}
 
-	pkg := cliprompts.FlattenPkgs(ctx, foundPkgs, "build", o.Interactive)
+	pkg, err := cliprompts.FlattenPkgs(ctx, foundPkgs, "build", o.Interactive)
+	if err != nil {
+		return nil, fmt.Errorf("failed to flatten packages: %w", err)
+	}
 	var packages []string
 	if pkg[0].BasePkgName != "" {
 		packages = append(packages, pkg[0].Name)

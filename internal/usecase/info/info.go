@@ -72,7 +72,10 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		return errors.WrapIntoI18nError(ErrPackageNotFound, gotext.Get("Package not found"))
 	}
 
-	pkgs := cliprompts.FlattenPkgs(ctx, found, "show", opts.Interactive)
+	pkgs, err := cliprompts.FlattenPkgs(ctx, found, "show", opts.Interactive)
+	if err != nil {
+		return fmt.Errorf("failed to flatten packages: %w", err)
+	}
 
 	resolver := staplerfile.NewResolver(u.info)
 	err = resolver.Init()

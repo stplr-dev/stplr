@@ -378,7 +378,7 @@ msgstr "Полный текст лицензии доступен по адре�
 msgid "Installing dependencies"
 msgstr "Установка зависимостей"
 
-#: internal/build/build.go:298
+#: internal/build/build.go:301
 msgid ""
 "Firejail is disabled for %q package due to ignore pattern %q in config. "
 "Security isolation will not be applied. Ensure you understand the risks."
@@ -434,15 +434,11 @@ msgstr "Показать скрипт для пакета %s"
 msgid "Would you still like to continue?"
 msgstr "Продолжить?"
 
-#: internal/cliprompts/prompt.go:119
-msgid "Error prompting for choice of package"
-msgstr "Ошибка при запросе выбора пакета"
-
-#: internal/cliprompts/prompt.go:143
+#: internal/cliprompts/prompt.go:142
 msgid "Choose which package to %s"
 msgstr "Выберите, какой пакет использовать для %s"
 
-#: internal/cliprompts/prompt.go:164
+#: internal/cliprompts/prompt.go:163
 msgid "Choose which optional package to install"
 msgid_plural "Choose which optional packages to install"
 msgstr[0] "Выберите, какой дополнительный пакет следует установить"
@@ -691,11 +687,11 @@ msgstr "Ошибка при поиске пакетов"
 msgid "Package not found"
 msgstr "Пакет не найден"
 
-#: internal/usecase/info/info.go:80
+#: internal/usecase/info/info.go:83
 msgid "Error initializing resolver"
 msgstr "Ошибка инициализации resolver"
 
-#: internal/usecase/info/info.go:89
+#: internal/usecase/info/info.go:92
 msgid "Error encoding script variables"
 msgstr "Ошибка кодирования переменных скрита"
 
@@ -974,6 +970,9 @@ msgstr "Ошибка при определении языка системы"
 #: pkg/staplerfile/resolver.go:55
 msgid "Error resolving overrides"
 msgstr "Ошибка устранения переорпеделений"
+
+#~ msgid "Error prompting for choice of package"
+#~ msgstr "Ошибка при запросе выбора пакета"
 
 #~ msgid ""
 #~ "This command is deprecated and would be removed in the future, use \"%s\" "

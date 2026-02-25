@@ -349,7 +349,7 @@ msgstr ""
 msgid "Installing dependencies"
 msgstr ""
 
-#: internal/build/build.go:298
+#: internal/build/build.go:301
 msgid ""
 "Firejail is disabled for %q package due to ignore pattern %q in config. "
 "Security isolation will not be applied. Ensure you understand the risks."
@@ -398,15 +398,11 @@ msgstr ""
 msgid "Would you still like to continue?"
 msgstr ""
 
-#: internal/cliprompts/prompt.go:119
-msgid "Error prompting for choice of package"
-msgstr ""
-
-#: internal/cliprompts/prompt.go:143
+#: internal/cliprompts/prompt.go:142
 msgid "Choose which package to %s"
 msgstr ""
 
-#: internal/cliprompts/prompt.go:164
+#: internal/cliprompts/prompt.go:163
 msgid "Choose which optional package to install"
 msgid_plural "Choose which optional packages to install"
 msgstr[0] ""
@@ -650,11 +646,11 @@ msgstr ""
 msgid "Package not found"
 msgstr ""
 
-#: internal/usecase/info/info.go:80
+#: internal/usecase/info/info.go:83
 msgid "Error initializing resolver"
 msgstr ""
 
-#: internal/usecase/info/info.go:89
+#: internal/usecase/info/info.go:92
 msgid "Error encoding script variables"
 msgstr ""
 

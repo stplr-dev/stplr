@@ -27,14 +27,14 @@ package cliprompts
 import (
 	"context"
 	"errors"
-	"log/slog"
+	"fmt"
 	"os"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/leonelquinteros/gotext"
 
-	alrsh "go.stplr.dev/stplr/pkg/staplerfile"
+	"go.stplr.dev/stplr/pkg/staplerfile"
 
 	"go.stplr.dev/stplr/internal/app/tui/pager"
 )
@@ -110,25 +110,24 @@ func ShowScript(path, name, style string) error {
 
 // FlattenPkgs attempts to flatten the a map of slices of packages into a single slice
 // of packages by prompting the user if multiple packages match.
-func FlattenPkgs(ctx context.Context, found map[string][]alrsh.Package, verb string, interactive bool) []alrsh.Package {
-	var outPkgs []alrsh.Package
+func FlattenPkgs(ctx context.Context, found map[string][]staplerfile.Package, verb string, interactive bool) ([]staplerfile.Package, error) {
+	var outPkgs []staplerfile.Package
 	for _, pkgs := range found {
 		if len(pkgs) > 1 && interactive {
-			choice, err := PkgPrompt(ctx, pkgs, verb, interactive)
+			choice, err := pkgPrompt(pkgs, verb, interactive)
 			if err != nil {
-				slog.Error(gotext.Get("Error prompting for choice of package"))
-				os.Exit(1)
+				return nil, fmt.Errorf("error prompting for choice of package: %w", err)
 			}
 			outPkgs = append(outPkgs, choice)
 		} else if len(pkgs) == 1 || !interactive {
 			outPkgs = append(outPkgs, pkgs[0])
 		}
 	}
-	return outPkgs
+	return outPkgs, nil
 }
 
-// PkgPrompt asks the user to choose between multiple packages.
-func PkgPrompt(ctx context.Context, options []alrsh.Package, verb string, interactive bool) (alrsh.Package, error) {
+// pkgPrompt asks the user to choose between multiple packages.
+func pkgPrompt(options []staplerfile.Package, verb string, interactive bool) (staplerfile.Package, error) {
 	if !interactive {
 		return options[0], nil
 	}
@@ -146,7 +145,7 @@ func PkgPrompt(ctx context.Context, options []alrsh.Package, verb string, intera
 	var choice int
 	err := survey.AskOne(prompt, &choice)
 	if err != nil {
-		return alrsh.Package{}, err
+		return staplerfile.Package{}, err
 	}
 
 	return options[choice], nil

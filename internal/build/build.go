@@ -228,12 +228,15 @@ func (b *Builder) BuildALRDeps(ctx context.Context, input InstallInput, depends 
 		}
 		repoDeps = notFound
 
-		pkgs := cliprompts.FlattenPkgs(
+		pkgs, err := cliprompts.FlattenPkgs(
 			ctx,
 			found,
 			"install",
 			input.BuildOpts().Interactive,
 		)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to flatten packages: %w", err)
+		}
 		pkgsMap := groupPackages(pkgs)
 
 		for basePkgName := range pkgsMap {
