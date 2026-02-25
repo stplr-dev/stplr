@@ -2,6 +2,8 @@ module go.stplr.dev/stplr
 
 go 1.25.5
 
+toolchain go1.25.7
+
 // support of context via github.com/keegancsmith/rpc
 // see https://github.com/hashicorp/go-plugin/issues/284
 replace github.com/hashicorp/go-plugin => go.stplr.dev/go-plugin v1.7.1-0.20251005131903-98f00a04f159
