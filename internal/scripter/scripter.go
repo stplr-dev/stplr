@@ -334,10 +334,6 @@ func buildPkgMetadata(
 
 	setScripts(vars, pkgInfo, dirs.ScriptDir)
 
-	if slices.Contains(vars.Architectures, "all") {
-		pkgInfo.Arch = "all"
-	}
-
 	contents, err := buildContents(dirs, preferedContents, vars.Backup.Resolved())
 	if err != nil {
 		return nil, err

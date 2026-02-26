@@ -128,6 +128,26 @@ func TestGetBasePkgInfo(t *testing.T) {
 			expectedArch:  cpu.Arch(),
 			expectedEpoch: "0",
 		},
+		{
+			name: "all architecture",
+			pkg: &staplerfile.Package{
+				Name:          testPackage,
+				Version:       "1.0.0",
+				Release:       1,
+				Epoch:         2,
+				Architectures: []string{"all"},
+			},
+			osRelease: &distro.OSRelease{
+				ID: "ubuntu",
+			},
+			repository: "main",
+			buildOpts: &types.BuildOpts{
+				NoSuffix: false,
+			},
+			expectedName:  "test-package+stplr-main",
+			expectedArch:  "all",
+			expectedEpoch: "2",
+		},
 	}
 
 	for _, tt := range tests {

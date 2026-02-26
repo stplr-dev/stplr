@@ -540,7 +540,7 @@ msgstr ""
 msgid "Building metadata for package %q"
 msgstr ""
 
-#: internal/scripter/scripter.go:418 internal/scripter/scripter.go:472
+#: internal/scripter/scripter.go:414 internal/scripter/scripter.go:468
 msgid "Executing %s()"
 msgstr ""
 

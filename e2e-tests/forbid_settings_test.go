@@ -59,6 +59,11 @@ func TestE2EForbidSettings(t *testing.T) {
 				ExpectSuccess().
 				Run(t)
 
+			// Cleanup cache
+			r.Command("stplr", "fix").
+				ExpectSuccess().
+				Run(t)
+
 			enable(t, r)
 			r.Command("stplr", "-i=false", "install", testPackage).
 				ExpectStderrContains("Your settings do not allow SKIP in checksums").

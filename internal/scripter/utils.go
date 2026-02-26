@@ -207,9 +207,13 @@ func GetBasePkgInfo(pkg *staplerfile.Package, input getBasePkgInfoInput) *nfpm.I
 	} else {
 		name = FormatName(pkg.Name, input.Repository())
 	}
+	arch := cpu.Arch()
+	if slices.Contains(pkg.Architectures, "all") {
+		arch = "all"
+	}
 	return &nfpm.Info{
 		Name:    name,
-		Arch:    cpu.Arch(),
+		Arch:    arch,
 		Version: pkg.Version,
 		Release: overrides.ReleasePlatformSpecific(pkg.Release, input.OSRelease()),
 		Epoch:   strconv.FormatUint(uint64(pkg.Epoch), 10),
