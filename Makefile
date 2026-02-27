@@ -135,7 +135,6 @@ test-unit:
 
 test-unit-coverage:
 	go test ./... -v -coverpkg=./... -coverprofile=coverage.out
-	bash scripts/coverage-badge.sh
 
 prepare-test-e2e: clean build
 	rm -f e2e-tests/$(NAME)
