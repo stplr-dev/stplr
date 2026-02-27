@@ -26,7 +26,7 @@
 
 set -euo pipefail
 
-VERSION="0.0.29"
+VERSION="0.0.30"
 ARCH="linux-x86_64"
 BASE_URL="https://altlinux.space/stapler/stplr/releases/download/v$VERSION"
 TAR_NAME="stplr-$VERSION-$ARCH.tar.gz"
