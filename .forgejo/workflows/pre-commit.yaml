@@ -31,7 +31,7 @@ on:
 
 jobs:
   pre-commit:
-    runs-on: als-tiny-gh
+    runs-on: als-huge-gh
 
     steps:
       - name: Checkout

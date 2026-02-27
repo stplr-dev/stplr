@@ -30,7 +30,8 @@ on:
 
 jobs:
   sonarqube:
-    runs-on: als-tiny-gh
+    runs-on: als-huge-gh
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
