@@ -58,7 +58,7 @@ require (
 	github.com/spf13/afero v1.15.0
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli-docs/v3 v3.1.0
-	github.com/urfave/cli/v3 v3.6.2
+	github.com/urfave/cli/v3 v3.7.0
 	go.alt-gnome.ru/capytest v0.0.4
 	go.alt-gnome.ru/capytest/providers/podman v0.0.4
 	go.elara.ws/vercmp v0.0.0-20250912200949-2e97859b8794
