@@ -25,10 +25,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/charmbracelet/bubbles/spinner"
-	"github.com/charmbracelet/bubbles/viewport"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/bubbles/v2/spinner"
+	"charm.land/bubbles/v2/viewport"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/plugins/shared"
@@ -36,7 +36,7 @@ import (
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-const (
+var (
 	primaryColor     = lipgloss.Color("#00a8a3")
 	errorColor       = lipgloss.Color("9")
 	errorDarkerColor = lipgloss.Color("88")
@@ -65,8 +65,8 @@ func (m progressViewport) Update(msg tea.Msg) (progressViewport, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		if !m.viewportReady {
-			m.viewport.Width = msg.Width
-			m.viewport.Height = 15
+			m.viewport.SetWidth(msg.Width)
+			m.viewport.SetHeight(15)
 			m.viewportReady = true
 		}
 	case notifyWriteMsg:
@@ -84,7 +84,7 @@ func (m progressViewport) Update(msg tea.Msg) (progressViewport, tea.Cmd) {
 
 		m.viewport.SetContent(strings.Join(m.output, "\n"))
 		m.viewport.GotoBottom()
-		m.viewport.Height = len(m.output) + 3
+		m.viewport.SetHeight(len(m.output) + 3)
 		return m, nil
 	}
 
@@ -279,7 +279,7 @@ func (m pullModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m pullModel) View() string {
+func (m pullModel) View() tea.View {
 	title := lipgloss.NewStyle().
 		Bold(true).
 		Foreground(primaryColor).
@@ -296,7 +296,7 @@ func (m pullModel) View() string {
 	}
 
 	if m.done {
-		return fmt.Sprintf("%s%s\n%s\n", title, logSection, m.status)
+		return tea.NewView(fmt.Sprintf("%s%s\n%s\n", title, logSection, m.status))
 	}
 
 	statusLine := fmt.Sprintf("\n%s %s",
@@ -305,7 +305,7 @@ func (m pullModel) View() string {
 			Foreground(lipgloss.Color("240")).
 			Render(m.status))
 
-	return fmt.Sprintf("%s%s%s%s", title, logSection, statusLine, gitBox)
+	return tea.NewView(fmt.Sprintf("%s%s%s%s", title, logSection, statusLine, gitBox))
 }
 
 func (m pullModel) Pull() error {

@@ -28,9 +28,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/charmbracelet/bubbles/viewport"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/bubbles/v2/viewport"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 )
 
 var (
@@ -109,17 +109,17 @@ func (m GenericModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		verticalMarginHeight := headerHeight + footerHeight
 
 		if !m.ready {
-			m.viewport = viewport.New(msg.Width, msg.Height-verticalMarginHeight)
+			m.viewport = viewport.New(viewport.WithWidth(msg.Width), viewport.WithHeight(msg.Height-verticalMarginHeight))
 			m.viewport.YPosition = headerHeight + 1
 			m.viewport.SetHorizontalStep(0)
 			m.viewport.SetContent(lipgloss.NewStyle().Width(msg.Width).Render("\n" + m.cfg.Content))
 			m.ready = true
 		} else {
-			if msg.Width != m.viewport.Width {
+			if msg.Width != m.viewport.Width() {
 				m.viewport.SetContent(lipgloss.NewStyle().Width(msg.Width).Render("\n" + m.cfg.Content))
 			}
-			m.viewport.Width = msg.Width
-			m.viewport.Height = msg.Height - verticalMarginHeight
+			m.viewport.SetWidth(msg.Width)
+			m.viewport.SetHeight(msg.Height - verticalMarginHeight)
 		}
 	}
 
@@ -129,11 +129,17 @@ func (m GenericModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-func (m GenericModel) View() string {
+func (m GenericModel) View() tea.View {
+	var v tea.View
 	if !m.ready {
-		return "\n  Initializing..."
+		v = tea.NewView("\n  Initializing...")
 	}
-	return fmt.Sprintf("%s\n%s\n%s", m.headerView(), m.viewport.View(), m.footerView())
+	v = tea.NewView(fmt.Sprintf("%s\n%s\n%s", m.headerView(), m.viewport.View(), m.footerView()))
+
+	v.AltScreen = true
+	v.MouseMode = tea.MouseModeCellMotion
+
+	return v
 }
 
 func (m GenericModel) headerView() string {
@@ -154,13 +160,13 @@ func (m GenericModel) footerView() string {
 
 func DefaultHeader(m GenericModel) string {
 	title := m.cfg.Title.Render(m.cfg.Name)
-	line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(title)))
+	line := strings.Repeat("─", max(0, m.viewport.Width()-lipgloss.Width(title)))
 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
 }
 
 func DefaultFooter(m GenericModel) string {
 	info := m.cfg.Info.Render(fmt.Sprintf("%3.f%%", m.viewport.ScrollPercent()*100))
-	line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(info)))
+	line := strings.Repeat("─", max(0, m.viewport.Width()-lipgloss.Width(info)))
 
 	helpLine := ""
 	if len(m.cfg.Controls) > 0 {
