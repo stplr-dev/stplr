@@ -25,7 +25,6 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"strconv"
 
 	"go.stplr.dev/stplr/internal/osutils"
 	"go.stplr.dev/stplr/pkg/dl/cache"
@@ -35,10 +34,9 @@ import (
 )
 
 const (
-	metadataRepository         = "repository"
-	metadataPackage            = "package"
-	metadataVersion            = "version"
-	metadataSFE249NewExtractor = "sfe_249_new_extractor"
+	metadataRepository = "repository"
+	metadataPackage    = "package"
+	metadataVersion    = "version"
 )
 
 type LocalCache struct {
@@ -51,14 +49,13 @@ func NewLocalCache(baseDir string) *LocalCache {
 }
 
 type cacheRecord struct {
-	ID                 int64  `xorm:"pk autoincr"`
-	Hash               string `xorm:"index"`
-	Repo               string `xorm:"index"`
-	Pkg                string `xorm:"index"`
-	Ver                string `xorm:"index"`
-	SFE249NewExtractor bool   `xorm:"'sfe_249_new_extractor'"`
-	Name               string
-	Type               cache.Type
+	ID   int64  `xorm:"pk autoincr"`
+	Hash string `xorm:"index"`
+	Repo string `xorm:"index"`
+	Pkg  string `xorm:"index"`
+	Ver  string `xorm:"index"`
+	Name string
+	Type cache.Type
 }
 
 func (c *LocalCache) Init() error {
@@ -129,13 +126,12 @@ func (c *LocalCache) Resolve(ctx context.Context, url string, metadata cache.Met
 	}
 
 	newRecord := &cacheRecord{
-		Hash:               hashOnlyMatch.Hash,
-		Type:               hashOnlyMatch.Type,
-		SFE249NewExtractor: hashOnlyMatch.SFE249NewExtractor,
-		Name:               hashOnlyMatch.Name,
-		Repo:               repo,
-		Pkg:                pkg,
-		Ver:                ver,
+		Hash: hashOnlyMatch.Hash,
+		Type: hashOnlyMatch.Type,
+		Name: hashOnlyMatch.Name,
+		Repo: repo,
+		Pkg:  pkg,
+		Ver:  ver,
 	}
 	if v, ok := metadata[cache.MetdataRestoreName]; ok {
 		newRecord.Name = v
@@ -173,10 +169,9 @@ func (c *LocalCache) Get(ctx context.Context, cid cache.CacheID) (cache.CachedSo
 	src.Manifest.Name = record.Name
 	src.Manifest.Type = record.Type
 	src.Metadata = BuildMetadata(LocalCacheMetadata{
-		Repository:         record.Repo,
-		Package:            record.Pkg,
-		Version:            record.Ver,
-		SFE249NewExtractor: record.SFE249NewExtractor,
+		Repository: record.Repo,
+		Package:    record.Pkg,
+		Version:    record.Ver,
 	})
 
 	return src, nil
@@ -201,7 +196,6 @@ func (c *LocalCache) Put(ctx context.Context, req cache.CachePutRequest) (cache.
 		record.Repo = m.Repository
 		record.Pkg = m.Package
 		record.Ver = m.Version
-		record.SFE249NewExtractor = m.SFE249NewExtractor
 	}
 
 	dest := c.recordEntry(*record)
@@ -309,32 +303,28 @@ func (c *LocalCache) recordEntry(r cacheRecord) string {
 }
 
 func (c *LocalCache) recordDir(r cacheRecord) string {
-	return filepath.Join(c.baseDir, r.Hash, fmt.Sprintf("%d", btoi(r.SFE249NewExtractor)))
+	return filepath.Join(c.baseDir, r.Hash)
 }
 
 type LocalCacheMetadata struct {
-	Repository         string
-	Package            string
-	Version            string
-	SFE249NewExtractor bool
+	Repository string
+	Package    string
+	Version    string
 }
 
 func BuildMetadata(m LocalCacheMetadata) cache.Metadata {
 	return cache.Metadata{
-		metadataRepository:         m.Repository,
-		metadataPackage:            m.Package,
-		metadataVersion:            m.Version,
-		metadataSFE249NewExtractor: fmt.Sprintf("%t", m.SFE249NewExtractor),
+		metadataRepository: m.Repository,
+		metadataPackage:    m.Package,
+		metadataVersion:    m.Version,
 	}
 }
 
 func ParseMetadata(metadata cache.Metadata) LocalCacheMetadata {
-	sfe249, _ := strconv.ParseBool(metadata[metadataSFE249NewExtractor])
 	return LocalCacheMetadata{
-		Repository:         metadata[metadataRepository],
-		Package:            metadata[metadataPackage],
-		Version:            metadata[metadataVersion],
-		SFE249NewExtractor: sfe249,
+		Repository: metadata[metadataRepository],
+		Package:    metadata[metadataPackage],
+		Version:    metadata[metadataVersion],
 	}
 }
 
@@ -343,11 +333,4 @@ func typeFromPath(path string) cache.Type {
 		return cache.TypeDir
 	}
 	return cache.TypeFile
-}
-
-func btoi(b bool) int {
-	if b {
-		return 1
-	}
-	return 0
 }

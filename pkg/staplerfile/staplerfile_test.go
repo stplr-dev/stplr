@@ -60,5 +60,4 @@ func TestParseBuildVarsOptions(t *testing.T) {
 	assert.NotNil(t, pkgs)
 
 	assert.Len(t, pkgs, 1)
-	assert.Equal(t, pkgs[0].Options.SFE249NewExtractor, true)
 }

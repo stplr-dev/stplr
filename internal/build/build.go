@@ -57,9 +57,8 @@ type PackageFinder interface {
 }
 
 type SourcesInput struct {
-	Sources      []string
-	Checksums    []string
-	NewExtractor bool
+	Sources   []string
+	Checksums []string
 }
 
 type BuildArgs struct {

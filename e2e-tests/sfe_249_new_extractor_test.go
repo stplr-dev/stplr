@@ -29,10 +29,10 @@ import (
 func TestE2ESfe249NewExtractor(t *testing.T) {
 	t.Parallel()
 
-	t.Run("stplr SFE 249 (New Extractor) works", matrixSuite(COMMON_SYSTEMS, func(t *testing.T, r capytest.Runner) {
+	t.Run("stplr SFE 249 (New Extractor) is always enabled", matrixSuite(COMMON_SYSTEMS, func(t *testing.T, r capytest.Runner) {
 		defaultPrepare(t, r)
 
-		execShouldNoError(t, r, "stplr", "build", "-p", "test-sfe-249-off", "-c")
+		execShouldError(t, r, "stplr", "build", "-p", "test-sfe-249-off", "-c")
 		execShouldNoError(t, r, "stplr", "build", "-p", "test-sfe-249-on", "-c")
 	}))
 }

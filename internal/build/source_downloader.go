@@ -61,20 +61,18 @@ func (s *LocalSourceDownloader) DownloadSources(
 
 	for i, src := range si.Sources {
 		opts := dl.Options{
-			Name:         fmt.Sprintf("[%d]", i),
-			URL:          src,
-			Progress:     os.Stderr,
-			Destination:  commonbuild.GetSrcDir(s.cfg, basePkg),
-			LocalDir:     commonbuild.GetScriptDir(input.Script),
-			Output:       s.out,
-			DlCache:      s.localCache,
-			NewExtractor: si.NewExtractor,
+			Name:        fmt.Sprintf("[%d]", i),
+			URL:         src,
+			Progress:    os.Stderr,
+			Destination: commonbuild.GetSrcDir(s.cfg, basePkg),
+			LocalDir:    commonbuild.GetScriptDir(input.Script),
+			Output:      s.out,
+			DlCache:     s.localCache,
 			CacheMetadata: local.BuildMetadata(
 				local.LocalCacheMetadata{
-					Repository:         repo,
-					Package:            basePkg,
-					Version:            version,
-					SFE249NewExtractor: si.NewExtractor,
+					Repository: repo,
+					Package:    basePkg,
+					Version:    version,
 				},
 			),
 		}

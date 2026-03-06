@@ -38,10 +38,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 	"time"
 
-	"github.com/mholt/archiver/v4"
 	"golift.io/xtractr"
 
 	"go.stplr.dev/stplr/internal/experimental/xtract"
@@ -147,40 +145,18 @@ func (fd FileDownloader) postProcess(path string, fl *os.File, name string, opts
 		return TypeFile, name, nil
 	}
 
-	if opts.NewExtractor {
-		_, err := xtract.ExtractArchive(path, opts.Destination)
-		if errors.Is(err, xtractr.ErrUnknownArchiveType) {
-			return TypeFile, "", nil
-		}
-		if err != nil {
-			return 0, "", fmt.Errorf("failed to extract with new extractor: %w", err)
-		}
-		err = os.RemoveAll(path)
-		if err != nil {
-			return 0, "", fmt.Errorf("failed to remove original archive: %w", err)
-		}
-		return TypeDir, "", nil
+	_, err := xtract.ExtractArchive(path, opts.Destination)
+	if errors.Is(err, xtractr.ErrUnknownArchiveType) {
+		return TypeFile, "", nil
 	}
-
-	_, err := fl.Seek(0, io.SeekStart)
 	if err != nil {
-		return 0, "", err
+		return 0, "", fmt.Errorf("failed to extract with new extractor: %w", err)
 	}
-
-	format, ar, err := archiver.Identify(name, fl)
-	if err == archiver.ErrNoMatch {
-		return TypeFile, name, nil
-	} else if err != nil {
-		return 0, "", err
-	}
-
-	err = extractFile(ar, format, name, opts)
+	err = os.RemoveAll(path)
 	if err != nil {
-		return 0, "", err
+		return 0, "", fmt.Errorf("failed to remove original archive: %w", err)
 	}
-
-	err = os.Remove(path)
-	return TypeDir, "", err
+	return TypeDir, "", nil
 }
 
 // Download downloads a file using HTTP. If the file is compressed in a supported format, it will be unpacked.
@@ -231,85 +207,6 @@ func (fd FileDownloader) Download(ctx context.Context, opts Options) (Type, stri
 	}
 
 	return fd.postProcess(path, fl, name, opts, postprocDisabled)
-}
-
-// extractFile extracts an archive or decompresses a file based on the format.
-func extractFile(r io.Reader, format archiver.Format, name string, opts Options) error {
-	fname := format.Name()
-	switch format := format.(type) {
-	case archiver.Extractor:
-		return extractArchive(r, format, opts)
-	case archiver.Decompressor:
-		return decompressFile(r, format, name, fname, opts)
-	default:
-		return nil
-	}
-}
-
-// extractArchive handles extraction of archived files.
-func extractArchive(r io.Reader, format archiver.Extractor, opts Options) error {
-	return format.Extract(context.Background(), r, nil, func(ctx context.Context, f archiver.File) error {
-		return processArchiveFile(f, opts)
-	})
-}
-
-// processArchiveFile processes a single file or directory from an archive.
-func processArchiveFile(f archiver.File, opts Options) error {
-	fr, err := f.Open()
-	if err != nil {
-		return err
-	}
-	defer fr.Close()
-
-	path := filepath.Join(opts.Destination, f.NameInArchive)
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		return err
-	}
-
-	if f.IsDir() {
-		return os.MkdirAll(path, 0o755)
-	}
-	return writeExtractedFile(fr, path, f)
-}
-
-// writeExtractedFile writes an extracted file to disk.
-func writeExtractedFile(fr io.Reader, path string, f archiver.File) error {
-	fi, err := f.Stat()
-	if err != nil {
-		return err
-	}
-	outFl, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, fi.Mode().Perm())
-	if err != nil {
-		return err
-	}
-	defer outFl.Close()
-
-	_, err = io.Copy(outFl, fr)
-	return err
-}
-
-// decompressFile handles decompression of a single file.
-func decompressFile(r io.Reader, format archiver.Decompressor, name, fname string, opts Options) error {
-	rc, err := format.OpenReader(r)
-	if err != nil {
-		return err
-	}
-	defer rc.Close()
-
-	path := filepath.Join(opts.Destination, strings.TrimSuffix(name, fname))
-	return writeDecompressedFile(rc, path)
-}
-
-// writeDecompressedFile writes a decompressed file to disk.
-func writeDecompressedFile(rc io.Reader, path string) error {
-	outFl, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer outFl.Close()
-
-	_, err = io.Copy(outFl, rc)
-	return err
 }
 
 // getFilename пытается разобрать заголовок Content-Disposition

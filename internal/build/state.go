@@ -29,10 +29,9 @@ type BuildState struct {
 	BuiltDeps  []*commonbuild.BuiltDep
 	Packages   []*staplerfile.Package
 
-	Repository         string
-	BasePackage        string
-	Version            string
-	SFE249NewExtractor bool
+	Repository  string
+	BasePackage string
+	Version     string
 
 	FlatVars flatVars
 

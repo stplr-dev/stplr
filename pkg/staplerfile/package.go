@@ -47,9 +47,7 @@ func ParseNames(dec *decoder.Decoder) (*PackageNames, error) {
 	return &pkgs, nil
 }
 
-type ScriptOptions struct {
-	SFE249NewExtractor bool `sh:"sfe_249_new_extractor"`
-}
+type ScriptOptions struct{}
 
 func ParseScriptOptions(dec *decoder.Decoder) (*ScriptOptions, error) {
 	var opts ScriptOptions

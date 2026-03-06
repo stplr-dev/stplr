@@ -101,7 +101,6 @@ type Options struct {
 	DlCache          cache.DlCache
 	CacheMetadata    cache.Metadata
 	Output           output.Output
-	NewExtractor     bool
 }
 
 var _ cache.DlCache = new(local.LocalCache)
@@ -200,21 +199,12 @@ func downloadWithCache(ctx context.Context, opts Options, d Downloader) error {
 
 // handleCachedSource processes a cached source, updating it if necessary.
 func handleCachedSource(ctx context.Context, opts Options, d Downloader, cid cache.CacheID) error {
-	s, err := opts.DlCache.Get(ctx, cid)
+	_, err := opts.DlCache.Get(ctx, cid)
 	if err != nil {
 		if errors.Is(err, cache.ErrEntryNotFound) {
 			return performDownload(ctx, opts, d)
 		}
 		return err
-	}
-
-	if local.ParseMetadata(s.Metadata).SFE249NewExtractor != opts.NewExtractor {
-		err := opts.DlCache.Delete(ctx, cid)
-		if err != nil {
-			return err
-		}
-
-		return performDownload(ctx, opts, d)
 	}
 
 	updated, err := updateSourceIfNeeded(ctx, opts, d, cid)
