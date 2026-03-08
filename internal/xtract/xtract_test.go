@@ -215,7 +215,7 @@ func TestExtractAllFixtures(t *testing.T) {
 
 				// Verify extraction result
 				assert.NotNil(t, result, "extraction result should not be nil")
-				assert.Greater(t, result.Size, int64(0), "extracted size should be positive")
+				assert.Greater(t, result.Size, uint64(0), "extracted size should be positive")
 				assert.NotEmpty(t, result.Files, "files list should not be empty")
 
 				// Verify extracted content based on archive type

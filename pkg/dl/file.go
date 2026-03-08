@@ -42,7 +42,7 @@ import (
 
 	"golift.io/xtractr"
 
-	"go.stplr.dev/stplr/internal/experimental/xtract"
+	"go.stplr.dev/stplr/internal/xtract"
 )
 
 // FileDownloader загружает файлы с использованием HTTP

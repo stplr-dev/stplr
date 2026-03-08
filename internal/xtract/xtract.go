@@ -43,7 +43,7 @@ func IsSupported(filename string) bool {
 
 // ExtractResult contains information about the extraction process.
 type ExtractResult struct {
-	Size     int64    // Total size of extracted data
+	Size     uint64   // Total size of extracted data
 	Files    []string // List of extracted files
 	Archives []string // List of archives processed (including nested)
 }
