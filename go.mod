@@ -22,7 +22,7 @@ replace github.com/google/rpmpack => go.stplr.dev/rpmpack v0.0.0-20260225123040-
 require (
 	charm.land/bubbles/v2 v2.0.0
 	charm.land/bubbletea/v2 v2.0.1
-	charm.land/lipgloss/v2 v2.0.0
+	charm.land/lipgloss/v2 v2.0.1
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/PuerkitoBio/purell v1.2.1
 	github.com/alecthomas/chroma/v2 v2.23.1
