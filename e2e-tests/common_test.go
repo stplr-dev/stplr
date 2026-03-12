@@ -35,7 +35,7 @@ import (
 var ALL_SYSTEMS []string = []string{
 	"ubuntu-24.04",
 	"alt-sisyphus",
-	"fedora-41",
+	"fedora-43",
 	// "archlinux",
 	// "alpine",
 	// "opensuse-leap",
