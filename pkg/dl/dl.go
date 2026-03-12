@@ -152,6 +152,19 @@ type UpdatingDownloader interface {
 	Update(Options) (bool, error)
 }
 
+// CachePolicy is an enum that defines the cache policy for a given URL.
+type CachePolicy uint8
+
+const (
+	CachePolicyDefault CachePolicy = iota
+	CachePolicyNever
+)
+
+// CachePolicyProvider is an interface that provides cache policy for a given URL.
+type CachePolicyProvider interface {
+	CachePolicy(url string) CachePolicy
+}
+
 // Download handles downloading a file or directory with the given options.
 func Download(ctx context.Context, opts Options) (err error) {
 	normalized, err := normalizeURL(opts.URL)
@@ -179,6 +192,10 @@ func Download(ctx context.Context, opts Options) (err error) {
 	if opts.CacheDisabled {
 		_, _, err = d.Download(ctx, opts)
 		return err
+	}
+
+	if cp, ok := d.(CachePolicyProvider); ok && cp.CachePolicy(opts.URL) == CachePolicyNever {
+		return performDownload(ctx, opts, d)
 	}
 
 	return downloadWithCache(ctx, opts, d)

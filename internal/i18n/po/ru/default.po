@@ -920,21 +920,21 @@ msgstr[0] "Не удалось обновить %d пакет"
 msgstr[1] "Не удалось обновить %d пакета"
 msgstr[2] "Не удалось обновить %d пакетов"
 
-#: pkg/dl/dl.go:230
+#: pkg/dl/dl.go:247
 msgid "Source %q can be updated using %s — updating if required"
 msgstr ""
 "Источник %q можно обновить с помощью %s — обновление будет выполнено при "
 "необходимости"
 
-#: pkg/dl/dl.go:289
+#: pkg/dl/dl.go:306
 msgid "Downloading source %s from %s using %s downloader"
 msgstr "Загрузка источника %s из %s с помощью загрузчика %s"
 
-#: pkg/dl/dl.go:342
+#: pkg/dl/dl.go:359
 msgid "Source %q was updated and linked to destination"
 msgstr "Источник %q был обновлён и связан с пунктом назначения"
 
-#: pkg/dl/dl.go:344
+#: pkg/dl/dl.go:361
 msgid "Source %q found in cache and linked to destination"
 msgstr "Источник %q найден в кэше и связан с пунктом назначения"
 
