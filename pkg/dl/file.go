@@ -61,9 +61,20 @@ func (FileDownloader) MatchURL(string) bool {
 
 func IsLocalUrl(u *url.URL) bool { return u.Scheme == "local" }
 
+func (fd FileDownloader) CachePolicy(url string) CachePolicy {
+	u, _, _, err := fd.parseURLAndParams(url)
+	if err != nil {
+		return CachePolicyDefault
+	}
+	if IsLocalUrl(u) {
+		return CachePolicyNever
+	}
+	return CachePolicyDefault
+}
+
 // parseURLAndParams parses the URL and extracts special query parameters.
-func (fd FileDownloader) parseURLAndParams(opts Options) (*url.URL, string, string, error) {
-	u, err := url.Parse(opts.URL)
+func (fd FileDownloader) parseURLAndParams(downloadUrl string) (*url.URL, string, string, error) {
+	u, err := url.Parse(downloadUrl)
 	if err != nil {
 		return nil, "", "", err
 	}
@@ -161,7 +172,7 @@ func (fd FileDownloader) postProcess(path string, fl *os.File, name string, opts
 
 // Download downloads a file using HTTP. If the file is compressed in a supported format, it will be unpacked.
 func (fd FileDownloader) Download(ctx context.Context, opts Options) (Type, string, error) {
-	u, name, archive, err := fd.parseURLAndParams(opts)
+	u, name, archive, err := fd.parseURLAndParams(opts.URL)
 	if err != nil {
 		return 0, "", err
 	}
@@ -223,3 +234,8 @@ func getFilename(res *http.Response) (name string) {
 		return path.Base(res.Request.URL.Path)
 	}
 }
+
+var (
+	_ CachePolicyProvider = &FileDownloader{}
+	_ Downloader          = &FileDownloader{}
+)

@@ -35,7 +35,7 @@ import (
 var ALL_SYSTEMS []string = []string{
 	"ubuntu-24.04",
 	"alt-sisyphus",
-	"fedora-41",
+	"fedora-43",
 	// "archlinux",
 	// "alpine",
 	// "opensuse-leap",
@@ -48,11 +48,11 @@ var ALT_SISYPHUS = []string{
 
 var AUTOREQ_AUTOPROV_SYSTEMS []string = []string{
 	// "alt-sisyphus",
-	"fedora-41",
+	"fedora-43",
 }
 
 var RPM_SYSTEMS []string = []string{
-	"fedora-41",
+	"fedora-43",
 }
 
 var COMMON_SYSTEMS []string = []string{
