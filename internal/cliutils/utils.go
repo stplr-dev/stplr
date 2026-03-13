@@ -28,6 +28,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/hashicorp/go-plugin"
 	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app/output"
@@ -49,6 +50,13 @@ func HandleExitCoder(ctx context.Context, c *cli.Command, err error) {
 	}
 
 	slog.Error(fmt.Sprintf("%s command failed", c.Name), "err", err)
+
+	var startupErr *plugin.PluginStartupError
+	if stdErrors.As(err, &startupErr) {
+		out.Error(startupErr.Message)
+		cli.OsExiter(1)
+		return
+	}
 
 	if exitErr, ok := err.(cli.ExitCoder); ok {
 		if err.Error() != "" {

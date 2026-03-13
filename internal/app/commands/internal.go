@@ -40,7 +40,7 @@ func InternalPluginProvider() *cli.Command {
 		Action: func(ctx context.Context, c *cli.Command) error {
 			d, f, err := deps.ForPluginsServe(ctx)
 			if err != nil {
-				return err
+				return plugins.ServeError(err)
 			}
 			defer f()
 			return plugins.Serve(plugins.PluginMap(d.Puller, d.Scripter))
@@ -56,7 +56,7 @@ func InternalPluginProviderRoot() *cli.Command {
 		Action: func(ctx context.Context, c *cli.Command) error {
 			d, f, err := deps.ForPluginsServeRoot(ctx)
 			if err != nil {
-				return err
+				return plugins.ServeError(err)
 			}
 			defer f()
 			return plugins.Serve(plugins.RootPluginMap(

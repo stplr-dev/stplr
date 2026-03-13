@@ -59,14 +59,18 @@ var builderPluginMap = map[string]plugin.Plugin{
 	systemConfigWriterKey: &savers.SystemConfigWriterExecutorPlugin{},
 }
 
-func PluginMap(r repos.PullExecutor, s scripter.ScriptExecutor) map[string]plugin.Plugin {
-	return map[string]plugin.Plugin{
-		pullerPluginKey: &repos.PullExecutorPlugin{
-			Impl: r,
-		},
-		scripterPluginKey: &scripter.ScriptExecutorPlugin{
-			Impl: s,
-		},
+type pluginInitFunc func() (plugin.PluginSet, error)
+
+func PluginMap(r repos.PullExecutor, s scripter.ScriptExecutor) pluginInitFunc {
+	return func() (plugin.PluginSet, error) {
+		return plugin.PluginSet{
+			pullerPluginKey: &repos.PullExecutorPlugin{
+				Impl: r,
+			},
+			scripterPluginKey: &scripter.ScriptExecutorPlugin{
+				Impl: s,
+			},
+		}, nil
 	}
 }
 
@@ -74,17 +78,19 @@ func RootPluginMap(
 	p installer.InstallerExecutor,
 	c copier.CopierExecutor,
 	s savers.SystemConfigWriterExecutor,
-) map[string]plugin.Plugin {
-	return map[string]plugin.Plugin{
-		installerPluginKey: &installer.InstallerExecutorPlugin{
-			Impl: p,
-		},
-		copierPluginKey: &copier.CopierExecutorPlugin{
-			Impl: c,
-		},
-		systemConfigWriterKey: &savers.SystemConfigWriterExecutorPlugin{
-			Impl: s,
-		},
+) pluginInitFunc {
+	return func() (plugin.PluginSet, error) {
+		return plugin.PluginSet{
+			installerPluginKey: &installer.InstallerExecutorPlugin{
+				Impl: p,
+			},
+			copierPluginKey: &copier.CopierExecutorPlugin{
+				Impl: c,
+			},
+			systemConfigWriterKey: &savers.SystemConfigWriterExecutorPlugin{
+				Impl: s,
+			},
+		}, nil
 	}
 }
 
@@ -193,7 +199,7 @@ func (p *Provider) SetupRootConnection() error {
 	return p.setupConnection(RootProviderSubcommand)
 }
 
-func Serve(plugins map[string]plugin.Plugin) error {
+func commonServe(cfg *plugin.ServeConfig) error {
 	logger.SetupForGoPlugin()
 	logger := hclog.New(&hclog.LoggerOptions{
 		Name:        "plugin",
@@ -202,12 +208,24 @@ func Serve(plugins map[string]plugin.Plugin) error {
 		JSONFormat:  true,
 		DisableTime: true,
 	})
-	plugin.Serve(&plugin.ServeConfig{
-		HandshakeConfig: HandshakeConfig,
-		Plugins:         plugins,
-		Logger:          logger,
-	})
+	cfg.HandshakeConfig = HandshakeConfig
+	cfg.Logger = logger
+	plugin.Serve(cfg)
 	return nil
+}
+
+func Serve(initFunc pluginInitFunc) error {
+	return commonServe(&plugin.ServeConfig{
+		InitFunc: initFunc,
+	})
+}
+
+func ServeError(err error) error {
+	return commonServe(&plugin.ServeConfig{
+		InitFunc: func() (plugin.PluginSet, error) {
+			return nil, err
+		},
+	})
 }
 
 func Get[T any](ctx context.Context, provider *Provider, name string) (T, error) {
