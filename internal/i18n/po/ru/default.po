@@ -175,8 +175,8 @@ msgid "Command info expected at least 1 argument, got %d"
 msgstr "Для команды info ожидался хотя бы 1 аргумент, получено %d"
 
 #: internal/app/commands/install.go:44
-msgid "Command remove expected at least 1 argument, got %d"
-msgstr "Для команды remove ожидался хотя бы 1 аргумент, получено %d"
+msgid "Command install expected at least 1 argument, got %d"
+msgstr "Для команды install ожидался хотя бы 1 аргумент, получено %d"
 
 #: internal/app/commands/install.go:52
 msgid "Install a new package"
@@ -197,6 +197,10 @@ msgstr "Мигрировать до текущей версии"
 #: internal/app/commands/refresh.go:39
 msgid "Pull all repositories that have changed"
 msgstr "Скачать все изменённые репозитории"
+
+#: internal/app/commands/remove.go:38
+msgid "Command remove expected at least 1 argument, got %d"
+msgstr "Для команды remove ожидался хотя бы 1 аргумент, получено %d"
 
 #: internal/app/commands/remove.go:46
 msgid "Remove an installed package"
@@ -320,7 +324,7 @@ msgstr "[УСТАРЕЛ] Искать по репозиторию"
 
 #: internal/app/commands/search.go:70
 msgid "[DEPRECATED] Search by provides"
-msgstr "[УСТАРЕЛ] Иcкать по provides"
+msgstr "[УСТАРЕЛ] Искать по provides"
 
 #: internal/app/commands/support.go:35
 msgid "Dump debug information"
@@ -355,8 +359,8 @@ msgid "ERROR"
 msgstr "ОШИБКА"
 
 #: internal/app/tui/pager/code_pager.go:44
-msgid "q/Esc - Quit"
-msgstr "q/Esc - Выйти"
+msgid "q/Esc - Close viewer"
+msgstr "q/Esc - Закрыть просмотр"
 
 #: internal/app/tui/pager/nonfree_pager.go:48
 msgid "y - Accept"
@@ -451,7 +455,7 @@ msgstr "Ошибка при понижении привилегий"
 
 #: internal/cliutils/cli.go:122
 msgid "You need to be a %s member or root to perform this action"
-msgstr "Вы должны быть членом %s или root чтобы выполнить это"
+msgstr "Вы должны быть членом %s или root, чтобы выполнить это"
 
 #: internal/cliutils/localize.go:32
 msgid "Shows a list of commands or help for one command"
@@ -693,7 +697,7 @@ msgstr "Ошибка инициализации resolver"
 
 #: internal/usecase/info/info.go:92
 msgid "Error encoding script variables"
-msgstr "Ошибка кодирования переменных скрита"
+msgstr "Ошибка кодирования переменных скрипта"
 
 #: internal/usecase/info/shell/shell.go:53
 msgid "Error getting packages"
@@ -969,7 +973,10 @@ msgstr "Ошибка при определении языка системы"
 
 #: pkg/staplerfile/resolver.go:55
 msgid "Error resolving overrides"
-msgstr "Ошибка устранения переорпеделений"
+msgstr "Ошибка устранения переопределений"
+
+#~ msgid "q/Esc - Quit"
+#~ msgstr "q/Esc - Выйти"
 
 #~ msgid "Error prompting for choice of package"
 #~ msgstr "Ошибка при запросе выбора пакета"
@@ -1008,9 +1015,6 @@ msgstr "Ошибка устранения переорпеделений"
 
 #~ msgid "Repository up to date"
 #~ msgstr "Репозиторий уже обновлён"
-
-#~ msgid "Command install expected at least 1 argument, got %d"
-#~ msgstr "Для команды install ожидался хотя бы 1 аргумент, получено %d"
 
 #~ msgid "Cannot get absolute script path"
 #~ msgstr "Невозможно получить абсолютный путь к скрипту"

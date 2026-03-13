@@ -41,7 +41,7 @@ func NewCode(name, content string) *Pager {
 		Info:    DefaultInfoStyle,
 		Help:    DefaultHelpStyle,
 		Controls: []string{
-			gotext.Get("q/Esc - Quit"),
+			gotext.Get("q/Esc - Close viewer"),
 		},
 		KeyHandler: func(msg tea.KeyMsg, m *GenericModel) (bool, tea.Cmd) {
 			switch msg.String() {

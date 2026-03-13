@@ -41,7 +41,7 @@ import (
 func installCmdActionChecks(_ context.Context, c *cli.Command) error {
 	args := c.Args()
 	if args.Len() < 1 {
-		return errors.NewI18nError(gotext.Get("Command remove expected at least 1 argument, got %d", args.Len()))
+		return errors.NewI18nError(gotext.Get("Command install expected at least 1 argument, got %d", args.Len()))
 	}
 	return nil
 }

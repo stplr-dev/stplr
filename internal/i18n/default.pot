@@ -148,7 +148,7 @@ msgid "Command info expected at least 1 argument, got %d"
 msgstr ""
 
 #: internal/app/commands/install.go:44
-msgid "Command remove expected at least 1 argument, got %d"
+msgid "Command install expected at least 1 argument, got %d"
 msgstr ""
 
 #: internal/app/commands/install.go:52
@@ -169,6 +169,10 @@ msgstr ""
 
 #: internal/app/commands/refresh.go:39
 msgid "Pull all repositories that have changed"
+msgstr ""
+
+#: internal/app/commands/remove.go:38
+msgid "Command remove expected at least 1 argument, got %d"
 msgstr ""
 
 #: internal/app/commands/remove.go:46
@@ -326,7 +330,7 @@ msgid "ERROR"
 msgstr ""
 
 #: internal/app/tui/pager/code_pager.go:44
-msgid "q/Esc - Quit"
+msgid "q/Esc - Close viewer"
 msgstr ""
 
 #: internal/app/tui/pager/nonfree_pager.go:48
