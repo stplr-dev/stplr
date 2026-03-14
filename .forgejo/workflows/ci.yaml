@@ -1,0 +1,238 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Stapler
+# Copyright (C) 2025 The Stapler Authors
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+  workflow_dispatch:
+
+jobs:
+  checks:
+    runs-on: als-huge-gh
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install build deps
+        run: |
+          apt-get update
+          apt-get install -y libsystemd-dev gettext bc
+
+      - name: Cache Go
+        uses: actions/cache-tools-go@v1
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Set up Python for pre-commit
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Cache pre-commit environments
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-python-3.13-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            pre-commit-${{ runner.os }}-python-3.13-
+
+      - run: pip install pre-commit
+      - run: pre-commit install
+      - run: SKIP=test-unit pre-commit run --all-files
+
+      - name: Generate test coverage
+        env:
+          IGNORE_ROOT_CHECK: 1
+        run: make test-unit-coverage
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: coverage.out
+          retention-days: 1
+
+  semgrep:
+    runs-on: als-huge-gh
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch base branch
+        if: github.event_name == 'pull_request'
+        run: git fetch origin ${{ github.base_ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep
+        env:
+          SEMGREP_BASELINE_COMMIT: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+        run: make semgrep
+
+      - name: Upload Semgrep SARIF
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: semgrep-sarif
+          path: semgrep.sarif
+          retention-days: 1
+
+  bearer:
+    runs-on: als-huge-gh
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Bearer
+        run: |
+          curl -sfL https://raw.githubusercontent.com/Bearer/bearer/main/contrib/install.sh \
+            | sh -s -- -b /usr/local/bin
+
+      - name: Run Bearer
+        env:
+          BEARER_DIFF_BASE_BRANCH: ${{ github.event_name == 'pull_request' && github.base_ref || '' }}
+        run: make bearer
+
+      - name: Upload Bearer SARIF
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: bearer-sarif
+          path: bearer.sarif
+          retention-days: 1
+
+  sonarqube:
+    runs-on: als-huge-gh
+    needs: [checks, semgrep, bearer]
+    if: always() && needs.checks.result == 'success'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage
+
+      - name: Download Semgrep SARIF
+        continue-on-error: true
+        uses: actions/download-artifact@v3
+        with:
+          name: semgrep-sarif
+
+      - name: Download Bearer SARIF
+        continue-on-error: true
+        uses: actions/download-artifact@v3
+        with:
+          name: bearer-sarif
+
+      - name: SonarQube Scan (Pull Request)
+        if: github.event_name == 'pull_request'
+        uses: https://github.com/sonarsource/sonarqube-scan-action@v6
+        with:
+          args: >
+            -Dsonar.pullrequest.key=${{ github.event.number }}
+            -Dsonar.pullrequest.branch=${{ github.head_ref }}
+            -Dsonar.pullrequest.base=${{ github.base_ref }}
+            -Dsonar.scm.revision=${{ github.event.pull_request.head.sha }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+
+      - name: SonarQube Scan (Push to main / manual)
+        if: github.event_name != 'pull_request'
+        uses: https://github.com/sonarsource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check
+        uses: https://github.com/sonarsource/sonarqube-quality-gate-action@v1.2.0
+        with:
+          pollingTimeoutSec: 600
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}  
+
+  e2e-tests:
+    runs-on: als-huge
+
+    container:
+      image: altlinux.space/actions/runner/containers:sisyphus
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install build deps
+        run: |
+          apt-get update
+          apt-get install -y libsystemd-devel
+
+      - name: Cache Go
+        uses: actions/cache-tools-go@v1
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Run E2E tests
+        env:
+          IGNORE_ROOT_CHECK: 1
+          GENERATE: 0
+        run: |
+          make test-e2e

@@ -146,6 +146,35 @@ test-e2e: prepare-test-e2e
 update-license:
 	$(ADD_LICENSE_BIN) -v -ignore 'packaging/**' -ignore 'vendor/**' -f license-header.tmpl .
 
+SEMGREP_BASELINE_COMMIT ?=
+SEMGREP_CI_ARGS = $(if $(CI),--sarif --output semgrep.sarif,)
+
+semgrep:
+	semgrep \
+		--config p/golang \
+		--config p/secrets \
+		--config p/owasp-top-ten \
+		--jobs 1 \
+		--exclude 'e2e-tests/**' \
+		--exclude 'mocks/**' \
+		--exclude 'vendor/**' \
+		--exclude 'generators/**' \
+		$(if $(SEMGREP_BASELINE_COMMIT),--baseline-commit $(SEMGREP_BASELINE_COMMIT),) \
+		$(SEMGREP_CI_ARGS) \
+		.
+
+BEARER_CI_ARGS = $(if $(CI),--format sarif --output bearer.sarif,)
+BEARER_DIFF_BASE_BRANCH ?=
+
+bearer:
+	bearer scan \
+		--skip-path e2e-tests,mocks,vendor,generators \
+		$(if $(BEARER_DIFF_BASE_BRANCH),--diff-base-branch $(BEARER_DIFF_BASE_BRANCH),) \
+		$(BEARER_CI_ARGS) \
+		.
+
+security: semgrep bearer
+
 update-deps-cve:
 	bash scripts/update-deps-cve.sh
 
