@@ -24,20 +24,19 @@
 
 package manager
 
-import (
-	"fmt"
-	"os/exec"
-)
+import "os/exec"
 
 type DNF struct {
-	CommonPackageManager
-	CommonRPM
+	commonDNFYUM
 }
 
 func NewDNF() *DNF {
 	return &DNF{
-		CommonPackageManager: CommonPackageManager{
-			noConfirmArg: "-y",
+		commonDNFYUM: commonDNFYUM{
+			CommonPackageManager: CommonPackageManager{
+				noConfirmArg: "-y",
+			},
+			binary: "dnf",
 		},
 	}
 }
@@ -53,73 +52,4 @@ func (*DNF) Name() string {
 
 func (*DNF) Format() string {
 	return "rpm"
-}
-
-// Sync выполняет upgrade всех установленных пакетов, обновляя их до более новых версий
-func (d *DNF) Sync(opts *Opts) error {
-	opts = ensureOpts(opts) // Гарантирует, что opts не равен nil и содержит допустимые значения
-	cmd := d.getCmd(opts, "dnf", "upgrade")
-	setCmdEnv(cmd)   // Устанавливает переменные окружения для команды
-	err := cmd.Run() // Выполняет команду
-	if err != nil {
-		return fmt.Errorf("dnf: sync: %w", err)
-	}
-	return nil
-}
-
-// Install устанавливает указанные пакеты с помощью DNF
-func (d *DNF) Install(opts *Opts, pkgs ...string) error {
-	opts = ensureOpts(opts)
-	cmd := d.getCmd(opts, "dnf", "install", "--allowerasing")
-	cmd.Args = append(cmd.Args, pkgs...) // Добавляем названия пакетов к команде
-	setCmdEnv(cmd)
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("dnf: install: %w", err)
-	}
-	return nil
-}
-
-// InstallLocal расширяет метод Install для установки пакетов, расположенных локально
-func (d *DNF) InstallLocal(opts *Opts, pkgs ...string) error {
-	opts = ensureOpts(opts)
-	return d.Install(opts, pkgs...)
-}
-
-// Remove удаляет указанные пакеты с помощью DNF
-func (d *DNF) Remove(opts *Opts, pkgs ...string) error {
-	opts = ensureOpts(opts)
-	cmd := d.getCmd(opts, "dnf", "remove")
-	cmd.Args = append(cmd.Args, pkgs...)
-	setCmdEnv(cmd)
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("dnf: remove: %w", err)
-	}
-	return nil
-}
-
-// Upgrade обновляет указанные пакеты до более новых версий
-func (d *DNF) Upgrade(opts *Opts, pkgs ...string) error {
-	opts = ensureOpts(opts)
-	cmd := d.getCmd(opts, "dnf", "upgrade")
-	cmd.Args = append(cmd.Args, pkgs...)
-	setCmdEnv(cmd)
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("dnf: upgrade: %w", err)
-	}
-	return nil
-}
-
-// UpgradeAll обновляет все установленные пакеты
-func (d *DNF) UpgradeAll(opts *Opts) error {
-	opts = ensureOpts(opts)
-	cmd := d.getCmd(opts, "dnf", "upgrade")
-	setCmdEnv(cmd)
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("dnf: upgradeall: %w", err)
-	}
-	return nil
 }

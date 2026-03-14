@@ -27,10 +27,10 @@ import (
 	"encoding/json"
 	"errors"
 	"regexp"
+	"slices"
 	"strings"
 	"sync"
 
-	"golang.org/x/exp/slices"
 	"modernc.org/sqlite"
 
 	"go.stplr.dev/stplr/pkg/staplerfile"

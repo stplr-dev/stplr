@@ -69,7 +69,7 @@ func New(uid, gid int, wd string) (*Copier, error) {
 }
 
 func (e *Copier) Copy(ctx context.Context, f *staplerfile.ScriptFile, info *distro.OSRelease) (string, error) {
-	externalFiles, err := f.ExternalFiles(context.Background(), info)
+	externalFiles, err := f.ExternalFiles(ctx, info)
 	if err != nil {
 		return "", err
 	}

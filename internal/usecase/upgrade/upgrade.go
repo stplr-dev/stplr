@@ -137,7 +137,7 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 				}{pkgName, err})
 
 				if i+1 != len(updates) {
-					stopAll, _ := cliprompts.YesNoPrompt(context.Background(), gotext.Get("Do you want to stop the entire upgrade process?"), opts.Interactive, false)
+					stopAll, _ := cliprompts.YesNoPrompt(ctx, gotext.Get("Do you want to stop the entire upgrade process?"), opts.Interactive, false)
 					if stopAll {
 						u.out.Info(gotext.Get("Stopping upgrade process"))
 						break

@@ -27,10 +27,10 @@ package cpu
 import (
 	"os"
 	"runtime"
+	"slices"
 	"strconv"
 	"strings"
 
-	"golang.org/x/exp/slices"
 	"golang.org/x/sys/cpu"
 )
 

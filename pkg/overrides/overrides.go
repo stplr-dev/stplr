@@ -27,10 +27,10 @@ package overrides
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
-	"golang.org/x/exp/slices"
 	"golang.org/x/text/language"
 
 	"go.stplr.dev/stplr/internal/cpu"

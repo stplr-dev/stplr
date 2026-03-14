@@ -24,21 +24,20 @@
 
 package manager
 
-import (
-	"fmt"
-	"os/exec"
-)
+import "os/exec"
 
 // YUM represents the YUM package manager
 type YUM struct {
-	CommonPackageManager
-	CommonRPM
+	commonDNFYUM
 }
 
 func NewYUM() *YUM {
 	return &YUM{
-		CommonPackageManager: CommonPackageManager{
-			noConfirmArg: "-y",
+		commonDNFYUM: commonDNFYUM{
+			CommonPackageManager: CommonPackageManager{
+				noConfirmArg: "-y",
+			},
+			binary: "yum",
 		},
 	}
 }
@@ -54,67 +53,4 @@ func (*YUM) Name() string {
 
 func (*YUM) Format() string {
 	return "rpm"
-}
-
-func (y *YUM) Sync(opts *Opts) error {
-	opts = ensureOpts(opts)
-	cmd := y.getCmd(opts, "yum", "upgrade")
-	setCmdEnv(cmd)
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("yum: sync: %w", err)
-	}
-	return nil
-}
-
-func (y *YUM) Install(opts *Opts, pkgs ...string) error {
-	opts = ensureOpts(opts)
-	cmd := y.getCmd(opts, "yum", "install", "--allowerasing")
-	cmd.Args = append(cmd.Args, pkgs...)
-	setCmdEnv(cmd)
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("yum: install: %w", err)
-	}
-	return nil
-}
-
-func (y *YUM) InstallLocal(opts *Opts, pkgs ...string) error {
-	opts = ensureOpts(opts)
-	return y.Install(opts, pkgs...)
-}
-
-func (y *YUM) Remove(opts *Opts, pkgs ...string) error {
-	opts = ensureOpts(opts)
-	cmd := y.getCmd(opts, "yum", "remove")
-	cmd.Args = append(cmd.Args, pkgs...)
-	setCmdEnv(cmd)
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("yum: remove: %w", err)
-	}
-	return nil
-}
-
-func (y *YUM) Upgrade(opts *Opts, pkgs ...string) error {
-	opts = ensureOpts(opts)
-	cmd := y.getCmd(opts, "yum", "upgrade")
-	cmd.Args = append(cmd.Args, pkgs...)
-	setCmdEnv(cmd)
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("yum: upgrade: %w", err)
-	}
-	return nil
-}
-
-func (y *YUM) UpgradeAll(opts *Opts) error {
-	opts = ensureOpts(opts)
-	cmd := y.getCmd(opts, "yum", "upgrade")
-	setCmdEnv(cmd)
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("yum: upgradeall: %w", err)
-	}
-	return nil
 }

@@ -22,10 +22,10 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"maps"
 	"slices"
 
 	"github.com/gobwas/glob"
-	"golang.org/x/exp/maps"
 
 	"go.elara.ws/vercmp"
 
@@ -76,7 +76,7 @@ func (u *Updater) CheckForUpdates(
 		return nil, err
 	}
 
-	pkgNames := maps.Keys(installed)
+	pkgNames := slices.AppendSeq(make([]string, 0, len(installed)), maps.Keys(installed))
 	slices.Sort(pkgNames)
 
 	var out []UpdateInfo

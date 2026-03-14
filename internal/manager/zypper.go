@@ -35,8 +35,8 @@ type Zypper struct {
 	CommonRPM
 }
 
-func NewZypper() *YUM {
-	return &YUM{
+func NewZypper() *Zypper {
+	return &Zypper{
 		CommonPackageManager: CommonPackageManager{
 			noConfirmArg: "-y",
 		},

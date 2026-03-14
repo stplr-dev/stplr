@@ -30,13 +30,13 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"unsafe"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
-	"golang.org/x/exp/slices"
 	"mvdan.cc/sh/v3/interp"
 
 	"go.stplr.dev/stplr/internal/shutils/handlers"
