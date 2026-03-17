@@ -68,7 +68,7 @@ require (
 	golang.org/x/text v0.35.0
 	golift.io/xtractr v0.2.3-0.20260111181756-d6376a2e84ce
 	google.golang.org/genproto/googleapis/api v0.0.0-20260114163908-3f89685c29c3
-	modernc.org/sqlite v1.46.1
+	modernc.org/sqlite v1.47.0
 	mvdan.cc/sh/v3 v3.12.1-0.20251005234102-d3ff6f655a6a
 	xorm.io/xorm v1.3.11
 )
@@ -194,7 +194,7 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/libc v1.67.6 // indirect
+	modernc.org/libc v1.70.0 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 	xorm.io/builder v0.3.13 // indirect
