@@ -28,8 +28,41 @@ import (
 	"bytes"
 	"io"
 
+	"github.com/alecthomas/chroma/v2"
 	"github.com/alecthomas/chroma/v2/quick"
+	"github.com/alecthomas/chroma/v2/styles"
 )
+
+// Based on https://github.com/alecthomas/chroma/blob/e11ef85a2cefd02d799cfa3875ffb242051382c6/styles/vim.xml
+var _ = styles.Register(chroma.MustNewStyle("stplr", chroma.StyleEntries{
+	chroma.Error: "border:#ff0000",
+	// chroma.Background:         "#cccccc bg:#000000",
+	chroma.Keyword:            "#cdcd00",
+	chroma.KeywordDeclaration: "#00cd00",
+	chroma.KeywordNamespace:   "#cd00cd",
+	chroma.KeywordType:        "#00cd00",
+	chroma.NameBuiltin:        "#cd00cd",
+	chroma.NameClass:          "#00cdcd",
+	chroma.NameException:      "bold #666699",
+	chroma.NameVariable:       "bold #00a8a3",
+	chroma.LiteralString:      "#007000",
+	chroma.LiteralNumber:      "#cd00cd",
+	chroma.Operator:           "#3399cc",
+	chroma.OperatorWord:       "#cdcd00",
+	chroma.Comment:            "#000080",
+	chroma.CommentSpecial:     "bold #cd0000",
+	chroma.GenericDeleted:     "#cd0000",
+	chroma.GenericEmph:        "italic",
+	chroma.GenericError:       "#ff0000",
+	chroma.GenericHeading:     "bold #000080",
+	chroma.GenericInserted:    "#00cd00",
+	// chroma.GenericOutput:      "#888888",
+	chroma.GenericPrompt:     "bold #000080",
+	chroma.GenericStrong:     "bold",
+	chroma.GenericSubheading: "bold #800080",
+	chroma.GenericTraceback:  "#0044dd",
+	chroma.GenericUnderline:  "underline",
+}))
 
 func SyntaxHighlightBash(r io.Reader, style string) (string, error) {
 	data, err := io.ReadAll(r)
@@ -38,6 +71,6 @@ func SyntaxHighlightBash(r io.Reader, style string) (string, error) {
 	}
 
 	w := &bytes.Buffer{}
-	err = quick.Highlight(w, string(data), "bash", "terminal", style)
+	err = quick.Highlight(w, string(data), "bash", "terminal", "stplr")
 	return w.String(), err
 }

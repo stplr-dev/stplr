@@ -19,7 +19,6 @@
 package cliutils
 
 import (
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 )
@@ -31,6 +30,4 @@ func Localize(app *cli.Command) {
 	cli.SubcommandHelpTemplate = GetSubcommandHelpTemplate()
 	cli.UsageCommandHelp = gotext.Get("Shows a list of commands or help for one command")
 	cli.HelpFlag.(*cli.BoolFlag).Usage = gotext.Get("Show help")
-
-	survey.MultiSelectQuestionTemplate = GetMultiSelectQuestionTemplate()
 }

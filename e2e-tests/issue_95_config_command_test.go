@@ -39,6 +39,7 @@ func TestE2EIssue95ConfigCommand(t *testing.T) {
 		property     string
 		defaultValue string
 		newValue     string
+		deprecated   bool
 	}
 
 	cases := []testCase{
@@ -78,6 +79,7 @@ func TestE2EIssue95ConfigCommand(t *testing.T) {
 			property:     "pagerStyle",
 			defaultValue: "native",
 			newValue:     "test",
+			deprecated:   true,
 		},
 		{
 			name:         "logLevel",
@@ -96,14 +98,25 @@ func TestE2EIssue95ConfigCommand(t *testing.T) {
 
 			for _, tc := range cases {
 				t.Run(tc.name, func(t *testing.T) {
-					r.Command("stplr", "config", "get", tc.property).
+					stderrCheck := func(cmd capytest.CommandBuilder) capytest.CommandBuilder {
+						if tc.deprecated {
+							return cmd.ExpectStderrContains("field is outdated and doesn't really affect anything")
+						}
+						return cmd.ExpectStderrEmpty()
+					}
+
+					stderrCheck(r.Command("stplr", "config", "get", tc.property)).
 						ExpectSuccess().
 						ExpectStdoutRegex(fmt.Sprintf("^%s\n$", tc.defaultValue)).
-						ExpectStderrEmpty().
 						Run(t)
 
-					execShouldError(t, r, "sudo", "stplr", "config", "set", tc.property)
-					execShouldNoError(t, r, "sudo", "stplr", "config", "set", tc.property, tc.newValue)
+					r.Command("sudo", "stplr", "config", "set", tc.property).
+						ExpectFailure().
+						Run(t)
+
+					stderrCheck(r.Command("sudo", "stplr", "config", "set", tc.property, tc.newValue)).
+						ExpectSuccess().
+						Run(t)
 
 					r.Command("stplr", "config", "show").
 						ExpectSuccess().
@@ -114,22 +127,21 @@ func TestE2EIssue95ConfigCommand(t *testing.T) {
 					r.Command("stplr", "config", "get").
 						ExpectSuccess().
 						ExpectStdoutContains(fmt.Sprintf("%s: %s", tc.property, tc.newValue)).
-						ExpectStderrEmpty().
 						Run(t)
 
-					r.Command("stplr", "config", "get", tc.property).
+					stderrCheck(r.Command("stplr", "config", "get", tc.property)).
 						ExpectSuccess().
 						ExpectStdoutRegex(fmt.Sprintf("^%s\n$", tc.newValue)).
-						ExpectStderrEmpty().
 						Run(t)
 
-					r.Command("stplr", "config", "get", tc.property).
+					stderrCheck(r.Command("stplr", "config", "get", tc.property)).
 						ExpectSuccess().
 						ExpectStdoutRegex(fmt.Sprintf("^%s\n$", tc.newValue)).
-						ExpectStderrEmpty().
 						Run(t)
 
-					execShouldNoError(t, r, "sudo", "stplr", "config", "set", tc.property, tc.defaultValue)
+					stderrCheck(r.Command("sudo", "stplr", "config", "set", tc.property, tc.newValue)).
+						ExpectSuccess().
+						Run(t)
 				})
 			}
 		},

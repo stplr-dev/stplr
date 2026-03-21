@@ -31,7 +31,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/AlecAivazis/survey/v2"
+	"charm.land/bubbles/v2/key"
+	"charm.land/huh/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/pkg/staplerfile"
@@ -39,17 +41,121 @@ import (
 	"go.stplr.dev/stplr/internal/app/tui/pager"
 )
 
+func newI18nDefaultKeyMap() *huh.KeyMap {
+	return &huh.KeyMap{
+		Quit: key.NewBinding(key.WithKeys("ctrl+c")),
+		Select: huh.SelectKeyMap{
+			Prev:         key.NewBinding(key.WithKeys("shift+tab"), key.WithHelp("shift+tab", gotext.Get("back"))),
+			Next:         key.NewBinding(key.WithKeys("enter", "tab"), key.WithHelp("enter", gotext.Get("select"))),
+			Submit:       key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", gotext.Get("submit"))),
+			Up:           key.NewBinding(key.WithKeys("up", "k", "ctrl+k", "ctrl+p"), key.WithHelp("↑", gotext.Get("up"))),
+			Down:         key.NewBinding(key.WithKeys("down", "j", "ctrl+j", "ctrl+n"), key.WithHelp("↓", gotext.Get("down"))),
+			Left:         key.NewBinding(key.WithKeys("h", "left"), key.WithHelp("←", gotext.Get("left")), key.WithDisabled()),
+			Right:        key.NewBinding(key.WithKeys("l", "right"), key.WithHelp("→", gotext.Get("right")), key.WithDisabled()),
+			Filter:       key.NewBinding(key.WithKeys("/"), key.WithHelp("/", gotext.Get("filter"))),
+			SetFilter:    key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", gotext.Get("set filter")), key.WithDisabled()),
+			ClearFilter:  key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", gotext.Get("clear filter")), key.WithDisabled()),
+			HalfPageUp:   key.NewBinding(key.WithKeys("ctrl+u"), key.WithHelp("ctrl+u", gotext.Get("½ page up"))),
+			HalfPageDown: key.NewBinding(key.WithKeys("ctrl+d"), key.WithHelp("ctrl+d", gotext.Get("½ page down"))),
+			GotoTop:      key.NewBinding(key.WithKeys("home", "g"), key.WithHelp("g/home", gotext.Get("go to start"))),
+			GotoBottom:   key.NewBinding(key.WithKeys("end", "G"), key.WithHelp("G/end", gotext.Get("go to end"))),
+		},
+		MultiSelect: huh.MultiSelectKeyMap{
+			Prev:         key.NewBinding(key.WithKeys("shift+tab"), key.WithHelp("shift+tab", gotext.Get("back"))),
+			Next:         key.NewBinding(key.WithKeys("enter", "tab"), key.WithHelp("enter", gotext.Get("confirm"))),
+			Submit:       key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", gotext.Get("submit"))),
+			Toggle:       key.NewBinding(key.WithKeys("space", "x"), key.WithHelp("x", gotext.Get("toggle"))),
+			Up:           key.NewBinding(key.WithKeys("up", "k", "ctrl+p"), key.WithHelp("↑", gotext.Get("up"))),
+			Down:         key.NewBinding(key.WithKeys("down", "j", "ctrl+n"), key.WithHelp("↓", gotext.Get("down"))),
+			Filter:       key.NewBinding(key.WithKeys("/"), key.WithHelp("/", gotext.Get("filter"))),
+			SetFilter:    key.NewBinding(key.WithKeys("enter", "esc"), key.WithHelp("esc", gotext.Get("set filter")), key.WithDisabled()),
+			ClearFilter:  key.NewBinding(key.WithKeys("esc"), key.WithHelp("esc", gotext.Get("clear filter")), key.WithDisabled()),
+			HalfPageUp:   key.NewBinding(key.WithKeys("ctrl+u"), key.WithHelp("ctrl+u", gotext.Get("½ page up"))),
+			HalfPageDown: key.NewBinding(key.WithKeys("ctrl+d"), key.WithHelp("ctrl+d", gotext.Get("½ page down"))),
+			GotoTop:      key.NewBinding(key.WithKeys("home", "g"), key.WithHelp("g/home", gotext.Get("go to start"))),
+			GotoBottom:   key.NewBinding(key.WithKeys("end", "G"), key.WithHelp("G/end", gotext.Get("go to end"))),
+			SelectAll:    key.NewBinding(key.WithKeys("ctrl+a"), key.WithHelp("ctrl+a", gotext.Get("select all"))),
+			SelectNone:   key.NewBinding(key.WithKeys("ctrl+a"), key.WithHelp("ctrl+a", gotext.Get("select none")), key.WithDisabled()),
+		},
+		Confirm: huh.ConfirmKeyMap{
+			Prev:   key.NewBinding(key.WithKeys("shift+tab"), key.WithHelp("shift+tab", gotext.Get("back"))),
+			Next:   key.NewBinding(key.WithKeys("enter", "tab"), key.WithHelp("enter", gotext.Get("next"))),
+			Submit: key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", gotext.Get("submit"))),
+			Toggle: key.NewBinding(key.WithKeys("h", "l", "right", "left"), key.WithHelp("←/→", gotext.Get("toggle"))),
+			Accept: key.NewBinding(key.WithKeys("y", "Y"), key.WithHelp("y", gotext.Get("Yes"))),
+			Reject: key.NewBinding(key.WithKeys("n", "N"), key.WithHelp("n", gotext.Get("No"))),
+		},
+	}
+}
+
+// Based on https://github.com/charmbracelet/huh/blob/3b90d9d743964ba8ebc4db221dfa5ccbb8abf888/theme.go#L139
+func themeCharm(isDark bool) *huh.Styles {
+	t := huh.ThemeBase(isDark)
+	lightDark := lipgloss.LightDark(isDark)
+
+	var (
+		normalFg = lightDark(lipgloss.Color("252"), lipgloss.Color("235"))
+		cream    = lightDark(lipgloss.Color("#FFFDF5"), lipgloss.Color("#FFFDF5"))
+		primary  = lipgloss.Color("#00a8a3")
+		green    = lightDark(lipgloss.Color("#02BA84"), lipgloss.Color("#02BF87"))
+		red      = lightDark(lipgloss.Color("#FF4672"), lipgloss.Color("#ED567A"))
+	)
+
+	t.Focused.Base = t.Focused.Base.BorderForeground(lipgloss.Color("238"))
+	t.Focused.Card = t.Focused.Base
+	t.Focused.Title = t.Focused.Title.Foreground(primary).Bold(true)
+	t.Focused.NoteTitle = t.Focused.NoteTitle.Foreground(primary).Bold(true).MarginBottom(1)
+	t.Focused.Directory = t.Focused.Directory.Foreground(primary)
+	t.Focused.Description = t.Focused.Description.Foreground(lightDark(lipgloss.Color(""), lipgloss.Color("243")))
+	t.Focused.ErrorIndicator = t.Focused.ErrorIndicator.Foreground(red)
+	t.Focused.ErrorMessage = t.Focused.ErrorMessage.Foreground(red)
+	t.Focused.SelectSelector = t.Focused.SelectSelector.Foreground(primary)
+	t.Focused.NextIndicator = t.Focused.NextIndicator.Foreground(primary)
+	t.Focused.PrevIndicator = t.Focused.PrevIndicator.Foreground(primary)
+	t.Focused.Option = t.Focused.Option.Foreground(normalFg)
+	t.Focused.MultiSelectSelector = t.Focused.MultiSelectSelector.Foreground(primary)
+	t.Focused.SelectedOption = t.Focused.SelectedOption.Foreground(green)
+	t.Focused.SelectedPrefix = lipgloss.NewStyle().Foreground(lightDark(lipgloss.Color("#02CF92"), lipgloss.Color("#02A877"))).SetString("✓ ")
+	t.Focused.UnselectedPrefix = lipgloss.NewStyle().Foreground(lightDark(lipgloss.Color(""), lipgloss.Color("243"))).SetString("• ")
+	t.Focused.UnselectedOption = t.Focused.UnselectedOption.Foreground(normalFg)
+	t.Focused.FocusedButton = t.Focused.FocusedButton.Foreground(cream).Background(primary)
+	t.Focused.Next = t.Focused.FocusedButton
+	t.Focused.BlurredButton = t.Focused.BlurredButton.Foreground(normalFg).Background(lightDark(lipgloss.Color("237"), lipgloss.Color("252")))
+
+	t.Focused.TextInput.Cursor = t.Focused.TextInput.Cursor.Foreground(green)
+	t.Focused.TextInput.Placeholder = t.Focused.TextInput.Placeholder.Foreground(lightDark(lipgloss.Color("248"), lipgloss.Color("238")))
+	t.Focused.TextInput.Prompt = t.Focused.TextInput.Prompt.Foreground(primary)
+
+	t.Blurred = t.Focused
+	t.Blurred.Base = t.Focused.Base.BorderStyle(lipgloss.HiddenBorder())
+	t.Blurred.Card = t.Blurred.Base
+	t.Blurred.NextIndicator = lipgloss.NewStyle()
+	t.Blurred.PrevIndicator = lipgloss.NewStyle()
+
+	t.Group.Title = t.Focused.Title
+	t.Group.Description = t.Focused.Description
+	return t
+}
+
+func wrapIntoHuhForm(f huh.Field) *huh.Form {
+	return huh.NewForm(
+		huh.NewGroup(f),
+	).
+		WithKeyMap(newI18nDefaultKeyMap()).
+		WithTheme(huh.ThemeFunc(themeCharm))
+}
+
 // YesNoPrompt asks the user a yes or no question, using def as the default answer
 func YesNoPrompt(ctx context.Context, msg string, interactive, def bool) (bool, error) {
 	if interactive {
-		var answer bool
-		err := survey.AskOne(
-			&survey.Confirm{
-				Message: msg,
-				Default: def,
-			},
-			&answer,
-		)
+		answer := def
+
+		err := wrapIntoHuhForm(huh.NewConfirm().
+			Title(msg).
+			Value(&answer).
+			Affirmative(gotext.Get("Yes")).
+			Negative(gotext.Get("No")).
+			WithButtonAlignment(lipgloss.Left)).Run()
 		return answer, err
 	} else {
 		return def, nil
@@ -132,18 +238,19 @@ func pkgPrompt(options []staplerfile.Package, verb string, interactive bool) (st
 		return options[0], nil
 	}
 
-	names := make([]string, len(options))
+	opts := make([]huh.Option[int], len(options))
 	for i, option := range options {
-		names[i] = option.Repository + "/" + option.Name + " " + option.Version
-	}
-
-	prompt := &survey.Select{
-		Options: names,
-		Message: gotext.Get("Choose which package to %s", verb),
+		opts[i] = huh.NewOption(option.Repository+"/"+option.Name+" "+option.Version, i)
 	}
 
 	var choice int
-	err := survey.AskOne(prompt, &choice)
+
+	err := wrapIntoHuhForm(
+		huh.NewSelect[int]().
+			Title(gotext.Get("Choose which package to %s", verb)).
+			Options(opts...).
+			Value(&choice),
+	).Run()
 	if err != nil {
 		return staplerfile.Package{}, err
 	}
@@ -158,20 +265,19 @@ func ChooseOptDepends(ctx context.Context, options []string, verb string, intera
 		return []string{}, nil
 	}
 
-	prompt := &survey.MultiSelect{
-		Options: options,
-		Message: gotext.GetN("Choose which optional package to install", "Choose which optional packages to install", len(options)),
-	}
-
-	var choices []int
-	err := survey.AskOne(prompt, &choices)
+	var choices []string
+	err := wrapIntoHuhForm(huh.NewMultiSelect[string]().
+		Title(gotext.GetN("Choose which optional package to install", "Choose which optional packages to install", len(options))).
+		Options(huh.NewOptions(options...)...).
+		Value(&choices),
+	).Run()
 	if err != nil {
 		return nil, err
 	}
 
 	out := make([]string, len(choices))
-	for i, choiceIndex := range choices {
-		out[i], _, _ = strings.Cut(options[choiceIndex], ": ")
+	for i, c := range choices {
+		out[i], _, _ = strings.Cut(c, ": ")
 	}
 
 	return out, nil

@@ -112,11 +112,11 @@ func (m GenericModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.viewport = viewport.New(viewport.WithWidth(msg.Width), viewport.WithHeight(msg.Height-verticalMarginHeight))
 			m.viewport.YPosition = headerHeight + 1
 			m.viewport.SetHorizontalStep(0)
-			m.viewport.SetContent(lipgloss.NewStyle().Width(msg.Width).Render("\n" + m.cfg.Content))
+			m.viewport.SetContent(lipgloss.NewStyle().Width(msg.Width).Render(m.cfg.Content))
 			m.ready = true
 		} else {
 			if msg.Width != m.viewport.Width() {
-				m.viewport.SetContent(lipgloss.NewStyle().Width(msg.Width).Render("\n" + m.cfg.Content))
+				m.viewport.SetContent(lipgloss.NewStyle().Width(msg.Width).Render(m.cfg.Content))
 			}
 			m.viewport.SetWidth(msg.Width)
 			m.viewport.SetHeight(msg.Height - verticalMarginHeight)

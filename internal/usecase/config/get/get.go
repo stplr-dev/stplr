@@ -29,14 +29,16 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/config/common"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
 type useCase struct {
-	cfg ConfigGetter
-	out io.Writer
+	cfg    ConfigGetter
+	stdout io.Writer
+	out    output.Output
 }
 
 type ConfigGetter interface {
@@ -54,10 +56,11 @@ type ConfigGetter interface {
 	GetPaths() *config.Paths
 }
 
-func New(cfg ConfigGetter) *useCase {
+func New(cfg ConfigGetter, out output.Output) *useCase {
 	return &useCase{
-		cfg: cfg,
-		out: os.Stdout,
+		cfg:    cfg,
+		stdout: os.Stdout,
+		out:    out,
 	}
 }
 
@@ -81,6 +84,10 @@ func (u *useCase) Run(ctx context.Context, key string) error {
 		common.FIREJAIL_EXCLUDE:   u.cfg.FirejailExclude,
 	}
 
+	if key == common.PAGER_STYLE {
+		u.out.Warn(gotext.Get("The %q field is outdated and doesn't really affect anything. This field will be deleted in %s", common.PAGER_STYLE, "v0.2.0"))
+	}
+
 	switch key {
 	// TODO: remove legacy keys
 	case common.REPO, "repos":
@@ -93,7 +100,7 @@ func (u *useCase) Run(ctx context.Context, key string) error {
 func (u *useCase) handleReposKey() error {
 	repos := u.cfg.Repos()
 	if len(repos) == 0 {
-		fmt.Fprintln(u.out, "[]")
+		fmt.Fprintln(u.stdout, "[]")
 		return nil
 	}
 
@@ -101,7 +108,7 @@ func (u *useCase) handleReposKey() error {
 	if err != nil {
 		return fmt.Errorf("failed to serialize repos: %w", err)
 	}
-	fmt.Fprint(u.out, string(repoData))
+	fmt.Fprint(u.stdout, string(repoData))
 	return nil
 }
 
@@ -112,12 +119,12 @@ func (u *useCase) handleConfigKey(
 	listGetters map[string]func() []string,
 ) error {
 	if getter, ok := boolGetters[key]; ok {
-		fmt.Fprintln(u.out, getter())
+		fmt.Fprintln(u.stdout, getter())
 		return nil
 	}
 
 	if getter, ok := stringGetters[key]; ok {
-		fmt.Fprintln(u.out, getter())
+		fmt.Fprintln(u.stdout, getter())
 		return nil
 	}
 
@@ -131,8 +138,8 @@ func (u *useCase) handleConfigKey(
 
 func (u *useCase) printList(listValue []string) {
 	if len(listValue) == 0 {
-		fmt.Fprintln(u.out, "[]")
+		fmt.Fprintln(u.stdout, "[]")
 	} else {
-		fmt.Fprintln(u.out, strings.Join(listValue, ", "))
+		fmt.Fprintln(u.stdout, strings.Join(listValue, ", "))
 	}
 }

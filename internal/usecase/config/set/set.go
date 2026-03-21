@@ -26,17 +26,20 @@ import (
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/config/common"
 )
 
 type useCase struct {
 	cfg *config.ALRConfig
+	out output.Output
 }
 
-func New(cfg *config.ALRConfig) *useCase {
+func New(cfg *config.ALRConfig, out output.Output) *useCase {
 	return &useCase{
 		cfg: cfg,
+		out: out,
 	}
 }
 
@@ -60,6 +63,10 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 
 	if err := u.cfg.SetToAndSave(common.SOURCE_SYSTEM, key, value); err != nil {
 		return errors.NewI18nError(gotext.Get("failed to save config: %v", err))
+	}
+
+	if key == common.PAGER_STYLE {
+		u.out.Warn(gotext.Get("The %q field is outdated and doesn't really affect anything. This field will be deleted in %s", common.PAGER_STYLE, "v0.2.0"))
 	}
 
 	fmt.Println(gotext.Get("Successfully set %s = %s", key, valueStr))

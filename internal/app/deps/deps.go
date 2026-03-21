@@ -230,6 +230,7 @@ func ForConfigShowAction(ctx context.Context) (*ConfigShowActionDeps, Cleanup, e
 
 type ConfigSetActionDeps struct {
 	Config *config.ALRConfig
+	Output output.Output
 }
 
 func ForConfigSetAction(ctx context.Context) (*ConfigSetActionDeps, Cleanup, error) {
@@ -244,11 +245,13 @@ func ForConfigSetAction(ctx context.Context) (*ConfigSetActionDeps, Cleanup, err
 
 	return &ConfigSetActionDeps{
 		Config: b.Cfg,
+		Output: b.Output,
 	}, b.Cleanup, nil
 }
 
 type ConfigGetActionDeps struct {
 	Config *config.ALRConfig
+	Output output.Output
 }
 
 func ForConfigGetAction(ctx context.Context) (*ConfigGetActionDeps, Cleanup, error) {
@@ -262,6 +265,7 @@ func ForConfigGetAction(ctx context.Context) (*ConfigGetActionDeps, Cleanup, err
 
 	return &ConfigGetActionDeps{
 		Config: b.Cfg,
+		Output: b.Output,
 	}, b.Cleanup, nil
 }
 

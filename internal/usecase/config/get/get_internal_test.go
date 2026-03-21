@@ -25,6 +25,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 
+	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/config/common"
 	"go.stplr.dev/stplr/pkg/types"
@@ -47,9 +48,9 @@ func TestAllAllowedKeysHandled(t *testing.T) {
 	mockConfig.EXPECT().FirejailExclude().Return([]string{})
 
 	for _, key := range config.AllowedKeys() {
-		useCase := New(mockConfig)
+		useCase := New(mockConfig, output.NewConsoleOutput())
 		buf := bytes.NewBuffer(nil)
-		useCase.out = buf
+		useCase.stdout = buf
 		useCase.Run(t.Context(), key)
 		assert.NotEmpty(t, buf)
 	}
@@ -64,9 +65,9 @@ func TestLegacyKeysHandled(t *testing.T) {
 	mockConfig.EXPECT().Repos().Return([]types.Repo{})
 
 	for _, key := range []string{"repo", "repos"} {
-		useCase := New(mockConfig)
+		useCase := New(mockConfig, output.NewConsoleOutput())
 		buf := bytes.NewBuffer(nil)
-		useCase.out = buf
+		useCase.stdout = buf
 		useCase.Run(t.Context(), key)
 		assert.NotEmpty(t, buf)
 	}
@@ -79,9 +80,9 @@ func TestStringKeyOutput(t *testing.T) {
 	mockConfig := NewMockConfigGetter(ctrl)
 	mockConfig.EXPECT().RootCmd().Return("test-cmd")
 
-	useCase := New(mockConfig)
+	useCase := New(mockConfig, output.NewConsoleOutput())
 	buf := bytes.NewBuffer(nil)
-	useCase.out = buf
+	useCase.stdout = buf
 	useCase.Run(t.Context(), common.ROOT_CMD)
 
 	assert.Equal(t, "test-cmd\n", buf.String())
@@ -94,9 +95,9 @@ func TestBoolKeyOutput(t *testing.T) {
 	mockConfig := NewMockConfigGetter(ctrl)
 	mockConfig.EXPECT().AutoPull().Return(true)
 
-	useCase := New(mockConfig)
+	useCase := New(mockConfig, output.NewConsoleOutput())
 	buf := bytes.NewBuffer(nil)
-	useCase.out = buf
+	useCase.stdout = buf
 	useCase.Run(t.Context(), common.AUTO_PULL)
 
 	assert.Equal(t, "true\n", buf.String())
@@ -109,9 +110,9 @@ func TestListKeyOutputEmpty(t *testing.T) {
 	mockConfig := NewMockConfigGetter(ctrl)
 	mockConfig.EXPECT().IgnorePkgUpdates().Return([]string{})
 
-	useCase := New(mockConfig)
+	useCase := New(mockConfig, output.NewConsoleOutput())
 	buf := bytes.NewBuffer(nil)
-	useCase.out = buf
+	useCase.stdout = buf
 	useCase.Run(t.Context(), common.IGNORE_PKG_UPDATES)
 
 	assert.Equal(t, "[]\n", buf.String())
@@ -124,9 +125,9 @@ func TestListKeyOutputWithValues(t *testing.T) {
 	mockConfig := NewMockConfigGetter(ctrl)
 	mockConfig.EXPECT().IgnorePkgUpdates().Return([]string{"pkg1", "pkg2", "pkg3"})
 
-	useCase := New(mockConfig)
+	useCase := New(mockConfig, output.NewConsoleOutput())
 	buf := bytes.NewBuffer(nil)
-	useCase.out = buf
+	useCase.stdout = buf
 	useCase.Run(t.Context(), common.IGNORE_PKG_UPDATES)
 
 	assert.Equal(t, "pkg1, pkg2, pkg3\n", buf.String())
@@ -139,9 +140,9 @@ func TestReposKeyEmptyOutput(t *testing.T) {
 	mockConfig := NewMockConfigGetter(ctrl)
 	mockConfig.EXPECT().Repos().Return([]types.Repo{})
 
-	useCase := New(mockConfig)
+	useCase := New(mockConfig, output.NewConsoleOutput())
 	buf := bytes.NewBuffer(nil)
-	useCase.out = buf
+	useCase.stdout = buf
 	useCase.Run(t.Context(), "repo")
 
 	assert.Equal(t, "[]\n", buf.String())
@@ -157,9 +158,9 @@ func TestReposKeyWithValues(t *testing.T) {
 		{Name: "repo2", URL: "https://example.com/repo2"},
 	})
 
-	useCase := New(mockConfig)
+	useCase := New(mockConfig, output.NewConsoleOutput())
 	buf := bytes.NewBuffer(nil)
-	useCase.out = buf
+	useCase.stdout = buf
 	err := useCase.Run(t.Context(), "repo")
 
 	assert.NoError(t, err)
@@ -173,9 +174,9 @@ func TestUnknownKeyReturnsError(t *testing.T) {
 
 	mockConfig := NewMockConfigGetter(ctrl)
 
-	useCase := New(mockConfig)
+	useCase := New(mockConfig, output.NewConsoleOutput())
 	buf := bytes.NewBuffer(nil)
-	useCase.out = buf
+	useCase.stdout = buf
 	err := useCase.Run(t.Context(), "unknown_key")
 
 	assert.Error(t, err)

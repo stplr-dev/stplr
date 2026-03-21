@@ -394,19 +394,105 @@ msgstr ""
 msgid "Would you like to remove the build dependencies?"
 msgstr ""
 
-#: internal/cliprompts/prompt.go:69
+#: internal/cliprompts/prompt.go:48 internal/cliprompts/prompt.go:64
+#: internal/cliprompts/prompt.go:81
+msgid "back"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:49
+msgid "select"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:50 internal/cliprompts/prompt.go:66
+#: internal/cliprompts/prompt.go:83
+msgid "submit"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:51 internal/cliprompts/prompt.go:68
+msgid "up"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:52 internal/cliprompts/prompt.go:69
+msgid "down"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:53
+msgid "left"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:54
+msgid "right"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:55 internal/cliprompts/prompt.go:70
+msgid "filter"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:56 internal/cliprompts/prompt.go:71
+msgid "set filter"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:57 internal/cliprompts/prompt.go:72
+msgid "clear filter"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:58 internal/cliprompts/prompt.go:73
+msgid "½ page up"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:59 internal/cliprompts/prompt.go:74
+msgid "½ page down"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:60 internal/cliprompts/prompt.go:75
+msgid "go to start"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:61 internal/cliprompts/prompt.go:76
+msgid "go to end"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:65
+msgid "confirm"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:67 internal/cliprompts/prompt.go:84
+msgid "toggle"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:77
+msgid "select all"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:78
+msgid "select none"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:82
+msgid "next"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:85 internal/cliprompts/prompt.go:156
+msgid "Yes"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:86 internal/cliprompts/prompt.go:157
+msgid "No"
+msgstr ""
+
+#: internal/cliprompts/prompt.go:175
 msgid "Would you like to view the build script for %s"
 msgstr ""
 
-#: internal/cliprompts/prompt.go:80
+#: internal/cliprompts/prompt.go:186
 msgid "Would you still like to continue?"
 msgstr ""
 
-#: internal/cliprompts/prompt.go:142
+#: internal/cliprompts/prompt.go:250
 msgid "Choose which package to %s"
 msgstr ""
 
-#: internal/cliprompts/prompt.go:163
+#: internal/cliprompts/prompt.go:270
 msgid "Choose which optional package to install"
 msgid_plural "Choose which optional packages to install"
 msgstr[0] ""
@@ -420,11 +506,11 @@ msgstr ""
 msgid "You need to be a %s member or root to perform this action"
 msgstr ""
 
-#: internal/cliutils/localize.go:32
+#: internal/cliutils/localize.go:31
 msgid "Shows a list of commands or help for one command"
 msgstr ""
 
-#: internal/cliutils/localize.go:33
+#: internal/cliutils/localize.go:32
 msgid "Show help"
 msgstr ""
 
@@ -488,34 +574,6 @@ msgstr ""
 #: internal/cliutils/template.go:105 internal/cliutils/template.go:106
 #: internal/cliutils/template.go:133 internal/cliutils/template.go:134
 msgid "OPTIONS"
-msgstr ""
-
-#: internal/cliutils/template.go:156
-msgid "Help"
-msgstr ""
-
-#: internal/cliutils/template.go:157
-msgid "Use arrows to move"
-msgstr ""
-
-#: internal/cliutils/template.go:158
-msgid "space to select"
-msgstr ""
-
-#: internal/cliutils/template.go:159
-msgid "<right> to all"
-msgstr ""
-
-#: internal/cliutils/template.go:160
-msgid "<left> to none"
-msgstr ""
-
-#: internal/cliutils/template.go:161
-msgid "type to filter"
-msgstr ""
-
-#: internal/cliutils/template.go:162
-msgid "for more help"
 msgstr ""
 
 #: internal/cliutils2/cli.go:66
@@ -598,19 +656,25 @@ msgstr ""
 msgid "Your settings do not allow build command"
 msgstr ""
 
-#: internal/usecase/config/get/get.go:129
+#: internal/usecase/config/get/get.go:88
+msgid ""
+"The %q field is outdated and doesn't really affect anything. This field will "
+"be deleted in %s"
+msgstr ""
+
+#: internal/usecase/config/get/get.go:136
 msgid "unknown config key: %s"
 msgstr ""
 
-#: internal/usecase/config/set/set.go:58
+#: internal/usecase/config/set/set.go:61
 msgid "invalid value for %s: %v"
 msgstr ""
 
-#: internal/usecase/config/set/set.go:62
+#: internal/usecase/config/set/set.go:65
 msgid "failed to save config: %v"
 msgstr ""
 
-#: internal/usecase/config/set/set.go:65
+#: internal/usecase/config/set/set.go:72
 msgid "Successfully set %s = %s"
 msgstr ""
 

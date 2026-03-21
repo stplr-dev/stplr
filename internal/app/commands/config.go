@@ -98,7 +98,7 @@ func SetConfig() *cli.Command {
 				return err
 			}
 			defer f()
-			return set.New(d.Config).Run(ctx, set.Options{
+			return set.New(d.Config, d.Output).Run(ctx, set.Options{
 				Field: field,
 				Value: c.Args().Get(1),
 			})
@@ -133,7 +133,7 @@ func GetConfig() *cli.Command {
 			}
 
 			key := c.Args().Get(0)
-			return get.New(d.Config).Run(ctx, key)
+			return get.New(d.Config, d.Output).Run(ctx, key)
 		}),
 	}
 }
