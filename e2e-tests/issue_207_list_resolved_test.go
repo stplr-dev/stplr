@@ -47,7 +47,7 @@ func TestE2EIssue207ListResolved(t *testing.T) {
 		// Prepare
 		execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", REPO_NAME_FOR_E2E_TESTS, "9889ee9375bdf9a6410c86dc00f225ca7eb78bac")
 		execShouldNoError(t, r, "sudo", "stplr", "in", "bar-pkg")
-		execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", REPO_NAME_FOR_E2E_TESTS, "2a0187ea1118a922124f7567aa4565034dc77517")
+		execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", REPO_NAME_FOR_E2E_TESTS, "243f31aabe2af9575a1fb6d799962c065c4cb6b3")
 		execShouldNoError(t, r, "sudo", "stplr", "ref")
 
 		// Actual test
