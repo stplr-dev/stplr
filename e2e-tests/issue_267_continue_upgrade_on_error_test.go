@@ -36,7 +36,7 @@ func TestE2EIssue267ContinueUpgradeOnError(t *testing.T) {
 		execShouldNoError(t, r, "sudo", "stplr", "ref")
 		execShouldNoError(t, r, "sudo", "stplr", "in", "bar-pkg", "foo-pkg")
 		execShouldNoError(t, r, "sh", "-c", "test $(stplr list -U | wc -l) -eq 0 || exit 1")
-		execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", REPO_NAME_FOR_E2E_TESTS, "0f3663d4e377ebf0460d7497e7a57827ae92261a")
+		execShouldNoError(t, r, "sudo", "stplr", "repo", "set-ref", REPO_NAME_FOR_E2E_TESTS, "249ece42d3c6eea895f245c0207a3142f06dd324")
 		execShouldNoError(t, r, "sh", "-c", "test $(stplr list -U | wc -l) -eq 2 || exit 1")
 
 		r.Command("sudo", "stplr", "-i=false", "upgrade").

@@ -69,7 +69,7 @@ require (
 	golift.io/xtractr v0.2.3-0.20260111181756-d6376a2e84ce
 	google.golang.org/genproto/googleapis/api v0.0.0-20260114163908-3f89685c29c3
 	modernc.org/sqlite v1.47.0
-	mvdan.cc/sh/v3 v3.12.1-0.20251005234102-d3ff6f655a6a
+	mvdan.cc/sh/v3 v3.13.0
 	xorm.io/xorm v1.3.11
 )
 
