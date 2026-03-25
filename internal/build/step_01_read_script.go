@@ -27,15 +27,18 @@ import (
 type readScriptStep struct {
 	reader scripter.ScriptReader
 	parser scripter.PackagesParser
+	checks ChecksExecutor
 }
 
 func ReadScriptStep(
 	reader scripter.ScriptReader,
 	parser scripter.PackagesParser,
+	checks ChecksExecutor,
 ) *readScriptStep {
 	return &readScriptStep{
-		reader: reader,
-		parser: parser,
+		reader,
+		parser,
+		checks,
 	}
 }
 
@@ -53,6 +56,14 @@ func (s *readScriptStep) Run(ctx context.Context, state *BuildState) error {
 	if err != nil {
 		return err
 	}
+
+	for _, pkg := range state.Packages {
+		err := s.checks.RunPreChecks(ctx, pkg, state.Input)
+		if err != nil {
+			return err
+		}
+	}
+
 	state.Version = state.Packages[0].Version
 	state.ScriptFile = f
 	return nil

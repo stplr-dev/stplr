@@ -388,7 +388,7 @@ func (b *builder) Puller() *builder {
 		return b
 	}
 
-	b.deps.Puller = repos.NewPuller(b.deps.Cfg, b.deps.DB)
+	b.deps.Puller = repos.NewPuller(b.deps.Cfg, b.deps.Info, b.deps.DB)
 
 	return b
 }

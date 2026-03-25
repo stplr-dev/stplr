@@ -464,6 +464,7 @@ func ForPluginsServe(ctx context.Context) (*PluginServeDeps, Cleanup, error) {
 		Config().
 		Scripter().
 		DB().
+		Info().
 		Puller().
 		End()
 	if err != nil {

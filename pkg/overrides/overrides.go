@@ -69,6 +69,26 @@ func genCombinations(variantsList ...[]string) []string {
 	return results
 }
 
+func DistrosFromOsRelease(info *distro.OSRelease, likeDistros bool) []string {
+	distros := []string{info.ID}
+	if likeDistros {
+		distros = append(distros, info.Like...)
+	}
+
+	if info.ReleaseID != "" {
+		origDistros := distros
+		distros = []string{}
+		for _, d := range origDistros {
+			if d != "" {
+				distros = append(distros, strings.Join([]string{d, info.ReleaseID}, "_"))
+			}
+		}
+		distros = append(distros, origDistros...)
+	}
+
+	return distros
+}
+
 // Resolve generates a slice of possible override names in the order that they should be checked
 func Resolve(info *distro.OSRelease, opts *Opts) ([]string, error) {
 	// Validate inputs
@@ -97,21 +117,7 @@ func Resolve(info *distro.OSRelease, opts *Opts) ([]string, error) {
 	}
 
 	// Collect distributions
-	distros := []string{info.ID}
-	if opts.LikeDistros {
-		distros = append(distros, info.Like...)
-	}
-
-	if info.ReleaseID != "" {
-		origDistros := distros
-		distros = []string{}
-		for _, d := range origDistros {
-			if d != "" {
-				distros = append(distros, strings.Join([]string{d, info.ReleaseID}, "_"))
-			}
-		}
-		distros = append(distros, origDistros...)
-	}
+	distros := DistrosFromOsRelease(info, opts.LikeDistros)
 
 	// comb := combGenerator{reverse: true}
 

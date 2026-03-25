@@ -28,6 +28,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"slices"
 	"strings"
 
 	"go.stplr.dev/stplr/internal/shutils/decoder"
@@ -65,14 +66,16 @@ type Package struct {
 	Name        string `xorm:"pk 'name'" json:"name"`
 	BasePkgName string `xorm:"notnull 'basepkg_name'" json:"basepkg_name"`
 
-	Version       string   `sh:"version" xorm:"notnull 'version'" json:"version"`
-	Release       int      `sh:"release" xorm:"notnull 'release'" json:"release"`
-	Epoch         uint     `sh:"epoch" xorm:"'epoch'" json:"epoch"`
-	Architectures []string `sh:"architectures" xorm:"json 'architectures'" json:"architectures"`
-	Licenses      []string `sh:"license" xorm:"json 'licenses'" json:"license"`
-	Provides      []string `sh:"provides" xorm:"json 'provides'" json:"provides"`
-	Conflicts     []string `sh:"conflicts" xorm:"json 'conflicts'" json:"conflicts"`
-	Replaces      []string `sh:"replaces" xorm:"json 'replaces'" json:"replaces"`
+	Version          string   `sh:"version" xorm:"notnull 'version'" json:"version"`
+	Release          int      `sh:"release" xorm:"notnull 'release'" json:"release"`
+	Epoch            uint     `sh:"epoch" xorm:"'epoch'" json:"epoch"`
+	Architectures    []string `sh:"architectures" xorm:"json 'architectures'" json:"architectures"`
+	CompatibleWith   []string `sh:"compatible_with" xorm:"json 'compatible_with'" json:"compatible_with"`
+	IncompatibleWith []string `sh:"incompatible_with" xorm:"json 'incompatible_with'" json:"incompatible_with"`
+	Licenses         []string `sh:"license" xorm:"json 'licenses'" json:"license"`
+	Provides         []string `sh:"provides" xorm:"json 'provides'" json:"provides"`
+	Conflicts        []string `sh:"conflicts" xorm:"json 'conflicts'" json:"conflicts"`
+	Replaces         []string `sh:"replaces" xorm:"json 'replaces'" json:"replaces"`
 
 	AppStreamAppID    OverridableField[string] `sh:"appstream_app_id" xorm:"json 'appstream_app_id'" json:"appstream_app_id"`
 	AppStreamMetaInfo OverridableField[string] `sh:"appstream_metainfo" xorm:"json 'appstream_metainfo'" json:"appstream_metainfo"`
@@ -218,4 +221,31 @@ func (p Package) MarshalJSONWithOptions(includeOverrides bool) ([]byte, error) {
 
 func (pkg *Package) FormatFullName() string {
 	return fmt.Sprintf("%s/%s", pkg.Repository, pkg.Name)
+}
+
+func (pkg *Package) IsDistroCompatible(distros []string) bool {
+	if len(pkg.CompatibleWith) != 0 {
+		if !hasIntersection(distros, pkg.CompatibleWith) {
+			return false
+		}
+	}
+	if len(pkg.IncompatibleWith) != 0 {
+		if hasIntersection(distros, pkg.IncompatibleWith) {
+			return false
+		}
+	}
+	return true
+}
+
+func hasIntersection(a, b []string) bool {
+	// slices are small so I hope to cache locality
+	if len(a) > len(b) {
+		a, b = b, a
+	}
+	for _, item := range a {
+		if slices.Contains(b, item) {
+			return true
+		}
+	}
+	return false
 }

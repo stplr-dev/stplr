@@ -391,21 +391,25 @@ msgstr ""
 "конфигурации. Изоляция безопасности применяться не будет. Убедитесь, что вы "
 "понимаете связанные с этим риски."
 
-#: internal/build/check_executor.go:56
+#: internal/build/check_executor.go:64
+msgid "This package is already installed"
+msgstr "Этот пакет уже установлен"
+
+#: internal/build/check_executor.go:77
 msgid "Your settings do not allow SKIP in checksums"
 msgstr "Ваши настройки не позволяют использовать SKIP в контрольных суммах"
 
-#: internal/build/check_executor.go:63
-msgid ""
-"Your system's CPU architecture doesn't match this package. Do you want to "
-"build anyway?"
+#: internal/build/check_executor.go:82
+#, fuzzy
+msgid "This package is not compatible with your distro"
+msgstr "Этот пакет уже установлен"
+
+#: internal/build/check_executor.go:86
+#, fuzzy
+msgid "Your system's CPU architecture doesn't match this package"
 msgstr ""
 "Архитектура процессора вашей системы не соответствует этому пакету. Вы все "
 "равно хотите выполнить сборку?"
-
-#: internal/build/check_executor.go:86
-msgid "This package is already installed"
-msgstr "Этот пакет уже установлен"
 
 #: internal/build/step_04_nonfree_view.go:103
 msgid ""
@@ -649,7 +653,7 @@ msgstr "Сборка метаданных пакета %q"
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
 
-#: internal/service/repos/internal/puller/puller.go:204
+#: internal/service/repos/internal/puller/puller.go:213
 msgid "Git repository does not appear to be a valid Stapler repo"
 msgstr "Git-репозиторий не выглядит корректным репозиторием Stapler"
 

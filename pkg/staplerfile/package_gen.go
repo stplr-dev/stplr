@@ -30,6 +30,8 @@ type packageResolved struct {
 	Release           int               `json:"release"`
 	Epoch             uint              `json:"epoch"`
 	Architectures     []string          `json:"architectures"`
+	CompatibleWith    []string          `json:"compatible_with"`
+	IncompatibleWith  []string          `json:"incompatible_with"`
 	Licenses          []string          `json:"license"`
 	Provides          []string          `json:"provides"`
 	Conflicts         []string          `json:"conflicts"`
@@ -74,6 +76,8 @@ func PackageToResolved(src *Package) packageResolved {
 		Release:           src.Release,
 		Epoch:             src.Epoch,
 		Architectures:     src.Architectures,
+		CompatibleWith:    src.CompatibleWith,
+		IncompatibleWith:  src.IncompatibleWith,
 		Licenses:          src.Licenses,
 		Provides:          src.Provides,
 		Conflicts:         src.Conflicts,
@@ -149,6 +153,8 @@ func GetCELColumnMap() map[string]cel2sqlite.ColumnInfo {
 		"release":            {SQLName: "release", Type: cel2sqlite.ColumnTypeInt},
 		"epoch":              {SQLName: "epoch", Type: cel2sqlite.ColumnTypeInt},
 		"architectures":      {SQLName: "architectures", Type: cel2sqlite.ColumnTypeJSONArray},
+		"compatible_with":    {SQLName: "compatible_with", Type: cel2sqlite.ColumnTypeJSONArray},
+		"incompatible_with":  {SQLName: "incompatible_with", Type: cel2sqlite.ColumnTypeJSONArray},
 		"license":            {SQLName: "licenses", Type: cel2sqlite.ColumnTypeJSONArray},
 		"provides":           {SQLName: "provides", Type: cel2sqlite.ColumnTypeJSONArray},
 		"conflicts":          {SQLName: "conflicts", Type: cel2sqlite.ColumnTypeJSONArray},

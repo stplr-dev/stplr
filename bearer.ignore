@@ -1,0 +1,26 @@
+{
+  "2717c3e5a5002d7d0596187d7357b516_0": {
+    "author": "Maxim Slipenko",
+    "comment": "Allowed hash for files",
+    "false_positive": true,
+    "ignored_at": "2026-03-14T12:02:56Z"
+  },
+  "d7c1727f2a9f75cc530034f341d4a608_0": {
+    "author": "Maxim Slipenko",
+    "comment": "Allowed hash for files",
+    "false_positive": true,
+    "ignored_at": "2026-03-14T12:00:00Z"
+  },
+  "fb908325260c40e4c63d84cb5fcaaf58_0": {
+    "author": "Maxim Slipenko",
+    "comment": "Allowed hash for files",
+    "false_positive": true,
+    "ignored_at": "2026-03-14T12:02:08Z"
+  },
+  "fb908325260c40e4c63d84cb5fcaaf58_1": {
+    "author": "Maxim Slipenko",
+    "comment": "Allowed hash for files",
+    "false_positive": true,
+    "ignored_at": "2026-03-14T12:02:18Z"
+  }
+}

@@ -25,11 +25,11 @@ import (
 
 	"github.com/leonelquinteros/gotext"
 
-	"go.stplr.dev/stplr/internal/cliprompts"
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/commonbuild"
 	"go.stplr.dev/stplr/internal/cpu"
 	"go.stplr.dev/stplr/internal/manager"
+	"go.stplr.dev/stplr/pkg/overrides"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
@@ -50,28 +50,6 @@ func NewChecksRunner(mgr manager.Manager, cfg checksRunnerConfig) *ChecksRunner 
 }
 
 func (r *ChecksRunner) RunChecks(ctx context.Context, pkg *staplerfile.Package, input *commonbuild.BuildInput) (bool, error) {
-	if r.cfg.ForbidSkipInChecksums() {
-		checksums := pkg.Checksums.Resolved()
-		if slices.ContainsFunc(checksums, IsSkipChecksum) {
-			return false, cliutils.FormatCliExit(gotext.Get("Your settings do not allow SKIP in checksums"), nil)
-		}
-	}
-
-	if !cpu.IsCompatibleWith(cpu.Arch(), pkg.Architectures) {
-		cont, err := cliprompts.YesNoPrompt(
-			ctx,
-			gotext.Get("Your system's CPU architecture doesn't match this package. Do you want to build anyway?"),
-			input.Opts.Interactive,
-			true,
-		)
-		if err != nil {
-			return false, err
-		}
-		if !cont {
-			return false, nil
-		}
-	}
-
 	installed, err := r.mgr.ListInstalled(nil)
 	if err != nil {
 		return false, err
@@ -92,6 +70,26 @@ func (r *ChecksRunner) RunChecks(ctx context.Context, pkg *staplerfile.Package, 
 	return true, nil
 }
 
+func (r *ChecksRunner) RunPreChecks(ctx context.Context, pkg *staplerfile.Package, input *commonbuild.BuildInput) error {
+	if r.cfg.ForbidSkipInChecksums() {
+		checksums := pkg.Checksums.Resolved()
+		if slices.ContainsFunc(checksums, IsSkipChecksum) {
+			return cliutils.FormatCliExit(gotext.Get("Your settings do not allow SKIP in checksums"), nil)
+		}
+	}
+
+	if !pkg.IsDistroCompatible(overrides.DistrosFromOsRelease(input.OSRelease(), true)) {
+		return cliutils.FormatCliExit(gotext.Get("This package is not compatible with your distro"), nil)
+	}
+
+	if !cpu.IsCompatibleWith(cpu.Arch(), pkg.Architectures) {
+		return cliutils.FormatCliExit(gotext.Get("Your system's CPU architecture doesn't match this package"), nil)
+	}
+
+	return nil
+}
+
 type ChecksExecutor interface {
 	RunChecks(ctx context.Context, pkg *staplerfile.Package, input *commonbuild.BuildInput) (bool, error)
+	RunPreChecks(ctx context.Context, pkg *staplerfile.Package, input *commonbuild.BuildInput) error
 }

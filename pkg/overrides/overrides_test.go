@@ -264,3 +264,27 @@ func TestReleasePlatformSpecific(t *testing.T) {
 		assert.Equal(t, 1, release)
 	}
 }
+
+func TestDistrosFromOsRelease(t *testing.T) {
+	names := overrides.DistrosFromOsRelease(info, true)
+
+	expected := []string{
+		"centos_9",
+		"rhel_9",
+		"fedora_9",
+		"centos",
+		"rhel",
+		"fedora",
+	}
+
+	assert.Equal(t, expected, names)
+
+	names = overrides.DistrosFromOsRelease(info, false)
+
+	expected = []string{
+		"centos_9",
+		"centos",
+	}
+
+	assert.Equal(t, expected, names)
+}

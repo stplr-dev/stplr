@@ -37,6 +37,8 @@ import (
 	"go.stplr.dev/stplr/internal/repoprocessor"
 	"go.stplr.dev/stplr/internal/repoutils"
 	"go.stplr.dev/stplr/internal/service/repos/internal/gitmanager"
+	"go.stplr.dev/stplr/pkg/distro"
+	"go.stplr.dev/stplr/pkg/overrides"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 	"go.stplr.dev/stplr/pkg/types"
 )
@@ -55,17 +57,19 @@ type PackageAction struct {
 
 // Puller executes in plugin
 type Puller struct {
-	cfg *config.ALRConfig
-	db  *database.Database
+	cfg  *config.ALRConfig
+	db   *database.Database
+	info *distro.OSRelease
 
 	rp *repoprocessor.RepoProcessor
 	gm *gitmanager.GitManager
 }
 
-func NewPuller(cfg *config.ALRConfig, db *database.Database) *Puller {
+func NewPuller(cfg *config.ALRConfig, info *distro.OSRelease, db *database.Database) *Puller {
 	return &Puller{
 		cfg,
 		db,
+		info,
 		repoprocessor.New(),
 		&gitmanager.GitManager{},
 	}
@@ -188,7 +192,12 @@ func (p *Puller) processRepoChanges(ctx context.Context, repo types.Repo, repoDi
 		return fmt.Errorf("failed to process %q repo: %w", repo.Name, err)
 	}
 
+	distros := overrides.DistrosFromOsRelease(p.info, true)
 	for _, pkg := range pkgs {
+		if !pkg.IsDistroCompatible(distros) {
+			continue
+		}
+
 		if err := p.db.InsertPackage(ctx, *pkg); err != nil {
 			return fmt.Errorf("failed to insert package: %w", err)
 		}

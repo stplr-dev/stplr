@@ -46,6 +46,10 @@ var ALT_SISYPHUS = []string{
 	"alt-sisyphus",
 }
 
+var FEDORA_43 = []string{
+	"fedora-43",
+}
+
 var AUTOREQ_AUTOPROV_SYSTEMS []string = []string{
 	// "alt-sisyphus",
 	"fedora-43",

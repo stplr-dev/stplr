@@ -117,6 +117,7 @@ func (b *Builder) BuildPackage(ctx context.Context, input *commonbuild.BuildInpu
 		ReadScriptStep(
 			b.scriptExecutor,
 			b.scriptExecutor,
+			b.checksExecutor,
 		),
 		CheckCacheStep(
 			b.cacheExecutor,

@@ -359,18 +359,20 @@ msgid ""
 "Security isolation will not be applied. Ensure you understand the risks."
 msgstr ""
 
-#: internal/build/check_executor.go:56
+#: internal/build/check_executor.go:64
+msgid "This package is already installed"
+msgstr ""
+
+#: internal/build/check_executor.go:77
 msgid "Your settings do not allow SKIP in checksums"
 msgstr ""
 
-#: internal/build/check_executor.go:63
-msgid ""
-"Your system's CPU architecture doesn't match this package. Do you want to "
-"build anyway?"
+#: internal/build/check_executor.go:82
+msgid "This package is not compatible with your distro"
 msgstr ""
 
 #: internal/build/check_executor.go:86
-msgid "This package is already installed"
+msgid "Your system's CPU architecture doesn't match this package"
 msgstr ""
 
 #: internal/build/step_04_nonfree_view.go:103
@@ -606,7 +608,7 @@ msgstr ""
 msgid "Executing %s()"
 msgstr ""
 
-#: internal/service/repos/internal/puller/puller.go:204
+#: internal/service/repos/internal/puller/puller.go:213
 msgid "Git repository does not appear to be a valid Stapler repo"
 msgstr ""
 
