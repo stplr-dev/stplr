@@ -54,7 +54,7 @@ require (
 	github.com/opencontainers/cgroups v0.0.6
 	github.com/opencontainers/runc v1.4.1
 	github.com/opencontainers/runtime-spec v1.3.0
-	github.com/pelletier/go-toml/v2 v2.2.4
+	github.com/pelletier/go-toml/v2 v2.3.0
 	github.com/spf13/afero v1.15.0
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli-docs/v3 v3.1.0
