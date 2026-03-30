@@ -46,6 +46,10 @@ func InfoCmd() *cli.Command {
 				Aliases: []string{"a"},
 				Usage:   gotext.Get("Show all information, not just for the current distro"),
 			},
+			&cli.BoolFlag{
+				Name:  "json",
+				Usage: gotext.Get("Return information in JSON format"),
+			},
 		},
 		ShellComplete: cliutils.BashCompleteWithError(func(ctx context.Context, c *cli.Command) error {
 			if err := cliutils.ExitIfRootCantDropCapsNoPrivs(); err != nil {
@@ -80,6 +84,7 @@ func InfoCmd() *cli.Command {
 				All:         c.Bool("all"),
 				Pkgs:        c.Args().Slice(),
 				Interactive: c.Bool("interactive"),
+				Json:        c.Bool("json"),
 			})
 		},
 	}

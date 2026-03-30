@@ -20,6 +20,7 @@ package info
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -60,6 +61,7 @@ type Options struct {
 	All         bool
 	Interactive bool
 	Pkgs        []string
+	Json        bool
 }
 
 func (u *useCase) Run(ctx context.Context, opts Options) error {
@@ -83,15 +85,28 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error initializing resolver"))
 	}
 
-	for _, pkg := range pkgs {
-		resolver.Resolve(&pkg)
-		view := staplerfile.NewPackageView(pkg)
-		view.Resolved = !opts.All
-		err = yaml.NewEncoder(u.stdout, yaml.UseJSONMarshaler(), yaml.OmitEmpty()).Encode(view)
+	if opts.Json {
+		views := make([]staplerfile.PackageView, len(pkgs))
+		for i, pkg := range pkgs {
+			resolver.Resolve(&pkg)
+			views[i] = staplerfile.NewPackageView(pkg)
+			views[i].Resolved = !opts.All
+		}
+		err = json.NewEncoder(u.stdout).Encode(views)
 		if err != nil {
 			return errors.WrapIntoI18nError(err, gotext.Get("Error encoding script variables"))
 		}
-		fmt.Fprintln(u.stdout, "---")
+	} else {
+		for _, pkg := range pkgs {
+			resolver.Resolve(&pkg)
+			view := staplerfile.NewPackageView(pkg)
+			view.Resolved = !opts.All
+			err = yaml.NewEncoder(u.stdout, yaml.UseJSONMarshaler(), yaml.OmitEmpty()).Encode(view)
+			if err != nil {
+				return errors.WrapIntoI18nError(err, gotext.Get("Error encoding script variables"))
+			}
+			fmt.Fprintln(u.stdout, "---")
+		}
 	}
 
 	return nil

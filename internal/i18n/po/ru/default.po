@@ -170,7 +170,12 @@ msgstr "Отобразить информацию о пакете"
 msgid "Show all information, not just for the current distro"
 msgstr "Показывать всю информацию, не только для текущего дистрибутива"
 
-#: internal/app/commands/info.go:66
+#: internal/app/commands/info.go:51
+#, fuzzy
+msgid "Return information in JSON format"
+msgstr "Вывод в JSON формате"
+
+#: internal/app/commands/info.go:70
 msgid "Command info expected at least 1 argument, got %d"
 msgstr "Для команды info ожидался хотя бы 1 аргумент, получено %d"
 
@@ -755,19 +760,19 @@ msgstr "Не удалось создать новый каталог кэша"
 msgid "Done"
 msgstr "Сделано"
 
-#: internal/usecase/info/info.go:68
+#: internal/usecase/info/info.go:70
 msgid "Error finding packages"
 msgstr "Ошибка при поиске пакетов"
 
-#: internal/usecase/info/info.go:72
+#: internal/usecase/info/info.go:74
 msgid "Package not found"
 msgstr "Пакет не найден"
 
-#: internal/usecase/info/info.go:83
+#: internal/usecase/info/info.go:85
 msgid "Error initializing resolver"
 msgstr "Ошибка инициализации resolver"
 
-#: internal/usecase/info/info.go:92
+#: internal/usecase/info/info.go:97 internal/usecase/info/info.go:106
 msgid "Error encoding script variables"
 msgstr "Ошибка кодирования переменных скрипта"
 
