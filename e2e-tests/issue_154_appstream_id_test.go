@@ -42,7 +42,9 @@ func TestE2EIssue154AppstreamAppId(t *testing.T) {
 		defaultPrepare(t, r)
 
 		r.Command("stplr", "info", "alr-repo/test-appstream-metainfo").
-			ExpectStdoutContains("appstream_metainfo: com.example.app.metainfo.xml").
+			ExpectStdoutContains("appstream").
+			ExpectStdoutContains("type: desktop-application").
+			ExpectStdoutContains("metadata_license: CC0-1.0").
 			ExpectSuccess().
 			Run(t)
 	}))

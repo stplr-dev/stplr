@@ -21,7 +21,6 @@ package repoprocessor
 import (
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"slices"
@@ -55,11 +54,7 @@ func (rp *RepoProcessor) Process(ctx context.Context, repo types.Repo, repoDir s
 func (rp *RepoProcessor) processFiles(ctx context.Context, repo types.Repo, files []string) ([]*staplerfile.Package, error) {
 	var all []*staplerfile.Package
 	for _, match := range files {
-		f, err := os.Open(match)
-		if err != nil {
-			return nil, fmt.Errorf("failed to open %q: %w", match, err)
-		}
-		pkgs, err := rp.parseScript(ctx, repo, f)
+		pkgs, err := rp.parseScript(ctx, repo, match)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse script %q: %w", match, err)
 		}
@@ -72,13 +67,17 @@ func (rp *RepoProcessor) processFiles(ctx context.Context, repo types.Repo, file
 func (rp *RepoProcessor) parseScript(
 	ctx context.Context,
 	repo types.Repo,
-	r io.ReadCloser,
+	path string,
 ) ([]*staplerfile.Package, error) {
-	f, err := staplerfile.ReadFromIOReader(r, "/tmp")
+	f, err := staplerfile.ReadFromLocal(path)
 	if err != nil {
 		return nil, err
 	}
-	_, pkgs, err := f.ParseBuildVars(ctx, &distro.OSRelease{}, []string{})
+	_, pkgs, err := f.ParseBuildVars(ctx,
+		&distro.OSRelease{},
+		[]string{},
+		staplerfile.WithAppstream(),
+	)
 	if err != nil {
 		return nil, err
 	}

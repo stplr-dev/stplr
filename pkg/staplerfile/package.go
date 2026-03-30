@@ -31,6 +31,8 @@ import (
 	"slices"
 	"strings"
 
+	"go.alt-gnome.ru/x/appstream"
+
 	"go.stplr.dev/stplr/internal/shutils/decoder"
 )
 
@@ -77,8 +79,8 @@ type Package struct {
 	Conflicts        []string `sh:"conflicts" xorm:"json 'conflicts'" json:"conflicts"`
 	Replaces         []string `sh:"replaces" xorm:"json 'replaces'" json:"replaces"`
 
-	AppStreamAppID    OverridableField[string] `sh:"appstream_app_id" xorm:"json 'appstream_app_id'" json:"appstream_app_id"`
-	AppStreamMetaInfo OverridableField[string] `sh:"appstream_metainfo" xorm:"json 'appstream_metainfo'" json:"appstream_metainfo"`
+	AppStreamAppID string               `sh:"appstream_app_id" xorm:"json 'appstream_app_id'" json:"appstream_app_id"`
+	AppStream      *appstream.Component `xorm:"json 'appstream'" json:"appstream"`
 
 	NonFree        bool                     `sh:"nonfree" xorm:"'nonfree'" json:"nonfree"`
 	NonFreeUrl     OverridableField[string] `sh:"nonfree_url" xorm:"'nonfree_url'" json:"nonfree_url"`

@@ -61,6 +61,7 @@ require (
 	github.com/urfave/cli/v3 v3.8.0
 	go.alt-gnome.ru/capytest v0.0.4
 	go.alt-gnome.ru/capytest/providers/podman v0.0.4
+	go.alt-gnome.ru/x/appstream v0.0.0-20260329065238-1d6c9e8eef00
 	go.elara.ws/vercmp v0.0.0-20250912200949-2e97859b8794
 	go.uber.org/mock v0.6.0
 	golang.org/x/crypto v0.49.0

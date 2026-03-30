@@ -24,6 +24,7 @@ package staplerfile
 
 import (
 	"context"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"net/url"
@@ -31,6 +32,7 @@ import (
 	"path/filepath"
 
 	"github.com/jeandeaual/go-locale"
+	"go.alt-gnome.ru/x/appstream"
 	"mvdan.cc/sh/v3/expand"
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
@@ -47,11 +49,14 @@ import (
 
 type ScriptFile struct {
 	file *syntax.File
+
+	// Staplerfile path
 	path string
 }
 
 type parseOptions struct {
-	language string
+	language      string
+	withAppstream bool
 }
 
 type parseOption func(*parseOptions)
@@ -59,6 +64,12 @@ type parseOption func(*parseOptions)
 func WithCustomLanguage(lang string) parseOption {
 	return func(os *parseOptions) {
 		os.language = lang
+	}
+}
+
+func WithAppstream() parseOption {
+	return func(os *parseOptions) {
+		os.withAppstream = true
 	}
 }
 
@@ -110,8 +121,12 @@ func (s *ScriptFile) ParseBuildVars(ctx context.Context, info *distro.OSRelease,
 		return "", nil, fmt.Errorf("failed to createPackagesForBuildVars: %w", err)
 	}
 
+	dir := filepath.Dir(s.path)
 	for _, p := range pkgs {
 		p.Options = scriptOpts
+		if options.withAppstream {
+			refineAppstream(p, dir)
+		}
 	}
 
 	baseName := pkgNames.BasePkgName
@@ -120,6 +135,38 @@ func (s *ScriptFile) ParseBuildVars(ctx context.Context, info *distro.OSRelease,
 	}
 
 	return baseName, pkgs, nil
+}
+
+func refineAppstream(pkg *Package, basedir string) {
+	if pkg.AppStreamAppID == "" {
+		return
+	}
+
+	appID := pkg.AppStreamAppID
+
+	candidates := []string{
+		filepath.Join(basedir, appID+".metainfo.xml"),
+		filepath.Join(basedir, appID+".appdata.xml"),
+	}
+
+	for _, candidate := range candidates {
+		if _, err := os.Stat(candidate); err == nil {
+			f, err := os.Open(candidate)
+			if err != nil {
+				continue
+			}
+
+			var component appstream.Component
+			err = xml.NewDecoder(f).Decode(&component)
+			f.Close()
+			if err != nil {
+				continue
+			}
+
+			pkg.AppStream = &component
+			break
+		}
+	}
 }
 
 func (s *ScriptFile) createRunner(info *distro.OSRelease) (*interp.Runner, error) {

@@ -315,7 +315,10 @@ func main() {
 
 	buf.WriteString("// DO NOT EDIT MANUALLY. This file is generated.\n")
 	buf.WriteString("package staplerfile\n\n")
-	buf.WriteString("import \"go.stplr.dev/stplr/internal/cel2sqlite\"\n")
+	buf.WriteString("import (\n")
+	buf.WriteString("	\"go.alt-gnome.ru/x/appstream\"\n")
+	buf.WriteString("	\"go.stplr.dev/stplr/internal/cel2sqlite\"\n")
+	buf.WriteString(")\n")
 
 	resolvedStructGenerator(&buf, fields)
 	toResolvedFuncGenerator(&buf, fields)
