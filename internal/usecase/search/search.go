@@ -29,6 +29,7 @@ import (
 
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/search"
+	"go.stplr.dev/stplr/internal/templutils"
 	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/staplerfile"
 )
@@ -106,7 +107,7 @@ func (u *useCase) outputResults(packages []staplerfile.Package, resolver *staple
 		format = "{{.Repository}}/{{.Name}} {{.Version}}-{{.Release}}\n"
 	}
 
-	tmpl, err = template.New("format").Parse(format)
+	tmpl, err = templutils.NewPackageTemplate().Parse(format)
 	if err != nil {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error parsing format template"))
 	}

@@ -932,7 +932,7 @@ msgstr "Ошибка при удалении каталога репозитор
 msgid "Error removing packages from database"
 msgstr "Ошибка при удалении пакетов из базы данных"
 
-#: internal/usecase/search/search.go:96
+#: internal/usecase/search/search.go:97
 msgid "Error while executing search"
 msgstr "Ошибка при выполнении поиска"
 

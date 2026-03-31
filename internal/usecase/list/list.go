@@ -24,7 +24,6 @@ import (
 	"os"
 	"slices"
 	"strings"
-	"text/template"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -33,6 +32,7 @@ import (
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/manager"
 	"go.stplr.dev/stplr/internal/service/updater"
+	"go.stplr.dev/stplr/internal/templutils"
 	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/overrides"
 	"go.stplr.dev/stplr/pkg/staplerfile"
@@ -98,7 +98,7 @@ func (u *useCase) runForUpgradable(ctx context.Context, opts Options) error {
 	if format == "" {
 		format = "{{.Package.Repository}}/{{.Package.Name}} {{.FromVersion}} -> {{.ToVersion}}\n"
 	}
-	tmpl, err := template.New("format").Parse(format)
+	tmpl, err := templutils.NewPackageTemplate().Parse(format)
 	if err != nil {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error parsing format template"))
 	}
@@ -188,7 +188,7 @@ func (u *useCase) processAndOutputPackages(opts Options, pkgs []staplerfile.Pack
 		format = defaultFormatTemplate
 	}
 
-	tmpl, err := template.New("format").Parse(format)
+	tmpl, err := templutils.NewPackageTemplate().Parse(format)
 	if err != nil {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error parsing format template"))
 	}

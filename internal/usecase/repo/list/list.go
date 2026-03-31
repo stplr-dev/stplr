@@ -24,12 +24,12 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 	"text/template"
 
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/errors"
+	"go.stplr.dev/stplr/internal/templutils"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
@@ -83,17 +83,7 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 			gotext.Get("Homepage"), gotext.Get("Icon"), gotext.Get("URL"), gotext.Get("Ref"),
 			gotext.Get("Mirrors"), gotext.Get("Report"))
 	}
-	tmpl, err = template.New("format").Funcs(template.FuncMap{
-		"indent": func(s string) string {
-			lines := strings.Split(s, "\n")
-			for i, line := range lines {
-				if line != "" {
-					lines[i] = "  " + line
-				}
-			}
-			return strings.Join(lines, "\n")
-		},
-	}).Parse(format)
+	tmpl, err = templutils.NewPackageTemplate().Parse(format)
 	if err != nil {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error parsing format template"))
 	}
