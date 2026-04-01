@@ -168,10 +168,10 @@ func GetCELColumnMap() map[string]cel2sqlite.ColumnInfo {
 `))
 
 	var entriesBuilder strings.Builder
+	var xormTag string
 
 	for _, field := range fields {
 		for _, name := range field.Names {
-			// Получаем теги
 			var celName, sqlName string
 			var skip bool
 
@@ -186,7 +186,7 @@ func GetCELColumnMap() map[string]cel2sqlite.ColumnInfo {
 				}
 
 				// Получаем SQL имя из тега xorm
-				xormTag := tag.Get("xorm")
+				xormTag = tag.Get("xorm")
 				sqlName = extractSQLName(xormTag)
 
 				// Пропускаем поля с xorm:"-"
@@ -202,8 +202,7 @@ func GetCELColumnMap() map[string]cel2sqlite.ColumnInfo {
 				continue
 			}
 
-			// Определяем тип колонки
-			colType := determineColumnType(field.Type)
+			colType := determineColumnType(field.Type, xormTag)
 
 			var entryBuf bytes.Buffer
 			entryBuf.WriteString(fmt.Sprintf("\t\t\"%s\": {SQLName: \"%s\", Type: cel2sqlite.%s},\n",
@@ -245,7 +244,7 @@ func extractSQLName(xormTag string) string {
 	return ""
 }
 
-func determineColumnType(expr ast.Expr) string {
+func determineColumnType(expr ast.Expr, xormTag string) string {
 	switch overridableFieldKind(expr) {
 	case "overridable_array":
 		return "ColumnTypeOverridableFieldArray"
@@ -266,6 +265,8 @@ func determineColumnType(expr ast.Expr) string {
 		return "ColumnTypeBool"
 	case strings.HasPrefix(typeStr, "[]"):
 		return "ColumnTypeJSONArray"
+	case strings.Contains(xormTag, "json"):
+		return "ColumnTypeJSON"
 	default:
 		return "ColumnTypeString"
 	}

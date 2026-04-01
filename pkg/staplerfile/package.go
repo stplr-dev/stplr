@@ -79,7 +79,7 @@ type Package struct {
 	Conflicts        []string `sh:"conflicts" xorm:"json 'conflicts'" json:"conflicts"`
 	Replaces         []string `sh:"replaces" xorm:"json 'replaces'" json:"replaces"`
 
-	AppStreamAppID string               `sh:"appstream_app_id" xorm:"json 'appstream_app_id'" json:"appstream_app_id"`
+	AppStreamAppID string               `sh:"appstream_app_id" xorm:"'appstream_app_id'" json:"appstream_app_id"`
 	AppStream      *appstream.Component `xorm:"json 'appstream'" json:"appstream"`
 
 	NonFree        bool                     `sh:"nonfree" xorm:"'nonfree'" json:"nonfree"`

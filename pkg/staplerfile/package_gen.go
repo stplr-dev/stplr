@@ -161,7 +161,7 @@ func GetCELColumnMap() map[string]cel2sqlite.ColumnInfo {
 		"conflicts":         {SQLName: "conflicts", Type: cel2sqlite.ColumnTypeJSONArray},
 		"replaces":          {SQLName: "replaces", Type: cel2sqlite.ColumnTypeJSONArray},
 		"appstream_app_id":  {SQLName: "appstream_app_id", Type: cel2sqlite.ColumnTypeString},
-		"appstream":         {SQLName: "appstream", Type: cel2sqlite.ColumnTypeString},
+		"appstream":         {SQLName: "appstream", Type: cel2sqlite.ColumnTypeJSON},
 		"nonfree":           {SQLName: "nonfree", Type: cel2sqlite.ColumnTypeBool},
 		"nonfree_url":       {SQLName: "nonfree_url", Type: cel2sqlite.ColumnTypeOverridableField},
 		"summary":           {SQLName: "summary", Type: cel2sqlite.ColumnTypeOverridableField},
