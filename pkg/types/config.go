@@ -55,7 +55,10 @@ type Repo struct {
 	Homepage    string `json:"homepage" koanf:"homepage" toml:"homepage"`
 	Icon        string `json:"icon" koanf:"icon" toml:"icon"`
 
-	Disabled bool `json:"disabled" koanf:"disabled" toml:"disabled"`
+	Disabled bool `json:"disabled" koanf:"disabled"`
+
+	RequireSignedCommits bool     `json:"require_signed_commits" koanf:"require_signed_commits"`
+	TrustedKeys          []string `json:"trusted_keys" koanf:"trusted_keys"`
 }
 
 func (r *Repo) MergeFrom(other *Repo) {
@@ -77,5 +80,13 @@ func (r *Repo) MergeFrom(other *Repo) {
 
 	if len(other.Mirrors) > 0 {
 		r.Mirrors = other.Mirrors
+	}
+
+	if other.RequireSignedCommits {
+		r.RequireSignedCommits = true
+	}
+
+	if len(other.TrustedKeys) > 0 {
+		r.TrustedKeys = other.TrustedKeys
 	}
 }

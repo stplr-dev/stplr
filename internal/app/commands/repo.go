@@ -45,6 +45,7 @@ import (
 	"go.stplr.dev/stplr/internal/usecase/repo/remove"
 	"go.stplr.dev/stplr/internal/usecase/repo/setdisabled"
 	"go.stplr.dev/stplr/internal/usecase/repo/setref"
+	"go.stplr.dev/stplr/internal/usecase/repo/setreqsigned"
 	"go.stplr.dev/stplr/internal/usecase/repo/seturl"
 )
 
@@ -80,6 +81,8 @@ func RepoCmd() *cli.Command {
 			RepoImportCmd(),
 			SetRepoRefCmd(),
 			SetRepoDisabledCmd(),
+			SetRepoRequireSignedCmd(),
+			RepoMirrorCmd(),
 			SetUrlCmd(),
 			RepoMirrorCmd(),
 			ClearOverridesCmd(),
@@ -245,6 +248,38 @@ func SetUrlCmd() *cli.Command {
 				Name: c.Args().Get(0),
 				URL:  c.Args().Get(1),
 			})
+		}),
+	}
+}
+
+func SetRepoRequireSignedCmd() *cli.Command {
+	return &cli.Command{
+		Name:          "set-require-signed",
+		Usage:         gotext.Get("Require signed commits for a repository"),
+		ArgsUsage:     gotext.Get("<name> <value>"),
+		ShellComplete: ShellCompleteRepoName,
+		Action: repoModifyAction(func(ctx context.Context, c *cli.Command) error {
+			if c.Args().Len() < 2 {
+				return errMissingArgs
+			}
+
+			requireSigned, err := strconv.ParseBool(c.Args().Get(1))
+			if err != nil {
+				return fmt.Errorf("invalid value for require-signed: %w", err)
+			}
+
+			d, f, err := deps.ForUniversalReposModificationActionDeps(ctx)
+			if err != nil {
+				return err
+			}
+			defer f()
+
+			return setreqsigned.
+				New(d.Repos).
+				Run(ctx, setreqsigned.Options{
+					Name:                 c.Args().Get(0),
+					RequireSignedCommits: requireSigned,
+				})
 		}),
 	}
 }

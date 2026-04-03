@@ -149,6 +149,12 @@ func (p *Puller) pull(ctx context.Context, rawRepoUrl string, repo *types.Repo, 
 		return fmt.Errorf("resolve revision for repo %q: %w", repo.Name, err)
 	}
 
+	if repo.RequireSignedCommits && !isGitFresh {
+		if err := p.gm.VerifyCommitSignature(r, revHash, repo.TrustedKeys); err != nil {
+			return fmt.Errorf("signature check for repo %q: %w", repo.Name, err)
+		}
+	}
+
 	if _, err := p.gm.CheckoutRevision(r, revHash); err != nil {
 		return fmt.Errorf("checkout revision %s for repo %q: %w", revHash, repo.Name, err)
 	}
