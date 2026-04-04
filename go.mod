@@ -52,7 +52,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/opencontainers/cgroups v0.0.6
-	github.com/opencontainers/runc v1.4.1
+	github.com/opencontainers/runc v1.4.2
 	github.com/opencontainers/runtime-spec v1.3.0
 	github.com/pelletier/go-toml/v2 v2.3.0
 	github.com/spf13/afero v1.15.0
