@@ -34,15 +34,6 @@ type RepoOverrideSource struct {
 	Dir string
 }
 
-// tomlRepoOverride mirrors RepoOverride but uses pointer booleans so that
-// go-toml can distinguish an absent field from an explicit false.
-type tomlRepoOverride struct {
-	Disabled *bool    `toml:"disabled"`
-	Ref      *string  `toml:"ref"`
-	URL      *string  `toml:"url"`
-	Mirrors  []string `toml:"mirrors"`
-}
-
 // Load reads all *.toml files from Dir and returns a map from repo name to its override.
 // The file stem is used as the repo name.
 // Returns an empty map (not an error) if the directory does not exist.
@@ -78,14 +69,9 @@ func loadOverrideFile(path string) (types.RepoOverride, error) {
 	if err != nil {
 		return types.RepoOverride{}, err
 	}
-	var raw tomlRepoOverride
-	if err := toml.Unmarshal(data, &raw); err != nil {
+	var v types.RepoOverride
+	if err := toml.Unmarshal(data, &v); err != nil {
 		return types.RepoOverride{}, err
 	}
-	return types.RepoOverride{
-		Disabled: raw.Disabled,
-		Ref:      raw.Ref,
-		URL:      raw.URL,
-		Mirrors:  raw.Mirrors,
-	}, nil
+	return v, nil
 }

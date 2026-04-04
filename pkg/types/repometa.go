@@ -34,14 +34,23 @@ type RepoWithMeta struct {
 	FilePath string // path to the source file; empty for inline repos
 }
 
+func ptrCopy[T any](p *T) *T {
+	if p == nil {
+		return nil
+	}
+	v := *p
+	return &v
+}
+
 // RepoOverride holds only the fields the user explicitly wants to override.
 // Pointer fields: nil means "don't touch".
 // Slice fields: nil means "don't touch", []string{} means "clear".
 type RepoOverride struct {
-	Disabled *bool
-	Ref      *string
-	URL      *string
-	Mirrors  []string
+	Disabled             *bool    `toml:"disabled"`
+	Ref                  *string  `toml:"ref"`
+	URL                  *string  `toml:"url"`
+	Mirrors              []string `toml:"mirrors"`
+	RequireSignedCommits *bool    `toml:"require_signed_commits"`
 }
 
 // ApplyOverride returns a copy of base with non-nil override fields applied.
@@ -58,5 +67,27 @@ func ApplyOverride(base Repo, o RepoOverride) Repo {
 	if o.Mirrors != nil {
 		base.Mirrors = o.Mirrors
 	}
+	if o.RequireSignedCommits != nil {
+		base.RequireSignedCommits = *o.RequireSignedCommits
+	}
 	return base
+}
+
+func MergeOverrides(a, b RepoOverride) RepoOverride {
+	if b.Disabled != nil {
+		a.Disabled = ptrCopy(b.Disabled)
+	}
+	if b.Ref != nil {
+		a.Ref = ptrCopy(b.Ref)
+	}
+	if b.URL != nil {
+		a.URL = ptrCopy(b.URL)
+	}
+	if b.Mirrors != nil {
+		a.Mirrors = append([]string(nil), b.Mirrors...)
+	}
+	if b.RequireSignedCommits != nil {
+		a.RequireSignedCommits = ptrCopy(b.RequireSignedCommits)
+	}
+	return a
 }
