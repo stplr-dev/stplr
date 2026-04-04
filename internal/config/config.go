@@ -25,7 +25,6 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -37,14 +36,17 @@ import (
 
 	"go.stplr.dev/stplr/internal/config/common"
 	"go.stplr.dev/stplr/internal/config/internal/sources"
+	"go.stplr.dev/stplr/internal/config/repomgr"
 	"go.stplr.dev/stplr/internal/config/savers"
 	"go.stplr.dev/stplr/internal/constants"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
 type ALRConfig struct {
-	cfg   *types.Config
-	paths *Paths
+	cfg         *types.Config
+	paths       *Paths
+	registry    *repomgr.RepoRegistry
+	inlineRepos []types.Repo
 
 	srcs []sources.Source
 }
@@ -62,6 +64,29 @@ func WithSystemConfigWriter(w savers.SystemConfigWriterExecutor) Option {
 	}
 }
 
+func WithRepoDirWriter(w savers.RepoDirWriterExecutor) Option {
+	return func(cfg *ALRConfig) {
+		cfg.registry.SetWriter(w)
+	}
+}
+
+func WithSystemConfigPath(path string) Option {
+	return func(cfg *ALRConfig) {
+		for _, src := range cfg.srcs {
+			if v, ok := src.(*sources.SystemConfig); ok {
+				v.Path = path
+				return
+			}
+		}
+	}
+}
+
+func WithRepoDirs(systemDir, userDir, overridesDir string) Option {
+	return func(cfg *ALRConfig) {
+		cfg.registry = repomgr.New(systemDir, userDir, overridesDir)
+	}
+}
+
 func New(opts ...Option) *ALRConfig {
 	cfg := &ALRConfig{
 		srcs: []sources.Source{
@@ -69,6 +94,11 @@ func New(opts ...Option) *ALRConfig {
 			sources.NewSystemConfig(),
 			sources.NewEnvConfig(),
 		},
+		registry: repomgr.New(
+			constants.SystemReposDirPath,
+			constants.UserReposDirPath,
+			constants.RepoOverridesDirPath,
+		),
 	}
 
 	for _, opt := range opts {
@@ -96,6 +126,15 @@ func (c *ALRConfig) Load() error {
 		return fmt.Errorf("failed to unmarshal: %w", err)
 	}
 
+	// Load repos from directory sources. cfg.Repos contains legacy inline repos
+	// from stplr.toml, which are passed as the lowest-priority user-managed source.
+	c.inlineRepos = cfg.Repos
+	repos, err := c.registry.LoadAll(cfg.Repos)
+	if err != nil {
+		return fmt.Errorf("failed to load repos: %w", err)
+	}
+	cfg.Repos = repoWithMetaToSlice(repos)
+
 	c.cfg = cfg
 	c.paths = &Paths{}
 	c.paths.UserConfigPath = constants.SystemConfigPath
@@ -105,6 +144,14 @@ func (c *ALRConfig) Load() error {
 	c.paths.DBPath = filepath.Join(c.paths.CacheDir, "db")
 
 	return nil
+}
+
+func repoWithMetaToSlice(repos []types.RepoWithMeta) []types.Repo {
+	result := make([]types.Repo, len(repos))
+	for i, r := range repos {
+		result[i] = r.Repo
+	}
+	return result
 }
 
 func (c *ALRConfig) SetTo(level, key string, value any) error {
@@ -121,21 +168,6 @@ func (c *ALRConfig) SetTo(level, key string, value any) error {
 		return setter.Set(key, value)
 	}
 	return fmt.Errorf("unknown config level: %s", level)
-}
-
-// TODO: remove
-func (c *ALRConfig) SetRepos(v []types.Repo) {
-	b, err := json.Marshal(v)
-	if err != nil {
-		panic(err)
-	}
-	var m []interface{}
-	if err := json.Unmarshal(b, &m); err != nil {
-		panic(err)
-	}
-	if err := c.SetTo(common.SOURCE_SYSTEM, common.REPO, m); err != nil {
-		panic(err)
-	}
 }
 
 func (c *ALRConfig) Save(level string) error {
@@ -160,6 +192,57 @@ func (c *ALRConfig) SetToAndSave(level, key string, value any) error {
 	}
 
 	return c.Save(level)
+}
+
+func (c *ALRConfig) AddRepo(repo types.Repo) error {
+	return c.registry.WriteUserRepo(repo)
+}
+
+func (c *ALRConfig) RemoveRepo(name string) error {
+	return c.registry.RemoveUserRepo(name)
+}
+
+func (c *ALRConfig) SetRepoOverride(name string, o types.RepoOverride) error {
+	return c.registry.WriteOverride(name, o)
+}
+
+func (c *ALRConfig) RemoveRepoOverride(name string) error {
+	return c.registry.RemoveOverride(name)
+}
+
+// ReloadRepos re-reads all repo sources from disk and updates the in-memory repo list.
+// Call this after modifying override files so that Repos() reflects the new state.
+func (c *ALRConfig) ReloadRepos() error {
+	repos, err := c.registry.LoadAll(c.inlineRepos)
+	if err != nil {
+		return fmt.Errorf("failed to reload repos: %w", err)
+	}
+	c.cfg.Repos = repoWithMetaToSlice(repos)
+	return nil
+}
+
+func (c *ALRConfig) UpdateRepoFromPull(name string, updated types.Repo) error {
+	return c.registry.UpdateFromPull(name, updated)
+}
+
+func (c *ALRConfig) IsSystemRepo(name string) bool {
+	return c.registry.IsSystemRepo(name)
+}
+
+// InlineRepos returns repos that were defined in the [[repo]] array in stplr.toml.
+// Used by the migrate command to move them to individual files in repos.d/.
+func (c *ALRConfig) InlineRepos() []types.Repo {
+	return c.inlineRepos
+}
+
+// ClearInlineRepos removes all inline [[repo]] entries from stplr.toml.
+// Used by the migrate command.
+func (c *ALRConfig) ClearInlineRepos() error {
+	c.inlineRepos = nil
+	if err := c.SetTo(common.SOURCE_SYSTEM, common.REPO, []interface{}{}); err != nil {
+		return err
+	}
+	return c.Save(common.SOURCE_SYSTEM)
 }
 
 func (c *ALRConfig) ToYAML() (string, error) {

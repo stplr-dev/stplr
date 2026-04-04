@@ -63,6 +63,7 @@ func InternalPluginProviderRoot() *cli.Command {
 				d.Installer,
 				d.Copier,
 				d.SystemConfigWriter,
+				d.RepoDirWriter,
 			))
 		},
 	}

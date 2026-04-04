@@ -26,20 +26,15 @@ import (
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/repoutils"
-	"go.stplr.dev/stplr/pkg/types"
+	"go.stplr.dev/stplr/internal/service/repos"
 )
-
-type Repos interface {
-	ModifySlice(ctx context.Context, c func(repos []types.Repo) ([]types.Repo, error), pull bool) error
-	HasRepo(name string) bool
-}
 
 type useCase struct {
 	cfg *config.ALRConfig
-	r   Repos
+	r   *repos.Repos
 }
 
-func New(cfg *config.ALRConfig, p Repos) *useCase {
+func New(cfg *config.ALRConfig, p *repos.Repos) *useCase {
 	return &useCase{cfg, p}
 }
 
@@ -69,11 +64,15 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		r.Name = opts.Name
 	}
 
-	err = u.r.ModifySlice(ctx, func(repos []types.Repo) ([]types.Repo, error) {
-		repos = append(repos, *r)
-		return repos, nil
-	}, !opts.NoPull)
-	if err != nil {
+	if !opts.NoPull {
+		pulled, pullErr := u.r.Pull(ctx, *r)
+		if pullErr != nil {
+			return errors.WrapIntoI18nError(pullErr, gotext.Get("Failed to import repository"))
+		}
+		r = &pulled
+	}
+
+	if err := u.cfg.AddRepo(*r); err != nil {
 		return errors.WrapIntoI18nError(err, gotext.Get("Failed to import repository"))
 	}
 

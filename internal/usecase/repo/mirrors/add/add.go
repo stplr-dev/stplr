@@ -25,7 +25,8 @@ import (
 )
 
 type Repos interface {
-	Modify(ctx context.Context, c func(repo types.Repo) *types.Repo) error
+	GetRepo(name string) (types.Repo, error)
+	SetOverride(ctx context.Context, name string, o types.RepoOverride, pull bool) error
 }
 
 type useCase struct {
@@ -42,10 +43,10 @@ type Options struct {
 }
 
 func (u *useCase) Run(ctx context.Context, opts Options) error {
-	return u.r.Modify(ctx, func(repo types.Repo) *types.Repo {
-		if repo.Name == opts.Name {
-			repo.Mirrors = append(repo.Mirrors, opts.URL)
-		}
-		return &repo
-	})
+	repo, err := u.r.GetRepo(opts.Name)
+	if err != nil {
+		return err
+	}
+	repo.Mirrors = append(repo.Mirrors, opts.URL)
+	return u.r.SetOverride(ctx, opts.Name, types.RepoOverride{Mirrors: repo.Mirrors}, false)
 }

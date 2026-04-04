@@ -32,7 +32,6 @@ import (
 	"github.com/charmbracelet/x/term"
 	"github.com/leonelquinteros/gotext"
 
-	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/db"
@@ -100,40 +99,6 @@ func (tn *simpleNotifier) NotifyWrite(ctx context.Context, event shared.NotifyWr
 	return len(p), nil
 }
 
-// Modify updates the configured repositories using the provided callback.
-// The updated list is saved into the system configuration.
-//
-// The callback can return nil to exclude a repo from the final list.
-func (r *Repos) Modify(ctx context.Context, c func(repo types.Repo) *types.Repo) error {
-	return r.ModifySlice(ctx, func(repos []types.Repo) ([]types.Repo, error) {
-		newRepos := make([]types.Repo, 0, len(repos))
-		for _, repo := range repos {
-			if r := c(repo); r != nil {
-				newRepos = append(newRepos, *r)
-			}
-		}
-		return newRepos, nil
-	}, true)
-}
-
-func (r *Repos) ModifySlice(ctx context.Context, c func(repos []types.Repo) ([]types.Repo, error), pull bool) error {
-	repos := r.cfg.Repos()
-	newRepos, err := c(repos)
-	if err != nil {
-		return err
-	}
-	r.cfg.SetRepos(newRepos)
-	_ = r.cfg.Save("system")
-
-	if pull {
-		if err := r.pullRepos(ctx, newRepos); err != nil {
-			return errors.WrapIntoI18nError(err, gotext.Get("Error pulling repositories"))
-		}
-	}
-
-	return nil
-}
-
 func (r *Repos) pullRepos(ctx context.Context, repos []types.Repo) error {
 	for i, repo := range repos {
 		if repo.Disabled {
@@ -148,8 +113,43 @@ func (r *Repos) pullRepos(ctx context.Context, repos []types.Repo) error {
 			return err
 		}
 		repos[i] = updatedRepo
+		if err := r.cfg.UpdateRepoFromPull(repo.Name, updatedRepo); err != nil {
+			slog.Warn("failed to persist pull result", "repo", repo.Name, "err", err)
+		}
 	}
 	return nil
+}
+
+// ClearOverrides removes the override file for the repo, restoring all defaults,
+// then re-pulls the repo.
+func (r *Repos) ClearOverrides(ctx context.Context, name string) error {
+	if err := r.cfg.RemoveRepoOverride(name); err != nil {
+		return err
+	}
+	if err := r.cfg.ReloadRepos(); err != nil {
+		return err
+	}
+	repo, err := r.GetRepo(name)
+	if err != nil {
+		return err
+	}
+	return r.pullRepos(ctx, []types.Repo{repo})
+}
+
+// SetOverride writes a per-repo override and optionally re-pulls the affected repo.
+func (r *Repos) SetOverride(ctx context.Context, name string, o types.RepoOverride, pull bool) error {
+	if err := r.cfg.SetRepoOverride(name, o); err != nil {
+		return err
+	}
+	if !pull {
+		return nil
+	}
+	repo, err := r.GetRepo(name)
+	if err != nil {
+		return err
+	}
+	effective := types.ApplyOverride(repo, o)
+	return r.pullRepos(ctx, []types.Repo{effective})
 }
 
 func (r *Repos) PullAll(ctx context.Context) error {

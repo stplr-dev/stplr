@@ -20,15 +20,15 @@ package remove
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
-	"slices"
 
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/config"
-	"go.stplr.dev/stplr/internal/config/common"
+	"go.stplr.dev/stplr/internal/config/repomgr"
 )
 
 type useCase struct {
@@ -51,40 +51,26 @@ type Options struct {
 func (u *useCase) Run(ctx context.Context, opts Options) error {
 	name := opts.Name
 
-	found := false
-	index := 0
-	reposSlice := u.cfg.Repos()
-	for i, repo := range reposSlice {
-		if repo.Name == name {
-			index = i
-			found = true
+	err := u.cfg.RemoveRepo(name)
+	if err != nil {
+		if errors.Is(err, repomgr.ErrSystemRepo) {
+			return cliutils.FormatCliExit(gotext.Get("Repo \"%s\" is provided by a system package. Remove the providing package to delete it.", name), nil)
 		}
-	}
-	if !found {
-		return cliutils.FormatCliExit(gotext.Get("Repo \"%s\" does not exist", name), nil)
+		if errors.Is(err, repomgr.ErrRepoNotFound) {
+			return cliutils.FormatCliExit(gotext.Get("Repo \"%s\" does not exist", name), nil)
+		}
+		return cliutils.FormatCliExit(gotext.Get("Error removing repo"), err)
 	}
 
-	// err := u.cfg.SetTo(common.SOURCE_SYSTEM, common.REPOS, slices.Delete(reposSlice, index, index+1))
-	// if err != nil {
-	// 	return err
-	// }
-	u.cfg.SetRepos(slices.Delete(reposSlice, index, index+1))
-
-	err := os.RemoveAll(filepath.Join(u.cfg.GetPaths().RepoDir, name))
-	if err != nil {
+	if err := os.RemoveAll(filepath.Join(u.cfg.GetPaths().RepoDir, name)); err != nil {
 		return cliutils.FormatCliExit(gotext.Get("Error removing repo directory"), err)
-	}
-	err = u.cfg.Save(common.SOURCE_SYSTEM)
-	if err != nil {
-		return cliutils.FormatCliExit(gotext.Get("Error saving config"), err)
 	}
 
 	if err := cliutils.ExitIfCantDropCapsToBuilderUser(); err != nil {
 		return err
 	}
 
-	err = u.pp.DeletePkgs(ctx, "repository = ?", name)
-	if err != nil {
+	if err := u.pp.DeletePkgs(ctx, "repository = ?", name); err != nil {
 		return cliutils.FormatCliExit(gotext.Get("Error removing packages from database"), err)
 	}
 

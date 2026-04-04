@@ -42,7 +42,7 @@ func MigrateCmd() *cli.Command {
 			}
 			defer f()
 
-			return migrate.New(d.DbResetter, d.DlCacheResetter, func() (*repos.Repos, deps.Cleanup, error) {
+			return migrate.New(d.Cfg, d.DbResetter, d.DlCacheResetter, func() (*repos.Repos, deps.Cleanup, error) {
 				return deps.ReposGetter(ctx)
 			}).Run(ctx)
 		}),

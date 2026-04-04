@@ -39,11 +39,17 @@ func TestE2EAlrAddRepo(t *testing.T) {
 		COMMON_SYSTEMS,
 		func(t *testing.T, r capytest.Runner) {
 			execShouldNoError(t, r, "sudo", "stplr", "repo", "add", "alr-repo", REPO_URL_FOR_E2E_TESTS)
-			execShouldNoError(t, r, "bash", "-c", "cat /etc/stplr/stplr.toml")
+
+			// Repo file must appear in repos.d, not in the main config.
+			r.Command("bash", "-c", "test -f /etc/stplr/repos.d/alr-repo.toml").
+				ExpectSuccess().
+				Run(t)
+
 			execShouldNoError(t, r, "sudo", "stplr", "repo", "rm", "alr-repo")
 
-			r.Command("bash", "-c", "cat /etc/stplr/stplr.toml").
-				ExpectStdoutContains("repo = []").
+			// File must be gone after removal.
+			r.Command("bash", "-c", "test ! -f /etc/stplr/repos.d/alr-repo.toml").
+				ExpectSuccess().
 				Run(t)
 		},
 	)

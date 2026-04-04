@@ -62,7 +62,7 @@ url = 'https://example.com/secret-url-with-token.git'`
 	tr := tar.NewReader(&buf)
 	header, err := tr.Next()
 	require.NoError(t, err)
-	assert.Equal(t, "stplr.toml.filtered", header.Name)
+	assert.Equal(t, "/etc/stplr/stplr.toml.filtered", header.Name)
 
 	content, err := io.ReadAll(tr)
 	require.NoError(t, err)
@@ -205,11 +205,11 @@ func TestCreateSupportArchiveExtractAndVerify(t *testing.T) {
 	}
 
 	assert.Contains(t, files, "os-release")
-	assert.Contains(t, files, "stplr.toml.filtered")
+	assert.Contains(t, files, "/etc/stplr/stplr.toml.filtered")
 	assert.Contains(t, files, "commands.log")
 	assert.Contains(t, files, "journal.log")
 	assert.Contains(t, files, "disk-usage.log")
 
-	assert.Contains(t, files["stplr.toml.filtered"], `url = "<filtered>"`)
-	assert.NotContains(t, files["stplr.toml.filtered"], "secret")
+	assert.Contains(t, files["/etc/stplr/stplr.toml.filtered"], `url = "<filtered>"`)
+	assert.NotContains(t, files["/etc/stplr/stplr.toml.filtered"], "secret")
 }

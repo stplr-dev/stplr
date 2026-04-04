@@ -20,11 +20,13 @@ package migrate
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/deps"
 	"go.stplr.dev/stplr/internal/app/errors"
+	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/service/repos"
 )
 
@@ -35,16 +37,21 @@ type resetter interface {
 type ReposGetter func() (*repos.Repos, deps.Cleanup, error)
 
 type useCase struct {
+	cfg           *config.ALRConfig
 	dbResetter    resetter
 	cacheResetter resetter
 	reposGetter   ReposGetter
 }
 
-func New(dbResetter, cacheResetter resetter, reposGetter ReposGetter) *useCase {
-	return &useCase{dbResetter, cacheResetter, reposGetter}
+func New(cfg *config.ALRConfig, dbResetter, cacheResetter resetter, reposGetter ReposGetter) *useCase {
+	return &useCase{cfg, dbResetter, cacheResetter, reposGetter}
 }
 
 func (u *useCase) Run(ctx context.Context) error {
+	if err := u.migrateInlineRepos(ctx); err != nil {
+		slog.Warn("failed to migrate inline repos", "err", err)
+	}
+
 	if err := u.dbResetter.Reset(ctx); err != nil {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error resetting database"))
 	}
@@ -64,4 +71,29 @@ func (u *useCase) Run(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+// migrateInlineRepos moves [[repo]] entries from stplr.toml to individual files
+// in /etc/stplr/repos.d/.
+func (u *useCase) migrateInlineRepos(ctx context.Context) error {
+	inline := u.cfg.InlineRepos()
+	if len(inline) == 0 {
+		return nil
+	}
+
+	migrated := 0
+	for _, repo := range inline {
+		if err := u.cfg.AddRepo(repo); err != nil {
+			slog.Warn("failed to migrate inline repo", "repo", repo.Name, "err", err)
+			continue
+		}
+		migrated++
+	}
+
+	if migrated == 0 {
+		return nil
+	}
+
+	slog.Info("migrated inline repos to repos.d", "count", migrated)
+	return u.cfg.ClearInlineRepos()
 }

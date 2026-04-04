@@ -49,6 +49,7 @@ const (
 	copierPluginKey       = "copier"
 	scripterPluginKey     = "scripter"
 	systemConfigWriterKey = "system-config-writer"
+	repoDirWriterKey      = "repo-dir-writer"
 )
 
 var builderPluginMap = map[string]plugin.Plugin{
@@ -57,6 +58,7 @@ var builderPluginMap = map[string]plugin.Plugin{
 	copierPluginKey:       &copier.CopierExecutorPlugin{},
 	scripterPluginKey:     &scripter.ScriptExecutorPlugin{},
 	systemConfigWriterKey: &savers.SystemConfigWriterExecutorPlugin{},
+	repoDirWriterKey:      &savers.RepoDirWriterExecutorPlugin{},
 }
 
 type pluginInitFunc func() (plugin.PluginSet, error)
@@ -78,6 +80,7 @@ func RootPluginMap(
 	p installer.InstallerExecutor,
 	c copier.CopierExecutor,
 	s savers.SystemConfigWriterExecutor,
+	r savers.RepoDirWriterExecutor,
 ) pluginInitFunc {
 	return func() (plugin.PluginSet, error) {
 		return plugin.PluginSet{
@@ -89,6 +92,9 @@ func RootPluginMap(
 			},
 			systemConfigWriterKey: &savers.SystemConfigWriterExecutorPlugin{
 				Impl: s,
+			},
+			repoDirWriterKey: &savers.RepoDirWriterExecutorPlugin{
+				Impl: r,
 			},
 		}, nil
 	}
@@ -259,4 +265,8 @@ func GetScripter(ctx context.Context, provider *Provider) (scripter.ScriptExecut
 
 func GetSystemConfigWriter(ctx context.Context, provider *Provider) (savers.SystemConfigWriterExecutor, error) {
 	return Get[savers.SystemConfigWriterExecutor](ctx, provider, systemConfigWriterKey)
+}
+
+func GetRepoDirWriter(ctx context.Context, provider *Provider) (savers.RepoDirWriterExecutor, error) {
+	return Get[savers.RepoDirWriterExecutor](ctx, provider, repoDirWriterKey)
 }

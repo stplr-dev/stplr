@@ -20,7 +20,6 @@ package remove
 
 import (
 	"context"
-	stdErrors "errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -32,7 +31,8 @@ import (
 )
 
 type Repos interface {
-	ModifySlice(ctx context.Context, c func(repos []types.Repo) ([]types.Repo, error), pull bool) error
+	GetRepo(name string) (types.Repo, error)
+	SetOverride(ctx context.Context, name string, o types.RepoOverride, pull bool) error
 }
 
 type useCase struct {
@@ -50,73 +50,38 @@ type Options struct {
 	PartialMatch  bool
 }
 
-var (
-	errMissingRepo   = stdErrors.New("repo does not exist")
-	errMissingMirror = stdErrors.New("mirror does not exist")
-)
-
-func (u *useCase) modify(opts Options, repos []types.Repo) ([]types.Repo, error) {
-	var repo *types.Repo
-
-	for i := range repos {
-		if repos[i].Name == opts.Name {
-			repo = &repos[i]
-			break
+func (u *useCase) Run(ctx context.Context, opts Options) error {
+	repo, err := u.r.GetRepo(opts.Name)
+	if err != nil {
+		if opts.IgnoreMissing {
+			return nil
 		}
+		return err
 	}
 
-	if repo == nil {
-		return nil, errMissingRepo
-	}
-
-	originalCount := len(repo.Mirrors)
-	repo.Mirrors = slices.DeleteFunc(repo.Mirrors, func(mirror string) bool {
+	original := repo.Mirrors
+	filtered := slices.DeleteFunc(slices.Clone(original), func(mirror string) bool {
 		if opts.PartialMatch {
 			return strings.Contains(mirror, opts.URL)
 		}
 		return mirror == opts.URL
 	})
 
-	if len(repo.Mirrors) == originalCount {
-		return nil, errMissingMirror
+	removed := len(original) - len(filtered)
+	if removed == 0 {
+		if opts.IgnoreMissing {
+			return nil
+		}
+		if opts.PartialMatch {
+			return errors.NewI18nError(gotext.Get("No mirrors containing \"%s\" found in repo \"%s\"", opts.URL, opts.Name))
+		}
+		return errors.NewI18nError(gotext.Get("URL \"%s\" does not exist in repo \"%s\"", opts.URL, opts.Name))
 	}
 
-	return repos, nil
-}
-
-func (u *useCase) Run(ctx context.Context, opts Options) error {
-	count := 0
-
-	err := u.r.ModifySlice(ctx, func(repos []types.Repo) ([]types.Repo, error) {
-		newRepos, err := u.modify(opts, repos)
-		if err != nil {
-			return nil, err
-		}
-
-		count = len(repos) - len(newRepos)
-
-		return newRepos, err
-	}, false)
-	if err != nil {
-		switch err {
-		case errMissingRepo:
-			if opts.IgnoreMissing {
-				return nil
-			}
-		case errMissingMirror:
-			if opts.IgnoreMissing {
-				return nil
-			}
-			if opts.PartialMatch {
-				return errors.NewI18nError(gotext.Get("No mirrors containing \"%s\" found in repo \"%s\"", opts.URL, opts.Name))
-			}
-			return errors.NewI18nError(gotext.Get("URL \"%s\" does not exist in repo \"%s\"", opts.URL, opts.Name))
-		default:
-			return err
-		}
+	if err := u.r.SetOverride(ctx, opts.Name, types.RepoOverride{Mirrors: filtered}, false); err != nil {
+		return err
 	}
 
-	fmt.Println(gotext.Get("Removed %d mirrors from repo \"%s\"\n", count, opts.Name))
-
+	fmt.Println(gotext.Get("Removed %d mirrors from repo \"%s\"\n", removed, opts.Name))
 	return nil
 }

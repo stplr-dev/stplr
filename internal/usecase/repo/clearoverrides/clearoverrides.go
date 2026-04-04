@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 // Stapler
-// Copyright (C) 2025 The Stapler Authors
+// Copyright (C) 2026 The Stapler Authors
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,16 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package clear
+package clearoverrides
 
-import (
-	"context"
-
-	"go.stplr.dev/stplr/pkg/types"
-)
+import "context"
 
 type Repos interface {
-	SetOverride(ctx context.Context, name string, o types.RepoOverride, pull bool) error
+	ClearOverrides(ctx context.Context, name string) error
 }
 
 type useCase struct {
@@ -41,5 +37,5 @@ type Options struct {
 }
 
 func (u *useCase) Run(ctx context.Context, opts Options) error {
-	return u.r.SetOverride(ctx, opts.Name, types.RepoOverride{Mirrors: []string{}}, false)
+	return u.r.ClearOverrides(ctx, opts.Name)
 }

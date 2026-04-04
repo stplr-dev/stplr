@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: unnamed project\n"
-"PO-Revision-Date: 2026-02-14 11:18+0300\n"
+"PO-Revision-Date: 2026-04-04 14:42+0300\n"
 "Last-Translator: Maks1mS <maks1ms@noreply.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/stapler/"
 "stplr/ru/>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Gtranslator 49.0\n"
+"X-Generator: Gtranslator 50.0\n"
 
 #: cmd/stplr/main.go:81
 msgid "Error loading config"
@@ -211,59 +211,59 @@ msgstr "Для команды remove ожидался хотя бы 1 аргум
 msgid "Remove an installed package"
 msgstr "Удалить установленный пакет"
 
-#: internal/app/commands/repo.go:74
+#: internal/app/commands/repo.go:75
 msgid "Manage repos"
 msgstr "Управление репозиториями"
 
-#: internal/app/commands/repo.go:91
+#: internal/app/commands/repo.go:93
 msgid "Remove an existing repository"
 msgstr "Удалить существующий репозиторий"
 
-#: internal/app/commands/repo.go:93
+#: internal/app/commands/repo.go:95 internal/app/commands/repo.go:306
 msgid "<name>"
 msgstr "<имя>"
 
-#: internal/app/commands/repo.go:114
+#: internal/app/commands/repo.go:116
 msgid "Add a new repository"
 msgstr "Добавить новый репозиторий"
 
-#: internal/app/commands/repo.go:115 internal/app/commands/repo.go:229
+#: internal/app/commands/repo.go:117 internal/app/commands/repo.go:231
 msgid "<name> <url>"
 msgstr "<имя> <url>"
 
-#: internal/app/commands/repo.go:138
+#: internal/app/commands/repo.go:140
 msgid "List repositories"
 msgstr "Список репозиториев"
 
-#: internal/app/commands/repo.go:148
+#: internal/app/commands/repo.go:150
 msgid "Output in JSON format"
 msgstr "Вывод в JSON формате"
 
-#: internal/app/commands/repo.go:169
+#: internal/app/commands/repo.go:171
 msgid "Set the reference of the repository"
 msgstr "Установить ссылку на версию репозитория"
 
-#: internal/app/commands/repo.go:170
+#: internal/app/commands/repo.go:172
 msgid "<name> <ref>"
 msgstr "<имя> <ссылка_на_версию>"
 
-#: internal/app/commands/repo.go:196
+#: internal/app/commands/repo.go:198
 msgid "Disable (or enable) repository"
 msgstr "Отключить (или включить) репозиторий"
 
-#: internal/app/commands/repo.go:197
+#: internal/app/commands/repo.go:199
 msgid "<name> <value>"
 msgstr "<имя> <значение>"
 
-#: internal/app/commands/repo.go:228
+#: internal/app/commands/repo.go:230
 msgid "Set the main url of the repository"
 msgstr "Установить главный URL репозитория"
 
-#: internal/app/commands/repo.go:253
+#: internal/app/commands/repo.go:255
 msgid "Import a repository from a stapler-repo.toml file"
 msgstr "Импортировать репозиторий из stapler-repo.toml файла"
 
-#: internal/app/commands/repo.go:254
+#: internal/app/commands/repo.go:256
 msgid ""
 "Import a repository using a stapler-repo.toml file. The file path can be a "
 "regular file or '-' to read from stdin."
@@ -271,17 +271,21 @@ msgstr ""
 "Импортировать репозиторий из stapler-repo.toml файла. Путь к файлу может "
 "быть обычным файлом или '-' для чтения из stdin."
 
-#: internal/app/commands/repo.go:255
+#: internal/app/commands/repo.go:257
 msgid "<name> <file>"
 msgstr "<имя> <файл>"
 
-#: internal/app/commands/repo.go:259
+#: internal/app/commands/repo.go:261
 msgid "Skip pulling repository after import"
 msgstr "Пропустить загрузку репозитория после импорта"
 
-#: internal/app/commands/repo.go:263
+#: internal/app/commands/repo.go:265
 msgid "Skip import if repository already exists"
 msgstr "Пропустить импорт, если репозиторий уже существует"
+
+#: internal/app/commands/repo.go:305
+msgid "Remove all overrides for a repository"
+msgstr "Удалить все переопределения репозитория"
 
 #: internal/app/commands/repo_mirror.go:37
 msgid "Manage mirrors of repos"
@@ -347,15 +351,15 @@ msgstr "Обновить все установленные пакеты"
 msgid "Print the current Stapler version and exit"
 msgstr "Показать текущую версию Stapler и выйти"
 
-#: internal/app/deps/internal/builder/builder.go:114
+#: internal/app/deps/internal/builder/builder.go:115
 msgid "Failed to get working directory"
 msgstr "Ошибка при получении рабочего каталога"
 
-#: internal/app/deps/internal/builder/builder.go:164
+#: internal/app/deps/internal/builder/builder.go:166
 msgid "Unable to detect a supported package manager on the system"
 msgstr "Не удалось обнаружить поддерживаемый менеджер пакетов в системе"
 
-#: internal/app/deps/internal/builder/builder.go:183
+#: internal/app/deps/internal/builder/builder.go:185
 msgid "Error initialization database"
 msgstr "Ошибка инициализации базы данных"
 
@@ -662,17 +666,13 @@ msgstr "Выполнение %s()"
 msgid "Git repository does not appear to be a valid Stapler repo"
 msgstr "Git-репозиторий не выглядит корректным репозиторием Stapler"
 
-#: internal/service/repos/repos.go:80
+#: internal/service/repos/repos.go:79
 msgid "Pull %s"
 msgstr "Получение %s"
 
-#: internal/service/repos/repos.go:82
+#: internal/service/repos/repos.go:81
 msgid "Trying mirror %d: %s"
 msgstr "Пробую зеркало %d: %s"
-
-#: internal/service/repos/repos.go:130
-msgid "Error pulling repositories"
-msgstr "Ошибка при извлечении репозиториев"
 
 #: internal/service/repos/repos.go:237
 msgid "Repository pulled successfully!"
@@ -824,15 +824,15 @@ msgstr "Не удалось разобрать релиз"
 msgid "Error listing installed packages"
 msgstr "Ошибка при составлении списка установленных пакетов"
 
-#: internal/usecase/migrate/migrate.go:49
+#: internal/usecase/migrate/migrate.go:56
 msgid "Error resetting database"
 msgstr "Ошибка cброса базы данных"
 
-#: internal/usecase/migrate/migrate.go:53
+#: internal/usecase/migrate/migrate.go:60
 msgid "Error resetting cache"
 msgstr "Ошибка при сбросе кэша"
 
-#: internal/usecase/migrate/migrate.go:63
+#: internal/usecase/migrate/migrate.go:70
 msgid "Failed to reread all"
 msgstr "Не удалось перечитать всё"
 
@@ -840,23 +840,25 @@ msgstr "Не удалось перечитать всё"
 msgid "Error removing packages"
 msgstr "Ошибка при удалении пакетов"
 
-#: internal/usecase/repo/add/add.go:51
+#: internal/usecase/repo/add/add.go:49
 msgid "Repo \"%s\" already exists"
 msgstr "Репозиторий \"%s\" уже существует"
 
-#: internal/usecase/repo/add/add.go:69
-msgid "Error saving config"
+#: internal/usecase/repo/add/add.go:64
+#, fuzzy
+msgid "Error saving repo"
 msgstr "Ошибка при сохранении конфигурации"
 
-#: internal/usecase/repo/import/import.go:59
+#: internal/usecase/repo/import/import.go:54
 msgid "Repository %q already exists"
 msgstr "Репозиторий %q уже существует"
 
-#: internal/usecase/repo/import/import.go:65
+#: internal/usecase/repo/import/import.go:60
 msgid "Failed to read repo configuration"
 msgstr "Не удалось прочитать конфигурацию репозитория"
 
-#: internal/usecase/repo/import/import.go:77
+#: internal/usecase/repo/import/import.go:70
+#: internal/usecase/repo/import/import.go:76
 msgid "Failed to import repository"
 msgstr "Не удалось импортировать репозиторий"
 
@@ -908,27 +910,38 @@ msgstr "Зеркала"
 msgid "Report"
 msgstr "Сообщить об ошибке"
 
-#: internal/usecase/repo/mirrors/remove/remove.go:111
+#: internal/usecase/repo/mirrors/remove/remove.go:76
 msgid "No mirrors containing \"%s\" found in repo \"%s\""
 msgstr "В репозитории \"%s\" не найдено зеркал, содержащих \"%s\""
 
-#: internal/usecase/repo/mirrors/remove/remove.go:113
+#: internal/usecase/repo/mirrors/remove/remove.go:78
 msgid "URL \"%s\" does not exist in repo \"%s\""
 msgstr "URL \"%s\" не существует в репозитории \"%s\""
 
-#: internal/usecase/repo/mirrors/remove/remove.go:119
+#: internal/usecase/repo/mirrors/remove/remove.go:85
 msgid "Removed %d mirrors from repo \"%s\"\n"
 msgstr "Удалены зеркала %d из репозитория \"%s\"\n"
 
-#: internal/usecase/repo/remove/remove.go:64
+#: internal/usecase/repo/remove/remove.go:57
+msgid ""
+"Repo \"%s\" is provided by a system package. Remove the providing package to "
+"delete it."
+msgstr ""
+
+#: internal/usecase/repo/remove/remove.go:60
 msgid "Repo \"%s\" does not exist"
 msgstr "Репозитория \"%s\" не существует"
 
-#: internal/usecase/repo/remove/remove.go:75
+#: internal/usecase/repo/remove/remove.go:62
+#, fuzzy
+msgid "Error removing repo"
+msgstr "Ошибка при удалении каталога репозитория"
+
+#: internal/usecase/repo/remove/remove.go:66
 msgid "Error removing repo directory"
 msgstr "Ошибка при удалении каталога репозитория"
 
-#: internal/usecase/repo/remove/remove.go:88
+#: internal/usecase/repo/remove/remove.go:74
 msgid "Error removing packages from database"
 msgstr "Ошибка при удалении пакетов из базы данных"
 
@@ -945,6 +958,10 @@ msgid ""
 "Support archive %s has been created. You can send it to whoever needs it."
 msgstr ""
 "Диагностический архив %s создан. Вы можете отправить его тем, кому он нужен."
+
+#: internal/usecase/upgrade/upgrade.go:79
+msgid "Error pulling repositories"
+msgstr "Ошибка при извлечении репозиториев"
 
 #: internal/usecase/upgrade/upgrade.go:84
 msgid "Error checking for updates"

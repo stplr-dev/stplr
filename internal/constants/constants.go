@@ -25,6 +25,9 @@ package constants
 const (
 	SystemConfigPath       = "/etc/stplr/stplr.toml"
 	SystemCachePath        = "/var/cache/stplr"
+	SystemReposDirPath     = "/usr/lib/stplr/repos.d"
+	UserReposDirPath       = "/etc/stplr/repos.d"
+	RepoOverridesDirPath   = "/etc/stplr/repo-overrides.d"
 	SocketDirPath          = "/tmp/.stplr-socket"
 	PrivilegedGroup        = "wheel"
 	BuilderUser            = "stapler-builder"

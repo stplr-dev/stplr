@@ -23,6 +23,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -83,6 +84,16 @@ func (ac *archiveCreator) CreateSupportArchive(ctx context.Context, archivePath 
 
 	if err := ac.addFilteredConfig(tw, "/etc/stplr/stplr.toml"); err != nil {
 		return fmt.Errorf("add filtered stplr.toml: %w", err)
+	}
+
+	for _, repoDir := range []string{
+		"/usr/lib/stplr/repos.d/*.toml",
+		"/etc/stplr/repos.d/*.toml",
+		"/etc/stplr/repo-overrides.d/*.toml",
+	} {
+		if err := ac.addFilteredRepoDir(tw, repoDir); err != nil {
+			return fmt.Errorf("add filtered repo dir %s: %w", repoDir, err)
+		}
 	}
 
 	if err := ac.executeCommands(ctx, tw); err != nil {
@@ -147,9 +158,25 @@ func (ac *archiveCreator) addStplrLogs(tw *tar.Writer) error {
 	return addReaderToTar(tw, "journal.log", bytes.NewReader(buf.Bytes()), n)
 }
 
+func (ac *archiveCreator) addFilteredRepoDir(tw *tar.Writer, path string) error {
+	matches, err := afero.Glob(ac.fs, path)
+	if err != nil {
+		return fmt.Errorf("glob %s: %w", path, err)
+	}
+	for _, match := range matches {
+		if err := ac.addFilteredConfig(tw, match); err != nil {
+			return fmt.Errorf("add filtered %s: %w", match, err)
+		}
+	}
+	return nil
+}
+
 func (ac *archiveCreator) addFilteredConfig(tw *tar.Writer, path string) error {
 	data, err := afero.ReadFile(ac.fs, path)
 	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
 		return err
 	}
 
@@ -168,7 +195,7 @@ func (ac *archiveCreator) addFilteredConfig(tw *tar.Writer, path string) error {
 
 	return addReaderToTar(
 		tw,
-		filepath.Base(path)+".filtered",
+		path+".filtered",
 		bytes.NewReader([]byte(clean)),
 		int64(len(clean)),
 	)

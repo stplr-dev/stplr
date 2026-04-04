@@ -380,7 +380,7 @@ func ForRepoAddAction(ctx context.Context) (*RepoAddDeps, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
 		RootPluginProvider().
-		SystemConfigWriterFromRootPlugin().
+		RepoDirWriterFromRootPlugin().
 		ConfigRW().
 		DropCaps().
 		PluginProvider().
@@ -406,7 +406,8 @@ type RepoRemoveDeps struct {
 func ForRepoRemoveAction(ctx context.Context) (*RepoRemoveDeps, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
-		SystemConfigWriter().
+		RootPluginProvider().
+		RepoDirWriterFromRootPlugin().
 		ConfigRW().
 		DB().
 		End()
@@ -429,7 +430,7 @@ func ForUniversalReposModificationActionDeps(ctx context.Context) (*UniversalRep
 	b, err := builder.
 		Start(ctx).
 		RootPluginProvider().
-		SystemConfigWriterFromRootPlugin().
+		RepoDirWriterFromRootPlugin().
 		ConfigRW().
 		DB().
 		DropCaps().
@@ -481,6 +482,7 @@ type RootPluginServeDeps struct {
 	Installer          installer.InstallerExecutor
 	Copier             copier.CopierExecutor
 	SystemConfigWriter savers.SystemConfigWriterExecutor
+	RepoDirWriter      savers.RepoDirWriterExecutor
 }
 
 func ForPluginsServeRoot(ctx context.Context) (*RootPluginServeDeps, Cleanup, error) {
@@ -491,6 +493,7 @@ func ForPluginsServeRoot(ctx context.Context) (*RootPluginServeDeps, Cleanup, er
 		UserContext().
 		CopierForRootPlugin().
 		SystemConfigWriter().
+		RepoDirWriter().
 		End()
 	if err != nil {
 		return nil, nil, err
@@ -508,6 +511,7 @@ func ForPluginsServeRoot(ctx context.Context) (*RootPluginServeDeps, Cleanup, er
 		Installer:          installer.New(b.Manager, needRootCmd, rootCmd),
 		Copier:             b.Copier,
 		SystemConfigWriter: b.SystemConfigWriter,
+		RepoDirWriter:      b.RepoDirWriter,
 	}, b.Cleanup, nil
 }
 
@@ -582,6 +586,7 @@ type DlCacheReseter interface {
 }
 
 type MigrateActionDeps struct {
+	Cfg             *config.ALRConfig
 	DbResetter      *db.Resetter
 	Repos           *repos.Repos
 	DlCacheResetter DlCacheReseter
@@ -590,7 +595,10 @@ type MigrateActionDeps struct {
 func ForMigrateAction(ctx context.Context) (*MigrateActionDeps, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
-		Config().
+		RootPluginProvider().
+		SystemConfigWriterFromRootPlugin().
+		RepoDirWriterFromRootPlugin().
+		ConfigRW().
 		DropCaps().
 		End()
 	if err != nil {
@@ -598,6 +606,7 @@ func ForMigrateAction(ctx context.Context) (*MigrateActionDeps, Cleanup, error) 
 	}
 
 	return &MigrateActionDeps{
+		Cfg:             b.Cfg,
 		DbResetter:      db.NewResetter(b.Cfg),
 		DlCacheResetter: local.NewLocalCache(filepath.Join(b.Cfg.GetPaths().CacheDir, "dl")),
 	}, b.Cleanup, nil

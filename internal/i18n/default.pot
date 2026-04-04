@@ -183,74 +183,78 @@ msgstr ""
 msgid "Remove an installed package"
 msgstr ""
 
-#: internal/app/commands/repo.go:74
+#: internal/app/commands/repo.go:75
 msgid "Manage repos"
 msgstr ""
 
-#: internal/app/commands/repo.go:91
+#: internal/app/commands/repo.go:93
 msgid "Remove an existing repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:93
+#: internal/app/commands/repo.go:95 internal/app/commands/repo.go:306
 msgid "<name>"
 msgstr ""
 
-#: internal/app/commands/repo.go:114
+#: internal/app/commands/repo.go:116
 msgid "Add a new repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:115 internal/app/commands/repo.go:229
+#: internal/app/commands/repo.go:117 internal/app/commands/repo.go:231
 msgid "<name> <url>"
 msgstr ""
 
-#: internal/app/commands/repo.go:138
+#: internal/app/commands/repo.go:140
 msgid "List repositories"
 msgstr ""
 
-#: internal/app/commands/repo.go:148
+#: internal/app/commands/repo.go:150
 msgid "Output in JSON format"
 msgstr ""
 
-#: internal/app/commands/repo.go:169
+#: internal/app/commands/repo.go:171
 msgid "Set the reference of the repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:170
+#: internal/app/commands/repo.go:172
 msgid "<name> <ref>"
 msgstr ""
 
-#: internal/app/commands/repo.go:196
+#: internal/app/commands/repo.go:198
 msgid "Disable (or enable) repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:197
+#: internal/app/commands/repo.go:199
 msgid "<name> <value>"
 msgstr ""
 
-#: internal/app/commands/repo.go:228
+#: internal/app/commands/repo.go:230
 msgid "Set the main url of the repository"
 msgstr ""
 
-#: internal/app/commands/repo.go:253
+#: internal/app/commands/repo.go:255
 msgid "Import a repository from a stapler-repo.toml file"
 msgstr ""
 
-#: internal/app/commands/repo.go:254
+#: internal/app/commands/repo.go:256
 msgid ""
 "Import a repository using a stapler-repo.toml file. The file path can be a "
 "regular file or '-' to read from stdin."
 msgstr ""
 
-#: internal/app/commands/repo.go:255
+#: internal/app/commands/repo.go:257
 msgid "<name> <file>"
 msgstr ""
 
-#: internal/app/commands/repo.go:259
+#: internal/app/commands/repo.go:261
 msgid "Skip pulling repository after import"
 msgstr ""
 
-#: internal/app/commands/repo.go:263
+#: internal/app/commands/repo.go:265
 msgid "Skip import if repository already exists"
+msgstr ""
+
+#: internal/app/commands/repo.go:305
+msgid "Remove all overrides for a repository"
 msgstr ""
 
 #: internal/app/commands/repo_mirror.go:37
@@ -317,15 +321,15 @@ msgstr ""
 msgid "Print the current Stapler version and exit"
 msgstr ""
 
-#: internal/app/deps/internal/builder/builder.go:114
+#: internal/app/deps/internal/builder/builder.go:115
 msgid "Failed to get working directory"
 msgstr ""
 
-#: internal/app/deps/internal/builder/builder.go:164
+#: internal/app/deps/internal/builder/builder.go:166
 msgid "Unable to detect a supported package manager on the system"
 msgstr ""
 
-#: internal/app/deps/internal/builder/builder.go:183
+#: internal/app/deps/internal/builder/builder.go:185
 msgid "Error initialization database"
 msgstr ""
 
@@ -616,16 +620,12 @@ msgstr ""
 msgid "Git repository does not appear to be a valid Stapler repo"
 msgstr ""
 
-#: internal/service/repos/repos.go:80
+#: internal/service/repos/repos.go:79
 msgid "Pull %s"
 msgstr ""
 
-#: internal/service/repos/repos.go:82
+#: internal/service/repos/repos.go:81
 msgid "Trying mirror %d: %s"
-msgstr ""
-
-#: internal/service/repos/repos.go:130
-msgid "Error pulling repositories"
 msgstr ""
 
 #: internal/service/repos/repos.go:237
@@ -774,15 +774,15 @@ msgstr ""
 msgid "Error listing installed packages"
 msgstr ""
 
-#: internal/usecase/migrate/migrate.go:49
+#: internal/usecase/migrate/migrate.go:56
 msgid "Error resetting database"
 msgstr ""
 
-#: internal/usecase/migrate/migrate.go:53
+#: internal/usecase/migrate/migrate.go:60
 msgid "Error resetting cache"
 msgstr ""
 
-#: internal/usecase/migrate/migrate.go:63
+#: internal/usecase/migrate/migrate.go:70
 msgid "Failed to reread all"
 msgstr ""
 
@@ -790,23 +790,24 @@ msgstr ""
 msgid "Error removing packages"
 msgstr ""
 
-#: internal/usecase/repo/add/add.go:51
+#: internal/usecase/repo/add/add.go:49
 msgid "Repo \"%s\" already exists"
 msgstr ""
 
-#: internal/usecase/repo/add/add.go:69
-msgid "Error saving config"
+#: internal/usecase/repo/add/add.go:64
+msgid "Error saving repo"
 msgstr ""
 
-#: internal/usecase/repo/import/import.go:59
+#: internal/usecase/repo/import/import.go:54
 msgid "Repository %q already exists"
 msgstr ""
 
-#: internal/usecase/repo/import/import.go:65
+#: internal/usecase/repo/import/import.go:60
 msgid "Failed to read repo configuration"
 msgstr ""
 
-#: internal/usecase/repo/import/import.go:77
+#: internal/usecase/repo/import/import.go:70
+#: internal/usecase/repo/import/import.go:76
 msgid "Failed to import repository"
 msgstr ""
 
@@ -858,27 +859,37 @@ msgstr ""
 msgid "Report"
 msgstr ""
 
-#: internal/usecase/repo/mirrors/remove/remove.go:111
+#: internal/usecase/repo/mirrors/remove/remove.go:76
 msgid "No mirrors containing \"%s\" found in repo \"%s\""
 msgstr ""
 
-#: internal/usecase/repo/mirrors/remove/remove.go:113
+#: internal/usecase/repo/mirrors/remove/remove.go:78
 msgid "URL \"%s\" does not exist in repo \"%s\""
 msgstr ""
 
-#: internal/usecase/repo/mirrors/remove/remove.go:119
+#: internal/usecase/repo/mirrors/remove/remove.go:85
 msgid "Removed %d mirrors from repo \"%s\"\n"
 msgstr ""
 
-#: internal/usecase/repo/remove/remove.go:64
+#: internal/usecase/repo/remove/remove.go:57
+msgid ""
+"Repo \"%s\" is provided by a system package. Remove the providing package to "
+"delete it."
+msgstr ""
+
+#: internal/usecase/repo/remove/remove.go:60
 msgid "Repo \"%s\" does not exist"
 msgstr ""
 
-#: internal/usecase/repo/remove/remove.go:75
+#: internal/usecase/repo/remove/remove.go:62
+msgid "Error removing repo"
+msgstr ""
+
+#: internal/usecase/repo/remove/remove.go:66
 msgid "Error removing repo directory"
 msgstr ""
 
-#: internal/usecase/repo/remove/remove.go:88
+#: internal/usecase/repo/remove/remove.go:74
 msgid "Error removing packages from database"
 msgstr ""
 
@@ -893,6 +904,10 @@ msgstr ""
 #: internal/usecase/support/support.go:49
 msgid ""
 "Support archive %s has been created. You can send it to whoever needs it."
+msgstr ""
+
+#: internal/usecase/upgrade/upgrade.go:79
+msgid "Error pulling repositories"
 msgstr ""
 
 #: internal/usecase/upgrade/upgrade.go:84

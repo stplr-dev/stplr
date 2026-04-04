@@ -39,6 +39,7 @@ import (
 
 	"go.stplr.dev/stplr/internal/cliutils2"
 	"go.stplr.dev/stplr/internal/usecase/repo/add"
+	"go.stplr.dev/stplr/internal/usecase/repo/clearoverrides"
 	repo_import "go.stplr.dev/stplr/internal/usecase/repo/import"
 	"go.stplr.dev/stplr/internal/usecase/repo/list"
 	"go.stplr.dev/stplr/internal/usecase/repo/remove"
@@ -76,11 +77,12 @@ func RepoCmd() *cli.Command {
 			ListReposCmd(),
 			RemoveRepoCmd(),
 			AddRepoCmd(),
+			RepoImportCmd(),
 			SetRepoRefCmd(),
 			SetRepoDisabledCmd(),
-			RepoMirrorCmd(),
 			SetUrlCmd(),
-			RepoImportCmd(),
+			RepoMirrorCmd(),
+			ClearOverridesCmd(),
 		},
 	}
 }
@@ -292,6 +294,30 @@ func RepoImportCmd() *cli.Command {
 				ConfigContent:  configStr,
 				NoPull:         c.Bool("no-pull"),
 				IgnoreExisting: c.Bool("ignore-existing"),
+			})
+		}),
+	}
+}
+
+func ClearOverridesCmd() *cli.Command {
+	return &cli.Command{
+		Name:          "clear-overrides",
+		Usage:         gotext.Get("Remove all overrides for a repository"),
+		ArgsUsage:     gotext.Get("<name>"),
+		ShellComplete: ShellCompleteRepoName,
+		Action: repoModifyAction(func(ctx context.Context, c *cli.Command) error {
+			if c.Args().Len() < 1 {
+				return errMissingArgs
+			}
+
+			d, f, err := deps.ForUniversalReposModificationActionDeps(ctx)
+			if err != nil {
+				return err
+			}
+			defer f()
+
+			return clearoverrides.New(d.Repos).Run(ctx, clearoverrides.Options{
+				Name: c.Args().Get(0),
 			})
 		}),
 	}

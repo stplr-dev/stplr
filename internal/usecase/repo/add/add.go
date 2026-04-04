@@ -25,7 +25,6 @@ import (
 
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/config"
-	"go.stplr.dev/stplr/internal/config/common"
 	"go.stplr.dev/stplr/internal/service/repos"
 	"go.stplr.dev/stplr/pkg/types"
 )
@@ -45,8 +44,7 @@ type Options struct {
 }
 
 func (u *useCase) Run(ctx context.Context, opts Options) error {
-	repos := u.cfg.Repos()
-	for _, repo := range repos {
+	for _, repo := range u.cfg.Repos() {
 		if repo.URL == opts.URL || repo.Name == opts.Name {
 			return errors.NewI18nError(gotext.Get("Repo \"%s\" already exists", repo.Name))
 		}
@@ -57,16 +55,13 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		URL:  opts.URL,
 	}
 
-	newRepo, err := u.r.Pull(ctx, repo)
+	pulledRepo, err := u.r.Pull(ctx, repo)
 	if err != nil {
 		return err
 	}
 
-	repos = append(repos, newRepo)
-	u.cfg.SetRepos(repos)
-	err = u.cfg.Save(common.SOURCE_SYSTEM)
-	if err != nil {
-		return errors.WrapIntoI18nError(err, gotext.Get("Error saving config"))
+	if err := u.cfg.AddRepo(pulledRepo); err != nil {
+		return errors.WrapIntoI18nError(err, gotext.Get("Error saving repo"))
 	}
 
 	return nil

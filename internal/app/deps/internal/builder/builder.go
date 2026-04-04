@@ -75,6 +75,7 @@ type Deps struct {
 	Installer          installer.InstallerExecutor
 	Scripter           scripter.ScriptExecutor
 	SystemConfigWriter savers.SystemConfigWriterExecutor
+	RepoDirWriter      savers.RepoDirWriterExecutor
 
 	cleanups []Cleanup
 }
@@ -144,6 +145,7 @@ func (b *builder) ConfigRW() *builder {
 
 	cfg := config.New(
 		config.WithSystemConfigWriter(b.deps.SystemConfigWriter),
+		config.WithRepoDirWriter(b.deps.RepoDirWriter),
 	)
 	if err := cfg.Load(); err != nil {
 		b.err = errors.WrapIntoI18nError(err, gotext.Get("Error loading config"))
@@ -482,6 +484,31 @@ func (b *builder) SystemConfigWriter() *builder {
 	}
 
 	b.deps.SystemConfigWriter = &savers.SystemConfigWriter{}
+
+	return b
+}
+
+func (b *builder) RepoDirWriterFromRootPlugin() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	var err error
+	b.deps.RepoDirWriter, err = plugins.GetRepoDirWriter(b.ctx, b.deps.RootPluginProvider)
+	if err != nil {
+		b.err = fmt.Errorf("failed to get repo-dir-writer: %w", err)
+		return b
+	}
+
+	return b
+}
+
+func (b *builder) RepoDirWriter() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	b.deps.RepoDirWriter = savers.NewRepoDirWriter()
 
 	return b
 }

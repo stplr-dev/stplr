@@ -43,19 +43,19 @@ type Config struct {
 
 // Repo represents a Stapler repo within a configuration file
 type Repo struct {
-	Name      string   `json:"name" koanf:"name"`
-	URL       string   `json:"url" koanf:"url"`
-	Ref       string   `json:"ref" koanf:"ref"`
-	Mirrors   []string `json:"mirrors" koanf:"mirrors"`
-	ReportUrl string   `json:"report_url" koanf:"report_url"`
+	Name      string   `json:"name" koanf:"name" toml:"name"`
+	URL       string   `json:"url" koanf:"url" toml:"url"`
+	Ref       string   `json:"ref" koanf:"ref" toml:"ref"`
+	Mirrors   []string `json:"mirrors" koanf:"mirrors" toml:"mirrors"`
+	ReportUrl string   `json:"report_url" koanf:"report_url" toml:"report_url"`
 
-	Title       string `json:"title" koanf:"title"`
-	Summary     string `json:"summary" koanf:"summary"`
-	Description string `json:"description" koanf:"description"`
-	Homepage    string `json:"homepage" koanf:"homepage"`
-	Icon        string `json:"icon" koanf:"icon"`
+	Title       string `json:"title" koanf:"title" toml:"title"`
+	Summary     string `json:"summary" koanf:"summary" toml:"summary"`
+	Description string `json:"description" koanf:"description" toml:"description"`
+	Homepage    string `json:"homepage" koanf:"homepage" toml:"homepage"`
+	Icon        string `json:"icon" koanf:"icon" toml:"icon"`
 
-	Disabled bool `json:"disabled" koanf:"disabled"`
+	Disabled bool `json:"disabled" koanf:"disabled" toml:"disabled"`
 }
 
 func (r *Repo) MergeFrom(other *Repo) {

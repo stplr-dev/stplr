@@ -19,11 +19,19 @@
 package savers
 
 import (
+	"context"
 	"io"
 )
 
-//go:generate go run ../../../generators/plugin-generator2 SystemConfigWriterExecutor
+//go:generate go run ../../../generators/plugin-generator2 SystemConfigWriterExecutor RepoDirWriterExecutor
 
 type SystemConfigWriterExecutor interface {
 	io.Writer
+}
+
+type RepoDirWriterExecutor interface {
+	WriteUserRepo(ctx context.Context, name string, data []byte) error
+	RemoveUserRepo(ctx context.Context, name string) error
+	WriteOverride(ctx context.Context, name string, data []byte) error
+	RemoveOverride(ctx context.Context, name string) error
 }

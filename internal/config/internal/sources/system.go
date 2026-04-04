@@ -37,27 +37,29 @@ import (
 )
 
 type SystemConfig struct {
-	k   *koanf.Koanf
-	cfg *types.Config
+	k    *koanf.Koanf
+	cfg  *types.Config
+	Path string
 
 	Writer io.Writer
 }
 
 func NewSystemConfig() *SystemConfig {
 	return &SystemConfig{
-		k:   koanf.New("."),
-		cfg: &types.Config{},
+		k:    koanf.New("."),
+		cfg:  &types.Config{},
+		Path: constants.SystemConfigPath,
 	}
 }
 
 func (c *SystemConfig) Name() string { return "system" }
 
 func (c *SystemConfig) Load() (*koanf.Koanf, error) {
-	if _, err := os.Stat(constants.SystemConfigPath); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(c.Path); errors.Is(err, os.ErrNotExist) {
 		return c.k, nil
 	}
 
-	if err := c.k.Load(file.Provider(constants.SystemConfigPath), ktoml.Parser()); err != nil {
+	if err := c.k.Load(file.Provider(c.Path), ktoml.Parser()); err != nil {
 		return c.k, err
 	}
 
