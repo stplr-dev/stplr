@@ -866,51 +866,55 @@ msgstr "Не удалось прочитать конфигурацию репо
 msgid "Failed to import repository"
 msgstr "Не удалось импортировать репозиторий"
 
-#: internal/usecase/repo/list/list.go:59
+#: internal/usecase/repo/list/list.go:60
 msgid "Error encoding repos to JSON"
 msgstr "Ошибка при кодировании репозиториев в JSON"
 
-#: internal/usecase/repo/list/list.go:82
+#: internal/usecase/repo/list/list.go:84
 msgid "Name"
 msgstr "Имя"
 
-#: internal/usecase/repo/list/list.go:82
+#: internal/usecase/repo/list/list.go:84
+msgid "Origin"
+msgstr "Источник"
+
+#: internal/usecase/repo/list/list.go:84
 msgid "Disabled"
 msgstr "Отключен"
 
-#: internal/usecase/repo/list/list.go:82
+#: internal/usecase/repo/list/list.go:84
 msgid "Title"
 msgstr "Название"
 
-#: internal/usecase/repo/list/list.go:82
+#: internal/usecase/repo/list/list.go:84
 msgid "Summary"
 msgstr "Кратко"
 
-#: internal/usecase/repo/list/list.go:82
+#: internal/usecase/repo/list/list.go:84
 msgid "Description"
 msgstr "Описание"
 
-#: internal/usecase/repo/list/list.go:83
+#: internal/usecase/repo/list/list.go:85
 msgid "Homepage"
 msgstr "Домашняя страница"
 
-#: internal/usecase/repo/list/list.go:83
+#: internal/usecase/repo/list/list.go:85
 msgid "Icon"
 msgstr "Иконка"
 
-#: internal/usecase/repo/list/list.go:83
+#: internal/usecase/repo/list/list.go:85
 msgid "URL"
 msgstr "URL"
 
-#: internal/usecase/repo/list/list.go:83
+#: internal/usecase/repo/list/list.go:85
 msgid "Ref"
 msgstr "Ревизия"
 
-#: internal/usecase/repo/list/list.go:84
+#: internal/usecase/repo/list/list.go:86
 msgid "Mirrors"
 msgstr "Зеркала"
 
-#: internal/usecase/repo/list/list.go:84
+#: internal/usecase/repo/list/list.go:86
 msgid "Report"
 msgstr "Сообщить об ошибке"
 

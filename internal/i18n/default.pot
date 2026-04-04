@@ -815,51 +815,55 @@ msgstr ""
 msgid "Failed to import repository"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:59
+#: internal/usecase/repo/list/list.go:60
 msgid "Error encoding repos to JSON"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:82
+#: internal/usecase/repo/list/list.go:84
 msgid "Name"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:82
+#: internal/usecase/repo/list/list.go:84
+msgid "Origin"
+msgstr ""
+
+#: internal/usecase/repo/list/list.go:84
 msgid "Disabled"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:82
+#: internal/usecase/repo/list/list.go:84
 msgid "Title"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:82
+#: internal/usecase/repo/list/list.go:84
 msgid "Summary"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:82
+#: internal/usecase/repo/list/list.go:84
 msgid "Description"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:83
+#: internal/usecase/repo/list/list.go:85
 msgid "Homepage"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:83
+#: internal/usecase/repo/list/list.go:85
 msgid "Icon"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:83
+#: internal/usecase/repo/list/list.go:85
 msgid "URL"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:83
+#: internal/usecase/repo/list/list.go:85
 msgid "Ref"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:84
+#: internal/usecase/repo/list/list.go:86
 msgid "Mirrors"
 msgstr ""
 
-#: internal/usecase/repo/list/list.go:84
+#: internal/usecase/repo/list/list.go:86
 msgid "Report"
 msgstr ""
 

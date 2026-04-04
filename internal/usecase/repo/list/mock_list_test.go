@@ -40,6 +40,20 @@ func (m *MockReposProvier) EXPECT() *MockReposProvierMockRecorder {
 	return m.recorder
 }
 
+// IsSystemRepo mocks base method.
+func (m *MockReposProvier) IsSystemRepo(name string) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsSystemRepo", name)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// IsSystemRepo indicates an expected call of IsSystemRepo.
+func (mr *MockReposProvierMockRecorder) IsSystemRepo(name any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsSystemRepo", reflect.TypeOf((*MockReposProvier)(nil).IsSystemRepo), name)
+}
+
 // Repos mocks base method.
 func (m *MockReposProvier) Repos() []types.Repo {
 	m.ctrl.T.Helper()

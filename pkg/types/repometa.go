@@ -22,9 +22,10 @@ package types
 type RepoOrigin int
 
 const (
-	RepoOriginSystem RepoOrigin = iota // /usr/lib/stplr/repos.d
-	RepoOriginUser                     // /etc/stplr/repos.d
-	RepoOriginInline                   // [[repo]] in stplr.toml
+	// Deprecated
+	RepoOriginInline RepoOrigin = iota // [[repo]] in stplr.toml
+	RepoOriginSystem                   // /usr/lib/stplr/repos.d
+	RepoOriginGlobal                   // /etc/stplr/repos.d
 )
 
 // RepoWithMeta wraps a Repo with information about its source.

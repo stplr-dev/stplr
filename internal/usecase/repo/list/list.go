@@ -35,6 +35,7 @@ import (
 
 type ReposProvier interface {
 	Repos() []types.Repo
+	IsSystemRepo(name string) bool
 }
 
 type useCase struct {
@@ -65,7 +66,8 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 	var err error
 	format := opts.Format
 	if format == "" {
-		format = fmt.Sprintf(`%s: {{.Name}}{{if .Disabled}}
+		format = fmt.Sprintf(`%s: {{.Name}}
+%s: {{.Origin | repoOrigin}}{{if .Disabled}}
 %s: {{.Disabled}}{{end}}{{if .Title}}
 %s: {{.Title}}{{end}}{{if .Summary}}
 %s: {{.Summary}}{{end}}{{if .Description}}
@@ -79,7 +81,7 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
   - {{$m}}{{end}}{{end}}{{if .ReportUrl}}
 %s: {{.ReportUrl}}{{end}}
 
-`, gotext.Get("Name"), gotext.Get("Disabled"), gotext.Get("Title"), gotext.Get("Summary"), gotext.Get("Description"),
+`, gotext.Get("Name"), gotext.Get("Origin"), gotext.Get("Disabled"), gotext.Get("Title"), gotext.Get("Summary"), gotext.Get("Description"),
 			gotext.Get("Homepage"), gotext.Get("Icon"), gotext.Get("URL"), gotext.Get("Ref"),
 			gotext.Get("Mirrors"), gotext.Get("Report"))
 	}
@@ -89,7 +91,15 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 	}
 
 	for _, repo := range repos {
-		err = tmpl.Execute(u.stdout, repo)
+		origin := types.RepoOriginGlobal
+		if u.cfg.IsSystemRepo(repo.Name) {
+			origin = types.RepoOriginSystem
+		}
+
+		err = tmpl.Execute(u.stdout, types.RepoWithMeta{
+			Repo:   repo,
+			Origin: origin,
+		})
 		if err != nil {
 			return errors.WrapIntoI18nError(err, gotext.Get("Error executing template"))
 		}

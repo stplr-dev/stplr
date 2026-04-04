@@ -71,7 +71,7 @@ func (rr *RepoRegistry) SetWriter(w savers.RepoDirWriterExecutor) {
 // in stplr.toml and slots between system and user directories in priority.
 func (rr *RepoRegistry) LoadAll(inlineRepos []types.Repo) ([]types.RepoWithMeta, error) {
 	systemSrc := sources.RepoDirSource{Dir: rr.systemDir, Origin: types.RepoOriginSystem}
-	userSrc := sources.RepoDirSource{Dir: rr.userDir, Origin: types.RepoOriginUser}
+	userSrc := sources.RepoDirSource{Dir: rr.userDir, Origin: types.RepoOriginGlobal}
 	overrideSrc := sources.RepoOverrideSource{Dir: rr.overridesDir}
 
 	systemRepos, err := systemSrc.LoadRepos()
