@@ -60,7 +60,7 @@ func TestRepoDirSourceFallbackName(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "myrepo.toml"), `url = "https://example.com"`)
 
-	s := sources.RepoDirSource{Dir: dir, Origin: types.RepoOriginUser}
+	s := sources.RepoDirSource{Dir: dir, Origin: types.RepoOriginGlobal}
 	repos, err := s.LoadRepos()
 	require.NoError(t, err)
 	require.Len(t, repos, 1)
@@ -73,7 +73,7 @@ func TestRepoDirSourceSortedOrder(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "aaa.toml"), `name = "aaa"`)
 	writeFile(t, filepath.Join(dir, "mmm.toml"), `name = "mmm"`)
 
-	s := sources.RepoDirSource{Dir: dir, Origin: types.RepoOriginUser}
+	s := sources.RepoDirSource{Dir: dir, Origin: types.RepoOriginGlobal}
 	repos, err := s.LoadRepos()
 	require.NoError(t, err)
 	require.Len(t, repos, 3)
@@ -88,7 +88,7 @@ func TestRepoDirSourceSkipsNonTomlFiles(t *testing.T) {
 	writeFile(t, filepath.Join(dir, "readme.txt"), `not a repo`)
 	writeFile(t, filepath.Join(dir, "other.yaml"), `name: other`)
 
-	s := sources.RepoDirSource{Dir: dir, Origin: types.RepoOriginUser}
+	s := sources.RepoDirSource{Dir: dir, Origin: types.RepoOriginGlobal}
 	repos, err := s.LoadRepos()
 	require.NoError(t, err)
 	assert.Len(t, repos, 1)
@@ -98,7 +98,7 @@ func TestRepoDirSourceInvalidToml(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, filepath.Join(dir, "bad.toml"), `this is not valid toml ][`)
 
-	s := sources.RepoDirSource{Dir: dir, Origin: types.RepoOriginUser}
+	s := sources.RepoDirSource{Dir: dir, Origin: types.RepoOriginGlobal}
 	_, err := s.LoadRepos()
 	assert.Error(t, err)
 }

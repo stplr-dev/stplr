@@ -24,6 +24,8 @@ import (
 	"text/template"
 
 	"go.alt-gnome.ru/x/appstream"
+
+	"go.stplr.dev/stplr/pkg/types"
 )
 
 func localizedText(m appstream.LocalizedMap, langs ...string) string {
@@ -52,9 +54,21 @@ func indent(s string) string {
 	return strings.Join(lines, "\n")
 }
 
+func repoOrigin(origin types.RepoOrigin) string {
+	switch origin {
+	case types.RepoOriginSystem:
+		return "system"
+	case types.RepoOriginGlobal:
+		return "global"
+	default:
+		return "unknown"
+	}
+}
+
 var commonFuncs = template.FuncMap{
-	"localized": localizedText,
-	"indent":    indent,
+	"localized":  localizedText,
+	"indent":     indent,
+	"repoOrigin": repoOrigin,
 }
 
 func NewPackageTemplate() *template.Template {

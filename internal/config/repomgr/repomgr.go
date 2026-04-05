@@ -71,7 +71,7 @@ func (rr *RepoRegistry) SetWriter(w savers.RepoDirWriterExecutor) {
 // in stplr.toml and slots between system and user directories in priority.
 func (rr *RepoRegistry) LoadAll(inlineRepos []types.Repo) ([]types.RepoWithMeta, error) {
 	systemSrc := sources.RepoDirSource{Dir: rr.systemDir, Origin: types.RepoOriginSystem}
-	userSrc := sources.RepoDirSource{Dir: rr.userDir, Origin: types.RepoOriginUser}
+	userSrc := sources.RepoDirSource{Dir: rr.userDir, Origin: types.RepoOriginGlobal}
 	overrideSrc := sources.RepoOverrideSource{Dir: rr.overridesDir}
 
 	systemRepos, err := systemSrc.LoadRepos()
@@ -180,20 +180,7 @@ func (rr *RepoRegistry) WriteOverride(name string, o types.RepoOverride) error {
 		return err
 	}
 
-	merged := existing[name]
-	if o.Disabled != nil {
-		merged.Disabled = o.Disabled
-	}
-	if o.Ref != nil {
-		merged.Ref = o.Ref
-	}
-	if o.URL != nil {
-		merged.URL = o.URL
-	}
-	if o.Mirrors != nil {
-		merged.Mirrors = o.Mirrors
-	}
-
+	merged := types.MergeOverrides(existing[name], o)
 	data, err := marshalOverride(merged)
 	if err != nil {
 		return err
@@ -233,23 +220,8 @@ func (rr *RepoRegistry) UpdateFromPull(name string, updated types.Repo) error {
 	return rr.WriteUserRepo(updated)
 }
 
-// tomlOverrideFile is the on-disk representation of a RepoOverride.
-// Pointer fields ensure we only write keys that are actually set.
-type tomlOverrideFile struct {
-	Disabled *bool    `toml:"disabled,omitempty"`
-	Ref      *string  `toml:"ref,omitempty"`
-	URL      *string  `toml:"url,omitempty"`
-	Mirrors  []string `toml:"mirrors,omitempty"`
-}
-
 func marshalOverride(o types.RepoOverride) ([]byte, error) {
-	out := tomlOverrideFile{
-		Disabled: o.Disabled,
-		Ref:      o.Ref,
-		URL:      o.URL,
-		Mirrors:  o.Mirrors,
-	}
-	data, err := toml.Marshal(out)
+	data, err := toml.Marshal(o)
 	if err != nil {
 		return nil, fmt.Errorf("marshal override: %w", err)
 	}

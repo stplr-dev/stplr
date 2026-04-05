@@ -253,6 +253,30 @@ func (gm *GitManager) CheckoutRevision(r gitRepository, revHash *plumbing.Hash) 
 	return w.Filesystem, nil
 }
 
+func (gm *GitManager) VerifyCommitSignature(r gitRepository, revHash *plumbing.Hash, trustedKeys []string) error {
+	commit, err := r.CommitObject(*revHash)
+	if err != nil {
+		return fmt.Errorf("failed to get commit object: %w", err)
+	}
+
+	if commit.PGPSignature == "" {
+		return errors.New("commit has no PGP signature")
+	}
+
+	if len(trustedKeys) == 0 {
+		return errors.New("require_signed_commits is enabled but no trusted_keys are configured")
+	}
+
+	for _, k := range trustedKeys {
+		_, err = commit.Verify(k)
+		if err == nil {
+			slog.Debug("Commit signature verified", "hash", commit.Hash.String())
+			return nil
+		}
+	}
+	return fmt.Errorf("commit signature verification failed: %w", err)
+}
+
 func (gm *GitManager) ResolveHash(r *git.Repository, ref string) (*plumbing.Hash, error) {
 	var err error
 

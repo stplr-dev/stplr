@@ -38,5 +38,8 @@ type RepoConfig struct {
 		Description string `toml:"description"`
 		Homepage    string `toml:"homepage"`
 		Icon        string `toml:"icon"`
+
+		RequireSignedCommits bool     `toml:"require_signed_commits"`
+		TrustedKeys          []string `toml:"trusted_keys"`
 	}
 }

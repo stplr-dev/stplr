@@ -77,6 +77,8 @@ func repoFromReader(r interface {
 	repo.Description = repocfg.Repo.Description
 	repo.Homepage = repocfg.Repo.Homepage
 	repo.Icon = repocfg.Repo.Icon
+	repo.RequireSignedCommits = repocfg.Repo.RequireSignedCommits
+	repo.TrustedKeys = repocfg.Repo.TrustedKeys
 
 	return &repo, nil
 }

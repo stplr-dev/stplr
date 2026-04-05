@@ -211,59 +211,63 @@ msgstr "Для команды remove ожидался хотя бы 1 аргум
 msgid "Remove an installed package"
 msgstr "Удалить установленный пакет"
 
-#: internal/app/commands/repo.go:75
+#: internal/app/commands/repo.go:76
 msgid "Manage repos"
 msgstr "Управление репозиториями"
 
-#: internal/app/commands/repo.go:93
+#: internal/app/commands/repo.go:95
 msgid "Remove an existing repository"
 msgstr "Удалить существующий репозиторий"
 
-#: internal/app/commands/repo.go:95 internal/app/commands/repo.go:306
+#: internal/app/commands/repo.go:97 internal/app/commands/repo.go:340
 msgid "<name>"
 msgstr "<имя>"
 
-#: internal/app/commands/repo.go:116
+#: internal/app/commands/repo.go:118
 msgid "Add a new repository"
 msgstr "Добавить новый репозиторий"
 
-#: internal/app/commands/repo.go:117 internal/app/commands/repo.go:231
+#: internal/app/commands/repo.go:119 internal/app/commands/repo.go:233
 msgid "<name> <url>"
 msgstr "<имя> <url>"
 
-#: internal/app/commands/repo.go:140
+#: internal/app/commands/repo.go:142
 msgid "List repositories"
 msgstr "Список репозиториев"
 
-#: internal/app/commands/repo.go:150
+#: internal/app/commands/repo.go:152
 msgid "Output in JSON format"
 msgstr "Вывод в JSON формате"
 
-#: internal/app/commands/repo.go:171
+#: internal/app/commands/repo.go:173
 msgid "Set the reference of the repository"
 msgstr "Установить ссылку на версию репозитория"
 
-#: internal/app/commands/repo.go:172
+#: internal/app/commands/repo.go:174
 msgid "<name> <ref>"
 msgstr "<имя> <ссылка_на_версию>"
 
-#: internal/app/commands/repo.go:198
+#: internal/app/commands/repo.go:200
 msgid "Disable (or enable) repository"
 msgstr "Отключить (или включить) репозиторий"
 
-#: internal/app/commands/repo.go:199
+#: internal/app/commands/repo.go:201 internal/app/commands/repo.go:258
 msgid "<name> <value>"
 msgstr "<имя> <значение>"
 
-#: internal/app/commands/repo.go:230
+#: internal/app/commands/repo.go:232
 msgid "Set the main url of the repository"
 msgstr "Установить главный URL репозитория"
 
-#: internal/app/commands/repo.go:255
+#: internal/app/commands/repo.go:257
+msgid "Require signed commits for a repository"
+msgstr "Требовать подписанных коммитов для репозитория"
+
+#: internal/app/commands/repo.go:289
 msgid "Import a repository from a stapler-repo.toml file"
 msgstr "Импортировать репозиторий из stapler-repo.toml файла"
 
-#: internal/app/commands/repo.go:256
+#: internal/app/commands/repo.go:290
 msgid ""
 "Import a repository using a stapler-repo.toml file. The file path can be a "
 "regular file or '-' to read from stdin."
@@ -271,19 +275,19 @@ msgstr ""
 "Импортировать репозиторий из stapler-repo.toml файла. Путь к файлу может "
 "быть обычным файлом или '-' для чтения из stdin."
 
-#: internal/app/commands/repo.go:257
+#: internal/app/commands/repo.go:291
 msgid "<name> <file>"
 msgstr "<имя> <файл>"
 
-#: internal/app/commands/repo.go:261
+#: internal/app/commands/repo.go:295
 msgid "Skip pulling repository after import"
 msgstr "Пропустить загрузку репозитория после импорта"
 
-#: internal/app/commands/repo.go:265
+#: internal/app/commands/repo.go:299
 msgid "Skip import if repository already exists"
 msgstr "Пропустить импорт, если репозиторий уже существует"
 
-#: internal/app/commands/repo.go:305
+#: internal/app/commands/repo.go:339
 msgid "Remove all overrides for a repository"
 msgstr "Удалить все переопределения репозитория"
 
@@ -662,7 +666,7 @@ msgstr "Сборка метаданных пакета %q"
 msgid "Executing %s()"
 msgstr "Выполнение %s()"
 
-#: internal/service/repos/internal/puller/puller.go:213
+#: internal/service/repos/internal/puller/puller.go:219
 msgid "Git repository does not appear to be a valid Stapler repo"
 msgstr "Git-репозиторий не выглядит корректным репозиторием Stapler"
 
@@ -862,51 +866,55 @@ msgstr "Не удалось прочитать конфигурацию репо
 msgid "Failed to import repository"
 msgstr "Не удалось импортировать репозиторий"
 
-#: internal/usecase/repo/list/list.go:59
+#: internal/usecase/repo/list/list.go:60
 msgid "Error encoding repos to JSON"
 msgstr "Ошибка при кодировании репозиториев в JSON"
 
-#: internal/usecase/repo/list/list.go:82
+#: internal/usecase/repo/list/list.go:84
 msgid "Name"
 msgstr "Имя"
 
-#: internal/usecase/repo/list/list.go:82
+#: internal/usecase/repo/list/list.go:84
+msgid "Origin"
+msgstr "Источник"
+
+#: internal/usecase/repo/list/list.go:84
 msgid "Disabled"
 msgstr "Отключен"
 
-#: internal/usecase/repo/list/list.go:82
+#: internal/usecase/repo/list/list.go:84
 msgid "Title"
 msgstr "Название"
 
-#: internal/usecase/repo/list/list.go:82
+#: internal/usecase/repo/list/list.go:84
 msgid "Summary"
 msgstr "Кратко"
 
-#: internal/usecase/repo/list/list.go:82
+#: internal/usecase/repo/list/list.go:84
 msgid "Description"
 msgstr "Описание"
 
-#: internal/usecase/repo/list/list.go:83
+#: internal/usecase/repo/list/list.go:85
 msgid "Homepage"
 msgstr "Домашняя страница"
 
-#: internal/usecase/repo/list/list.go:83
+#: internal/usecase/repo/list/list.go:85
 msgid "Icon"
 msgstr "Иконка"
 
-#: internal/usecase/repo/list/list.go:83
+#: internal/usecase/repo/list/list.go:85
 msgid "URL"
 msgstr "URL"
 
-#: internal/usecase/repo/list/list.go:83
+#: internal/usecase/repo/list/list.go:85
 msgid "Ref"
 msgstr "Ревизия"
 
-#: internal/usecase/repo/list/list.go:84
+#: internal/usecase/repo/list/list.go:86
 msgid "Mirrors"
 msgstr "Зеркала"
 
-#: internal/usecase/repo/list/list.go:84
+#: internal/usecase/repo/list/list.go:86
 msgid "Report"
 msgstr "Сообщить об ошибке"
 

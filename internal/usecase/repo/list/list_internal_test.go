@@ -39,7 +39,7 @@ func TestListUseCaseRun(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		repos          []types.Repo
+		repos          []types.RepoWithMeta
 		format         string
 		json           bool
 		expectedOutput string
@@ -47,20 +47,20 @@ func TestListUseCaseRun(t *testing.T) {
 	}{
 		{
 			name: "Default format with multiple repos",
-			repos: []types.Repo{
-				{Name: "repo1", URL: "http://repo1.com"},
-				{Name: "repo2", URL: "http://repo2.com"},
+			repos: []types.RepoWithMeta{
+				{Repo: types.Repo{Name: "repo1", URL: "http://repo1.com"}},
+				{Repo: types.Repo{Name: "repo2", URL: "http://repo2.com"}},
 			},
 			format:         "",
 			json:           false,
-			expectedOutput: "Name: repo1\nURL: http://repo1.com\n\nName: repo2\nURL: http://repo2.com\n\n",
+			expectedOutput: "Name: repo1\nOrigin: system\nURL: http://repo1.com\n\nName: repo2\nOrigin: system\nURL: http://repo2.com\n\n",
 			expectError:    false,
 		},
 		{
 			name: "Custom format with multiple repos",
-			repos: []types.Repo{
-				{Name: "repo1", URL: "http://repo1.com"},
-				{Name: "repo2", URL: "http://repo2.com"},
+			repos: []types.RepoWithMeta{
+				{Repo: types.Repo{Name: "repo1", URL: "http://repo1.com"}},
+				{Repo: types.Repo{Name: "repo2", URL: "http://repo2.com"}},
 			},
 			format:         "{{.Name}}: {{.URL}}\n",
 			json:           false,
@@ -69,7 +69,7 @@ func TestListUseCaseRun(t *testing.T) {
 		},
 		{
 			name:           "Empty repos list",
-			repos:          []types.Repo{},
+			repos:          []types.RepoWithMeta{},
 			format:         "",
 			json:           false,
 			expectedOutput: "",
@@ -77,8 +77,8 @@ func TestListUseCaseRun(t *testing.T) {
 		},
 		{
 			name: "Invalid template format",
-			repos: []types.Repo{
-				{Name: "repo1", URL: "http://repo1.com"},
+			repos: []types.RepoWithMeta{
+				{Repo: types.Repo{Name: "repo1", URL: "http://repo1.com"}},
 			},
 			format:         "{{.InvalidField}}\n",
 			json:           false,
@@ -87,9 +87,9 @@ func TestListUseCaseRun(t *testing.T) {
 		},
 		{
 			name: "JSON format with multiple repos",
-			repos: []types.Repo{
-				{Name: "repo1", URL: "http://repo1.com"},
-				{Name: "repo2", URL: "http://repo2.com"},
+			repos: []types.RepoWithMeta{
+				{Repo: types.Repo{Name: "repo1", URL: "http://repo1.com"}},
+				{Repo: types.Repo{Name: "repo2", URL: "http://repo2.com"}},
 			},
 			format: "",
 			json:   true,
@@ -101,24 +101,27 @@ func TestListUseCaseRun(t *testing.T) {
 		},
 		{
 			name: "Default format with additional fields",
-			repos: []types.Repo{
+			repos: []types.RepoWithMeta{
 				{
-					Name:      "repo1",
-					URL:       "http://repo1.com",
-					Ref:       "main",
-					Mirrors:   []string{"http://mirror1.com", "http://mirror2.com"},
-					ReportUrl: "http://report.com",
-					Title:     "Repo1",
-					Summary:   "Short summary",
-					Description: `Long multiline
+					Repo: types.Repo{
+						Name:      "repo1",
+						URL:       "http://repo1.com",
+						Ref:       "main",
+						Mirrors:   []string{"http://mirror1.com", "http://mirror2.com"},
+						ReportUrl: "http://report.com",
+						Title:     "Repo1",
+						Summary:   "Short summary",
+						Description: `Long multiline
 description`,
-					Homepage: "http://repo1.com",
-					Icon:     "http://repo1.com/icon.svg",
+						Homepage: "http://repo1.com",
+						Icon:     "http://repo1.com/icon.svg",
+					},
 				},
 			},
 			format: "",
 			json:   false,
 			expectedOutput: `Name: repo1
+Origin: system
 Title: Repo1
 Summary: Short summary
 Description:
@@ -144,7 +147,14 @@ Report: http://report.com
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockProvider := NewMockReposProvier(ctrl)
-			mockProvider.EXPECT().Repos().Return(tt.repos)
+
+			repos := make([]types.Repo, len(tt.repos))
+			for i, r := range tt.repos {
+				repos[i] = r.Repo
+			}
+
+			mockProvider.EXPECT().Repos().Return(repos)
+			mockProvider.EXPECT().IsSystemRepo(gomock.Any()).Return(true).AnyTimes()
 
 			useCase := New(mockProvider)
 

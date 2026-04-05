@@ -13,3 +13,5 @@
   homepage: https://stplr.dev
   icon: https://stplr.dev/img/logo.svg
   disabled: false
+  require_signed_commits: false
+  trusted_keys: []

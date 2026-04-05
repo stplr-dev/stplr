@@ -68,7 +68,7 @@ url = "https://user.example.com"`)
 	require.NoError(t, err)
 	require.Len(t, repos, 1)
 	assert.Equal(t, "https://user.example.com", repos[0].URL)
-	assert.Equal(t, types.RepoOriginUser, repos[0].Origin)
+	assert.Equal(t, types.RepoOriginGlobal, repos[0].Origin)
 }
 
 func TestLoadAllInlineBetweenSystemAndUser(t *testing.T) {
