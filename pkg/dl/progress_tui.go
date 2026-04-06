@@ -30,9 +30,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"charm.land/bubbles/v2/progress"
-	"charm.land/bubbles/v2/spinner"
-	tea "charm.land/bubbletea/v2"
+	"github.com/charmbracelet/bubbles/progress"
+	"github.com/charmbracelet/bubbles/spinner"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/leonelquinteros/gotext"
 )
 
@@ -84,7 +84,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case progress.FrameMsg:
 		if !m.useSpinner {
 			progressModel, cmd := m.progress.Update(msg)
-			m.progress = progressModel
+			m.progress = progressModel.(progress.Model)
 			return m, cmd
 		}
 	case spinner.TickMsg:
@@ -102,17 +102,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() tea.View {
+func (m model) View() string {
 	if m.done {
-		return tea.NewView(gotext.Get("%s: done!\n", m.filename))
+		return gotext.Get("%s: done!\n", m.filename)
 	}
 	if m.useSpinner {
-		return tea.NewView(gotext.Get(
+		return gotext.Get(
 			"%s %s downloading at %s/s\n",
 			m.filename,
 			m.spinner.View(),
 			prettyByteSize(int64(m.speed)),
-		))
+		)
 	}
 
 	leftPart := m.filename
@@ -125,14 +125,14 @@ func (m model) View() tea.View {
 		m.remaining,
 	)
 
-	m.progress.SetWidth(m.width - len(leftPart) - len(rightPart) - 6)
+	m.progress.Width = m.width - len(leftPart) - len(rightPart) - 6
 	bar := m.progress.ViewAs(m.percent)
-	return tea.NewView(fmt.Sprintf(
+	return fmt.Sprintf(
 		"%s %s %s",
 		leftPart,
 		bar,
 		rightPart,
-	))
+	)
 }
 
 func prettyByteSize(b int64) string {
@@ -229,7 +229,7 @@ func NewProgressWriter(ctx context.Context, base io.WriteCloser, max int64, file
 	} else {
 		m = &model{
 			progress: progress.New(
-				progress.WithDefaultBlend(),
+				progress.WithDefaultGradient(),
 				progress.WithoutPercentage(),
 			),
 			useSpinner: false,

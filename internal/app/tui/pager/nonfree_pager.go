@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"strings"
 
-	tea "charm.land/bubbletea/v2"
-	"charm.land/lipgloss/v2"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/leonelquinteros/gotext"
 )
 
@@ -64,12 +64,12 @@ func NewNonfree(name, content, url string) *NonfreePager {
 		HeaderRenderer: func(m GenericModel) string {
 			warning := DefaultWarningStyle.Render("[!] " + gotext.Get("NON-FREE SOFTWARE AGREEMENT") + " [!]")
 			title := DefaultTitleStyle.Render(fmt.Sprintf("%s - %s", warning, m.cfg.Name))
-			line := strings.Repeat("─", max(0, m.viewport.Width()-lipgloss.Width(title)))
+			line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(title)))
 			return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
 		},
 		FooterRenderer: func(m GenericModel) string {
 			info := m.cfg.Info.Render(fmt.Sprintf("%3.f%%", m.viewport.ScrollPercent()*100))
-			line := strings.Repeat("─", max(0, m.viewport.Width()-lipgloss.Width(info)))
+			line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(info)))
 
 			helpLine := ""
 			if len(m.cfg.Controls) > 0 {
@@ -93,6 +93,8 @@ func NewNonfree(name, content, url string) *NonfreePager {
 func (p *NonfreePager) Run() (bool, error) {
 	prog := tea.NewProgram(
 		p.model,
+		tea.WithMouseCellMotion(),
+		tea.WithAltScreen(),
 	)
 
 	finalModel, err := prog.Run()

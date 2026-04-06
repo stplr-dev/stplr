@@ -28,7 +28,7 @@ import (
 
 	stdErrors "errors"
 
-	tea "charm.land/bubbletea/v2"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/term"
 	"github.com/leonelquinteros/gotext"
 

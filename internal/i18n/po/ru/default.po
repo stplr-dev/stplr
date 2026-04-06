@@ -529,27 +529,27 @@ msgstr "<влево> снять выбор"
 msgid "next"
 msgstr ""
 
-#: internal/cliprompts/prompt.go:85 internal/cliprompts/prompt.go:156
+#: internal/cliprompts/prompt.go:85 internal/cliprompts/prompt.go:155
 msgid "Yes"
 msgstr ""
 
-#: internal/cliprompts/prompt.go:86 internal/cliprompts/prompt.go:157
+#: internal/cliprompts/prompt.go:86 internal/cliprompts/prompt.go:156
 msgid "No"
 msgstr ""
 
-#: internal/cliprompts/prompt.go:175
+#: internal/cliprompts/prompt.go:174
 msgid "Would you like to view the build script for %s"
 msgstr "Показать скрипт для пакета %s"
 
-#: internal/cliprompts/prompt.go:186
+#: internal/cliprompts/prompt.go:185
 msgid "Would you still like to continue?"
 msgstr "Продолжить?"
 
-#: internal/cliprompts/prompt.go:250
+#: internal/cliprompts/prompt.go:249
 msgid "Choose which package to %s"
 msgstr "Выберите, какой пакет использовать для %s"
 
-#: internal/cliprompts/prompt.go:270
+#: internal/cliprompts/prompt.go:269
 msgid "Choose which optional package to install"
 msgid_plural "Choose which optional packages to install"
 msgstr[0] "Выберите, какой дополнительный пакет следует установить"

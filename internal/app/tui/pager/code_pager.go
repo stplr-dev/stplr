@@ -25,7 +25,7 @@
 package pager
 
 import (
-	tea "charm.land/bubbletea/v2"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/leonelquinteros/gotext"
 )
 
@@ -59,6 +59,8 @@ func NewCode(name, content string) *Pager {
 func (p *Pager) Run() error {
 	prog := tea.NewProgram(
 		p.model,
+		tea.WithMouseCellMotion(),
+		tea.WithAltScreen(),
 	)
 
 	_, err := prog.Run()

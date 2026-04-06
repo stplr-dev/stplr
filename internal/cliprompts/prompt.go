@@ -31,9 +31,9 @@ import (
 	"os"
 	"strings"
 
-	"charm.land/bubbles/v2/key"
-	"charm.land/huh/v2"
-	"charm.land/lipgloss/v2"
+	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/pkg/staplerfile"
@@ -89,16 +89,15 @@ func newI18nDefaultKeyMap() *huh.KeyMap {
 }
 
 // Based on https://github.com/charmbracelet/huh/blob/3b90d9d743964ba8ebc4db221dfa5ccbb8abf888/theme.go#L139
-func themeCharm(isDark bool) *huh.Styles {
-	t := huh.ThemeBase(isDark)
-	lightDark := lipgloss.LightDark(isDark)
+func themeCharm() *huh.Theme {
+	t := huh.ThemeBase()
 
 	var (
-		normalFg = lightDark(lipgloss.Color("252"), lipgloss.Color("235"))
-		cream    = lightDark(lipgloss.Color("#FFFDF5"), lipgloss.Color("#FFFDF5"))
+		normalFg = lipgloss.AdaptiveColor{Light: "235", Dark: "252"}
+		cream    = lipgloss.AdaptiveColor{Light: "#FFFDF5", Dark: "#FFFDF5"}
 		primary  = lipgloss.Color("#00a8a3")
-		green    = lightDark(lipgloss.Color("#02BA84"), lipgloss.Color("#02BF87"))
-		red      = lightDark(lipgloss.Color("#FF4672"), lipgloss.Color("#ED567A"))
+		green    = lipgloss.AdaptiveColor{Light: "#02BA84", Dark: "#02BF87"}
+		red      = lipgloss.AdaptiveColor{Light: "#FF4672", Dark: "#ED567A"}
 	)
 
 	t.Focused.Base = t.Focused.Base.BorderForeground(lipgloss.Color("238"))
@@ -106,7 +105,7 @@ func themeCharm(isDark bool) *huh.Styles {
 	t.Focused.Title = t.Focused.Title.Foreground(primary).Bold(true)
 	t.Focused.NoteTitle = t.Focused.NoteTitle.Foreground(primary).Bold(true).MarginBottom(1)
 	t.Focused.Directory = t.Focused.Directory.Foreground(primary)
-	t.Focused.Description = t.Focused.Description.Foreground(lightDark(lipgloss.Color(""), lipgloss.Color("243")))
+	t.Focused.Description = t.Focused.Description.Foreground(lipgloss.AdaptiveColor{Light: "", Dark: "243"})
 	t.Focused.ErrorIndicator = t.Focused.ErrorIndicator.Foreground(red)
 	t.Focused.ErrorMessage = t.Focused.ErrorMessage.Foreground(red)
 	t.Focused.SelectSelector = t.Focused.SelectSelector.Foreground(primary)
@@ -115,15 +114,15 @@ func themeCharm(isDark bool) *huh.Styles {
 	t.Focused.Option = t.Focused.Option.Foreground(normalFg)
 	t.Focused.MultiSelectSelector = t.Focused.MultiSelectSelector.Foreground(primary)
 	t.Focused.SelectedOption = t.Focused.SelectedOption.Foreground(green)
-	t.Focused.SelectedPrefix = lipgloss.NewStyle().Foreground(lightDark(lipgloss.Color("#02CF92"), lipgloss.Color("#02A877"))).SetString("✓ ")
-	t.Focused.UnselectedPrefix = lipgloss.NewStyle().Foreground(lightDark(lipgloss.Color(""), lipgloss.Color("243"))).SetString("• ")
+	t.Focused.SelectedPrefix = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "#02CF92", Dark: "#02A877"}).SetString("✓ ")
+	t.Focused.UnselectedPrefix = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "", Dark: "243"}).SetString("• ")
 	t.Focused.UnselectedOption = t.Focused.UnselectedOption.Foreground(normalFg)
 	t.Focused.FocusedButton = t.Focused.FocusedButton.Foreground(cream).Background(primary)
 	t.Focused.Next = t.Focused.FocusedButton
-	t.Focused.BlurredButton = t.Focused.BlurredButton.Foreground(normalFg).Background(lightDark(lipgloss.Color("237"), lipgloss.Color("252")))
+	t.Focused.BlurredButton = t.Focused.BlurredButton.Foreground(normalFg).Background(lipgloss.AdaptiveColor{Light: "252", Dark: "237"})
 
 	t.Focused.TextInput.Cursor = t.Focused.TextInput.Cursor.Foreground(green)
-	t.Focused.TextInput.Placeholder = t.Focused.TextInput.Placeholder.Foreground(lightDark(lipgloss.Color("248"), lipgloss.Color("238")))
+	t.Focused.TextInput.Placeholder = t.Focused.TextInput.Placeholder.Foreground(lipgloss.AdaptiveColor{Light: "248", Dark: "238"})
 	t.Focused.TextInput.Prompt = t.Focused.TextInput.Prompt.Foreground(primary)
 
 	t.Blurred = t.Focused
@@ -142,7 +141,7 @@ func wrapIntoHuhForm(f huh.Field) *huh.Form {
 		huh.NewGroup(f),
 	).
 		WithKeyMap(newI18nDefaultKeyMap()).
-		WithTheme(huh.ThemeFunc(themeCharm))
+		WithTheme(themeCharm())
 }
 
 // YesNoPrompt asks the user a yes or no question, using def as the default answer
