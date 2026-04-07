@@ -85,6 +85,9 @@ install-config:
 	[ -f $(DESTDIR)$(sysconfdir)/stplr/stplr.toml ] || install -m 644 $(DEFAULT_CONF) $(DESTDIR)$(sysconfdir)/stplr/stplr.toml
 	install -d -m 755 $(DESTDIR)$(sysconfdir)/stplr/firejailed
 	[ -f $(DESTDIR)$(sysconfdir)/stplr/firejailed/global ] || install -m 644 $(DEFAULT_FIREJAILED_CONF) $(DESTDIR)$(sysconfdir)/stplr/firejailed/global
+	install -d -m 755 $(DESTDIR)$(sysconfdir)/stplr/repos.d
+	install -d -m 755 $(DESTDIR)$(sysconfdir)/stplr/repo-overrides.d
+	install -d -m 755 $(DESTDIR)/usr/lib/stplr/repos.d
 
 install-sysusers:
 	install -Dpm644 $(SYSUSERS_CONF) $(DESTDIR)$(SYSUSERS_DIR)/stplr.conf
