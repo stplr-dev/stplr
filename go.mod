@@ -16,7 +16,7 @@ replace golift.io/xtractr => go.stplr.dev/xtractr v0.2.3-0.20260308180931-51e9c0
 // replace golift.io/xtractr => ../xtractr
 
 // reduce memory usage for building rpm
-replace github.com/goreleaser/nfpm/v2 => go.stplr.dev/nfpm/v2 v2.45.1-0.20260225141612-fc422e86c040
+replace github.com/goreleaser/nfpm/v2 => go.stplr.dev/nfpm/v2 v2.45.1-0.20260407060058-10fe27976b4a
 
 replace github.com/google/rpmpack => go.stplr.dev/rpmpack v0.0.0-20260225123040-9f1edfecb27d
 
@@ -83,7 +83,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/ProtonMail/go-crypto v1.3.0 // indirect
+	github.com/ProtonMail/go-crypto v1.4.1 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
@@ -138,7 +138,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kdomanski/iso9660 v0.4.0 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/klauspost/compress v1.18.4 // indirect
+	github.com/klauspost/compress v1.18.5 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/knadh/koanf/maps v0.1.2 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
