@@ -36,7 +36,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/goccy/go-yaml v1.19.2
 	github.com/gofrs/flock v0.13.0
-	github.com/google/cel-go v0.27.0
+	github.com/google/cel-go v0.28.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/goreleaser/nfpm/v2 v2.45.0
 	github.com/hashicorp/go-hclog v1.6.3
