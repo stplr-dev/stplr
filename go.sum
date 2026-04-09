@@ -435,6 +435,8 @@ go.alt-gnome.ru/capytest/providers/podman v0.0.4 h1:WNiMKKCyh70IPhg/bk9iJP/fvat6
 go.alt-gnome.ru/capytest/providers/podman v0.0.4/go.mod h1:4dipJNdGLD63It+P99KNhKvG+SIxzu/rpvWzY+LCuFg=
 go.alt-gnome.ru/x/appstream v0.0.0-20260329065238-1d6c9e8eef00 h1:nqvHu8PalttT7j8eOS1gFj7cjcQ3KTKQfL8w94TaQdw=
 go.alt-gnome.ru/x/appstream v0.0.0-20260329065238-1d6c9e8eef00/go.mod h1:b57CzsAYRB3wz/Mi3WwU2qbZBfN+/ehrBOpZBMlmyl0=
+go.alt-gnome.ru/x/appstream v0.0.0-20260408063201-89e604290b52 h1:XkFAi/UJFAfxM+8iPqDnU421xZOGPNzexNxvatfUyBM=
+go.alt-gnome.ru/x/appstream v0.0.0-20260408063201-89e604290b52/go.mod h1:b57CzsAYRB3wz/Mi3WwU2qbZBfN+/ehrBOpZBMlmyl0=
 go.digitalxero.dev/go-msix v0.3.0 h1:fp7nTkzJK/5fwcbTszsgCnfGwBnUt0b1PGX5nYgJkfs=
 go.digitalxero.dev/go-msix v0.3.0/go.mod h1:QbUpFs0AUd1zk7e9fy17suiqEAF90TR3jZY+LCI2K+c=
 go.elara.ws/vercmp v0.0.0-20250912200949-2e97859b8794 h1:IylaqCGvFp7pgC8tRHpd8yog8MwYR+wFOmRHccSAj34=
