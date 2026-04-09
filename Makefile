@@ -172,7 +172,7 @@ BEARER_DIFF_BASE_BRANCH ?=
 bearer:
 	bearer scan \
 		--skip-path e2e-tests,mocks,vendor,generators \
-		$(if $(BEARER_DIFF_BASE_BRANCH),--diff-base-branch $(BEARER_DIFF_BASE_BRANCH),) \
+		$(if $(BEARER_DIFF_BASE_BRANCH),--diff --diff-base-branch $(BEARER_DIFF_BASE_BRANCH),) \
 		$(BEARER_CI_ARGS) \
 		.
 
