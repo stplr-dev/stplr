@@ -64,9 +64,9 @@ require (
 	go.alt-gnome.ru/x/appstream v0.0.0-20260408063201-89e604290b52
 	go.elara.ws/vercmp v0.0.0-20250912200949-2e97859b8794
 	go.uber.org/mock v0.6.0
-	golang.org/x/crypto v0.49.0
+	golang.org/x/crypto v0.50.0
 	golang.org/x/sys v0.43.0
-	golang.org/x/text v0.35.0
+	golang.org/x/text v0.36.0
 	golift.io/xtractr v0.2.3-0.20260111181756-d6376a2e84ce
 	google.golang.org/genproto/googleapis/api v0.0.0-20260114163908-3f89685c29c3
 	modernc.org/sqlite v1.48.2
@@ -195,8 +195,8 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	go4.org v0.0.0-20260112195520-a5071408f32f // indirect
 	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90 // indirect
-	golang.org/x/net v0.51.0 // indirect
-	golang.org/x/term v0.41.0 // indirect
+	golang.org/x/net v0.52.0 // indirect
+	golang.org/x/term v0.42.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251222181119-0a764e51fe1b // indirect
 	google.golang.org/grpc v1.79.3 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
