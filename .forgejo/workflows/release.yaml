@@ -51,7 +51,7 @@ jobs:
           go-version-file: 'go.mod'
 
       - name: Generate a changelog
-        uses: https://github.com/orhun/git-cliff-action@98c93442bb05a455a77bee982867857ae748eeea # v4.5.1
+        uses: https://github.com/orhun/git-cliff-action@f50e11560dce63f7c33227798f90b924471a88b5 # v4.8.0
         id: git-cliff
         with:
           config: cliff.toml
