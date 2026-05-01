@@ -22,7 +22,7 @@ replace github.com/google/rpmpack => go.stplr.dev/rpmpack v0.0.0-20260225123040-
 
 require (
 	github.com/PuerkitoBio/purell v1.2.1
-	github.com/alecthomas/chroma/v2 v2.24.0
+	github.com/alecthomas/chroma/v2 v2.24.1
 	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/charmbracelet/bubbles v1.0.0
 	github.com/charmbracelet/bubbletea v1.3.10
