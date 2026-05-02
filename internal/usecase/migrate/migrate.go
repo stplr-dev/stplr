@@ -34,16 +34,21 @@ type resetter interface {
 	Reset(ctx context.Context) error
 }
 
+type databaseResetter interface {
+	resetter
+	IsDatabaseExist() bool
+}
+
 type ReposGetter func() (*repos.Repos, deps.Cleanup, error)
 
 type useCase struct {
 	cfg           *config.ALRConfig
-	dbResetter    resetter
+	dbResetter    databaseResetter
 	cacheResetter resetter
 	reposGetter   ReposGetter
 }
 
-func New(cfg *config.ALRConfig, dbResetter, cacheResetter resetter, reposGetter ReposGetter) *useCase {
+func New(cfg *config.ALRConfig, dbResetter databaseResetter, cacheResetter resetter, reposGetter ReposGetter) *useCase {
 	return &useCase{cfg, dbResetter, cacheResetter, reposGetter}
 }
 
@@ -52,22 +57,24 @@ func (u *useCase) Run(ctx context.Context) error {
 		slog.Warn("failed to migrate inline repos", "err", err)
 	}
 
-	if err := u.dbResetter.Reset(ctx); err != nil {
-		return errors.WrapIntoI18nError(err, gotext.Get("Error resetting database"))
-	}
-
 	if err := u.cacheResetter.Reset(ctx); err != nil {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error resetting cache"))
 	}
 
-	r, cleanup, err := u.reposGetter()
-	if err != nil {
-		return err
-	}
-	defer cleanup()
+	if u.dbResetter.IsDatabaseExist() {
+		if err := u.dbResetter.Reset(ctx); err != nil {
+			return errors.WrapIntoI18nError(err, gotext.Get("Error resetting database"))
+		}
 
-	if err := r.RereadAll(ctx, repos.WithDeleteFailed()); err != nil {
-		return errors.WrapIntoI18nError(err, gotext.Get("Failed to reread all"))
+		r, cleanup, err := u.reposGetter()
+		if err != nil {
+			return err
+		}
+		defer cleanup()
+
+		if err := r.RereadAll(ctx, repos.WithDeleteFailed()); err != nil {
+			return errors.WrapIntoI18nError(err, gotext.Get("Failed to reread all"))
+		}
 	}
 
 	return nil

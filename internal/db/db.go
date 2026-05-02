@@ -27,6 +27,7 @@ package db
 import (
 	"context"
 	"errors"
+	"os"
 
 	_ "modernc.org/sqlite"
 	"xorm.io/xorm"
@@ -57,9 +58,12 @@ func New(config Config) *Database {
 	}
 }
 
+func (d *Database) dbPath() string {
+	return d.config.GetPaths().DBPath
+}
+
 func (d *Database) Connect() error {
-	dsn := d.config.GetPaths().DBPath
-	engine, err := xorm.NewEngine("sqlite", dsn)
+	engine, err := xorm.NewEngine("sqlite", d.dbPath())
 	// engine.SetLogLevel(log.LOG_DEBUG)
 	// engine.ShowSQL(true)
 	if err != nil {
@@ -151,6 +155,13 @@ func (d *Database) DeletePkgs(_ context.Context, where string, args ...any) erro
 func (d *Database) IsEmpty() bool {
 	count, err := d.engine.Count(new(staplerfile.Package))
 	return err != nil || count == 0
+}
+
+func (d *Database) IsExist() bool {
+	if _, err := os.Stat(d.dbPath()); err != nil {
+		return false
+	}
+	return true
 }
 
 func (d *Database) Close() error {

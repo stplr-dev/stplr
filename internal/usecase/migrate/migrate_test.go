@@ -42,6 +42,11 @@ type noopResetter struct{}
 
 func (n *noopResetter) Reset(_ context.Context) error { return nil }
 
+type noopDatabaseResetter struct{}
+
+func (n *noopDatabaseResetter) Reset(_ context.Context) error { return nil }
+func (n *noopDatabaseResetter) IsDatabaseExist() bool         { return true }
+
 type fileWriter struct{ path string }
 
 func (w *fileWriter) Write(b []byte) (int, error) {
@@ -72,7 +77,7 @@ func newMigrateTestConfig(t *testing.T) (*config.ALRConfig, string, string) {
 
 func runMigrate(t *testing.T, cfg *config.ALRConfig) {
 	t.Helper()
-	u := migrate.New(cfg, &noopResetter{}, &noopResetter{}, stopGetter)
+	u := migrate.New(cfg, &noopDatabaseResetter{}, &noopResetter{}, stopGetter)
 	err := u.Run(context.Background())
 	// errStopAfterMigration is expected; any other error is a test failure.
 	if err != nil && !errors.Is(err, errStopAfterMigration) {

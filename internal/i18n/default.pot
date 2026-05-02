@@ -778,15 +778,15 @@ msgstr ""
 msgid "Error listing installed packages"
 msgstr ""
 
-#: internal/usecase/migrate/migrate.go:56
-msgid "Error resetting database"
-msgstr ""
-
-#: internal/usecase/migrate/migrate.go:60
+#: internal/usecase/migrate/migrate.go:61
 msgid "Error resetting cache"
 msgstr ""
 
-#: internal/usecase/migrate/migrate.go:70
+#: internal/usecase/migrate/migrate.go:66
+msgid "Error resetting database"
+msgstr ""
+
+#: internal/usecase/migrate/migrate.go:76
 msgid "Failed to reread all"
 msgstr ""
 

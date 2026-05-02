@@ -36,6 +36,10 @@ func NewResetter(cfg Config) *Resetter {
 func (r *Resetter) Reset(ctx context.Context) error {
 	db := New(r.cfg)
 
+	if !db.IsExist() {
+		return nil
+	}
+
 	if err := db.Connect(); err != nil {
 		return fmt.Errorf("failed to connect to db: %w", err)
 	}
@@ -53,4 +57,9 @@ func (r *Resetter) Reset(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (r *Resetter) IsDatabaseExist() bool {
+	db := New(r.cfg)
+	return db.IsExist()
 }
