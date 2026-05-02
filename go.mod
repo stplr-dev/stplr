@@ -7,7 +7,7 @@ toolchain go1.26.2
 // - support of context via github.com/keegancsmith/rpc
 //   see https://github.com/hashicorp/go-plugin/issues/284
 // - support InitFunc
-replace github.com/hashicorp/go-plugin => go.stplr.dev/go-plugin v1.7.1-0.20260313141055-bee5d1ec9627
+replace github.com/hashicorp/go-plugin => go.stplr.dev/go-plugin v1.7.1-0.20260502053526-675d2c821742
 
 // different fixes for ./internal/experimental/xtract
 // looks like better write own library in the future
