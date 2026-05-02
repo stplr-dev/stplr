@@ -195,6 +195,32 @@ func (b *builder) DB() *builder {
 	return b
 }
 
+func (b *builder) OptionalDB() *builder {
+	if b.err != nil {
+		return b
+	}
+
+	cfg := b.deps.Cfg
+	if cfg == nil {
+		b.err = stdErrors.New("config is required before initializing DB")
+		return b
+	}
+
+	db := db.New(cfg)
+	if err := db.InitIfExists(b.ctx); err != nil {
+		b.err = errors.WrapIntoI18nError(err, gotext.Get("Error initialization database"))
+		return b
+	}
+
+	b.deps.DB = db
+
+	b.deps.cleanups = append(b.deps.cleanups, func() {
+		_ = db.Close()
+	})
+
+	return b
+}
+
 func (b *builder) Scripter() *builder {
 	if b.err != nil {
 		return b

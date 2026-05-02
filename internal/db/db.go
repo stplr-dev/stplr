@@ -92,6 +92,13 @@ func (d *Database) Init(ctx context.Context) error {
 	return nil
 }
 
+func (d *Database) InitIfExists(ctx context.Context) error {
+	if !d.IsExist() {
+		return nil
+	}
+	return d.Init(ctx)
+}
+
 func (d *Database) GetVersion(ctx context.Context) (int, bool) {
 	var v Version
 	has, err := d.engine.Get(&v)
@@ -115,6 +122,9 @@ func (d *Database) reset() error {
 }
 
 func (d *Database) InsertPackage(ctx context.Context, pkg staplerfile.Package) error {
+	if d.engine == nil {
+		return nil
+	}
 	session := d.engine.Context(ctx)
 
 	affected, err := session.Where("name = ? AND repository = ?", pkg.Name, pkg.Repository).Update(&pkg)
@@ -133,12 +143,18 @@ func (d *Database) InsertPackage(ctx context.Context, pkg staplerfile.Package) e
 }
 
 func (d *Database) GetPkgs(_ context.Context, where string, args ...any) ([]staplerfile.Package, error) {
+	if d.engine == nil {
+		return nil, nil
+	}
 	var pkgs []staplerfile.Package
 	err := d.engine.Where(where, args...).Find(&pkgs)
 	return pkgs, err
 }
 
 func (d *Database) GetPkg(where string, args ...any) (*staplerfile.Package, error) {
+	if d.engine == nil {
+		return nil, nil
+	}
 	var pkg staplerfile.Package
 	has, err := d.engine.Where(where, args...).Get(&pkg)
 	if err != nil || !has {
@@ -148,11 +164,17 @@ func (d *Database) GetPkg(where string, args ...any) (*staplerfile.Package, erro
 }
 
 func (d *Database) DeletePkgs(_ context.Context, where string, args ...any) error {
+	if d.engine == nil {
+		return nil
+	}
 	_, err := d.engine.Where(where, args...).Delete(&staplerfile.Package{})
 	return err
 }
 
 func (d *Database) IsEmpty() bool {
+	if d.engine == nil {
+		return true
+	}
 	count, err := d.engine.Count(new(staplerfile.Package))
 	return err != nil || count == 0
 }
@@ -165,5 +187,8 @@ func (d *Database) IsExist() bool {
 }
 
 func (d *Database) Close() error {
+	if d.engine == nil {
+		return nil
+	}
 	return d.engine.Close()
 }

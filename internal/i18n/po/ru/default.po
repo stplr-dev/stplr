@@ -363,6 +363,7 @@ msgid "Unable to detect a supported package manager on the system"
 msgstr "Не удалось обнаружить поддерживаемый менеджер пакетов в системе"
 
 #: internal/app/deps/internal/builder/builder.go:185
+#: internal/app/deps/internal/builder/builder.go:211
 msgid "Error initialization database"
 msgstr "Ошибка инициализации базы данных"
 

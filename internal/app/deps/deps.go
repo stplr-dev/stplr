@@ -192,7 +192,7 @@ func ForListAction(ctx context.Context) (*ListActionDeps, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
 		Config().
-		DB().
+		OptionalDB().
 		Info().
 		Manager().
 		Searcher().
@@ -278,7 +278,7 @@ func ForInfoAction(ctx context.Context) (*InfoActionDeps, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
 		Config().
-		DB().
+		OptionalDB().
 		Info().
 		Repos().
 		End()
@@ -300,7 +300,7 @@ func ForInfoShellComp(ctx context.Context) (*InfoShellCompDeps, Cleanup, error) 
 	b, err := builder.
 		Start(ctx).
 		Config().
-		DB().
+		OptionalDB().
 		End()
 	if err != nil {
 		return nil, nil, err
@@ -356,7 +356,7 @@ func ForSearchAction(ctx context.Context) (*SearchDeps, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
 		Config().
-		DB().
+		OptionalDB().
 		Searcher().
 		Info().
 		End()
