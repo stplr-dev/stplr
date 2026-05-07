@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"math"
 	"os"
 	"os/exec"
 	"os/user"
@@ -518,37 +519,109 @@ func execEnv(env expand.Environ) []string {
 	return list
 }
 
+func readSubIDMappings(username, uid, path string) ([]specs.LinuxIDMapping, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, fmt.Errorf("file %s does not exist; ensure subid mappings are configured", path)
+		}
+		return nil, fmt.Errorf("reading %s: %w", path, err)
+	}
+
+	var mappings []specs.LinuxIDMapping
+	containerID := uint32(1)
+
+	for lineNum, line := range strings.Split(string(data), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		parts := strings.SplitN(line, ":", 3)
+		if len(parts) != 3 {
+			slog.Debug("subid: skipping malformed line", "file", path, "line", lineNum+1)
+			continue
+		}
+
+		if parts[0] != username && parts[0] != uid {
+			continue
+		}
+
+		start, err := strconv.ParseUint(strings.TrimSpace(parts[1]), 10, 32)
+		if err != nil {
+			slog.Debug("subid: skipping invalid start id", "file", path, "line", lineNum+1, "value", parts[1])
+			continue
+		}
+
+		size, err := strconv.ParseUint(strings.TrimSpace(parts[2]), 10, 32)
+		if err != nil {
+			slog.Debug("subid: skipping invalid size", "file", path, "line", lineNum+1, "value", parts[2])
+			continue
+		}
+
+		if size == 0 {
+			slog.Debug("subid: skipping zero-size mapping", "file", path, "line", lineNum+1)
+			continue
+		}
+
+		if start+size > math.MaxUint32 {
+			slog.Debug("subid: skipping overflow mapping", "file", path, "line", lineNum+1)
+			continue
+		}
+
+		mappings = append(mappings, specs.LinuxIDMapping{
+			ContainerID: containerID,
+			HostID:      uint32(start),
+			Size:        uint32(size),
+		})
+
+		if containerID > math.MaxUint32-uint32(size) {
+			slog.Debug("subid: containerID would overflow, stopping", "file", path, "line", lineNum+1)
+			break
+		}
+		containerID += uint32(size)
+	}
+
+	if len(mappings) == 0 {
+		return nil, fmt.Errorf("no subid mappings found for user %q in %s; run: usermod --add-subuids 100000-165535 --add-subgids 100000-165535 %s", username, path, username)
+	}
+
+	return mappings, nil
+}
+
 func generateMappings() ([]specs.LinuxIDMapping, []specs.LinuxIDMapping, error) {
 	u, err := user.Current()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("getting current user: %w", err)
 	}
 
 	uid, err := strconv.ParseUint(u.Uid, 10, 32)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("parsing uid %q: %w", u.Uid, err)
 	}
 
 	gid, err := strconv.ParseUint(u.Gid, 10, 32)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("parsing gid %q: %w", u.Gid, err)
 	}
 
-	uidMappings := []specs.LinuxIDMapping{
-		{
-			ContainerID: 0,
-			HostID:      uint32(uid),
-			Size:        1,
-		},
+	subUIDs, err := readSubIDMappings(u.Username, u.Uid, "/etc/subuid")
+	if err != nil {
+		return nil, nil, fmt.Errorf("subuid mappings: %w", err)
 	}
 
-	gidMappings := []specs.LinuxIDMapping{
-		{
-			ContainerID: 0,
-			HostID:      uint32(gid),
-			Size:        1,
-		},
+	subGIDs, err := readSubIDMappings(u.Username, u.Gid, "/etc/subgid")
+	if err != nil {
+		return nil, nil, fmt.Errorf("subgid mappings: %w", err)
 	}
+
+	uidMappings := append([]specs.LinuxIDMapping{
+		{ContainerID: 0, HostID: uint32(uid), Size: 1},
+	}, subUIDs...)
+
+	gidMappings := append([]specs.LinuxIDMapping{
+		{ContainerID: 0, HostID: uint32(gid), Size: 1},
+	}, subGIDs...)
 
 	return uidMappings, gidMappings, nil
 }
