@@ -109,6 +109,18 @@ func RestrictSandbox(allowedList ...string) filter.Predicate {
 	}
 }
 
+func applyPathRedirects(path string, redirects map[string]string) string {
+	for from, to := range redirects {
+		if hasPathPrefix(path, from) {
+			rel, err := filepath.Rel(from, path)
+			if err == nil {
+				return filepath.Join(to, rel)
+			}
+		}
+	}
+	return path
+}
+
 func fsFromOpts(opts options) afero.Fs {
 	baseFs := afero.NewOsFs()
 	if opts.Filter != nil {
@@ -125,6 +137,7 @@ func RestrictedReadDir(opt ...Option) interp.ReadDirHandlerFunc2 {
 	}
 	f := fsFromOpts(opts)
 	return func(ctx context.Context, path string) ([]fs.DirEntry, error) {
+		path = applyPathRedirects(path, opts.PathRedirects)
 		infos, err := afero.ReadDir(f, path)
 		if err != nil {
 			return nil, err
@@ -144,6 +157,7 @@ func RestrictedStat(opt ...Option) interp.StatHandlerFunc {
 	}
 	f := fsFromOpts(opts)
 	return func(ctx context.Context, path string, followSymlinks bool) (fs.FileInfo, error) {
+		path = applyPathRedirects(path, opts.PathRedirects)
 		if !followSymlinks {
 			if lst, ok := f.(afero.Lstater); ok {
 				info, _, err := lst.LstatIfPossible(path)
@@ -165,6 +179,7 @@ func RestrictedOpen(opt ...Option) interp.OpenHandlerFunc {
 		if path != "" && !filepath.IsAbs(path) {
 			path = filepath.Join(mc.Dir, path)
 		}
+		path = applyPathRedirects(path, opts.PathRedirects)
 		return f.OpenFile(path, flag, perm)
 	}
 }

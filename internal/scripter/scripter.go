@@ -168,10 +168,12 @@ func (e *LocalScriptExecutor) createRunner(
 		return pkg.DisableNetwork.Resolved()
 	})
 
-	fakeroot, cleanup, err := handlers.SandboxHandler(2*time.Second, dirs, disableNet)
+	sandboxInstance, err := handlers.SandboxHandler(2*time.Second, dirs, disableNet)
 	if err != nil {
 		return nil, nil, fmt.Errorf("creating sandbox handler: %w", err)
 	}
+
+	options = append(options, handlers.WithPathRedirect("/tmp", filepath.Join(sandboxInstance.Rootfs(), "tmp")))
 
 	runner, err := interp.New(
 		interp.Env(expand.ListEnviron(env...)),
@@ -180,15 +182,15 @@ func (e *LocalScriptExecutor) createRunner(
 		interp.OpenHandler(handlers.RestrictedOpen(options...)),
 		interp.StatHandler(handlers.RestrictedStat(options...)),
 		interp.ExecHandlers(func(next interp.ExecHandlerFunc) interp.ExecHandlerFunc {
-			return helpers.Helpers.ExecHandler(fakeroot)
+			return helpers.Helpers.ExecHandler(sandboxInstance.Exec)
 		}),
 	)
 	if err != nil {
-		cleanup()
+		sandboxInstance.Cleanup()
 		return nil, nil, fmt.Errorf("creating interpreter: %w", err)
 	}
 
-	return runner, cleanup, nil
+	return runner, sandboxInstance.Cleanup, nil
 }
 
 func (e *LocalScriptExecutor) buildPackages(

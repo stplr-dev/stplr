@@ -25,6 +25,7 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
@@ -44,10 +45,28 @@ import (
 	"github.com/opencontainers/cgroups/devices/config"
 )
 
-func SandboxHandler(killTimeout time.Duration, dirs types.Directories, disableNetwork bool) (interp.ExecHandlerFunc, func(), error) {
+type SandboxHandlerInstance struct {
+	handler   interp.ExecHandlerFunc
+	container *libcontainer.Container
+	cleanup   func()
+}
+
+func (i *SandboxHandlerInstance) Exec(ctx context.Context, args []string) error {
+	return i.handler(ctx, args)
+}
+
+func (i *SandboxHandlerInstance) Cleanup() {
+	i.cleanup()
+}
+
+func (i *SandboxHandlerInstance) Rootfs() string {
+	return i.container.Config().Rootfs
+}
+
+func SandboxHandler(killTimeout time.Duration, dirs types.Directories, disableNetwork bool) (*SandboxHandlerInstance, error) {
 	container, cleanup, err := createContainer(dirs, disableNetwork, true)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	err = startInitProcess(container)
@@ -58,21 +77,26 @@ func SandboxHandler(killTimeout time.Duration, dirs types.Directories, disableNe
 
 		container, cleanup, err = createContainer(dirs, disableNetwork, false)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 
 		err = startInitProcess(container)
 		if err != nil {
 			cleanup()
-			return nil, nil, err
+			return nil, err
 		}
 	} else if err != nil {
 		cleanup()
-		return nil, nil, err
+		return nil, err
 	}
 
 	handler := createHandler(container, killTimeout)
-	return handler, cleanup, nil
+
+	return &SandboxHandlerInstance{
+		handler,
+		container,
+		cleanup,
+	}, nil
 }
 
 func createContainer(dirs types.Directories, disableNetwork, isolatedProc bool) (*libcontainer.Container, func(), error) {
@@ -119,6 +143,11 @@ func createTempDirs() (string, string, error) {
 		return "", "", err
 	}
 
+	tmpDir := filepath.Join(rootfsDir, "tmp")
+	if err := os.Mkdir(tmpDir, 0o1777); err != nil {
+		return "", "", err
+	}
+
 	containerDir, err := os.MkdirTemp("", "stplr-container-state-*")
 	if err != nil {
 		os.RemoveAll(rootfsDir)
@@ -139,13 +168,21 @@ func buildContainerSpec(rootfsDir string, dirs types.Directories, disableNetwork
 		return nil, err
 	}
 
+	mounts := buildMounts(homeDir, dirs, isolatedProc)
+	mounts = append(mounts, specs.Mount{
+		Destination: "/tmp",
+		Type:        "bind",
+		Source:      filepath.Join(rootfsDir, "tmp"),
+		Options:     []string{"rbind", "rw"},
+	})
+
 	spec := &specs.Spec{
 		Version: specs.Version,
 		Root: &specs.Root{
 			Path:     rootfsDir,
 			Readonly: false,
 		},
-		Mounts: buildMounts(homeDir, dirs, isolatedProc),
+		Mounts: mounts,
 		Linux: &specs.Linux{
 			UIDMappings: uidMappings,
 			GIDMappings: gidMappings,

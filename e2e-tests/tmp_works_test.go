@@ -26,20 +26,11 @@ import (
 	"go.alt-gnome.ru/capytest"
 )
 
-func TestDoNotCacheLocalSources(t *testing.T) {
+func TestTmpWorks(t *testing.T) {
 	t.Parallel()
 
-	t.Run("do not cache local sources", matrixSuite(RPM_SYSTEMS, func(t *testing.T, r capytest.Runner) {
+	t.Run("stplr write to tmp works", matrixSuite(COMMON_SYSTEMS, func(t *testing.T, r capytest.Runner) {
 		defaultPrepare(t, r)
-
-		r.Command("stplr", "build", "-c", "-p", "test-build").
-			ExpectStderrContains("Downloading source [0] from local:///FILE using file downloader").
-			ExpectStderrContains("Downloading source [3] from https://altlinux.space/stapler/stplr/raw/branch/main/README.md using file downloader").
-			Run(t)
-
-		r.Command("stplr", "build", "-c", "-p", "test-build").
-			ExpectStderrContains("Downloading source [0] from local:///FILE using file downloader").
-			ExpectStderrNotContains("Downloading source [3] from https://altlinux.space/stapler/stplr/raw/branch/main/README.md using file downloader").
-			Run(t)
+		execShouldNoError(t, r, "stplr", "build", "-p", "test-tmp-works", "-c")
 	}))
 }
