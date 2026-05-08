@@ -103,41 +103,72 @@ func RootPluginMap(
 var HandshakeConfig = plugin.HandshakeConfig{
 	ProtocolVersion:  1,
 	MagicCookieKey:   "STPLR_PLUGIN",
-	MagicCookieValue: "-",
+	MagicCookieValue: "stplr-plugin-handshake-v1-adef82d6e4622d8cdba1098291845fe9", // echo "stplr-plugin-handshake-v1-$(openssl rand -hex 16)"
 }
 
-func prepareSocketDirPath() error {
-	err := os.MkdirAll(constants.SocketDirPath, 0o777)
-	if err != nil {
+// ensureSocketBaseDir creates the shared base directory.
+//
+// The base must remain world-writable + sticky because different UIDs (regular
+// user, builder, root) may each host their own per-invocation subdirs in here.
+func ensureSocketBaseDir() error {
+	if err := os.MkdirAll(constants.SocketDirPath, 0o777); err != nil {
 		return err
 	}
-
 	info, err := os.Stat(constants.SocketDirPath)
 	if err != nil {
 		return err
 	}
-
 	requiredMode := os.FileMode(0o777 | os.ModeSticky)
-
 	if info.Mode().Perm() != requiredMode.Perm() || info.Mode()&os.ModeSticky == 0 {
 		if err := os.Chmod(constants.SocketDirPath, requiredMode); err != nil {
 			return err
 		}
 	}
-
 	return nil
+}
+
+// prepareSocketDir creates a per-invocation subdirectory under the shared base.
+func prepareSocketDir(privileged bool) (string, error) {
+	if err := ensureSocketBaseDir(); err != nil {
+		return "", err
+	}
+	dir, err := os.MkdirTemp(constants.SocketDirPath, "sock-")
+	if err != nil {
+		return "", err
+	}
+	if privileged {
+		_, gid, err := utils.GetUidGidStaplerUser()
+		if err != nil {
+			_ = os.RemoveAll(dir)
+			return "", fmt.Errorf("lookup %s group: %w", constants.BuilderGroup, err)
+		}
+		if err := os.Chown(dir, -1, gid); err != nil {
+			_ = os.RemoveAll(dir)
+			return "", err
+		}
+		if err := os.Chmod(dir, 0o770); err != nil {
+			_ = os.RemoveAll(dir)
+			return "", err
+		}
+	}
+	return dir, nil
 }
 
 type Provider struct {
 	output output.Output
 
-	c      *plugin.Client
-	client plugin.ClientProtocol
+	c         *plugin.Client
+	client    plugin.ClientProtocol
+	socketDir string
 }
 
 func (p *Provider) Cleanup() error {
 	if p.c != nil {
 		p.c.Kill()
+	}
+	if p.socketDir != "" {
+		_ = os.RemoveAll(p.socketDir)
+		p.socketDir = ""
 	}
 	return nil
 }
@@ -150,29 +181,35 @@ func (p *Provider) setupConnection(subcommand string) error {
 		return err
 	}
 
-	if err := prepareSocketDirPath(); err != nil {
+	isBuildUser, err := utils.IsBuilderUser()
+	if err != nil {
+		return err
+	}
+	privileged := utils.IsRoot() || isBuildUser
+
+	socketDir, err := prepareSocketDir(privileged)
+	if err != nil {
 		return fmt.Errorf("failed to prepare socket dir: %w", err)
 	}
+	p.socketDir = socketDir
 
 	unixSocketConfig := &plugin.UnixSocketConfig{}
 
 	args := []string{subcommand}
 	cmd := exec.Command(executable, args...)
 
-	isBuildUser, err := utils.IsBuilderUser()
-	if err != nil {
-		return err
-	}
-
-	if utils.IsRoot() || isBuildUser {
+	if privileged {
+		// Socket file itself is created by the child; group must be set so
+		// the parent (which may have demoted from root to builder by now) can
+		// connect to a socket created by a root-uid child.
 		unixSocketConfig.Group = constants.BuilderGroup
 		setCommonCmdEnv(cmd)
 	} else {
 		passCommonEnv(cmd)
 	}
 
-	// HACK
-	cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", plugin.EnvUnixSocketDir, constants.SocketDirPath))
+	// HACK: tell go-plugin where to put the unix socket.
+	cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", plugin.EnvUnixSocketDir, socketDir))
 
 	p.c = plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig:  HandshakeConfig,
