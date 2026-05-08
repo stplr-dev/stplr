@@ -32,6 +32,7 @@ import (
 	"syscall"
 
 	"github.com/leonelquinteros/gotext"
+	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app"
 	"go.stplr.dev/stplr/internal/app/output"
@@ -85,6 +86,10 @@ func run() int {
 
 	if err = p.Run(ctx, os.Args); err != nil {
 		out.Error("%s: %v", gotext.Get("Error while running app"), err)
+		if exitErr, ok := err.(cli.ExitCoder); ok {
+			return exitErr.ExitCode()
+		}
+		return 1
 	}
 
 	return 0
