@@ -32,7 +32,7 @@ require (
 	github.com/coreos/go-systemd/v22 v22.7.0
 	github.com/dave/jennifer v1.7.1
 	github.com/go-git/go-billy/v5 v5.9.0
-	github.com/go-git/go-git/v5 v5.18.0
+	github.com/go-git/go-git/v5 v5.19.0
 	github.com/gobwas/glob v0.2.3
 	github.com/goccy/go-yaml v1.19.2
 	github.com/gofrs/flock v0.13.0
@@ -139,6 +139,7 @@ require (
 	github.com/kdomanski/iso9660 v0.4.0 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/klauspost/compress v1.18.5 // indirect
+	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
 	github.com/knadh/koanf/maps v0.1.2 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
@@ -165,7 +166,7 @@ require (
 	github.com/opencontainers/selinux v1.13.0 // indirect
 	github.com/peterebden/ar v0.0.0-20241106141004-20dc11b778e8 // indirect
 	github.com/pierrec/lz4/v4 v4.1.25 // indirect
-	github.com/pjbgf/sha1cd v0.3.2 // indirect
+	github.com/pjbgf/sha1cd v0.6.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
