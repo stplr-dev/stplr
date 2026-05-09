@@ -31,7 +31,7 @@ require (
 	github.com/charmbracelet/x/term v0.2.2
 	github.com/coreos/go-systemd/v22 v22.7.0
 	github.com/dave/jennifer v1.7.1
-	github.com/go-git/go-billy/v5 v5.8.0
+	github.com/go-git/go-billy/v5 v5.9.0
 	github.com/go-git/go-git/v5 v5.18.0
 	github.com/gobwas/glob v0.2.3
 	github.com/goccy/go-yaml v1.19.2
@@ -194,8 +194,8 @@ require (
 	gitlab.com/digitalxero/go-conventional-commit v1.0.7 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	go4.org v0.0.0-20260112195520-a5071408f32f // indirect
-	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90 // indirect
-	golang.org/x/net v0.52.0 // indirect
+	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
+	golang.org/x/net v0.53.0 // indirect
 	golang.org/x/term v0.42.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251222181119-0a764e51fe1b // indirect
 	google.golang.org/grpc v1.79.3 // indirect
