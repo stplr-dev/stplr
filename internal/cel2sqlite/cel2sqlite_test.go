@@ -591,3 +591,62 @@ func TestOverridable(t *testing.T) {
 		})
 	}
 }
+
+func TestConverterNullComparisons(t *testing.T) {
+	conv, err := cel2sqlite.NewConverter(map[string]cel2sqlite.ColumnInfo{
+		"appstream": {SQLName: "appstream", Type: cel2sqlite.ColumnTypeJSON},
+		"summary":   {SQLName: "summary", Type: cel2sqlite.ColumnTypeOverridableField},
+		"name":      {SQLName: "name", Type: cel2sqlite.ColumnTypeString},
+	}, []string{"amd64"})
+	require.NoError(t, err, "Failed to create converter")
+
+	tests := []struct {
+		name     string
+		celExpr  string
+		expected string
+	}{
+		{
+			name:     "json field is null",
+			celExpr:  "appstream == null",
+			expected: "(appstream IS NULL)",
+		},
+		{
+			name:     "json field is not null",
+			celExpr:  "appstream != null",
+			expected: "(appstream IS NOT NULL)",
+		},
+		{
+			name:     "overridable field is null",
+			celExpr:  "summary == null",
+			expected: "(overridable_resolve(summary, 'amd64') IS NULL)",
+		},
+		{
+			name:     "overridable field is not null",
+			celExpr:  "summary != null",
+			expected: "(overridable_resolve(summary, 'amd64') IS NOT NULL)",
+		},
+		{
+			name:     "null on left side",
+			celExpr:  "null == appstream",
+			expected: "(appstream IS NULL)",
+		},
+		{
+			name:     "null on left side not equal",
+			celExpr:  "null != appstream",
+			expected: "(appstream IS NOT NULL)",
+		},
+		{
+			name:     "null check combined with AND",
+			celExpr:  "appstream != null && name == 'vim'",
+			expected: "((appstream IS NOT NULL) AND (name = 'vim'))",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := conv.Convert(tt.celExpr)
+			require.NoError(t, err, "Convert should not fail")
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}

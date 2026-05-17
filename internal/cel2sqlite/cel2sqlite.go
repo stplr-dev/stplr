@@ -222,14 +222,22 @@ func (c *Converter) callToSQL(call *expr.Expr_Call) (string, error) {
 		return fmt.Sprintf("(NOT %s)", sqlArgs[0]), nil
 
 	case operators.Equals:
-		if len(sqlArgs) != 2 {
-			return "", fmt.Errorf("equals requires 2 arguments")
+		if sqlArgs[1] == "NULL" || sqlArgs[0] == "NULL" {
+			col := sqlArgs[0]
+			if sqlArgs[0] == "NULL" {
+				col = sqlArgs[1]
+			}
+			return fmt.Sprintf("(%s IS NULL)", col), nil
 		}
 		return fmt.Sprintf("(%s = %s)", sqlArgs[0], sqlArgs[1]), nil
 
 	case operators.NotEquals:
-		if len(sqlArgs) != 2 {
-			return "", fmt.Errorf("not equals requires 2 arguments")
+		if sqlArgs[0] == "NULL" || sqlArgs[1] == "NULL" {
+			col := sqlArgs[0]
+			if col == "NULL" {
+				col = sqlArgs[1]
+			}
+			return fmt.Sprintf("(%s IS NOT NULL)", col), nil
 		}
 		return fmt.Sprintf("(%s != %s)", sqlArgs[0], sqlArgs[1]), nil
 
