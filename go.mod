@@ -21,7 +21,7 @@ replace github.com/goreleaser/nfpm/v2 => go.stplr.dev/nfpm/v2 v2.45.1-0.20260407
 replace github.com/google/rpmpack => go.stplr.dev/rpmpack v0.0.0-20260225123040-9f1edfecb27d
 
 require (
-	github.com/PuerkitoBio/purell v1.2.1
+	github.com/PuerkitoBio/purell v1.2.2
 	github.com/alecthomas/chroma/v2 v2.24.1
 	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/charmbracelet/bubbles v1.0.0
