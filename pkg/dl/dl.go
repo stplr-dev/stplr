@@ -165,11 +165,16 @@ type CachePolicyProvider interface {
 	CachePolicy(url string) CachePolicy
 }
 
+type DownloadResult struct {
+	Type Type
+	Name string
+}
+
 // Download handles downloading a file or directory with the given options.
-func Download(ctx context.Context, opts Options) (err error) {
+func Download(ctx context.Context, opts Options) (res DownloadResult, err error) {
 	normalized, err := normalizeURL(opts.URL)
 	if err != nil {
-		return err
+		return res, err
 	}
 	opts.URL = normalized
 
@@ -177,7 +182,7 @@ func Download(ctx context.Context, opts Options) (err error) {
 
 	u, err := url.Parse(opts.URL)
 	if err != nil {
-		return fmt.Errorf("failed to parse URL: %w", err)
+		return res, fmt.Errorf("failed to parse URL: %w", err)
 	}
 
 	query := u.Query()
@@ -190,8 +195,10 @@ func Download(ctx context.Context, opts Options) (err error) {
 	}
 
 	if opts.CacheDisabled {
-		_, _, err = d.Download(ctx, opts)
-		return err
+		dlType, name, err := d.Download(ctx, opts)
+		res.Type = dlType
+		res.Name = name
+		return res, err
 	}
 
 	if cp, ok := d.(CachePolicyProvider); ok && cp.CachePolicy(opts.URL) == CachePolicyNever {
@@ -202,31 +209,31 @@ func Download(ctx context.Context, opts Options) (err error) {
 }
 
 // downloadWithCache handles downloading with cache logic.
-func downloadWithCache(ctx context.Context, opts Options, d Downloader) error {
+func downloadWithCache(ctx context.Context, opts Options, d Downloader) (DownloadResult, error) {
 	id, err := opts.DlCache.Resolve(ctx, opts.URL, opts.CacheMetadata)
 	if err != nil {
 		if errors.Is(err, cache.ErrEntryNotFound) {
 			return performDownload(ctx, opts, d)
 		}
-		return fmt.Errorf("failed to resolve cache id: %w", err)
+		return DownloadResult{}, fmt.Errorf("failed to resolve cache id: %w", err)
 	}
 
 	return handleCachedSource(ctx, opts, d, id)
 }
 
 // handleCachedSource processes a cached source, updating it if necessary.
-func handleCachedSource(ctx context.Context, opts Options, d Downloader, cid cache.CacheID) error {
-	_, err := opts.DlCache.Get(ctx, cid)
+func handleCachedSource(ctx context.Context, opts Options, d Downloader, cid cache.CacheID) (DownloadResult, error) {
+	cached, err := opts.DlCache.Get(ctx, cid)
 	if err != nil {
 		if errors.Is(err, cache.ErrEntryNotFound) {
 			return performDownload(ctx, opts, d)
 		}
-		return err
+		return DownloadResult{}, err
 	}
 
 	updated, err := updateSourceIfNeeded(ctx, opts, d, cid)
 	if err != nil {
-		return err
+		return DownloadResult{}, err
 	}
 
 	err = opts.DlCache.Restore(ctx, cid, opts.Destination)
@@ -234,10 +241,24 @@ func handleCachedSource(ctx context.Context, opts Options, d Downloader, cid cac
 		if errors.Is(err, cache.ErrEntryNotFound) {
 			return performDownload(ctx, opts, d)
 		}
-		return err
+		return DownloadResult{}, err
 	}
 	logCacheHit(opts, updated)
-	return nil
+	return DownloadResult{
+		Name: cached.Manifest.Name,
+		Type: TypeFromCacheType(cached.Manifest.Type),
+	}, nil
+}
+
+func TypeFromCacheType(t cache.Type) Type {
+	switch t {
+	case cache.TypeFile:
+		return TypeFile
+	case cache.TypeDir:
+		return TypeDir
+	default:
+		return TypeFile
+	}
 }
 
 func updateSourceIfNeeded(ctx context.Context, opts Options, d Downloader, cid cache.CacheID) (bool, error) {
@@ -277,8 +298,8 @@ func updateSourceIfNeeded(ctx context.Context, opts Options, d Downloader, cid c
 		}
 
 		newMetadata := cache.Metadata{}
-		maps.Copy(src.Metadata, newMetadata)
-		maps.Copy(opts.CacheMetadata, newMetadata)
+		maps.Copy(newMetadata, src.Metadata)
+		maps.Copy(newMetadata, opts.CacheMetadata)
 
 		if _, err = opts.DlCache.Put(ctx, cache.CachePutRequest{
 			Id:       src.Id,
@@ -294,7 +315,7 @@ func updateSourceIfNeeded(ctx context.Context, opts Options, d Downloader, cid c
 }
 
 // performDownload executes the download and writes to the cache.
-func performDownload(ctx context.Context, opts Options, d Downloader) error {
+func performDownload(ctx context.Context, opts Options, d Downloader) (DownloadResult, error) {
 	slog.Debug(
 		"downloading source",
 		"source", opts.Name,
@@ -310,16 +331,16 @@ func performDownload(ctx context.Context, opts Options, d Downloader) error {
 
 	tmpDir, err := os.MkdirTemp(opts.Destination, ".dl-cache-*")
 	if err != nil {
-		return err
+		return DownloadResult{}, err
 	}
 	defer os.RemoveAll(tmpDir)
 
 	newOpts := opts
 	newOpts.Destination = tmpDir
 
-	_, name, err := d.Download(ctx, newOpts)
+	dlType, name, err := d.Download(ctx, newOpts)
 	if err != nil {
-		return err
+		return DownloadResult{}, err
 	}
 
 	creq := cache.CachePutRequest{
@@ -336,16 +357,21 @@ func performDownload(ctx context.Context, opts Options, d Downloader) error {
 
 	cid, err := opts.DlCache.Put(ctx, creq)
 	if err != nil {
-		return fmt.Errorf("failed to put cache: %w", err)
+		return DownloadResult{}, fmt.Errorf("failed to put cache: %w", err)
 	}
 	os.RemoveAll(tmpDir)
 
 	err = opts.DlCache.Restore(ctx, cid, opts.Destination)
 	if err != nil {
-		return err
+		return DownloadResult{}, err
 	}
 
-	return nil
+	res := DownloadResult{
+		Name: name,
+		Type: dlType,
+	}
+
+	return res, nil
 }
 
 // logCacheHit logs when a cached source is used or updated.

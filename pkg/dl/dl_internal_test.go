@@ -36,7 +36,7 @@ func TestDownloadWithTimeouts(t *testing.T) {
 	type testCase struct {
 		name        string
 		setupServer func() *httptest.Server
-		expected    func(*testing.T, error)
+		expected    func(*testing.T, DownloadResult, error)
 	}
 
 	commonTimeoutDuration = 1 * time.Second
@@ -52,7 +52,7 @@ func TestDownloadWithTimeouts(t *testing.T) {
 					w.Write([]byte("too late"))
 				}))
 			},
-			expected: func(t *testing.T, err error) {
+			expected: func(t *testing.T, res DownloadResult, err error) {
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), "timeout")
 			},
@@ -75,7 +75,7 @@ func TestDownloadWithTimeouts(t *testing.T) {
 				server.Start()
 				return server
 			},
-			expected: func(t *testing.T, err error) {
+			expected: func(t *testing.T, res DownloadResult, err error) {
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), "timeout")
 			},
@@ -90,7 +90,9 @@ func TestDownloadWithTimeouts(t *testing.T) {
 					w.Write([]byte("success"))
 				}))
 			},
-			expected: func(t *testing.T, err error) {
+			expected: func(t *testing.T, res DownloadResult, err error) {
+				assert.Equal(t, "file", res.Name)
+				assert.Equal(t, TypeFile, res.Type)
 				assert.NoError(t, err)
 			},
 		},
@@ -111,7 +113,9 @@ func TestDownloadWithTimeouts(t *testing.T) {
 					w.Write([]byte("data"))
 				}))
 			},
-			expected: func(t *testing.T, err error) {
+			expected: func(t *testing.T, res DownloadResult, err error) {
+				assert.Equal(t, "file", res.Name)
+				assert.Equal(t, TypeFile, res.Type)
 				assert.NoError(t, err)
 			},
 		},
@@ -133,8 +137,8 @@ func TestDownloadWithTimeouts(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), commonTimeoutDuration+10*time.Second)
 			defer cancel()
 
-			err = Download(ctx, opts)
-			tc.expected(t, err)
+			res, err := Download(ctx, opts)
+			tc.expected(t, res, err)
 		})
 	}
 }

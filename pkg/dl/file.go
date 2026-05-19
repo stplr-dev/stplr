@@ -158,7 +158,7 @@ func (fd FileDownloader) postProcess(path string, fl *os.File, name string, opts
 
 	_, err := xtract.ExtractArchive(path, opts.Destination)
 	if errors.Is(err, xtractr.ErrUnknownArchiveType) {
-		return TypeFile, "", nil
+		return TypeFile, name, nil
 	}
 	if err != nil {
 		return 0, "", fmt.Errorf("failed to extract with new extractor: %w", err)

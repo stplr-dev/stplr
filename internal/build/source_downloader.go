@@ -82,7 +82,7 @@ func (s *LocalSourceDownloader) DownloadSources(
 			return err
 		}
 
-		err = dl.Download(ctx, opts)
+		_, err = dl.Download(ctx, opts)
 		if err != nil {
 			return err
 		}

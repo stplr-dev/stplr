@@ -54,7 +54,7 @@ func TestDownloadWithoutCache(t *testing.T) {
 	type testCase struct {
 		name     string
 		path     string
-		expected func(*testing.T, error, string)
+		expected func(*testing.T, dl.DownloadResult, error, string)
 	}
 
 	prepareServer := func() *httptest.Server {
@@ -87,7 +87,9 @@ func TestDownloadWithoutCache(t *testing.T) {
 		{
 			name: "simple file download",
 			path: "%s/file-downloader/file",
-			expected: func(t *testing.T, err error, tmpdir string) {
+			expected: func(t *testing.T, res dl.DownloadResult, err error, tmpdir string) {
+				assert.Equal(t, "file", res.Name)
+				assert.Equal(t, dl.TypeFile, res.Type)
 				assert.NoError(t, err)
 
 				_, err = os.Stat(path.Join(tmpdir, "file"))
@@ -97,7 +99,9 @@ func TestDownloadWithoutCache(t *testing.T) {
 		{
 			name: "git download",
 			path: "git+%s/git-downloader/git/stapler/repo-for-tests",
-			expected: func(t *testing.T, err error, tmpdir string) {
+			expected: func(t *testing.T, res dl.DownloadResult, err error, tmpdir string) {
+				assert.Equal(t, "repo-for-tests", res.Name)
+				assert.Equal(t, dl.TypeDir, res.Type)
 				assert.NoError(t, err)
 
 				_, err = os.Stat(path.Join(tmpdir, "repo-for-tests", "stapler-repo.toml"))
@@ -119,9 +123,9 @@ func TestDownloadWithoutCache(t *testing.T) {
 				Destination:   tmpdir,
 			}
 
-			err = dl.Download(context.Background(), opts)
+			res, err := dl.Download(context.Background(), opts)
 
-			tc.expected(t, err, tmpdir)
+			tc.expected(t, res, err, tmpdir)
 		})
 	}
 }
@@ -167,7 +171,9 @@ func TestDownloadFileWithCache(t *testing.T) {
 
 			outputFile := path.Join(tmpdir, "file")
 
-			err = dl.Download(context.Background(), opts)
+			res1, err := dl.Download(context.Background(), opts)
+			assert.Equal(t, "file", res1.Name)
+			assert.Equal(t, dl.TypeFile, res1.Type)
 			assert.NoError(t, err)
 			_, err = os.Stat(outputFile)
 			assert.NoError(t, err)
@@ -180,7 +186,9 @@ func TestDownloadFileWithCache(t *testing.T) {
 			err = os.Remove(outputFile)
 			assert.NoError(t, err)
 
-			err = dl.Download(context.Background(), opts)
+			res2, err := dl.Download(context.Background(), opts)
+			assert.Equal(t, "file", res2.Name)
+			assert.Equal(t, dl.TypeFile, res2.Type)
 			assert.NoError(t, err)
 			assert.Equal(t, 1, called)
 

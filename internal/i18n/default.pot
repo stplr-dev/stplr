@@ -972,19 +972,19 @@ msgid_plural "Failed to upgrade: %d packages"
 msgstr[0] ""
 msgstr[1] ""
 
-#: pkg/dl/dl.go:247
+#: pkg/dl/dl.go:268
 msgid "Source %q can be updated using %s — updating if required"
 msgstr ""
 
-#: pkg/dl/dl.go:306
+#: pkg/dl/dl.go:327
 msgid "Downloading source %s from %s using %s downloader"
 msgstr ""
 
-#: pkg/dl/dl.go:359
+#: pkg/dl/dl.go:385
 msgid "Source %q was updated and linked to destination"
 msgstr ""
 
-#: pkg/dl/dl.go:361
+#: pkg/dl/dl.go:387
 msgid "Source %q found in cache and linked to destination"
 msgstr ""
 
