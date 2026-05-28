@@ -64,8 +64,8 @@ func (m progressViewport) Update(msg tea.Msg) (progressViewport, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
+		m.viewport.Width = msg.Width
 		if !m.viewportReady {
-			m.viewport.Width = msg.Width
 			m.viewport.Height = 15
 			m.viewportReady = true
 		}
@@ -138,7 +138,12 @@ func (w *progressViewportWriter) Write(p []byte) (n int, err error) {
 	return n, nil
 }
 
-//
+func wrapLine(s string, width int) string {
+	if width <= 0 {
+		return s
+	}
+	return lipgloss.NewStyle().Width(width).Render(s)
+}
 
 // ================
 
@@ -152,9 +157,10 @@ type pullModel struct {
 
 	state *pullModelState
 
-	lastUrl string
-	logs    []string
-	status  string
+	lastUrl   string
+	logs      []string
+	status    string
+	termWidth int
 
 	rs PullExecutor
 
@@ -237,6 +243,11 @@ func (m pullModel) Init() tea.Cmd {
 
 func (m pullModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.termWidth = msg.Width
+		var cmd tea.Cmd
+		m.gitBox, cmd = m.gitBox.Update(msg)
+		return m, cmd
 	case spinner.TickMsg:
 		var cmd tea.Cmd
 		m.spinner, cmd = m.spinner.Update(msg)
@@ -256,6 +267,7 @@ func (m pullModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case puller.EventErrorPull:
 			line := textErorrDarkerStyle.
 				Render(fmt.Sprintf("- %s", gotext.Get("Failed to pull from %s: %v", msg.Data["url"], strings.TrimSpace(msg.Data["err"]))))
+			line = wrapLine(line, m.termWidth)
 			m.logs = append(m.logs, line)
 			return m, waitForNotifier(m.msgs)
 		}
@@ -263,6 +275,7 @@ func (m pullModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		line := lipgloss.NewStyle().
 			Foreground(lipgloss.Color("245")).
 			Render(gotext.Get("- Pulled from %s", m.lastUrl))
+		line = wrapLine(line, m.termWidth)
 		m.logs = append(m.logs, line)
 		m.status = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("10")).Render(fmt.Sprintf("✔ %s", gotext.Get("Repository pulled successfully!")))

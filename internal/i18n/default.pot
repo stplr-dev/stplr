@@ -637,19 +637,19 @@ msgstr ""
 msgid "Repository pulled successfully!"
 msgstr ""
 
-#: internal/service/repos/tui_pull.go:258
+#: internal/service/repos/tui_pull.go:269
 msgid "Failed to pull from %s: %v"
 msgstr ""
 
-#: internal/service/repos/tui_pull.go:265
+#: internal/service/repos/tui_pull.go:277
 msgid "- Pulled from %s"
 msgstr ""
 
-#: internal/service/repos/tui_pull.go:273
+#: internal/service/repos/tui_pull.go:286
 msgid "🞮 Failed to pull — the only source is unavailable"
 msgstr ""
 
-#: internal/service/repos/tui_pull.go:286
+#: internal/service/repos/tui_pull.go:299
 msgid "Pulling %s..."
 msgstr ""
 
