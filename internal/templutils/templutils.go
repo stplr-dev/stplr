@@ -28,9 +28,19 @@ import (
 	"go.stplr.dev/stplr/pkg/types"
 )
 
-func localizedText(m appstream.LocalizedMap, langs ...string) string {
+func localizedText(v any, langs ...string) string {
+	var m appstream.LocalizedMap
+	switch x := v.(type) {
+	case appstream.LocalizedMap:
+		m = x
+	case appstream.LocalizedDescription:
+		m = appstream.LocalizedMap(x)
+	default:
+		return ""
+	}
+
 	if len(langs) == 0 {
-		langs = []string{os.Getenv("LANG"), "С", "en", ""}
+		langs = []string{os.Getenv("LANG"), "C", "en", ""}
 	}
 
 	for _, lang := range langs {
