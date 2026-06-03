@@ -2,7 +2,7 @@ module go.stplr.dev/stplr
 
 go 1.25.8
 
-toolchain go1.26.3
+toolchain go1.26.4
 
 // - support of context via github.com/keegancsmith/rpc
 //   see https://github.com/hashicorp/go-plugin/issues/284
