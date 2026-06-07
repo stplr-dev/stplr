@@ -455,6 +455,8 @@ go.alt-gnome.ru/capytest/providers/podman v0.0.5-0.20260527200622-62f1c4f5e109 h
 go.alt-gnome.ru/capytest/providers/podman v0.0.5-0.20260527200622-62f1c4f5e109/go.mod h1:4dipJNdGLD63It+P99KNhKvG+SIxzu/rpvWzY+LCuFg=
 go.alt-gnome.ru/x/appstream v0.0.0-20260525101759-59d5f2543720 h1:IngFEu8hYjt+JFvyeL6dC8MYc8ogRr9jf8VW3a+dcAs=
 go.alt-gnome.ru/x/appstream v0.0.0-20260525101759-59d5f2543720/go.mod h1:b57CzsAYRB3wz/Mi3WwU2qbZBfN+/ehrBOpZBMlmyl0=
+go.alt-gnome.ru/x/appstream v0.0.0-20260607073719-66d6e00f892b h1:P8ehtMcPvv6/yc7lPHkJV9EVYPiGeqtlUW/3Vt4il2A=
+go.alt-gnome.ru/x/appstream v0.0.0-20260607073719-66d6e00f892b/go.mod h1:b57CzsAYRB3wz/Mi3WwU2qbZBfN+/ehrBOpZBMlmyl0=
 go.digitalxero.dev/go-msix v0.3.0 h1:fp7nTkzJK/5fwcbTszsgCnfGwBnUt0b1PGX5nYgJkfs=
 go.digitalxero.dev/go-msix v0.3.0/go.mod h1:QbUpFs0AUd1zk7e9fy17suiqEAF90TR3jZY+LCI2K+c=
 go.elara.ws/vercmp v0.0.0-20250912200949-2e97859b8794 h1:IylaqCGvFp7pgC8tRHpd8yog8MwYR+wFOmRHccSAj34=
