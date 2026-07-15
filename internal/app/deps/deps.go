@@ -92,6 +92,7 @@ type InstallActionDeps struct {
 	Builder *build.Builder
 	Manager manager.Manager
 	Info    *distro.OSRelease
+	Copier  copier.CopierExecutor
 }
 
 func ForInstallAction(ctx context.Context) (*InstallActionDeps, Cleanup, error) {
@@ -99,6 +100,7 @@ func ForInstallAction(ctx context.Context) (*InstallActionDeps, Cleanup, error) 
 		Start(ctx).
 		RootPluginProvider().
 		InstallerFromPlugin().
+		CopierFromRootPlugin().
 		// Drop caps
 		DropCaps().
 		PluginProvider().
@@ -118,6 +120,7 @@ func ForInstallAction(ctx context.Context) (*InstallActionDeps, Cleanup, error) 
 		Builder: b.Builder,
 		Manager: b.Manager,
 		Info:    b.Info,
+		Copier:  b.Copier,
 	}, b.Cleanup, nil
 }
 

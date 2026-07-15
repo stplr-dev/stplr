@@ -50,29 +50,49 @@ msgstr ""
 msgid "Enable interactive questions and prompts"
 msgstr ""
 
-#: internal/app/commands/build.go:41
+#: internal/app/commands/build.go:45
 msgid "Build a local package"
 msgstr ""
 
-#: internal/app/commands/build.go:47
+#: internal/app/commands/build.go:51
 msgid "Path to the build script"
 msgstr ""
 
-#: internal/app/commands/build.go:52
+#: internal/app/commands/build.go:56
 msgid "Specify subpackage in script (for multi package script only)"
 msgstr ""
 
-#: internal/app/commands/build.go:57
+#: internal/app/commands/build.go:61
 msgid "Name of the package to build and its repo (example: default/go-bin)"
 msgstr ""
 
-#: internal/app/commands/build.go:62
+#: internal/app/commands/build.go:66
 msgid ""
 "Build package from scratch even if there's an already built package available"
 msgstr ""
 
-#: internal/app/commands/build.go:66
+#: internal/app/commands/build.go:70
 msgid "Do not add suffix to package name"
+msgstr ""
+
+#: internal/app/commands/build.go:74
+msgid "Override a source by index (format: N:path or N:url, e.g. 0:./foo.deb)"
+msgstr ""
+
+#: internal/app/commands/build.go:78
+msgid "Skip checksum verification for overridden sources"
+msgstr ""
+
+#: internal/app/commands/build.go:124
+msgid "invalid --source format %q: expected N:path (e.g. 0:./file.deb)"
+msgstr ""
+
+#: internal/app/commands/build.go:128
+msgid "invalid source index %q: must be a non-negative integer"
+msgstr ""
+
+#: internal/app/commands/build.go:135
+msgid "failed to resolve path %q"
 msgstr ""
 
 #: internal/app/commands/config.go:46
@@ -151,11 +171,11 @@ msgstr ""
 msgid "Command info expected at least 1 argument, got %d"
 msgstr ""
 
-#: internal/app/commands/install.go:44
+#: internal/app/commands/install.go:45
 msgid "Command install expected at least 1 argument, got %d"
 msgstr ""
 
-#: internal/app/commands/install.go:52
+#: internal/app/commands/install.go:53
 msgid "Install a new package"
 msgstr ""
 
@@ -362,11 +382,11 @@ msgstr ""
 msgid "Full license available at: %s"
 msgstr ""
 
-#: internal/build/build.go:226
+#: internal/build/build.go:227
 msgid "Installing dependencies"
 msgstr ""
 
-#: internal/build/build.go:304
+#: internal/build/build.go:305
 msgid ""
 "Firejail is disabled for %q package due to ignore pattern %q in config. "
 "Security isolation will not be applied. Ensure you understand the risks."
@@ -388,6 +408,10 @@ msgstr ""
 msgid "Your system's CPU architecture doesn't match this package"
 msgstr ""
 
+#: internal/build/source_downloader.go:71
+msgid "Using local override for source [%d]: %s"
+msgstr ""
+
 #: internal/build/step_04_nonfree_view.go:103
 msgid ""
 "This package contains non-free software that requires license acceptance."
@@ -397,8 +421,12 @@ msgstr ""
 msgid "Building the %q package"
 msgstr ""
 
-#: internal/build/step_06_flat_vars.go:50
+#: internal/build/step_06_flat_vars.go:53
 msgid "The checksums array must be the same length as sources"
+msgstr ""
+
+#: internal/build/step_06_flat_vars.go:66
+msgid "source override index %d is out of range (package has %d sources)"
 msgstr ""
 
 #: internal/build/step_09_prepare.go:59
@@ -653,17 +681,21 @@ msgstr ""
 msgid "Pulling %s..."
 msgstr ""
 
-#: internal/usecase/build/build.go:109
+#: internal/usecase/build/build.go:101
+msgid "Error preparing source overrides"
+msgstr ""
+
+#: internal/usecase/build/build.go:118
 msgid ""
 "Error when building the package. Report the issue here: %s\n"
 "Error trace"
 msgstr ""
 
-#: internal/usecase/build/build.go:124
+#: internal/usecase/build/build.go:133
 msgid "Error moving the package"
 msgstr ""
 
-#: internal/usecase/build/build.go:132
+#: internal/usecase/build/build.go:141
 msgid "Your settings do not allow build command"
 msgstr ""
 
@@ -737,21 +769,21 @@ msgstr ""
 msgid "Error getting packages"
 msgstr ""
 
-#: internal/usecase/install/action/install.go:79
+#: internal/usecase/install/action/install.go:92
 msgid "License agreement was declined"
 msgstr ""
 
-#: internal/usecase/install/action/install.go:83
+#: internal/usecase/install/action/install.go:96
 msgid "User chose not to continue after reading script"
 msgstr ""
 
-#: internal/usecase/install/action/install.go:88
+#: internal/usecase/install/action/install.go:101
 msgid ""
 "Error when installing the package. Report the issue here: %s\n"
 "Error trace"
 msgstr ""
 
-#: internal/usecase/install/action/install.go:95
+#: internal/usecase/install/action/install.go:108
 msgid "Error when installing the package"
 msgstr ""
 

@@ -43,11 +43,12 @@ type BuildState struct {
 }
 
 type flatVars struct {
-	BuildDepends []string
-	OptDepends   []string
-	Depends      []string
-	Sources      []string
-	Checksums    []string
+	BuildDepends      []string
+	OptDepends        []string
+	Depends           []string
+	Sources           []string
+	Checksums         []string
+	OverriddenSources map[int]bool
 }
 
 func NewBuildState() *BuildState {

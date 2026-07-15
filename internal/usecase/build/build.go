@@ -77,11 +77,13 @@ func New(o ConstructOptions) *useCase {
 }
 
 type RunOptions struct {
-	Subpackage  string
-	Directory   string
-	Clean       bool
-	Interactive bool
-	NoSuffix    bool
+	Subpackage           string
+	Directory            string
+	Clean                bool
+	Interactive          bool
+	NoSuffix             bool
+	SourceOverrides      map[int]string
+	IgnoreSourceChecksum bool
 
 	Script  string
 	Package string
@@ -93,6 +95,13 @@ func (u *useCase) Run(ctx context.Context, o RunOptions) error {
 	}
 
 	var err error
+	var cleanupOverrides func()
+	o.SourceOverrides, cleanupOverrides, err = build.PreCopySourceOverrides(ctx, u.copier, o.SourceOverrides)
+	if err != nil {
+		return errors.WrapIntoI18nError(err, gotext.Get("Error preparing source overrides"))
+	}
+	defer cleanupOverrides()
+
 	var pkgs []*commonbuild.BuiltDep
 
 	switch {
@@ -161,9 +170,11 @@ func (u *useCase) runForDb(ctx context.Context, o RunOptions) ([]*commonbuild.Bu
 			Packages: packages,
 			BuildArgs: build.BuildArgs{
 				Opts: &types.BuildOpts{
-					Clean:       o.Clean,
-					Interactive: o.Interactive,
-					NoSuffix:    o.NoSuffix,
+					Clean:                 o.Clean,
+					Interactive:           o.Interactive,
+					NoSuffix:              o.NoSuffix,
+					SourceOverrides:       o.SourceOverrides,
+					IgnoreSourceChecksums: o.IgnoreSourceChecksum,
 				},
 				PkgFormat_: build.GetPkgFormat(u.manager),
 				Info:       u.info,
@@ -202,9 +213,11 @@ func (u *useCase) runForScript(ctx context.Context, o RunOptions) ([]*commonbuil
 			Packages: packages,
 			BuildArgs: build.BuildArgs{
 				Opts: &types.BuildOpts{
-					Clean:       o.Clean,
-					Interactive: o.Interactive,
-					NoSuffix:    o.NoSuffix,
+					Clean:                 o.Clean,
+					Interactive:           o.Interactive,
+					NoSuffix:              o.NoSuffix,
+					SourceOverrides:       o.SourceOverrides,
+					IgnoreSourceChecksums: o.IgnoreSourceChecksum,
 				},
 				PkgFormat_: build.GetPkgFormat(u.manager),
 				Info:       u.info,

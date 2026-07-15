@@ -105,6 +105,23 @@ func (e *Copier) Copy(ctx context.Context, f *staplerfile.ScriptFile, info *dist
 	return newScriptPath, nil
 }
 
+func (e *Copier) CopySourceFile(_ context.Context, src string) (string, error) {
+	destDir, err := os.MkdirTemp("", "stplr-source-override-*")
+	if err != nil {
+		return "", err
+	}
+	dest := filepath.Join(destDir, filepath.Base(src))
+	if err := e.copy(src, dest); err != nil {
+		os.RemoveAll(destDir)
+		return "", err
+	}
+	if err := e.chownToBuilder(destDir); err != nil {
+		os.RemoveAll(destDir)
+		return "", err
+	}
+	return dest, nil
+}
+
 func (e *Copier) CopyOut(ctx context.Context, pkgs []commonbuild.BuiltDep) error {
 	for _, pkg := range pkgs {
 		name := filepath.Base(pkg.Path)

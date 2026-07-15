@@ -27,11 +27,15 @@ package commands
 import (
 	"context"
 	"fmt"
+	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
 
 	"go.stplr.dev/stplr/internal/app/deps"
+	"go.stplr.dev/stplr/internal/app/errors"
 	build "go.stplr.dev/stplr/internal/usecase/build"
 )
 
@@ -65,6 +69,14 @@ func BuildCmd() *cli.Command {
 				Name:  "no-suffix",
 				Usage: gotext.Get("Do not add suffix to package name"),
 			},
+			&cli.StringSliceFlag{
+				Name:  "source",
+				Usage: gotext.Get("Override a source by index (format: N:path or N:url, e.g. 0:./foo.deb)"),
+			},
+			&cli.BoolFlag{
+				Name:  "ignore-overriden-source-checksum",
+				Usage: gotext.Get("Skip checksum verification for overridden sources"),
+			},
 		},
 		Action: func(ctx context.Context, c *cli.Command) error {
 			d, f, err := deps.ForBuildAction(ctx)
@@ -72,6 +84,11 @@ func BuildCmd() *cli.Command {
 				return fmt.Errorf("failed to get BuildActionDeps: %w", err)
 			}
 			defer f()
+
+			overrides, err := parseSourceOverrides(c.StringSlice("source"))
+			if err != nil {
+				return err
+			}
 
 			return build.New(build.ConstructOptions{
 				Builder: d.Builder,
@@ -81,13 +98,44 @@ func BuildCmd() *cli.Command {
 				Finder:  d.Repos,
 				Config:  d.Config,
 			}).Run(ctx, build.RunOptions{
-				Script:      c.String("script"),
-				Package:     c.String("package"),
-				Subpackage:  c.String("subpackage"),
-				Clean:       c.Bool("clean"),
-				Interactive: c.Bool("interactive"),
-				NoSuffix:    c.Bool("no-suffix"),
+				Script:               c.String("script"),
+				Package:              c.String("package"),
+				Subpackage:           c.String("subpackage"),
+				Clean:                c.Bool("clean"),
+				Interactive:          c.Bool("interactive"),
+				NoSuffix:             c.Bool("no-suffix"),
+				SourceOverrides:      overrides,
+				IgnoreSourceChecksum: c.Bool("ignore-overriden-source-checksum"),
 			})
 		},
 	}
+}
+
+// parseSourceOverrides parses --source flags of the form "N:path" or "N:url" into a map of index -> path/URL.
+// Local paths are resolved to absolute paths; remote URLs (containing "://") are kept as-is.
+func parseSourceOverrides(args []string) (map[int]string, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
+	result := make(map[int]string, len(args))
+	for _, s := range args {
+		idx, value, ok := strings.Cut(s, ":")
+		if !ok {
+			return nil, errors.NewI18nError(gotext.Get("invalid --source format %q: expected N:path (e.g. 0:./file.deb)", s))
+		}
+		n, err := strconv.Atoi(idx)
+		if err != nil || n < 0 {
+			return nil, errors.NewI18nError(gotext.Get("invalid source index %q: must be a non-negative integer", idx))
+		}
+		if strings.Contains(value, "://") {
+			result[n] = value
+		} else {
+			absPath, err := filepath.Abs(value)
+			if err != nil {
+				return nil, errors.WrapIntoI18nError(err, gotext.Get("failed to resolve path %q", value))
+			}
+			result[n] = "local:///" + absPath
+		}
+	}
+	return result, nil
 }

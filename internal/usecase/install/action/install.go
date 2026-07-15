@@ -30,6 +30,7 @@ import (
 	"go.stplr.dev/stplr/internal/build"
 	"go.stplr.dev/stplr/internal/cliprompts"
 	"go.stplr.dev/stplr/internal/commonbuild"
+	"go.stplr.dev/stplr/internal/copier"
 	"go.stplr.dev/stplr/internal/manager"
 	"go.stplr.dev/stplr/pkg/distro"
 	"go.stplr.dev/stplr/pkg/types"
@@ -43,31 +44,43 @@ type useCase struct {
 	builder builder
 	mgr     manager.Manager
 	info    *distro.OSRelease
+	copier  copier.CopierExecutor
 }
 
-func New(builder builder, mgr manager.Manager, info *distro.OSRelease) *useCase {
+func New(builder builder, mgr manager.Manager, info *distro.OSRelease, c copier.CopierExecutor) *useCase {
 	return &useCase{
 		builder: builder,
 		mgr:     mgr,
 		info:    info,
+		copier:  c,
 	}
 }
 
 type Options struct {
-	Pkgs        []string
-	Clean       bool
-	Interactive bool
+	Pkgs                 []string
+	Clean                bool
+	Interactive          bool
+	SourceOverrides      map[int]string
+	IgnoreSourceChecksum bool
 }
 
 func (u *useCase) Run(ctx context.Context, opts Options) error {
 	slog.Info("trying install", "pkgs", opts.Pkgs, "interactive", opts.Interactive)
 
-	_, err := u.builder.InstallPkgs(
+	overrides, cleanupOverrides, err := build.PreCopySourceOverrides(ctx, u.copier, opts.SourceOverrides)
+	if err != nil {
+		return errors.WrapIntoI18nError(err, gotext.Get("Error preparing source overrides"))
+	}
+	defer cleanupOverrides()
+
+	_, err = u.builder.InstallPkgs(
 		ctx,
 		&build.BuildArgs{
 			Opts: &types.BuildOpts{
-				Clean:       opts.Clean,
-				Interactive: opts.Interactive,
+				Clean:                 opts.Clean,
+				Interactive:           opts.Interactive,
+				SourceOverrides:       overrides,
+				IgnoreSourceChecksums: opts.IgnoreSourceChecksum,
 			},
 			Info:       u.info,
 			PkgFormat_: build.GetPkgFormat(u.mgr),

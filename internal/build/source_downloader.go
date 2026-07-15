@@ -22,9 +22,13 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"log/slog"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/leonelquinteros/gotext"
 
 	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/commonbuild"
@@ -60,12 +64,33 @@ func (s *LocalSourceDownloader) DownloadSources(
 	}
 
 	for i, src := range si.Sources {
-		opts := dl.Options{
+		var opts dl.Options
+
+		localDir := commonbuild.GetScriptDir(input.Script)
+		if si.Overrides[i] {
+			msg := gotext.Get("Using local override for source [%d]: %s", i, src)
+			s.out.Info(msg)
+			slog.Info(msg)
+
+			if u, err := url.Parse(src); err == nil && u.Scheme == "local" {
+				cleanPath := filepath.Clean(u.Path)
+				base := filepath.Base(cleanPath)
+				dir := filepath.Dir(cleanPath)
+
+				src = "local:///" + base
+				if u.RawQuery != "" {
+					src += "?" + u.RawQuery
+				}
+				localDir = dir
+			}
+		}
+
+		opts = dl.Options{
 			Name:        fmt.Sprintf("[%d]", i),
 			URL:         src,
 			Progress:    os.Stderr,
 			Destination: commonbuild.GetSrcDir(s.cfg, basePkg),
-			LocalDir:    commonbuild.GetScriptDir(input.Script),
+			LocalDir:    localDir,
 			Output:      s.out,
 			DlCache:     s.localCache,
 			CacheMetadata: local.BuildMetadata(
@@ -77,13 +102,11 @@ func (s *LocalSourceDownloader) DownloadSources(
 			),
 		}
 
-		err := s.setHashFromChecksum(si.Checksums[i], &opts)
-		if err != nil {
+		if err := s.setHashFromChecksum(si.Checksums[i], &opts); err != nil {
 			return err
 		}
 
-		_, err = dl.Download(ctx, opts)
-		if err != nil {
+		if _, err := dl.Download(ctx, opts); err != nil {
 			return err
 		}
 	}

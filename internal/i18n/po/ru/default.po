@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 5.16.2\n"
 
 #: cmd/stplr/main.go:82
@@ -77,30 +77,51 @@ msgstr "Аргументы, которые будут переданы мене�
 msgid "Enable interactive questions and prompts"
 msgstr "Включение интерактивных вопросов и запросов"
 
-#: internal/app/commands/build.go:41
+#: internal/app/commands/build.go:45
 msgid "Build a local package"
 msgstr "Сборка локального пакета"
 
-#: internal/app/commands/build.go:47
+#: internal/app/commands/build.go:51
 msgid "Path to the build script"
 msgstr "Путь к скрипту сборки"
 
-#: internal/app/commands/build.go:52
+#: internal/app/commands/build.go:56
 msgid "Specify subpackage in script (for multi package script only)"
 msgstr "Укажите подпакет в скрипте (только для многопакетного скрипта)"
 
-#: internal/app/commands/build.go:57
+#: internal/app/commands/build.go:61
 msgid "Name of the package to build and its repo (example: default/go-bin)"
 msgstr "Имя пакета для сборки и его репозиторий (пример: default/go-bin)"
 
-#: internal/app/commands/build.go:62
+#: internal/app/commands/build.go:66
 msgid ""
 "Build package from scratch even if there's an already built package available"
 msgstr "Создайте пакет с нуля, даже если уже имеется готовый пакет"
 
-#: internal/app/commands/build.go:66
+#: internal/app/commands/build.go:70
 msgid "Do not add suffix to package name"
 msgstr "Не добавлять суффикс к имени пакета"
+
+#: internal/app/commands/build.go:74
+msgid "Override a source by index (format: N:path or N:url, e.g. 0:./foo.deb)"
+msgstr ""
+
+#: internal/app/commands/build.go:78
+msgid "Skip checksum verification for overridden sources"
+msgstr ""
+
+#: internal/app/commands/build.go:124
+msgid "invalid --source format %q: expected N:path (e.g. 0:./file.deb)"
+msgstr ""
+
+#: internal/app/commands/build.go:128
+msgid "invalid source index %q: must be a non-negative integer"
+msgstr ""
+
+#: internal/app/commands/build.go:135
+#, fuzzy
+msgid "failed to resolve path %q"
+msgstr "не удалось сохранить конфигурацию: %v"
 
 #: internal/app/commands/config.go:46
 msgid "Manage config"
@@ -178,11 +199,11 @@ msgstr "Вернуть информацию в формате JSON"
 msgid "Command info expected at least 1 argument, got %d"
 msgstr "Для команды info ожидался хотя бы 1 аргумент, получено %d"
 
-#: internal/app/commands/install.go:44
+#: internal/app/commands/install.go:45
 msgid "Command install expected at least 1 argument, got %d"
 msgstr "Для команды install ожидался хотя бы 1 аргумент, получено %d"
 
-#: internal/app/commands/install.go:52
+#: internal/app/commands/install.go:53
 msgid "Install a new package"
 msgstr "Установить новый пакет"
 
@@ -391,11 +412,11 @@ msgstr "СОГЛАШЕНИЕ О НЕСВОБОДНОМ ПО"
 msgid "Full license available at: %s"
 msgstr "Полный текст лицензии доступен по адресу: %s"
 
-#: internal/build/build.go:226
+#: internal/build/build.go:227
 msgid "Installing dependencies"
 msgstr "Установка зависимостей"
 
-#: internal/build/build.go:304
+#: internal/build/build.go:305
 msgid ""
 "Firejail is disabled for %q package due to ignore pattern %q in config. "
 "Security isolation will not be applied. Ensure you understand the risks."
@@ -420,6 +441,10 @@ msgstr "Этот пакет несовместим с вашим дистриб�
 msgid "Your system's CPU architecture doesn't match this package"
 msgstr "Архитектура процессора вашей системы не соответствует этому пакету"
 
+#: internal/build/source_downloader.go:71
+msgid "Using local override for source [%d]: %s"
+msgstr ""
+
 #: internal/build/step_04_nonfree_view.go:103
 msgid ""
 "This package contains non-free software that requires license acceptance."
@@ -431,9 +456,13 @@ msgstr ""
 msgid "Building the %q package"
 msgstr "Сборка пакета %q"
 
-#: internal/build/step_06_flat_vars.go:50
+#: internal/build/step_06_flat_vars.go:53
 msgid "The checksums array must be the same length as sources"
 msgstr "Массив контрольных сумм должен быть той же длины, что и источники"
+
+#: internal/build/step_06_flat_vars.go:66
+msgid "source override index %d is out of range (package has %d sources)"
+msgstr ""
 
 #: internal/build/step_09_prepare.go:59
 msgid "Downloading sources"
@@ -690,7 +719,12 @@ msgstr "🞮 Не удалось выполнить запрос — единс�
 msgid "Pulling %s..."
 msgstr "Вытягивание %s..."
 
-#: internal/usecase/build/build.go:109
+#: internal/usecase/build/build.go:101
+#, fuzzy
+msgid "Error preparing source overrides"
+msgstr "Ошибка устранения переопределений"
+
+#: internal/usecase/build/build.go:118
 msgid ""
 "Error when building the package. Report the issue here: %s\n"
 "Error trace"
@@ -698,11 +732,11 @@ msgstr ""
 "Ошибка при сборке пакета. Сообщите о проблеме здесь: %s\n"
 "Трассировка ошибки"
 
-#: internal/usecase/build/build.go:124
+#: internal/usecase/build/build.go:133
 msgid "Error moving the package"
 msgstr "Ошибка при перемещении пакета"
 
-#: internal/usecase/build/build.go:132
+#: internal/usecase/build/build.go:141
 msgid "Your settings do not allow build command"
 msgstr "Ваши настройки не позволяют использовать команду build"
 
@@ -777,15 +811,15 @@ msgstr "Ошибка кодирования переменных скрипта"
 msgid "Error getting packages"
 msgstr "Ошибка при получении пакетов"
 
-#: internal/usecase/install/action/install.go:79
+#: internal/usecase/install/action/install.go:92
 msgid "License agreement was declined"
 msgstr "Лицензионное соглашение было отклонено"
 
-#: internal/usecase/install/action/install.go:83
+#: internal/usecase/install/action/install.go:96
 msgid "User chose not to continue after reading script"
 msgstr "Пользователь решил не продолжать после просмотра скрипта"
 
-#: internal/usecase/install/action/install.go:88
+#: internal/usecase/install/action/install.go:101
 msgid ""
 "Error when installing the package. Report the issue here: %s\n"
 "Error trace"
@@ -793,7 +827,7 @@ msgstr ""
 "Ошибка при установке пакета. Сообщите о проблеме здесь: %s\n"
 "Трассировка ошибки"
 
-#: internal/usecase/install/action/install.go:95
+#: internal/usecase/install/action/install.go:108
 msgid "Error when installing the package"
 msgstr "Ошибка при установке пакета"
 

@@ -31,4 +31,5 @@ import (
 type CopierExecutor interface {
 	Copy(ctx context.Context, f *staplerfile.ScriptFile, info *distro.OSRelease) (string, error)
 	CopyOut(ctx context.Context, pkgs []commonbuild.BuiltDep) error
+	CopySourceFile(ctx context.Context, src string) (string, error)
 }

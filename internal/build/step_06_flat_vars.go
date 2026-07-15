@@ -21,6 +21,9 @@ package build
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/url"
+	"strings"
 
 	"github.com/leonelquinteros/gotext"
 )
@@ -51,11 +54,58 @@ func (s *flatVarsStep) Run(ctx context.Context, state *BuildState) error {
 	}
 	sources, checksums = removeDuplicatesSources(sources, checksums)
 
+	var sourceOverrides map[int]string
+	var ignoreChecksums bool
+	if state.Input != nil && state.Input.Opts != nil {
+		sourceOverrides = state.Input.Opts.SourceOverrides
+		ignoreChecksums = state.Input.Opts.IgnoreSourceChecksums
+	}
+	overriddenSources := make(map[int]bool, len(sourceOverrides))
+	for idx, path := range sourceOverrides {
+		if idx < 0 || idx >= len(sources) {
+			return fmt.Errorf("%s", gotext.Get("source override index %d is out of range (package has %d sources)", idx, len(sources)))
+		}
+		originalSource := sources[idx]
+		sources[idx] = path
+		if ignoreChecksums {
+			checksums[idx] = "SKIP"
+		}
+		overriddenSources[idx] = true
+
+		// Preserve the original source name via ~name query parameter
+		// so that the overridden file is saved with the expected filename.
+		u, err := url.Parse(path)
+		if err == nil {
+			q := u.Query()
+			if q.Get("~name") == "" {
+				q.Set("~name", getSourceName(originalSource))
+				u.RawQuery = q.Encode()
+				sources[idx] = u.String()
+			}
+		}
+	}
+
 	state.FlatVars.Sources = sources
 	state.FlatVars.Checksums = checksums
+	state.FlatVars.OverriddenSources = overriddenSources
 	state.FlatVars.BuildDepends = removeDuplicates(buildDepends)
 	state.FlatVars.OptDepends = removeDuplicates(optDepends)
 	state.FlatVars.Depends = removeDuplicates(depends)
 
 	return nil
+}
+
+func getSourceName(src string) string {
+	u, err := url.Parse(src)
+	if err != nil {
+		return src
+	}
+	query := u.Query()
+	if name := query.Get("~name"); name != "" {
+		return name
+	}
+	if u.Path != "" {
+		return u.Path[strings.LastIndex(u.Path, "/")+1:]
+	}
+	return src
 }

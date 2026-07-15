@@ -67,6 +67,7 @@ func (b *prepareStep) Run(ctx context.Context, state *BuildState) error {
 		SourcesInput{
 			Sources:   state.FlatVars.Sources,
 			Checksums: state.FlatVars.Checksums,
+			Overrides: state.FlatVars.OverriddenSources,
 		},
 	)
 	if err != nil {

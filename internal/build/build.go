@@ -59,6 +59,7 @@ type PackageFinder interface {
 type SourcesInput struct {
 	Sources   []string
 	Checksums []string
+	Overrides map[int]bool
 }
 
 type BuildArgs struct {

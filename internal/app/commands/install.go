@@ -26,6 +26,7 @@ package commands
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/leonelquinteros/gotext"
 	"github.com/urfave/cli/v3"
@@ -57,6 +58,14 @@ func InstallCmd() *cli.Command {
 				Aliases: []string{"c"},
 				Usage:   gotext.Get("Build package from scratch even if there's an already built package available"),
 			},
+			&cli.StringSliceFlag{
+				Name:  "source",
+				Usage: gotext.Get("Override a source by index (format: N:path or N:url, e.g. 0:./foo.deb)"),
+			},
+			&cli.BoolFlag{
+				Name:  "ignore-overriden-source-checksum",
+				Usage: gotext.Get("Skip checksum verification for overridden sources"),
+			},
 		},
 		ShellComplete: cliutils.BashCompleteWithError(func(ctx context.Context, c *cli.Command) error {
 			d, f, err := deps.ForInstallShellComp(ctx)
@@ -80,10 +89,17 @@ func InstallCmd() *cli.Command {
 				}
 				defer f()
 
-				return action.New(d.Builder, d.Manager, d.Info).Run(ctx, action.Options{
-					Pkgs:        c.Args().Slice(),
-					Clean:       c.Bool("clean"),
-					Interactive: c.Bool("interactive"),
+				overrides, err := parseSourceOverrides(c.StringSlice("source"))
+				if err != nil {
+					return fmt.Errorf("%w", err)
+				}
+
+				return action.New(d.Builder, d.Manager, d.Info, d.Copier).Run(ctx, action.Options{
+					Pkgs:                 c.Args().Slice(),
+					Clean:                c.Bool("clean"),
+					Interactive:          c.Bool("interactive"),
+					SourceOverrides:      overrides,
+					IgnoreSourceChecksum: c.Bool("ignore-overriden-source-checksum"),
 				})
 			})),
 	}

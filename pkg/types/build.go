@@ -25,10 +25,12 @@
 package types
 
 type BuildOpts struct {
-	Clean           bool
-	Interactive     bool
-	NoSuffix        bool
-	DisableFirejail bool
+	Clean                 bool
+	Interactive           bool
+	NoSuffix              bool
+	DisableFirejail       bool
+	SourceOverrides       map[int]string // index -> absolute local path or URL
+	IgnoreSourceChecksums bool
 }
 
 type Scripts struct {

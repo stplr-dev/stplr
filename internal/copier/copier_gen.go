@@ -106,3 +106,28 @@ func (s *CopierExecutorRPCServer) CopyOut(ctx context.Context, args *CopierExecu
 	*resp = CopierExecutorCopyOutResp{}
 	return nil
 }
+
+type CopierExecutorCopySourceFileArgs struct {
+	Src string
+}
+type CopierExecutorCopySourceFileResp struct {
+	Result0 string
+}
+
+func (s *CopierExecutorRPC) CopySourceFile(ctx context.Context, src string) (string, error) {
+	var resp *CopierExecutorCopySourceFileResp
+	err := s.client.Call(ctx, "Plugin.CopySourceFile", &CopierExecutorCopySourceFileArgs{Src: src}, &resp)
+	if err != nil {
+		return "", err
+	}
+	return resp.Result0, nil
+}
+func (s *CopierExecutorRPCServer) CopySourceFile(ctx context.Context, args *CopierExecutorCopySourceFileArgs, resp *CopierExecutorCopySourceFileResp) error {
+	var err error
+	result0, err := s.Impl.CopySourceFile(ctx, args.Src)
+	if err != nil {
+		return err
+	}
+	*resp = CopierExecutorCopySourceFileResp{Result0: result0}
+	return nil
+}
