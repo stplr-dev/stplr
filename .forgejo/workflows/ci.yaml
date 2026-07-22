@@ -55,7 +55,7 @@ jobs:
           go-version-file: 'go.mod'
 
       - name: Set up Python for pre-commit
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.13'
 
@@ -98,7 +98,7 @@ jobs:
         run: git fetch origin ${{ github.base_ref }}
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.13'
 
