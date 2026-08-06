@@ -196,7 +196,7 @@ jobs:
 
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
-        uses: https://github.com/sonarsource/sonarqube-quality-gate-action@v1.2.0
+        uses: https://github.com/sonarsource/sonarqube-quality-gate-action@v1.2.1
         with:
           pollingTimeoutSec: 600
         env:
