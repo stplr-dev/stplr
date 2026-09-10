@@ -26,6 +26,19 @@
 
 set -euo pipefail
 
+UNAME_M=$(uname -m)
+UNAME_S=$(uname -s)
+
+if [ "$UNAME_S" != "Linux" ]; then
+    echo "Operation system $UNAME_S is not supported!"
+    exit 1
+fi
+
+if [ "$UNAME_M" != "x86_64" ]; then
+    echo "Hardware architecture $UNAME_M is not supported!"
+    exit 1
+fi
+
 VERSION="0.0.30"
 ARCH="linux-x86_64"
 BASE_URL="https://altlinux.space/stapler/stplr/releases/download/v$VERSION"
