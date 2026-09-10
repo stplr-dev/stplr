@@ -33,7 +33,7 @@ func localizedText(v any, langs ...string) string {
 	switch x := v.(type) {
 	case appstream.LocalizedMap:
 		m = x
-	case appstream.LocalizedDescription:
+	case appstream.UpstreamDescription:
 		m = appstream.LocalizedMap(x)
 	default:
 		return ""
