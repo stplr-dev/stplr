@@ -35,7 +35,7 @@ require (
 	github.com/go-git/go-git/v5 v5.19.2
 	github.com/gobwas/glob v0.2.3
 	github.com/goccy/go-yaml v1.19.2
-	github.com/gofrs/flock v0.13.0
+	github.com/gofrs/flock v0.13.1
 	github.com/google/cel-go v0.30.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/goreleaser/nfpm/v2 v2.45.0
@@ -56,7 +56,7 @@ require (
 	github.com/opencontainers/runtime-spec v1.3.0
 	github.com/pelletier/go-toml/v2 v2.4.3
 	github.com/spf13/afero v1.15.0
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.1
 	github.com/urfave/cli-docs/v3 v3.1.0
 	github.com/urfave/cli/v3 v3.10.1
 	go.alt-gnome.ru/capytest v0.0.5-0.20260527200622-62f1c4f5e109
@@ -196,7 +196,7 @@ require (
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	gitlab.com/digitalxero/go-conventional-commit v1.0.7 // indirect
-	go.yaml.in/yaml/v3 v3.0.4 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	go4.org v0.0.0-20260112195520-a5071408f32f // indirect
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
 	golang.org/x/net v0.56.0 // indirect
