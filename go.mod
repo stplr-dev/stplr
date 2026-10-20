@@ -1,6 +1,6 @@
 module go.stplr.dev/stplr
 
-go 1.25.8
+go 1.26.0
 
 toolchain go1.26.5
 
@@ -32,7 +32,7 @@ require (
 	github.com/coreos/go-systemd/v22 v22.7.0
 	github.com/dave/jennifer v1.7.1
 	github.com/go-git/go-billy/v5 v5.9.2
-	github.com/go-git/go-git/v5 v5.19.2
+	github.com/go-git/go-git/v5 v5.19.3
 	github.com/gobwas/glob v0.2.3
 	github.com/goccy/go-yaml v1.19.2
 	github.com/gofrs/flock v0.13.1
@@ -64,9 +64,9 @@ require (
 	go.alt-gnome.ru/x/appstream v0.0.0-20260525101759-59d5f2543720
 	go.elara.ws/vercmp v0.0.0-20250912200949-2e97859b8794
 	go.uber.org/mock v0.6.0
-	golang.org/x/crypto v0.54.0
+	golang.org/x/crypto v0.56.0
 	golang.org/x/sys v0.47.0
-	golang.org/x/text v0.40.0
+	golang.org/x/text v0.41.0
 	golift.io/xtractr v0.2.3-0.20260111181756-d6376a2e84ce
 	google.golang.org/genproto/googleapis/api v0.0.0-20260114163908-3f89685c29c3
 	modernc.org/sqlite v1.57.0
@@ -169,7 +169,7 @@ require (
 	github.com/opencontainers/selinux v1.13.1 // indirect
 	github.com/peterebden/ar v0.0.0-20241106141004-20dc11b778e8 // indirect
 	github.com/pierrec/lz4/v4 v4.1.25 // indirect
-	github.com/pjbgf/sha1cd v0.6.0 // indirect
+	github.com/pjbgf/sha1cd v0.7.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
@@ -199,7 +199,7 @@ require (
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	go4.org v0.0.0-20260112195520-a5071408f32f // indirect
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
-	golang.org/x/net v0.56.0 // indirect
+	golang.org/x/net v0.57.0 // indirect
 	golang.org/x/term v0.45.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251222181119-0a764e51fe1b // indirect
 	google.golang.org/grpc v1.79.3 // indirect
