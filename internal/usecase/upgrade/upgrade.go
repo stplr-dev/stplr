@@ -85,7 +85,7 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 	}
 
 	if len(updates) == 0 {
-		u.out.Info(gotext.Get("There is nothing to do."))
+		u.out.Info("%s", gotext.Get("There is nothing to do."))
 		return nil
 	}
 
@@ -99,7 +99,7 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 
 	for i, update := range updates {
 		pkgName := update.Package.Name
-		u.out.Info(gotext.Get("Upgrading %d/%d: %s", i+1, len(updates), pkgName))
+		u.out.Info("%s", gotext.Get("Upgrading %d/%d: %s", i+1, len(updates), pkgName))
 
 		if ctx.Err() != nil {
 			u.out.Warn(gotext.Get("Stopping upgrade process"))
@@ -139,20 +139,20 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 				if i+1 != len(updates) {
 					stopAll, _ := cliprompts.YesNoPrompt(ctx, gotext.Get("Do you want to stop the entire upgrade process?"), opts.Interactive, false)
 					if stopAll {
-						u.out.Info(gotext.Get("Stopping upgrade process"))
+						u.out.Info("%s", gotext.Get("Stopping upgrade process"))
 						break
 					}
-					u.out.Info(gotext.Get("Continuing with next package"))
+					u.out.Info("%s", gotext.Get("Continuing with next package"))
 				}
 			} else {
-				u.out.Info(gotext.Get("Successfully upgraded %s", pkgName))
+				u.out.Info("%s", gotext.Get("Successfully upgraded %s", pkgName))
 				succeeded = append(succeeded, pkgName)
 			}
 
 		case <-ctx.Done():
 			cancel()
 			u.out.Warn(gotext.Get("Upgrade process interrupted"))
-			<-errChan
+			<-errChan //nolint:errcheck // wait for the interrupted upgrade to finish
 			break
 		}
 	}
@@ -172,7 +172,7 @@ func (u *useCase) printSummary(succeeded []string, failed []struct {
 },
 ) {
 	if len(succeeded) > 0 {
-		u.out.Info(gotext.GetN(
+		u.out.Info("%s", gotext.GetN(
 			"Successfully upgraded: %d package",
 			"Successfully upgraded: %d packages",
 			len(succeeded),

@@ -56,7 +56,7 @@ func (b *prepareStep) Run(ctx context.Context, state *BuildState) error {
 		return err
 	}
 
-	b.out.Info(gotext.Get("Downloading sources"))
+	b.out.Info("%s", gotext.Get("Downloading sources"))
 
 	err = b.sourceDownloader.DownloadSources(
 		ctx,

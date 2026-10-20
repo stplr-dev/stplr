@@ -619,15 +619,15 @@ msgstr ""
 msgid "OPTIONS"
 msgstr ""
 
-#: internal/cliutils2/cli.go:66
+#: internal/cliutils2/cli.go:65
 msgid "You need to be root to perform this action"
 msgstr ""
 
-#: internal/cliutils2/cli.go:74
+#: internal/cliutils2/cli.go:73
 msgid "This action requires elevated privileges."
 msgstr ""
 
-#: internal/cliutils2/cli.go:75
+#: internal/cliutils2/cli.go:74
 msgid "Attempting to run as root using '%s'..."
 msgstr ""
 

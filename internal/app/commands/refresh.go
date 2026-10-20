@@ -48,6 +48,7 @@ func RefreshCmd() *cli.Command {
 				defer f()
 
 				return refresh.New(d.Repos).Run(ctx, refresh.Options{})
-			})),
+			},
+		)),
 	}
 }

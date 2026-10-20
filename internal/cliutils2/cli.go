@@ -43,8 +43,7 @@ import (
 )
 
 func runAsRoot(ctx context.Context, rootCmd string, args []string) error {
-	// gosec:disable G204
-	cmd := exec.CommandContext(ctx, rootCmd, args...)
+	cmd := exec.CommandContext(ctx, rootCmd, args...) //gosec:disable G702 -- rootCmd comes from the user config
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

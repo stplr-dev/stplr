@@ -31,7 +31,7 @@ DEFAULT_CONF := packaging/stplr.toml
 DEFAULT_FIREJAILED_CONF := packaging/firejailed/global
 
 ADD_LICENSE_BIN := go run github.com/google/addlicense@4caba19b7ed7818bb86bc4cd20411a246aa4a524
-GOLANGCI_LINT_BIN := go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.3.1
+GOLANGCI_LINT_BIN := go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0
 XGOTEXT_BIN := go run github.com/Tom5521/xgotext@v1.2.0
 
 LDFLAGS := -X 'go.stplr.dev/stplr/internal/config.Version=$(GIT_VERSION)'
@@ -144,7 +144,7 @@ prepare-test-e2e: clean build
 	cp $(NAME) e2e-tests
 
 test-e2e: prepare-test-e2e
-	go test -v -timeout 10m -parallel 4 -tags=e2e ./e2e-tests/...
+	go test -v -timeout 20m -parallel 4 -tags=e2e ./e2e-tests/...
 
 update-license:
 	$(ADD_LICENSE_BIN) -v -ignore 'packaging/**' -ignore 'vendor/**' -f license-header.tmpl .

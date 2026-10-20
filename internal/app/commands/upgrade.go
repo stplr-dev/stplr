@@ -61,6 +61,7 @@ func UpgradeCmd() *cli.Command {
 					Clean:       c.Bool("clean"),
 					Interactive: c.Bool("interactive"),
 				})
-			})),
+			},
+		)),
 	}
 }

@@ -264,7 +264,7 @@ func TypeFromCacheType(t cache.Type) Type {
 func updateSourceIfNeeded(ctx context.Context, opts Options, d Downloader, cid cache.CacheID) (bool, error) {
 	if updater, ok := d.(UpdatingDownloader); ok {
 		if opts.Output != nil {
-			opts.Output.Info(gotext.Get(
+			opts.Output.Info("%s", gotext.Get(
 				"Source %q can be updated using %s — updating if required",
 				opts.Name, d.Name(),
 			))

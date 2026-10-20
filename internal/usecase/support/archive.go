@@ -125,10 +125,10 @@ func (ac *archiveCreator) executeCommands(ctx context.Context, tw *tar.Writer) e
 
 	var buf bytes.Buffer
 	for _, cmdArgs := range cmds {
-		buf.WriteString(fmt.Sprintf(">>> %s\n", strings.Join(cmdArgs, " ")))
+		fmt.Fprintf(&buf, ">>> %s\n", strings.Join(cmdArgs, " "))
 		output, err := ac.executor.Execute(ctx, cmdArgs[0], cmdArgs[1:]...)
 		if err != nil {
-			buf.WriteString(fmt.Sprintf("Error: %v\n", err))
+			fmt.Fprintf(&buf, "Error: %v\n", err)
 		} else {
 			buf.Write(output)
 		}

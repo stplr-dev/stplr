@@ -60,6 +60,6 @@ func linkDir(src, dest string) error {
 			return os.MkdirAll(newPath, info.Mode())
 		}
 
-		return os.Link(path, newPath)
+		return os.Link(path, newPath) //gosec:disable G122 -- src is a cache entry owned by stplr
 	})
 }

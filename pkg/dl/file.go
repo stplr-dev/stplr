@@ -98,7 +98,7 @@ var commonTimeoutDuration = 30 * time.Second
 func (fd FileDownloader) getSource(ctx context.Context, u *url.URL, opts Options, name string) (io.ReadCloser, int64, string, error) {
 	if IsLocalUrl(u) {
 		localPath := filepath.Join(opts.LocalDir, u.Path)
-		localFl, err := os.Open(localPath)
+		localFl, err := os.Open(localPath) //gosec:disable G703 -- local sources come from the package dir or the user's CLI
 		if err != nil {
 			return nil, 0, "", err
 		}

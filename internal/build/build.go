@@ -224,7 +224,7 @@ func (b *Builder) BuildALRDeps(ctx context.Context, input InstallInput, depends 
 	}
 
 	if len(depends) > 0 {
-		b.out.Info(gotext.Get("Installing dependencies"))
+		b.out.Info("%s", gotext.Get("Installing dependencies"))
 
 		found, notFound, err := b.repos.FindPkgs(ctx, depends)
 		if err != nil {

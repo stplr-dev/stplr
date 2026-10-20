@@ -101,6 +101,7 @@ func InstallCmd() *cli.Command {
 					SourceOverrides:      overrides,
 					IgnoreSourceChecksum: c.Bool("ignore-overriden-source-checksum"),
 				})
-			})),
+			},
+		)),
 	}
 }

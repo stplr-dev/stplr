@@ -126,7 +126,7 @@ func splitPkgAndDesc(pkgs []string) (names []string, mapping map[string]string) 
 		names = append(names, name)
 		mapping[name] = desc
 	}
-	return
+	return names, mapping
 }
 
 func (i *installDepsStep) installOptDeps(ctx context.Context, input InstallInput, pkgs []string) ([]*commonbuild.BuiltDep, error) {

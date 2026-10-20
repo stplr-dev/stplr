@@ -472,7 +472,7 @@ func handleProcessTermination(process *libcontainer.Process, killTimeout time.Du
 	select {
 	case <-time.After(killTimeout):
 		_ = process.Signal(syscall.SIGKILL)
-	case <-done:
+	case <-done: //nolint:errcheck // the process is being terminated, its exit error is irrelevant
 	}
 
 	return ctx.Err()

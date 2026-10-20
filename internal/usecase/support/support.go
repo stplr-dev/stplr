@@ -46,7 +46,7 @@ func (u *useCase) Run(ctx context.Context) error {
 		return errors.WrapIntoI18nError(err, gotext.Get("Failed to generate support archive"))
 	}
 
-	u.out.Info(gotext.Get("Support archive %s has been created. You can send it to whoever needs it.", archivePath))
+	u.out.Info("%s", gotext.Get("Support archive %s has been created. You can send it to whoever needs it.", archivePath))
 
 	return nil
 }

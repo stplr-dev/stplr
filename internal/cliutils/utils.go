@@ -53,7 +53,7 @@ func HandleExitCoder(ctx context.Context, c *cli.Command, err error) {
 
 	var startupErr *plugin.PluginStartupError
 	if stdErrors.As(err, &startupErr) {
-		out.Error(startupErr.Message)
+		out.Error("%s", startupErr.Message)
 		cli.OsExiter(1)
 		return
 	}
@@ -61,15 +61,15 @@ func HandleExitCoder(ctx context.Context, c *cli.Command, err error) {
 	if exitErr, ok := err.(cli.ExitCoder); ok {
 		if err.Error() != "" {
 			if _, ok := exitErr.(cli.ErrorFormatter); ok {
-				out.Error(fmt.Sprintf("%+v\n", err))
+				out.Error("%+v\n", err)
 			} else {
-				out.Error(err.Error())
+				out.Error("%s", err.Error())
 			}
 		}
 		cli.OsExiter(exitErr.ExitCode())
 		return
 	}
-	out.Error(err.Error())
+	out.Error("%s", err.Error())
 	cli.OsExiter(1)
 }
 

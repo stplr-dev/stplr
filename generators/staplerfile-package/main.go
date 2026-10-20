@@ -62,7 +62,7 @@ type {{ .EntityNameLower }}Resolved struct {
 			if jsonTag == "" {
 				jsonTag = strings.ToLower(name.Name)
 			}
-			buf.WriteString(fmt.Sprintf(" `json:\"%s\"`", jsonTag))
+			fmt.Fprintf(&buf, " `json:\"%s\"`", jsonTag)
 			buf.WriteString("\n")
 			structFieldsBuilder.Write(buf.Bytes())
 		}
@@ -100,9 +100,9 @@ func {{ .EntityName }}ToResolved(src *{{ .EntityName }}) {{ .EntityNameLower }}R
 			assignBuf.WriteString(name.Name)
 			assignBuf.WriteString(": ")
 			if isOverridableField(field.Type) {
-				assignBuf.WriteString(fmt.Sprintf("src.%s.Resolved()", name.Name))
+				fmt.Fprintf(&assignBuf, "src.%s.Resolved()", name.Name)
 			} else {
-				assignBuf.WriteString(fmt.Sprintf("src.%s", name.Name))
+				fmt.Fprintf(&assignBuf, "src.%s", name.Name)
 			}
 			assignBuf.WriteString(",\n")
 			assignmentsBuilder.Write(assignBuf.Bytes())
@@ -137,7 +137,7 @@ func Resolve{{ .EntityName }}(pkg *{{ .EntityName }}, overrides []string) {
 		for _, name := range field.Names {
 			if isOverridableField(field.Type) {
 				var buf bytes.Buffer
-				buf.WriteString(fmt.Sprintf("\t\tpkg.%s.Resolve(overrides)\n", name.Name))
+				fmt.Fprintf(&buf, "\t\tpkg.%s.Resolve(overrides)\n", name.Name)
 				codeBuilder.Write(buf.Bytes())
 			}
 		}
@@ -205,8 +205,8 @@ func GetCELColumnMap() map[string]cel2sqlite.ColumnInfo {
 			colType := determineColumnType(field.Type, xormTag)
 
 			var entryBuf bytes.Buffer
-			entryBuf.WriteString(fmt.Sprintf("\t\t\"%s\": {SQLName: \"%s\", Type: cel2sqlite.%s},\n",
-				celName, sqlName, colType))
+			fmt.Fprintf(&entryBuf, "\t\t\"%s\": {SQLName: \"%s\", Type: cel2sqlite.%s},\n",
+				celName, sqlName, colType)
 			entriesBuilder.Write(entryBuf.Bytes())
 		}
 	}
@@ -332,7 +332,7 @@ func main() {
 	}
 
 	outPath := strings.TrimSuffix(path, ".go") + "_gen.go"
-	outFile, err := os.Create(outPath)
+	outFile, err := os.Create(outPath) //gosec:disable G703 -- generator writes next to its own input file
 	if err != nil {
 		log.Fatalf("create file: %v", err)
 	}

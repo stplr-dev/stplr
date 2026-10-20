@@ -80,7 +80,7 @@ func (tn *simpleNotifier) Notify(ctx context.Context, event shared.NotifyEvent, 
 		} else {
 			msg = gotext.Get("Trying mirror %d: %s", i, url)
 		}
-		tn.out.Info(msg)
+		tn.out.Info("%s", msg)
 	case puller.EventErrorPull:
 		url := data["url"]
 		errMsg := data["err"]
@@ -234,6 +234,6 @@ func (r *Repos) Pull(ctx context.Context, repo types.Repo) (types.Repo, error) {
 	if err != nil {
 		return repo, err
 	}
-	r.out.Info(gotext.Get("Repository pulled successfully!"))
+	r.out.Info("%s", gotext.Get("Repository pulled successfully!"))
 	return repo, err
 }

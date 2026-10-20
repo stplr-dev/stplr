@@ -141,7 +141,7 @@ func (d *Decoder) DecodeVar(name string, val any) error {
 		elemType := mapType.Elem()  // T
 
 		var overridablePtr reflect.Value
-		if reflectVal.Kind() == reflect.Ptr {
+		if reflectVal.Kind() == reflect.Pointer {
 			overridablePtr = reflectVal
 		} else {
 			if !reflectVal.CanAddr() {

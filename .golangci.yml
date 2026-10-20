@@ -64,7 +64,7 @@ linters:
         path: _test\.go
       - linters:
           - staticcheck
-        text: 'SA1019: interp.ExecHandler'
+        text: 'SA1019: (mvdan\.cc/sh/v3/)?interp\.ExecHandler'
       - linters:
           - forbidigo
         text: "It is forbidden to call output.FromContext directly"

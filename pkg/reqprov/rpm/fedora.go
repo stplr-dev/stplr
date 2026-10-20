@@ -65,9 +65,10 @@ func (o *Fedora) FindProvides(ctx context.Context, out output.Output, pkgInfo *n
 		fedoraRpmDeps,
 		args,
 		func(dep string) {
-			out.Info(gotext.Get("Provided dependency found: %s", dep))
+			out.Info("%s", gotext.Get("Provided dependency found: %s", dep))
 			pkgInfo.Provides = append(pkgInfo.Provides, dep)
-		})
+		},
+	)
 }
 
 func (o *Fedora) FindRequires(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
@@ -89,9 +90,10 @@ func (o *Fedora) FindRequires(ctx context.Context, out output.Output, pkgInfo *n
 		fedoraRpmDeps,
 		args,
 		func(dep string) {
-			out.Info(gotext.Get("Required dependency found: %s", dep))
+			out.Info("%s", gotext.Get("Required dependency found: %s", dep))
 			pkgInfo.Depends = append(pkgInfo.Depends, dep)
-		})
+		},
+	)
 }
 
 func (o *Fedora) BuildDepends(ctx context.Context) ([]string, error) {

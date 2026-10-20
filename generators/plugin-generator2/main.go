@@ -291,7 +291,7 @@ func typeString(t types.Type) string {
 
 func (g *Generator) output(inputPath string) {
 	outPath := strings.TrimSuffix(inputPath, ".go") + "_gen.go"
-	outFile, err := os.Create(outPath)
+	outFile, err := os.Create(outPath) //gosec:disable G703 -- generator writes next to its own input file
 	if err != nil {
 		log.Fatalf("create file: %v", err)
 	}
@@ -388,7 +388,7 @@ func buildClientSignatures(m MethodInfo, imports map[string]string) (
 		clientReturn = append(clientReturn, jenType(r.Type, imports))
 	}
 	clientReturn = append(clientReturn, jen.Error())
-	return
+	return clientParams, clientReturn, zeroValues, returnValues
 }
 
 func buildClientBody(

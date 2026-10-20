@@ -62,7 +62,8 @@ func repoFromReader(r interface {
 	if strings.HasPrefix(config.Version, "v") {
 		if vercmp.Compare(config.Version, repocfg.Repo.MinVersion) == -1 {
 			slog.Warn(
-				gotext.Get("Stapler repo's minimum Stapler version is greater than the current version. Try updating Stapler if something doesn't work."))
+				gotext.Get("Stapler repo's minimum Stapler version is greater than the current version. Try updating Stapler if something doesn't work."),
+			)
 		}
 	}
 

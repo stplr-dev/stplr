@@ -56,12 +56,13 @@ func genCombinations(variantsList ...[]string) []string {
 	var dfs func(int, []string)
 	dfs = func(idx int, current []string) {
 		if idx == 0 {
-			slices.Reverse(current)
-			results = append(results, strings.Join(current, "_"))
+			parts := slices.Clone(current)
+			slices.Reverse(parts)
+			results = append(results, strings.Join(parts, "_"))
 			return
 		}
 		for _, v := range variantsList[idx-1] {
-			dfs(idx-1, append(current, v))
+			dfs(idx-1, append(slices.Clip(current), v))
 		}
 		dfs(idx-1, current)
 	}

@@ -90,7 +90,7 @@ func (u *useCase) runForUpgradable(ctx context.Context, opts Options) error {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error getting packages for upgrade"))
 	}
 	if len(updates) == 0 {
-		u.out.Info(gotext.Get("No packages for upgrade"))
+		u.out.Info("%s", gotext.Get("No packages for upgrade"))
 		return nil
 	}
 

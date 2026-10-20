@@ -69,7 +69,7 @@ func (s *LocalSourceDownloader) DownloadSources(
 		localDir := commonbuild.GetScriptDir(input.Script)
 		if si.Overrides[i] {
 			msg := gotext.Get("Using local override for source [%d]: %s", i, src)
-			s.out.Info(msg)
+			s.out.Info("%s", msg)
 			slog.Info(msg)
 
 			if u, err := url.Parse(src); err == nil && u.Scheme == "local" {

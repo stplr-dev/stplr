@@ -42,7 +42,7 @@ func (s *checksStep) Name() string {
 }
 
 func (s *checksStep) Run(ctx context.Context, state *BuildState) error {
-	s.out.Info(gotext.Get("Building the %q package", state.BasePackage))
+	s.out.Info("%s", gotext.Get("Building the %q package", state.BasePackage))
 
 	for _, pkg := range state.Packages {
 		cont, err := s.e.RunChecks(ctx, pkg, state.Input)

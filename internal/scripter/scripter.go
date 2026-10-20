@@ -223,7 +223,7 @@ func (e *LocalScriptExecutor) buildSinglePackage(
 		return nil, fmt.Errorf("executing package functions: %w", err)
 	}
 
-	e.out.Info(gotext.Get("Building metadata for package %q", bctx.basePkg))
+	e.out.Info("%s", gotext.Get("Building metadata for package %q", bctx.basePkg))
 
 	pkgInfo, err := buildPkgMetadata(
 		ctx,
@@ -413,7 +413,7 @@ func execFunc(ctx context.Context, out output.Output, d *decoder.Decoder, name s
 		return r.Run(ctx, script)
 	})
 	if ok {
-		out.Info(gotext.Get("Executing %s()", name))
+		out.Info("%s", gotext.Get("Executing %s()", name))
 		err := fn(ctx, interp.Dir(dirs.SrcDir))
 		if err != nil {
 			return err

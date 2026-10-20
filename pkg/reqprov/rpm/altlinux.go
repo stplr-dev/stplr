@@ -46,14 +46,14 @@ func NewALTLinux() *ALTLinux {
 
 func (o *ALTLinux) FindProvides(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	return o.rpmFindDependenciesALTLinux(ctx, out, pkgInfo, dirs, "/usr/lib/rpm/find-provides", []string{"RPM_FINDPROV_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
-		out.Info(gotext.Get("Provided dependency found: %s", dep))
+		out.Info("%s", gotext.Get("Provided dependency found: %s", dep))
 		pkgInfo.Provides = append(pkgInfo.Provides, dep)
 	})
 }
 
 func (o *ALTLinux) FindRequires(ctx context.Context, out output.Output, pkgInfo *nfpm.Info, dirs types.Directories, skiplist, filter []string) error {
 	return o.rpmFindDependenciesALTLinux(ctx, out, pkgInfo, dirs, "/usr/lib/rpm/find-requires", []string{"RPM_FINDREQ_SKIPLIST=" + strings.Join(skiplist, "\n")}, func(dep string) {
-		out.Info(gotext.Get("Required dependency found: %s", dep))
+		out.Info("%s", gotext.Get("Required dependency found: %s", dep))
 		pkgInfo.Depends = append(pkgInfo.Depends, dep)
 	})
 }

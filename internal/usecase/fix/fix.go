@@ -74,7 +74,7 @@ func (u *useCase) reinit(ctx context.Context) error {
 func (u *useCase) Run(ctx context.Context) error {
 	paths := u.config.GetPaths()
 
-	u.out.Info(gotext.Get("Clearing cache directory"))
+	u.out.Info("%s", gotext.Get("Clearing cache directory"))
 
 	dir, err := os.Open(paths.CacheDir)
 	if err != nil {
@@ -100,7 +100,7 @@ func (u *useCase) Run(ctx context.Context) error {
 		}
 	}
 
-	u.out.Info(gotext.Get("Rebuilding cache"))
+	u.out.Info("%s", gotext.Get("Rebuilding cache"))
 
 	err = os.MkdirAll(paths.CacheDir, 0o755)
 	if err != nil {
@@ -111,14 +111,22 @@ func (u *useCase) Run(ctx context.Context) error {
 		return err
 	}
 
-	u.out.Info(gotext.Get("Done"))
+	u.out.Info("%s", gotext.Get("Done"))
 	return nil
 }
 
 func makeWritableRecursive(path string) error {
-	return filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
+	root, err := os.OpenRoot(filepath.Dir(path))
+	if err != nil {
+		return err
+	}
+	defer root.Close()
+	return fs.WalkDir(root.FS(), filepath.Base(path), func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
+		}
+		if d.Type()&fs.ModeSymlink != 0 {
+			return nil
 		}
 
 		info, err := d.Info()
@@ -131,6 +139,6 @@ func makeWritableRecursive(path string) error {
 			newMode |= 0o100
 		}
 
-		return os.Chmod(path, newMode)
+		return root.Chmod(p, newMode)
 	})
 }

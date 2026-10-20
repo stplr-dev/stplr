@@ -23,6 +23,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -210,10 +211,17 @@ func (e *Copier) chown(path string, uid, gid int) error {
 	if err != nil {
 		return err
 	}
-	walkFn := func(p string, info os.FileInfo, err error) error {
-		return os.Chown(p, uid, gid)
+	root, err := os.OpenRoot(filepath.Dir(path))
+	if err != nil {
+		return err
 	}
-	return filepath.Walk(path, walkFn)
+	defer root.Close()
+	return fs.WalkDir(root.FS(), filepath.Base(path), func(p string, _ fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		return root.Lchown(p, uid, gid)
+	})
 }
 
 func isPathWithinBase(basePath, targetPath string) (bool, error) {
