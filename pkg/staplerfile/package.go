@@ -79,8 +79,8 @@ type Package struct {
 	Conflicts        []string `sh:"conflicts" xorm:"json 'conflicts'" json:"conflicts"`
 	Replaces         []string `sh:"replaces" xorm:"json 'replaces'" json:"replaces"`
 
-	AppStreamAppID string               `sh:"appstream_app_id" xorm:"'appstream_app_id'" json:"appstream_app_id"`
-	AppStream      *appstream.Component `xorm:"json 'appstream'" json:"appstream"`
+	AppStreamAppID string                       `sh:"appstream_app_id" xorm:"'appstream_app_id'" json:"appstream_app_id"`
+	AppStream      *appstream.UpstreamComponent `xorm:"json 'appstream'" json:"appstream"`
 
 	NonFree        bool                     `sh:"nonfree" xorm:"'nonfree'" json:"nonfree"`
 	NonFreeUrl     OverridableField[string] `sh:"nonfree_url" xorm:"'nonfree_url'" json:"nonfree_url"`

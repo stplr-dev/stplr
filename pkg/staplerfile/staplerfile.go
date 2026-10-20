@@ -156,7 +156,7 @@ func refineAppstream(pkg *Package, basedir string) {
 				continue
 			}
 
-			var component appstream.Component
+			var component appstream.UpstreamComponent
 			err = xml.NewDecoder(f).Decode(&component)
 			f.Close()
 			if err != nil {
