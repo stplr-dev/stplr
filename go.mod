@@ -51,8 +51,8 @@ require (
 	github.com/leonelquinteros/gotext v1.7.2
 	github.com/mattn/go-isatty v0.0.24
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/opencontainers/cgroups v0.0.8
-	github.com/opencontainers/runc v1.5.1
+	github.com/opencontainers/cgroups v0.1.0
+	github.com/opencontainers/runc v1.5.2
 	github.com/opencontainers/runtime-spec v1.3.0
 	github.com/pelletier/go-toml/v2 v2.4.3
 	github.com/spf13/afero v1.15.0
@@ -76,7 +76,7 @@ require (
 
 require (
 	cel.dev/expr v0.25.1 // indirect
-	cyphar.com/go-pathrs v0.2.5 // indirect
+	cyphar.com/go-pathrs v0.2.6 // indirect
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/AlekSi/pointer v1.2.0 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
@@ -158,7 +158,7 @@ require (
 	github.com/moby/sys/capability v0.4.0 // indirect
 	github.com/moby/sys/mountinfo v0.7.2 // indirect
 	github.com/moby/sys/user v0.4.0 // indirect
-	github.com/moby/sys/userns v0.1.0 // indirect
+	github.com/moby/sys/userns v0.2.1 // indirect
 	github.com/mrunalp/fileutils v0.5.1 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
@@ -175,7 +175,7 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.15.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/seccomp/libseccomp-golang v0.11.1 // indirect
+	github.com/seccomp/libseccomp-golang v0.12.0 // indirect
 	github.com/sergi/go-diff v1.4.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
