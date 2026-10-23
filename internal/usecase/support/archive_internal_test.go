@@ -30,6 +30,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	gomock "go.uber.org/mock/gomock"
+
+	"go.stplr.dev/stplr/internal/config"
 )
 
 func TestAddFilteredConfig(t *testing.T) {
@@ -204,6 +206,8 @@ func TestCreateSupportArchiveExtractAndVerify(t *testing.T) {
 		files[header.Name] = string(content)
 	}
 
+	assert.Contains(t, files, "version.txt")
+	assert.Contains(t, files["version.txt"], "stplr: "+config.Version)
 	assert.Contains(t, files, "os-release")
 	assert.Contains(t, files, "/etc/stplr/stplr.toml.filtered")
 	assert.Contains(t, files, "commands.log")

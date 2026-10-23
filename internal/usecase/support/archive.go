@@ -29,12 +29,16 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
+	"runtime/debug"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/coreos/go-systemd/v22/sdjournal"
 	"github.com/spf13/afero"
+
+	"go.stplr.dev/stplr/internal/config"
 )
 
 type CommandExecutor interface {
@@ -78,6 +82,10 @@ func (ac *archiveCreator) CreateSupportArchive(ctx context.Context, archivePath 
 	tw := tar.NewWriter(gw)
 	defer tw.Close()
 
+	if err := addVersionInfo(tw); err != nil {
+		return fmt.Errorf("add version info: %w", err)
+	}
+
 	if err := ac.copyFileToTar(tw, "/etc/os-release"); err != nil {
 		return fmt.Errorf("add os-release: %w", err)
 	}
@@ -109,6 +117,24 @@ func (ac *archiveCreator) CreateSupportArchive(ctx context.Context, archivePath 
 	}
 
 	return nil
+}
+
+func addVersionInfo(tw *tar.Writer) error {
+	var buf bytes.Buffer
+	fmt.Fprintf(&buf, "stplr: %s\n", config.Version)
+	fmt.Fprintf(&buf, "go: %s\n", runtime.Version())
+	fmt.Fprintf(&buf, "platform: %s/%s\n", runtime.GOOS, runtime.GOARCH)
+
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, s := range info.Settings {
+			switch s.Key {
+			case "vcs.revision", "vcs.time", "vcs.modified":
+				fmt.Fprintf(&buf, "%s: %s\n", s.Key, s.Value)
+			}
+		}
+	}
+
+	return addReaderToTar(tw, "version.txt", bytes.NewReader(buf.Bytes()), int64(buf.Len()))
 }
 
 func (ac *archiveCreator) executeCommands(ctx context.Context, tw *tar.Writer) error {
