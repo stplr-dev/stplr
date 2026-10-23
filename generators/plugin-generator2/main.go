@@ -80,7 +80,12 @@ func (g *Generator) prepare(input string) error {
 		return err
 	}
 
-	conf := types.Config{Importer: importer.ForCompiler(g.fset, "source", nil)}
+	lookup, err := exportDataLookup(g.inputFile)
+	if err != nil {
+		return err
+	}
+
+	conf := types.Config{Importer: importer.ForCompiler(g.fset, "gc", lookup)}
 	info := &types.Info{
 		Types: make(map[ast.Expr]types.TypeAndValue),
 	}
