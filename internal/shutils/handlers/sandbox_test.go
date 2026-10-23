@@ -20,12 +20,16 @@ package handlers
 
 import (
 	"errors"
+	"os"
+	"os/user"
+	"path/filepath"
 	"testing"
 
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"go.stplr.dev/stplr/internal/subid"
 	"go.stplr.dev/stplr/pkg/types"
 )
 
@@ -250,4 +254,49 @@ func findMount(mounts []specs.Mount, destination string) *specs.Mount {
 		}
 	}
 	return nil
+}
+
+func TestOwnedSubIDs(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "subuid")
+	content := "alice:100000:65536\nstapler-builder:200000:1000\n923:300000:65536\n"
+	require.NoError(t, os.WriteFile(path, []byte(content), 0o644))
+
+	u := &user.User{Username: "stapler-builder", Uid: "923"}
+	ranges, err := ownedSubIDs(path, u)
+	require.NoError(t, err)
+	assert.Equal(t, []specs.LinuxIDMapping{
+		{ContainerID: 0, HostID: 923, Size: 1},
+		{ContainerID: 1, HostID: 200000, Size: 1000},
+		{ContainerID: 1001, HostID: 300000, Size: 65536},
+	}, toSpecMappings(subid.Mappings(923, ranges)))
+
+	ranges, err = ownedSubIDs(filepath.Join(t.TempDir(), "missing"), u)
+	require.NoError(t, err)
+	assert.Empty(t, ranges)
+}
+
+func TestSetNamespacePath(t *testing.T) {
+	namespaces := buildNamespaces(false)
+	setNamespacePath(namespaces, specs.UserNamespace, "/proc/1/fd/3")
+
+	for _, ns := range namespaces {
+		if ns.Type == specs.UserNamespace {
+			assert.Equal(t, "/proc/1/fd/3", ns.Path)
+		} else {
+			assert.Empty(t, ns.Path)
+		}
+	}
+}
+
+func TestCheckIDMapHelper(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("PATH", dir)
+
+	require.Error(t, checkIDMapHelper("newuidmap"))
+
+	path := filepath.Join(dir, "newuidmap")
+	require.NoError(t, os.WriteFile(path, []byte("#!/bin/sh\n"), 0o755))
+	err := checkIDMapHelper("newuidmap")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "neither the setuid bit nor file capabilities")
 }

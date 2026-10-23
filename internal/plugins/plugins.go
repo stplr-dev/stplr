@@ -28,6 +28,7 @@ import (
 	"github.com/hashicorp/go-plugin"
 
 	"go.stplr.dev/stplr/internal/app/output"
+	"go.stplr.dev/stplr/internal/buildns"
 	"go.stplr.dev/stplr/internal/config/savers"
 	"go.stplr.dev/stplr/internal/constants"
 	"go.stplr.dev/stplr/internal/copier"
@@ -160,6 +161,14 @@ type Provider struct {
 	c         *plugin.Client
 	client    plugin.ClientProtocol
 	socketDir string
+
+	builderUserNS *buildns.Namespace
+}
+
+// PassBuilderUserNamespace hands the sandbox user namespace (see
+// [buildns.Create]) to the plugin process. A nil ns is ignored.
+func (p *Provider) PassBuilderUserNamespace(ns *buildns.Namespace) {
+	p.builderUserNS = ns
 }
 
 func (p *Provider) Cleanup() error {
@@ -210,6 +219,10 @@ func (p *Provider) setupConnection(subcommand string) error {
 
 	// HACK: tell go-plugin where to put the unix socket.
 	cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", plugin.EnvUnixSocketDir, socketDir))
+
+	if p.builderUserNS != nil {
+		buildns.Pass(cmd, p.builderUserNS)
+	}
 
 	p.c = plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig:  HandshakeConfig,

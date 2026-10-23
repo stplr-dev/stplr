@@ -17,12 +17,12 @@ msgstr ""
 msgid "Error while running app"
 msgstr ""
 
-#: internal/app/app.go:60
+#: internal/app/app.go:61
 msgid ""
 "Command-line interface for Stapler, a universal Linux package build system"
 msgstr ""
 
-#: internal/app/app.go:61
+#: internal/app/app.go:62
 msgid ""
 "Stapler is a universal Linux package build and distribution system designed "
 "for cross-distribution software delivery.\n"
@@ -42,11 +42,11 @@ msgid ""
 "docs/intro"
 msgstr ""
 
-#: internal/app/app.go:76
+#: internal/app/app.go:77
 msgid "Arguments to be passed on to the package manager"
 msgstr ""
 
-#: internal/app/app.go:82
+#: internal/app/app.go:83
 msgid "Enable interactive questions and prompts"
 msgstr ""
 
@@ -329,6 +329,18 @@ msgstr ""
 msgid "[DEPRECATED] Search by provides"
 msgstr ""
 
+#: internal/app/commands/setup.go:35
+msgid "Configure the system for Stapler"
+msgstr ""
+
+#: internal/app/commands/setup.go:36
+msgid ""
+"Allocates subordinate uid and gid ranges for the builder user, which the "
+"build sandbox needs.\n"
+"\n"
+"Safe to run repeatedly."
+msgstr ""
+
 #: internal/app/commands/support.go:35
 msgid "Dump debug information"
 msgstr ""
@@ -345,17 +357,21 @@ msgstr ""
 msgid "Print the current Stapler version and exit"
 msgstr ""
 
-#: internal/app/deps/internal/builder/builder.go:115
+#: internal/app/deps/internal/builder/builder.go:119
 msgid "Failed to get working directory"
 msgstr ""
 
-#: internal/app/deps/internal/builder/builder.go:166
+#: internal/app/deps/internal/builder/builder.go:170
 msgid "Unable to detect a supported package manager on the system"
 msgstr ""
 
-#: internal/app/deps/internal/builder/builder.go:185
-#: internal/app/deps/internal/builder/builder.go:211
+#: internal/app/deps/internal/builder/builder.go:189
+#: internal/app/deps/internal/builder/builder.go:215
 msgid "Error initialization database"
+msgstr ""
+
+#: internal/app/deps/internal/builder/builder.go:374
+msgid "Failed to prepare the build sandbox"
 msgstr ""
 
 #: internal/app/output/console.go:59
@@ -435,6 +451,12 @@ msgstr ""
 
 #: internal/build/step_11_post.go:64
 msgid "Would you like to remove the build dependencies?"
+msgstr ""
+
+#: internal/buildns/buildns.go:95
+msgid ""
+"The build user has no subordinate ids, so the build sandbox can't change "
+"file ownership. Run as root: stplr setup"
 msgstr ""
 
 #: internal/cliprompts/prompt.go:48 internal/cliprompts/prompt.go:64
@@ -679,6 +701,18 @@ msgstr ""
 
 #: internal/service/repos/tui_pull.go:299
 msgid "Pulling %s..."
+msgstr ""
+
+#: internal/shutils/handlers/sandbox.go:574
+msgid ""
+"You have no subordinate ids, so the build sandbox can't change file "
+"ownership. See https://stplr.dev/docs/guide#build-without-root"
+msgstr ""
+
+#: internal/shutils/handlers/sandbox.go:577
+msgid ""
+"Can't use newuidmap and newgidmap (%s), so the build sandbox can't change "
+"file ownership. See https://stplr.dev/docs/guide#build-without-root"
 msgstr ""
 
 #: internal/usecase/build/build.go:101
@@ -936,6 +970,22 @@ msgstr ""
 
 #: internal/usecase/search/search.go:97
 msgid "Error while executing search"
+msgstr ""
+
+#: internal/usecase/setup/setup.go:74
+msgid "User %s not found"
+msgstr ""
+
+#: internal/usecase/setup/setup.go:79
+msgid "Failed to configure %s"
+msgstr ""
+
+#: internal/usecase/setup/setup.go:85
+msgid "%s not found, builds run by a regular user can't change file ownership"
+msgstr ""
+
+#: internal/usecase/setup/setup.go:112
+msgid "Added range %d-%d to %s for %s"
 msgstr ""
 
 #: internal/usecase/support/support.go:46

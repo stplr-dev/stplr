@@ -20,6 +20,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -28,17 +29,23 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
+	"github.com/leonelquinteros/gotext"
 	"github.com/opencontainers/runc/libcontainer"
 	"github.com/opencontainers/runc/libcontainer/configs"
 	"github.com/opencontainers/runc/libcontainer/specconv"
 	"github.com/opencontainers/runtime-spec/specs-go"
+	"golang.org/x/sys/unix"
 	"mvdan.cc/sh/v3/expand"
 	"mvdan.cc/sh/v3/interp"
 
+	"go.stplr.dev/stplr/internal/app/output"
+	"go.stplr.dev/stplr/internal/buildns"
 	"go.stplr.dev/stplr/internal/constants"
+	"go.stplr.dev/stplr/internal/subid"
 	"go.stplr.dev/stplr/pkg/types"
 
 	_ "github.com/opencontainers/cgroups/devices"
@@ -63,8 +70,8 @@ func (i *SandboxHandlerInstance) Rootfs() string {
 	return i.container.Config().Rootfs
 }
 
-func SandboxHandler(killTimeout time.Duration, dirs types.Directories, disableNetwork bool) (*SandboxHandlerInstance, error) {
-	container, cleanup, err := createContainer(dirs, disableNetwork, true)
+func SandboxHandler(out output.Output, killTimeout time.Duration, dirs types.Directories, disableNetwork bool) (*SandboxHandlerInstance, error) {
+	container, cleanup, err := createContainer(out, dirs, disableNetwork, true)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +82,7 @@ func SandboxHandler(killTimeout time.Duration, dirs types.Directories, disableNe
 
 		slog.Debug("cannot create isolated /proc, retrying bind mount")
 
-		container, cleanup, err = createContainer(dirs, disableNetwork, false)
+		container, cleanup, err = createContainer(out, dirs, disableNetwork, false)
 		if err != nil {
 			return nil, err
 		}
@@ -99,7 +106,7 @@ func SandboxHandler(killTimeout time.Duration, dirs types.Directories, disableNe
 	}, nil
 }
 
-func createContainer(dirs types.Directories, disableNetwork, isolatedProc bool) (*libcontainer.Container, func(), error) {
+func createContainer(out output.Output, dirs types.Directories, disableNetwork, isolatedProc bool) (*libcontainer.Container, func(), error) {
 	rootfsDir, containerDir, err := createTempDirs()
 	if err != nil {
 		return nil, nil, err
@@ -110,7 +117,7 @@ func createContainer(dirs types.Directories, disableNetwork, isolatedProc bool) 
 		os.RemoveAll(containerDir)
 	}
 
-	spec, err := buildContainerSpec(rootfsDir, dirs, disableNetwork, isolatedProc)
+	spec, err := buildContainerSpec(out, rootfsDir, dirs, disableNetwork, isolatedProc)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
@@ -157,10 +164,20 @@ func createTempDirs() (string, string, error) {
 	return rootfsDir, containerDir, nil
 }
 
-func buildContainerSpec(rootfsDir string, dirs types.Directories, disableNetwork, isolatedProc bool) (*specs.Spec, error) {
-	uidMappings, gidMappings, err := generateMappings()
-	if err != nil {
-		return nil, err
+func buildContainerSpec(out output.Output, rootfsDir string, dirs types.Directories, disableNetwork, isolatedProc bool) (*specs.Spec, error) {
+	namespaces := buildNamespaces(disableNetwork)
+
+	// When stplr runs as root, the namespace with the mappings is prepared in
+	// advance; otherwise runc maps the ids via newuidmap/newgidmap.
+	var uidMappings, gidMappings []specs.LinuxIDMapping
+	if path, ok := buildns.InheritedPath(); ok {
+		setNamespacePath(namespaces, specs.UserNamespace, path)
+	} else {
+		var err error
+		uidMappings, gidMappings, err = generateMappings(out)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	homeDir, err := os.UserHomeDir()
@@ -186,7 +203,7 @@ func buildContainerSpec(rootfsDir string, dirs types.Directories, disableNetwork
 		Linux: &specs.Linux{
 			UIDMappings: uidMappings,
 			GIDMappings: gidMappings,
-			Namespaces:  buildNamespaces(disableNetwork),
+			Namespaces:  namespaces,
 			MaskedPaths: []string{"/run"},
 		},
 	}
@@ -319,6 +336,14 @@ func buildWorkspaceMounts(dirs types.Directories) []specs.Mount {
 	}
 
 	return mounts
+}
+
+func setNamespacePath(namespaces []specs.LinuxNamespace, nsType specs.LinuxNamespaceType, path string) {
+	for i := range namespaces {
+		if namespaces[i].Type == nsType {
+			namespaces[i].Path = path
+		}
+	}
 }
 
 func buildNamespaces(disableNetwork bool) []specs.LinuxNamespace {
@@ -518,37 +543,102 @@ func execEnv(env expand.Environ) []string {
 	return list
 }
 
-func generateMappings() ([]specs.LinuxIDMapping, []specs.LinuxIDMapping, error) {
+func generateMappings(out output.Output) ([]specs.LinuxIDMapping, []specs.LinuxIDMapping, error) {
 	u, err := user.Current()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("getting current user: %w", err)
 	}
 
 	uid, err := strconv.ParseUint(u.Uid, 10, 32)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("parsing uid %q: %w", u.Uid, err)
 	}
 
 	gid, err := strconv.ParseUint(u.Gid, 10, 32)
 	if err != nil {
+		return nil, nil, fmt.Errorf("parsing gid %q: %w", u.Gid, err)
+	}
+
+	subUIDs, err := ownedSubIDs(subid.UIDFile, u)
+	if err != nil {
 		return nil, nil, err
 	}
 
-	uidMappings := []specs.LinuxIDMapping{
-		{
-			ContainerID: 0,
-			HostID:      uint32(uid),
-			Size:        1,
-		},
+	// Owners in /etc/subgid are users too, so match them by uid.
+	subGIDs, err := ownedSubIDs(subid.GIDFile, u)
+	if err != nil {
+		return nil, nil, err
 	}
 
-	gidMappings := []specs.LinuxIDMapping{
-		{
-			ContainerID: 0,
-			HostID:      uint32(gid),
-			Size:        1,
-		},
+	if len(subUIDs) == 0 || len(subGIDs) == 0 {
+		warnOnce(out, gotext.Get("You have no subordinate ids, so the build sandbox can't change file ownership. See https://stplr.dev/docs/guide#build-without-root"))
+		subUIDs, subGIDs = nil, nil
+	} else if err := checkIDMapHelpers(); err != nil {
+		warnOnce(out, gotext.Get("Can't use newuidmap and newgidmap (%s), so the build sandbox can't change file ownership. See https://stplr.dev/docs/guide#build-without-root", err))
+		subUIDs, subGIDs = nil, nil
 	}
 
-	return uidMappings, gidMappings, nil
+	return toSpecMappings(subid.Mappings(uint32(uid), subUIDs)),
+		toSpecMappings(subid.Mappings(uint32(gid), subGIDs)),
+		nil
+}
+
+func checkIDMapHelpers() error {
+	if v, err := unix.PrctlRetInt(unix.PR_GET_NO_NEW_PRIVS, 0, 0, 0, 0); err == nil && v == 1 {
+		return errors.New("no_new_privs is set, newuidmap and newgidmap can't gain privileges")
+	}
+	for _, name := range []string{"newuidmap", "newgidmap"} {
+		if err := checkIDMapHelper(name); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// checkIDMapHelper reports whether the current user can run the helper and it
+// can gain the privileges to write a mapping with several ranges, either
+// through the setuid bit or file capabilities.
+func checkIDMapHelper(name string) error {
+	path, err := exec.LookPath(name)
+	if err != nil {
+		return err
+	}
+	if err := unix.Access(path, unix.X_OK); err != nil {
+		return fmt.Errorf("%s: %w", path, err)
+	}
+
+	var st unix.Stat_t
+	if err := unix.Stat(path, &st); err != nil {
+		return fmt.Errorf("%s: %w", path, err)
+	}
+	if st.Mode&unix.S_ISUID != 0 && st.Uid == 0 {
+		return nil
+	}
+	if _, err := unix.Getxattr(path, "security.capability", nil); err == nil {
+		return nil
+	}
+	return fmt.Errorf("%s has neither the setuid bit nor file capabilities", path)
+}
+
+func ownedSubIDs(path string, u *user.User) ([]subid.Range, error) {
+	ranges, err := subid.Owned(path, u.Username, u.Uid)
+	if err != nil {
+		return nil, fmt.Errorf("reading %s: %w", path, err)
+	}
+	return ranges, nil
+}
+
+// The sandbox is created for every script run, so the warning is shown once.
+var mappingWarning sync.Once
+
+func warnOnce(out output.Output, msg string) {
+	mappingWarning.Do(func() { out.Warn("%s", msg) })
+}
+
+func toSpecMappings(maps []subid.IDMap) []specs.LinuxIDMapping {
+	out := make([]specs.LinuxIDMapping, 0, len(maps))
+	for _, m := range maps {
+		out = append(out, specs.LinuxIDMapping{ContainerID: m.ContainerID, HostID: m.HostID, Size: m.Size})
+	}
+	return out
 }

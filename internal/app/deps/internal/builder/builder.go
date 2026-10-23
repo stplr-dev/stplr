@@ -30,9 +30,11 @@ import (
 	"go.stplr.dev/stplr/internal/app/errors"
 	"go.stplr.dev/stplr/internal/app/output"
 	"go.stplr.dev/stplr/internal/build"
+	"go.stplr.dev/stplr/internal/buildns"
 	"go.stplr.dev/stplr/internal/cliutils"
 	"go.stplr.dev/stplr/internal/config"
 	"go.stplr.dev/stplr/internal/config/savers"
+	"go.stplr.dev/stplr/internal/constants"
 	"go.stplr.dev/stplr/internal/copier"
 	"go.stplr.dev/stplr/internal/db"
 	"go.stplr.dev/stplr/internal/installer"
@@ -69,6 +71,8 @@ type Deps struct {
 
 	PluginProvider     *plugins.Provider
 	RootPluginProvider *plugins.Provider
+
+	builderUserNS *buildns.Namespace
 
 	Puller             repos.PullExecutor
 	Copier             copier.CopierExecutor
@@ -358,6 +362,24 @@ func (b *builder) Updater() *builder {
 	return b
 }
 
+// BuilderUserNamespace must run before [builder.DropCaps]: only root can map
+// the builder's subordinate ids for the sandbox.
+func (b *builder) BuilderUserNamespace() *builder {
+	if b.err != nil || !utils.IsRoot() {
+		return b
+	}
+
+	ns, err := buildns.Create(constants.BuilderUser, output.FromContext(b.ctx))
+	if err != nil {
+		b.err = errors.WrapIntoI18nError(err, gotext.Get("Failed to prepare the build sandbox"))
+		return b
+	}
+	b.deps.builderUserNS = ns
+	b.deps.cleanups = append(b.deps.cleanups, func() { _ = ns.Close() })
+
+	return b
+}
+
 func (b *builder) DropCaps() *builder {
 	if b.err != nil {
 		return b
@@ -379,6 +401,7 @@ func (b *builder) PluginProvider() *builder {
 	}
 
 	b.deps.PluginProvider = plugins.NewProvider(b.deps.Output)
+	b.deps.PluginProvider.PassBuilderUserNamespace(b.deps.builderUserNS)
 	err := b.deps.PluginProvider.SetupConnection()
 	if err != nil {
 		b.err = err

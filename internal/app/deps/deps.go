@@ -101,6 +101,7 @@ func ForInstallAction(ctx context.Context) (*InstallActionDeps, Cleanup, error) 
 		RootPluginProvider().
 		InstallerFromPlugin().
 		CopierFromRootPlugin().
+		BuilderUserNamespace().
 		// Drop caps
 		DropCaps().
 		PluginProvider().
@@ -157,6 +158,7 @@ func ForUpgradeAction(ctx context.Context) (*UpgradeDeps, Cleanup, error) {
 		Start(ctx).
 		RootPluginProvider().
 		InstallerFromPlugin().
+		BuilderUserNamespace().
 		DropCaps().
 		PluginProvider().
 		ScripterFromPlugin().
@@ -536,6 +538,7 @@ func ForBuildAction(ctx context.Context) (*BuildActionDeps, Cleanup, error) {
 		CopierFromRootPlugin().
 		// PatchConfigToUserDirs().
 		//
+		BuilderUserNamespace().
 		// Drop to builder user
 		DropCaps().
 		PatchToUserDirs().

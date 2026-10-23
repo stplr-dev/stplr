@@ -79,6 +79,11 @@ const (
 	REPO_URL_FOR_E2E_TESTS_SINGLE_PACKAGE = "https://altlinux.space/stapler/repo-for-tests-single-package.git"
 )
 
+const prepareSubIDsScript = `
+printf 'user:10000:20000\nstapler-builder:30000:30000\n' > /etc/subuid
+cp /etc/subuid /etc/subgid
+`
+
 func defaultPrepare(t *testing.T, r capytest.Runner) {
 	execShouldNoError(t, r,
 		"sudo",
@@ -107,6 +112,8 @@ func runMatrixSuite(t *testing.T, name string, images []string, test func(t *tes
 		ts.BeforeEach(func(t *testing.T, r capytest.Runner) {
 			execShouldNoError(t, r, "/bin/stplr-test-setup", "stplr-install")
 			execShouldNoError(t, r, "/bin/stplr-test-setup", "passwordless-sudo-setup")
+			execShouldNoError(t, r, "sudo", "bash", "-c", prepareSubIDsScript)
+			execShouldNoError(t, r, "sudo", "stplr", "setup")
 		})
 
 		testName := fmt.Sprintf("%s/%s", name, image)

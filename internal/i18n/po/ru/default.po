@@ -26,14 +26,14 @@ msgstr "Ошибка при загрузке конфигурации"
 msgid "Error while running app"
 msgstr "Ошибка при запуске приложения"
 
-#: internal/app/app.go:60
+#: internal/app/app.go:61
 msgid ""
 "Command-line interface for Stapler, a universal Linux package build system"
 msgstr ""
 "Интерфейс командной строки для Stapler, универсальной системы сборки пакетов "
 "Linux"
 
-#: internal/app/app.go:61
+#: internal/app/app.go:62
 msgid ""
 "Stapler is a universal Linux package build and distribution system designed "
 "for cross-distribution software delivery.\n"
@@ -69,11 +69,11 @@ msgstr ""
 "Для получения дополнительной информации и списка репозиториев сообщества: "
 "https://stplr.dev/docs/intro"
 
-#: internal/app/app.go:76
+#: internal/app/app.go:77
 msgid "Arguments to be passed on to the package manager"
 msgstr "Аргументы, которые будут переданы менеджеру пакетов"
 
-#: internal/app/app.go:82
+#: internal/app/app.go:83
 msgid "Enable interactive questions and prompts"
 msgstr "Включение интерактивных вопросов и запросов"
 
@@ -359,6 +359,18 @@ msgstr "[УСТАРЕЛ] Искать по репозиторию"
 msgid "[DEPRECATED] Search by provides"
 msgstr "[УСТАРЕЛ] Искать по provides"
 
+#: internal/app/commands/setup.go:35
+msgid "Configure the system for Stapler"
+msgstr "Настроить систему для Stapler"
+
+#: internal/app/commands/setup.go:36
+msgid ""
+"Allocates subordinate uid and gid ranges for the builder user, which the "
+"build sandbox needs.\n"
+"\n"
+"Safe to run repeatedly."
+msgstr ""
+
 #: internal/app/commands/support.go:35
 msgid "Dump debug information"
 msgstr "Выгрузить отладочную информацию"
@@ -375,18 +387,22 @@ msgstr "Обновить все установленные пакеты"
 msgid "Print the current Stapler version and exit"
 msgstr "Показать текущую версию Stapler и выйти"
 
-#: internal/app/deps/internal/builder/builder.go:115
+#: internal/app/deps/internal/builder/builder.go:119
 msgid "Failed to get working directory"
 msgstr "Ошибка при получении рабочего каталога"
 
-#: internal/app/deps/internal/builder/builder.go:166
+#: internal/app/deps/internal/builder/builder.go:170
 msgid "Unable to detect a supported package manager on the system"
 msgstr "Не удалось обнаружить поддерживаемый менеджер пакетов в системе"
 
-#: internal/app/deps/internal/builder/builder.go:185
-#: internal/app/deps/internal/builder/builder.go:211
+#: internal/app/deps/internal/builder/builder.go:189
+#: internal/app/deps/internal/builder/builder.go:215
 msgid "Error initialization database"
 msgstr "Ошибка инициализации базы данных"
+
+#: internal/app/deps/internal/builder/builder.go:374
+msgid "Failed to prepare the build sandbox"
+msgstr "Не удалось подготовить песочницу сборки"
 
 #: internal/app/output/console.go:59
 msgid "ERROR"
@@ -471,6 +487,14 @@ msgstr "Скачивание источников"
 #: internal/build/step_11_post.go:64
 msgid "Would you like to remove the build dependencies?"
 msgstr "Хотели бы вы удалить зависимости сборки?"
+
+#: internal/buildns/buildns.go:95
+msgid ""
+"The build user has no subordinate ids, so the build sandbox can't change "
+"file ownership. Run as root: stplr setup"
+msgstr ""
+"У пользователя сборки нет подчинённых идентификаторов, поэтому песочница "
+"сборки не может менять владельца файлов. Выполните от root: stplr setup"
 
 #: internal/cliprompts/prompt.go:48 internal/cliprompts/prompt.go:64
 #: internal/cliprompts/prompt.go:81
@@ -718,6 +742,24 @@ msgstr "🞮 Не удалось выполнить запрос — единс�
 #: internal/service/repos/tui_pull.go:299
 msgid "Pulling %s..."
 msgstr "Вытягивание %s..."
+
+#: internal/shutils/handlers/sandbox.go:574
+msgid ""
+"You have no subordinate ids, so the build sandbox can't change file "
+"ownership. See https://stplr.dev/docs/guide#build-without-root"
+msgstr ""
+"У вас нет подчинённых идентификаторов, поэтому песочница сборки не может "
+"менять владельца файлов. Подробнее: https://stplr.dev/docs/guide#build-"
+"without-root"
+
+#: internal/shutils/handlers/sandbox.go:577
+msgid ""
+"Can't use newuidmap and newgidmap (%s), so the build sandbox can't change "
+"file ownership. See https://stplr.dev/docs/guide#build-without-root"
+msgstr ""
+"Не удаётся использовать newuidmap и newgidmap (%s), поэтому песочница сборки "
+"не может менять владельца файлов. Подробнее: https://stplr.dev/docs/"
+"guide#build-without-root"
 
 #: internal/usecase/build/build.go:101
 #, fuzzy
@@ -984,6 +1026,24 @@ msgstr "Ошибка при удалении пакетов из базы дан
 msgid "Error while executing search"
 msgstr "Ошибка при выполнении поиска"
 
+#: internal/usecase/setup/setup.go:74
+msgid "User %s not found"
+msgstr "Пользователь %s не найден"
+
+#: internal/usecase/setup/setup.go:79
+msgid "Failed to configure %s"
+msgstr "Не удалось настроить %s"
+
+#: internal/usecase/setup/setup.go:85
+msgid "%s not found, builds run by a regular user can't change file ownership"
+msgstr ""
+"%s не найден, при сборке от обычного пользователя песочница не сможет менять "
+"владельца файлов"
+
+#: internal/usecase/setup/setup.go:112
+msgid "Added range %d-%d to %s for %s"
+msgstr "Добавлен диапазон %d-%d в %s для %s"
+
 #: internal/usecase/support/support.go:46
 msgid "Failed to generate support archive"
 msgstr "Не удалось создать архив для поддержки"
@@ -1103,6 +1163,31 @@ msgstr "Ошибка при определении языка системы"
 #: pkg/staplerfile/resolver.go:55
 msgid "Error resolving overrides"
 msgstr "Ошибка устранения переопределений"
+
+#~ msgid ""
+#~ "Allocates subordinate uid and gid ranges for the builder user, which the "
+#~ "build sandbox needs.\n"
+#~ "\n"
+#~ "Safe to run repeatedly.\n"
+#~ "\n"
+#~ "Builds run by a regular user don't use the builder user. They map the "
+#~ "user's own ranges from /etc/subuid and /etc/subgid with newuidmap and "
+#~ "newgidmap, and without them the sandbox can't change file ownership. On "
+#~ "ALT allow these helpers with \"control newuidmap public\" and \"control "
+#~ "newgidmap public\", on other systems install the uidmap or shadow-utils "
+#~ "package."
+#~ msgstr ""
+#~ "Выделяет пользователю сборки диапазоны подчинённых uid и gid, необходимые "
+#~ "песочнице сборки.\n"
+#~ "\n"
+#~ "Можно запускать повторно.\n"
+#~ "\n"
+#~ "Сборка от обычного пользователя не использует пользователя сборки. Она "
+#~ "отображает собственные диапазоны пользователя из /etc/subuid и /etc/"
+#~ "subgid с помощью newuidmap и newgidmap, и без них песочница не может "
+#~ "менять владельца файлов. В ALT разрешите эти программы командами "
+#~ "\"control newuidmap public\" и \"control newgidmap public\", в других "
+#~ "системах установите пакет uidmap или shadow-utils."
 
 #~ msgid "Help"
 #~ msgstr "Помощь"

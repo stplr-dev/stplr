@@ -168,7 +168,7 @@ func (e *LocalScriptExecutor) createRunner(
 		return pkg.DisableNetwork.Resolved()
 	})
 
-	sandboxInstance, err := handlers.SandboxHandler(2*time.Second, dirs, disableNet)
+	sandboxInstance, err := handlers.SandboxHandler(e.out, 2*time.Second, dirs, disableNet)
 	if err != nil {
 		return nil, nil, fmt.Errorf("creating sandbox handler: %w", err)
 	}

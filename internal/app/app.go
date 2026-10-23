@@ -49,6 +49,7 @@ func GetApp() *cli.Command {
 		commands.RepoCmd(),
 		commands.ConfigCmd(),
 		commands.MigrateCmd(),
+		commands.SetupCmd(),
 		commands.SupportCmd(),
 		// Internal commands
 		commands.InternalPluginProvider(),

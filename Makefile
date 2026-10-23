@@ -106,6 +106,7 @@ install-post:
 		echo "User 'stapler-builder' already exists. Skipping."; \
 	fi
 	install -d -o stapler-builder -g stapler-builder -m 755 $(DESTDIR)$(CACHE_DIR);
+	$(BIN) setup
 
 uninstall:
 	rm -rf \

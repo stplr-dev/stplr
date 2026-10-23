@@ -12,3 +12,5 @@ fi
 
 chown -R stapler-builder:stapler-builder /var/cache/stplr
 chmod 755 /var/cache/stplr
+
+/usr/bin/stplr setup || true

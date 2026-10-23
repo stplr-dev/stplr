@@ -23,10 +23,15 @@ import (
 
 	"github.com/opencontainers/runc/libcontainer"
 	_ "github.com/opencontainers/runc/libcontainer/nsenter"
+
+	"go.stplr.dev/stplr/internal/buildns"
 )
 
 func init() {
 	if len(os.Args) > 1 && os.Args[1] == "init" {
 		libcontainer.Init()
+	}
+	if len(os.Args) > 1 && os.Args[1] == buildns.HolderSubcommand {
+		buildns.RunHolder(os.Args[2:])
 	}
 }
