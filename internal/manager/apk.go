@@ -50,7 +50,7 @@ func (*APK) Exists() bool {
 }
 
 func (*APK) Name() string {
-	return "apk"
+	return NameAPK
 }
 
 func (*APK) Format() string {

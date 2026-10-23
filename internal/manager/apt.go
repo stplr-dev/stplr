@@ -50,7 +50,7 @@ func (*APT) Exists() bool {
 }
 
 func (*APT) Name() string {
-	return "apt"
+	return NameAPT
 }
 
 func (*APT) Format() string {

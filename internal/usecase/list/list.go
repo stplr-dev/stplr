@@ -164,12 +164,12 @@ func (u *useCase) parseInstalledPackages(installed map[string]string) (map[strin
 	return installedAlrPackages, nil
 }
 
-func (u *useCase) getInstalledPackages(opts Options) (map[string]VerInfo, error) {
+func (u *useCase) getInstalledPackages(ctx context.Context, opts Options) (map[string]VerInfo, error) {
 	if !opts.Installed {
 		return nil, nil
 	}
 
-	mgr := manager.Detect()
+	mgr := manager.Detect(ctx)
 	if mgr == nil {
 		return nil, errors.NewI18nError(gotext.Get("Unable to detect a supported package manager on the system"))
 	}
@@ -232,7 +232,7 @@ func (u *useCase) Run(ctx context.Context, opts Options) error {
 		return errors.WrapIntoI18nError(err, gotext.Get("Error getting packages"))
 	}
 
-	installedPkgs, err := u.getInstalledPackages(opts)
+	installedPkgs, err := u.getInstalledPackages(ctx, opts)
 	if err != nil {
 		return err
 	}

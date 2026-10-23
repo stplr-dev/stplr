@@ -50,7 +50,7 @@ func (*Pacman) Exists() bool {
 }
 
 func (*Pacman) Name() string {
-	return "pacman"
+	return NamePacman
 }
 
 func (*Pacman) Format() string {

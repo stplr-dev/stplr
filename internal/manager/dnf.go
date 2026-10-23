@@ -47,7 +47,7 @@ func (*DNF) Exists() bool {
 }
 
 func (*DNF) Name() string {
-	return "dnf"
+	return NameDNF
 }
 
 func (*DNF) Format() string {

@@ -165,7 +165,7 @@ func (b *builder) Manager() *builder {
 		return b
 	}
 
-	b.deps.Manager = manager.Detect()
+	b.deps.Manager = manager.Detect(b.ctx)
 	if b.deps.Manager == nil {
 		b.err = errors.NewI18nError(gotext.Get("Unable to detect a supported package manager on the system"))
 	}

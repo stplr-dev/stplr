@@ -25,8 +25,22 @@
 package manager
 
 import (
+	"context"
 	"os"
 	"os/exec"
+
+	"go.stplr.dev/stplr/pkg/distro"
+)
+
+const (
+	NamePacman = "pacman"
+	NameAPTRpm = "apt-rpm"
+	NameAPT    = "apt"
+	NameDNF    = "dnf"
+	NameYUM    = "yum"
+	NameAPK    = "apk"
+	NameZypper = "zypper"
+	NameEpm    = "epm"
 )
 
 var Args []string
@@ -86,14 +100,56 @@ type Manager interface {
 	IsInstalled(string) (bool, error)
 }
 
+// distroManagers maps an os-release ID to the package managers native to it,
+// in order of preference.
+var distroManagers = map[string][]string{
+	"altlinux": {NameAPTRpm, NameEpm},
+	"arch":     {NamePacman},
+	"debian":   {NameAPT},
+	"ubuntu":   {NameAPT},
+	"fedora":   {NameDNF, NameYUM},
+	"rhel":     {NameDNF, NameYUM},
+	"centos":   {NameDNF, NameYUM},
+	"alpine":   {NameAPK},
+	"suse":     {NameZypper},
+	"opensuse": {NameZypper},
+}
+
 // Detect returns the package manager detected on the system
-func Detect() Manager {
-	for _, mgr := range managers {
+func Detect(ctx context.Context) Manager {
+	info, _ := distro.ParseOSRelease(ctx)
+	return detect(info, managers)
+}
+
+// detect prefers managers native to the distro, so an unrelated binary
+// with the same name (e.g. the pacman game on ALT Linux) is not picked up.
+func detect(info *distro.OSRelease, mgrs []Manager) Manager {
+	for _, name := range preferredManagers(info) {
+		for _, mgr := range mgrs {
+			if mgr.Name() == name && mgr.Exists() {
+				return mgr
+			}
+		}
+	}
+
+	for _, mgr := range mgrs {
 		if mgr.Exists() {
 			return mgr
 		}
 	}
 	return nil
+}
+
+func preferredManagers(info *distro.OSRelease) []string {
+	if info == nil {
+		return nil
+	}
+
+	var names []string
+	for _, id := range append([]string{info.ID}, info.Like...) {
+		names = append(names, distroManagers[id]...)
+	}
+	return names
 }
 
 // Get returns the package manager with the given name

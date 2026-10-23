@@ -49,7 +49,7 @@ func (e *Epm) Exists() bool {
 }
 
 func (*Epm) Name() string {
-	return "epm"
+	return NameEpm
 }
 
 func (*Epm) format() string {

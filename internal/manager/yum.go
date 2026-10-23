@@ -48,7 +48,7 @@ func (*YUM) Exists() bool {
 }
 
 func (*YUM) Name() string {
-	return "yum"
+	return NameYUM
 }
 
 func (*YUM) Format() string {

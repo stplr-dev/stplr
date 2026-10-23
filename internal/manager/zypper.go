@@ -49,7 +49,7 @@ func (*Zypper) Exists() bool {
 }
 
 func (*Zypper) Name() string {
-	return "zypper"
+	return NameZypper
 }
 
 func (*Zypper) Format() string {

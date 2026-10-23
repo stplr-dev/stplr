@@ -43,7 +43,7 @@ func NewAPTRpm() *APTRpm {
 }
 
 func (*APTRpm) Name() string {
-	return "apt-rpm"
+	return NameAPTRpm
 }
 
 func (*APTRpm) Format() string {
