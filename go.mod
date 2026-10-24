@@ -1,6 +1,6 @@
 module go.stplr.dev/stplr
 
-go 1.26.0
+go 1.27
 
 toolchain go1.27.3
 
@@ -48,7 +48,7 @@ require (
 	github.com/knadh/koanf/providers/env v1.1.0
 	github.com/knadh/koanf/providers/file v1.2.1
 	github.com/knadh/koanf/v2 v2.4.1
-	github.com/leonelquinteros/gotext v1.7.2
+	github.com/leonelquinteros/gotext v1.8.0
 	github.com/mattn/go-isatty v0.0.24
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/opencontainers/cgroups v0.1.0
