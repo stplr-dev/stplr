@@ -83,6 +83,39 @@ jobs:
           path: coverage.out
           retention-days: 1
 
+  build:
+    runs-on: als-huge-gh
+
+    strategy:
+      matrix:
+        target: [build, build-arm64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install build deps
+        run: |
+          apt-get update
+          apt-get install -y libsystemd-dev gcc-aarch64-linux-gnu
+
+      - name: Cache Go
+        uses: actions/cache-tools-go@v1
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Build
+        env:
+          GENERATE: 0
+        run: make ${{ matrix.target }}
+
   semgrep:
     runs-on: als-huge-gh
     continue-on-error: true

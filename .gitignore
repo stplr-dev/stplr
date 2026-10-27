@@ -1,4 +1,5 @@
 /stplr
+/stplr-arm64
 /dist/
 /internal/config/version.txt
 .fleet

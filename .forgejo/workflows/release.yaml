@@ -38,7 +38,7 @@ jobs:
       - name: Install build deps
         run: |
           apt-get update
-          apt-get install -y libsystemd-dev
+          apt-get install -y libsystemd-dev gcc-aarch64-linux-gnu
 
       - name: Cache Go
         uses: actions/cache-tools-go@v1
@@ -80,17 +80,22 @@ jobs:
         env:
           IGNORE_ROOT_CHECK: 1
         run: |
-          make build
+          make build build-arm64
 
       - name: Create tar.gz
         run: |
-          mkdir -p ./out/completion
-          cp stplr ./out
-          cp scripts/completion/bash ./out/completion/stplr
-          cp scripts/completion/zsh ./out/completion/_stplr
+          pack() {
+            rm -rf ./out
+            mkdir -p ./out/completion
+            cp "$1" ./out/stplr
+            cp scripts/completion/bash ./out/completion/stplr
+            cp scripts/completion/zsh ./out/completion/_stplr
+            ( cd out && tar -czvf ../dist/stplr-${{ env.VERSION }}-linux-$2.tar.gz * )
+          }
 
           mkdir -p ./dist
-          ( cd out && tar -czvf ../dist/stplr-${{ env.VERSION }}-linux-x86_64.tar.gz * )
+          pack stplr x86_64
+          pack stplr-arm64 aarch64
 
       - name: Release
         uses: actions/forgejo-release@v2.7.3

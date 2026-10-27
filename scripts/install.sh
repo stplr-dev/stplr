@@ -34,14 +34,33 @@ if [ "$UNAME_S" != "Linux" ]; then
     exit 1
 fi
 
-if [ "$UNAME_M" != "x86_64" ]; then
-    echo "Hardware architecture $UNAME_M is not supported!"
-    exit 1
-fi
+case "$UNAME_M" in
+    arm64) ARCH="linux-aarch64" ;;
+    *) ARCH="linux-$UNAME_M" ;;
+esac
 
-VERSION="0.0.30"
-ARCH="linux-x86_64"
-BASE_URL="https://altlinux.space/stapler/stplr/releases/download/v$VERSION"
+REPO_URL="https://altlinux.space/stapler/stplr"
+LATEST_RELEASE_API="https://altlinux.space/api/v1/repos/stapler/stplr/releases/latest"
+
+get_latest_version() {
+    curl -fsSL "$LATEST_RELEASE_API" \
+        | grep -o '"tag_name":"v[^"]*"' \
+        | head -n1 \
+        | sed -E 's/.*"v([^"]+)"/\1/'
+}
+
+VERSION="${STPLR_VERSION:-}"
+if [ -z "$VERSION" ]; then
+    VERSION="$(get_latest_version)" || true
+    if [ -z "$VERSION" ]; then
+        echo "❌ Error: Failed to determine the latest stplr version."
+        echo "Set STPLR_VERSION to install a specific version."
+        exit 1
+    fi
+fi
+VERSION="${VERSION#v}"
+
+BASE_URL="$REPO_URL/releases/download/v$VERSION"
 TAR_NAME="stplr-$VERSION-$ARCH.tar.gz"
 
 PREFIX="/usr/local"
@@ -91,7 +110,19 @@ cleanup() { rm -rf "$TMP_DIR"; }
 trap cleanup EXIT
 
 echo "⬇️  Downloading stplr v$VERSION..."
-curl -fsSL "$BASE_URL/$TAR_NAME" -o "$TMP_DIR/stplr.tar.gz"
+HTTP_CODE=$(curl -sSL -w '%{http_code}' "$BASE_URL/$TAR_NAME" -o "$TMP_DIR/stplr.tar.gz")
+case "$HTTP_CODE" in
+    200) ;;
+    404)
+        echo "❌ Error: stplr v$VERSION is not available for $UNAME_M."
+        echo "See $REPO_URL/releases for supported architectures."
+        exit 1
+        ;;
+    *)
+        echo "❌ Error: Failed to download $TAR_NAME (HTTP $HTTP_CODE)."
+        exit 1
+        ;;
+esac
 tar -xzf "$TMP_DIR/stplr.tar.gz" -C "$TMP_DIR"
 
 ROOT_SCRIPT_CONTENT="
@@ -101,15 +132,15 @@ install -Dm755 '$TMP_DIR/stplr' '$STPLR_BIN'
 echo '✅ Binary installed to $STPLR_BIN'
 
 # Install shell completions if available
-if [ -d '$TMP_DIR/completions' ]; then
-    if [ -f '$TMP_DIR/completions/stplr.bash' ]; then
+if [ -d '$TMP_DIR/completion' ]; then
+    if [ -f '$TMP_DIR/completion/stplr' ]; then
         mkdir -p '$BASH_COMPLETION_DIR'
-        install -Dm644 '$TMP_DIR/completions/stplr.bash' '$BASH_COMPLETION_DIR/stplr'
+        install -Dm644 '$TMP_DIR/completion/stplr' '$BASH_COMPLETION_DIR/stplr'
         echo '🔧 Bash completion installed'
     fi
-    if [ -f '$TMP_DIR/completions/stplr.zsh' ]; then
+    if [ -f '$TMP_DIR/completion/_stplr' ]; then
         mkdir -p '$ZSH_COMPLETION_DIR'
-        install -Dm644 '$TMP_DIR/completions/stplr.zsh' '$ZSH_COMPLETION_DIR/_stplr'
+        install -Dm644 '$TMP_DIR/completion/_stplr' '$ZSH_COMPLETION_DIR/_stplr'
         echo '🔧 Zsh completion installed'
     fi
 fi

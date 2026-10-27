@@ -14,6 +14,8 @@ sysconfdir = /etc
 mandir = $(datarootdir)/man
 
 BIN := ./$(NAME)
+BIN_ARM64 := $(BIN)-arm64
+ARM64_CC ?= aarch64-linux-gnu-gcc
 COMPLETIONS_DIR := ./scripts/completion
 BASH_COMPLETION := $(COMPLETIONS_DIR)/bash
 ZSH_COMPLETION := $(COMPLETIONS_DIR)/zsh
@@ -39,7 +41,7 @@ ifneq ($(CONFIG_DEFAULT_ROOT_CMD),)
 	LDFLAGS += -X 'go.stplr.dev/stplr/internal/constants.ConfigDefaultRootCmd=$(CONFIG_DEFAULT_ROOT_CMD)'
 endif
 
-.PHONY: build install clean clear uninstall install-config install-cachedir install-sysusers install-tmpfiles install-post
+.PHONY: build build-arm64 install clean clear uninstall install-config install-cachedir install-sysusers install-tmpfiles install-post
 
 build: $(BIN) $(MAN_DIR)
 
@@ -50,6 +52,10 @@ else
 	@echo "Skipping go generate (GENERATE=0)"
 endif
 	go build -ldflags="$(LDFLAGS)" -o $@ ./cmd/stplr
+
+# Skips go generate: its go run tools would be built for arm64 and fail to start.
+build-arm64:
+	CGO_ENABLED=1 GOARCH=arm64 CC=$(ARM64_CC) go build -ldflags="$(LDFLAGS)" -o $(BIN_ARM64) ./cmd/stplr
 
 $(MAN_DIR):
 	@echo "Generating man pages..."
@@ -118,7 +124,7 @@ uninstall:
 		$(DESTDIR)$(mandir)/ru/man1/$(NAME).1
 
 clean clear:
-	rm -f $(BIN)
+	rm -f $(BIN) $(BIN_ARM64)
 	rm -rf $(MAN_DIR)
 
 # Development Targets
