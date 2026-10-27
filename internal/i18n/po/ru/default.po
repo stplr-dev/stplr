@@ -105,23 +105,24 @@ msgstr "Не добавлять суффикс к имени пакета"
 #: internal/app/commands/build.go:74
 msgid "Override a source by index (format: N:path or N:url, e.g. 0:./foo.deb)"
 msgstr ""
+"Переопределить источник по индексу (формат: N:путь или N:url, например 0:./"
+"foo.deb)"
 
 #: internal/app/commands/build.go:78
 msgid "Skip checksum verification for overridden sources"
-msgstr ""
+msgstr "Пропустить проверку контрольных сумм для переопределённых источников"
 
 #: internal/app/commands/build.go:124
 msgid "invalid --source format %q: expected N:path (e.g. 0:./file.deb)"
-msgstr ""
+msgstr "неверный формат --source %q: ожидается N:путь (например, 0:./file.deb)"
 
 #: internal/app/commands/build.go:128
 msgid "invalid source index %q: must be a non-negative integer"
-msgstr ""
+msgstr "неверный индекс источника %q: должен быть неотрицательным целым числом"
 
 #: internal/app/commands/build.go:135
-#, fuzzy
 msgid "failed to resolve path %q"
-msgstr "не удалось сохранить конфигурацию: %v"
+msgstr "не удалось определить путь %q"
 
 #: internal/app/commands/config.go:46
 msgid "Manage config"
@@ -370,6 +371,10 @@ msgid ""
 "\n"
 "Safe to run repeatedly."
 msgstr ""
+"Выделяет подчинённые диапазоны uid и gid для пользователя сборщика, "
+"необходимые песочнице сборки.\n"
+"\n"
+"Можно безопасно запускать повторно."
 
 #: internal/app/commands/support.go:35
 msgid "Dump debug information"
@@ -459,7 +464,7 @@ msgstr "Архитектура процессора вашей системы н
 
 #: internal/build/source_downloader.go:71
 msgid "Using local override for source [%d]: %s"
-msgstr ""
+msgstr "Используется локальное переопределение для источника [%d]: %s"
 
 #: internal/build/step_04_nonfree_view.go:103
 msgid ""
@@ -479,6 +484,8 @@ msgstr "Массив контрольных сумм должен быть то�
 #: internal/build/step_06_flat_vars.go:66
 msgid "source override index %d is out of range (package has %d sources)"
 msgstr ""
+"индекс переопределения источника %d вне допустимого диапазона (у пакета "
+"источников: %d)"
 
 #: internal/build/step_09_prepare.go:59
 msgid "Downloading sources"
@@ -762,9 +769,8 @@ msgstr ""
 "guide#build-without-root"
 
 #: internal/usecase/build/build.go:101
-#, fuzzy
 msgid "Error preparing source overrides"
-msgstr "Ошибка устранения переопределений"
+msgstr "Ошибка подготовки переопределений источников"
 
 #: internal/usecase/build/build.go:118
 msgid ""
