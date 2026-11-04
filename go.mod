@@ -57,7 +57,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.4.3
 	github.com/spf13/afero v1.15.0
 	github.com/stretchr/testify v1.12.1
-	github.com/urfave/cli-docs/v3 v3.1.0
+	github.com/urfave/cli-docs/v3 v3.2.0
 	github.com/urfave/cli/v3 v3.14.0
 	go.alt-gnome.ru/capytest v0.0.5-0.20260527200622-62f1c4f5e109
 	go.alt-gnome.ru/capytest/providers/podman v0.0.5-0.20260527200622-62f1c4f5e109
