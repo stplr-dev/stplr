@@ -67,7 +67,9 @@ func (n *Namespace) Close() error {
 }
 
 // Create returns a user namespace owned by the builder, with the builder
-// mapped to root and its subordinate ranges mapped after it.
+// mapped to root and its subordinate ranges mapped after it. If the ranges
+// can't be mapped, the builder is mapped alone and the sandbox can't change
+// file ownership.
 func Create(username string, out output.Output) (*Namespace, error) {
 	u, err := user.Lookup(username)
 	if err != nil {
@@ -91,21 +93,62 @@ func Create(username string, out output.Output) (*Namespace, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(subUIDs) == 0 || len(subGIDs) == 0 {
-		out.Warn("%s", gotext.Get("The build user has no subordinate ids, so the build sandbox can't change file ownership. Run as root: stplr setup"))
-	}
-	uidMap := subid.Format(subid.Mappings(uint32(uid), subUIDs))
-	gidMap := subid.Format(subid.Mappings(uint32(gid), subGIDs))
-
-	exe, err := os.Executable()
+	validUIDs, err := subid.ValidRanges("/proc/self/uid_map")
 	if err != nil {
 		return nil, err
+	}
+	validGIDs, err := subid.ValidRanges("/proc/self/gid_map")
+	if err != nil {
+		return nil, err
+	}
+
+	uidRanges, uidSynthesized := subid.Subordinate(uint32(uid), subUIDs, validUIDs, true)
+	gidRanges, gidSynthesized := subid.Subordinate(uint32(gid), subGIDs, validGIDs, true)
+	if len(uidRanges) == 0 || len(gidRanges) == 0 {
+		out.Warn("%s", gotext.Get("The build user has no subordinate ids, so the build sandbox can't change file ownership. Run as root: stplr setup"))
+	}
+	if uidSynthesized || gidSynthesized {
+		out.Warn("%s", gotext.Get("The build user's subordinate IDs are unavailable in this user namespace, so the build sandbox will use the IDs available here"))
+	}
+	uidMap := subid.Format(subid.Mappings(uint32(uid), uidRanges))
+	gidMap := subid.Format(subid.Mappings(uint32(gid), gidRanges))
+
+	ns, pid, err := startHolder(uid, gid)
+	if err != nil {
+		return nil, err
+	}
+	if err := writeIDMaps(pid, uidMap, gidMap); err != nil {
+		_ = ns.Close()
+		out.Warn("%s", gotext.Get("Failed to map the build user's subordinate IDs (%s), so the build sandbox cannot change file ownership", err))
+		ns, pid, err = startHolder(uid, gid)
+		if err != nil {
+			return nil, err
+		}
+		if err := writeIDMaps(pid,
+			subid.Format(subid.Mappings(uint32(uid), nil)),
+			subid.Format(subid.Mappings(uint32(gid), nil)),
+		); err != nil {
+			_ = ns.Close()
+			return nil, err
+		}
+	}
+
+	return ns, nil
+}
+
+// startHolder runs the holder as the builder and returns the namespace
+// together with the pid of the process whose map files can be written.
+func startHolder(uid, gid uint64) (*Namespace, int, error) {
+	exe, err := os.Executable()
+	if err != nil {
+		return nil, 0, err
 	}
 
 	cmd := exec.Command(exe, HolderSubcommand)
 	cmd.Env = []string{}
 	cmd.Stderr = os.Stderr
 	cmd.SysProcAttr = &syscall.SysProcAttr{
+		//gosec:disable G115 -- uid and gid are parsed with a 32-bit bound
 		Credential: &syscall.Credential{Uid: uint32(uid), Gid: uint32(gid), Groups: []uint32{}},
 		Pdeathsig:  syscall.SIGKILL,
 	}
@@ -113,35 +156,37 @@ func Create(username string, out output.Output) (*Namespace, error) {
 	// The holders live until stdin is closed.
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	if err := cmd.Start(); err != nil {
-		return nil, fmt.Errorf("starting userns holder: %w", err)
+		return nil, 0, fmt.Errorf("starting userns holder: %w", err)
 	}
 	ns := &Namespace{stdin: stdin, cmd: cmd}
 
 	pid, err := readPid(stdout)
 	if err != nil {
 		_ = ns.Close()
-		return nil, err
+		return nil, 0, err
 	}
 	ns.Path = fmt.Sprintf("/proc/%d/ns/user", pid)
 
-	// The kernel accepts only one write per map file.
+	return ns, pid, nil
+}
+
+// writeIDMaps writes the uid and gid maps of the process. The kernel accepts
+// only one write per map file.
+func writeIDMaps(pid int, uidMap, gidMap string) error {
 	if err := os.WriteFile(fmt.Sprintf("/proc/%d/uid_map", pid), []byte(uidMap), 0); err != nil {
-		_ = ns.Close()
-		return nil, fmt.Errorf("writing uid_map: %w", err)
+		return fmt.Errorf("writing uid_map: %w", err)
 	}
 	if err := os.WriteFile(fmt.Sprintf("/proc/%d/gid_map", pid), []byte(gidMap), 0); err != nil {
-		_ = ns.Close()
-		return nil, fmt.Errorf("writing gid_map: %w", err)
+		return fmt.Errorf("writing gid_map: %w", err)
 	}
-
-	return ns, nil
+	return nil
 }
 
 func readPid(r io.Reader) (int, error) {

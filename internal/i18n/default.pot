@@ -453,10 +453,22 @@ msgstr ""
 msgid "Would you like to remove the build dependencies?"
 msgstr ""
 
-#: internal/buildns/buildns.go:95
+#: internal/buildns/buildns.go:108
 msgid ""
 "The build user has no subordinate ids, so the build sandbox can't change "
 "file ownership. Run as root: stplr setup"
+msgstr ""
+
+#: internal/buildns/buildns.go:111
+msgid ""
+"The build user's subordinate IDs are unavailable in this user namespace, so "
+"the build sandbox will use the IDs available here"
+msgstr ""
+
+#: internal/buildns/buildns.go:122
+msgid ""
+"Failed to map the build user's subordinate IDs (%s), so the build sandbox "
+"cannot change file ownership"
 msgstr ""
 
 #: internal/cliprompts/prompt.go:48 internal/cliprompts/prompt.go:64
@@ -703,13 +715,20 @@ msgstr ""
 msgid "Pulling %s..."
 msgstr ""
 
-#: internal/shutils/handlers/sandbox.go:574
+#: internal/shutils/handlers/sandbox.go:587
+msgid ""
+"Your subordinate IDs are unavailable in this user namespace, so the build "
+"sandbox cannot change file ownership. See https://stplr.dev/docs/guide#build-"
+"without-root"
+msgstr ""
+
+#: internal/shutils/handlers/sandbox.go:589
 msgid ""
 "You have no subordinate ids, so the build sandbox can't change file "
 "ownership. See https://stplr.dev/docs/guide#build-without-root"
 msgstr ""
 
-#: internal/shutils/handlers/sandbox.go:577
+#: internal/shutils/handlers/sandbox.go:593
 msgid ""
 "Can't use newuidmap and newgidmap (%s), so the build sandbox can't change "
 "file ownership. See https://stplr.dev/docs/guide#build-without-root"

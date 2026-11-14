@@ -570,16 +570,32 @@ func generateMappings(out output.Output) ([]specs.LinuxIDMapping, []specs.LinuxI
 		return nil, nil, err
 	}
 
-	if len(subUIDs) == 0 || len(subGIDs) == 0 {
-		warnOnce(out, gotext.Get("You have no subordinate ids, so the build sandbox can't change file ownership. See https://stplr.dev/docs/guide#build-without-root"))
-		subUIDs, subGIDs = nil, nil
-	} else if err := checkIDMapHelpers(); err != nil {
-		warnOnce(out, gotext.Get("Can't use newuidmap and newgidmap (%s), so the build sandbox can't change file ownership. See https://stplr.dev/docs/guide#build-without-root", err))
-		subUIDs, subGIDs = nil, nil
+	validUIDs, err := subid.ValidRanges("/proc/self/uid_map")
+	if err != nil {
+		return nil, nil, err
+	}
+	validGIDs, err := subid.ValidRanges("/proc/self/gid_map")
+	if err != nil {
+		return nil, nil, err
 	}
 
-	return toSpecMappings(subid.Mappings(uint32(uid), subUIDs)),
-		toSpecMappings(subid.Mappings(uint32(gid), subGIDs)),
+	uidRanges, _ := subid.Subordinate(uint32(uid), subUIDs, validUIDs, false)
+	gidRanges, _ := subid.Subordinate(uint32(gid), subGIDs, validGIDs, false)
+
+	if len(uidRanges) == 0 || len(gidRanges) == 0 {
+		if len(subUIDs) > 0 || len(subGIDs) > 0 {
+			warnOnce(out, gotext.Get("Your subordinate IDs are unavailable in this user namespace, so the build sandbox cannot change file ownership. See https://stplr.dev/docs/guide#build-without-root"))
+		} else {
+			warnOnce(out, gotext.Get("You have no subordinate ids, so the build sandbox can't change file ownership. See https://stplr.dev/docs/guide#build-without-root"))
+		}
+		uidRanges, gidRanges = nil, nil
+	} else if err := checkIDMapHelpers(); err != nil {
+		warnOnce(out, gotext.Get("Can't use newuidmap and newgidmap (%s), so the build sandbox can't change file ownership. See https://stplr.dev/docs/guide#build-without-root", err))
+		uidRanges, gidRanges = nil, nil
+	}
+
+	return toSpecMappings(subid.Mappings(uint32(uid), uidRanges)),
+		toSpecMappings(subid.Mappings(uint32(gid), gidRanges)),
 		nil
 }
 

@@ -16,7 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// Package subid reads subordinate id ranges from /etc/subuid and /etc/subgid.
+// Package subid reads id ranges from /etc/subuid, /etc/subgid,
+// /proc/<pid>/uid_map and /proc/<pid>/gid_map.
 package subid
 
 import (
@@ -26,6 +27,7 @@ import (
 	"log/slog"
 	"math"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -105,6 +107,123 @@ func OwnedBy(ranges []Range, username, uid string) []Range {
 		}
 	}
 	return owned
+}
+
+// ParseMap parses a /proc/<pid>/uid_map or /proc/<pid>/gid_map file and
+// returns the ranges of ids valid in the namespace it describes (the left
+// column).
+func ParseMap(r io.Reader) ([]Range, error) {
+	var ranges []Range
+
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+
+		parts := strings.Fields(line)
+		if len(parts) != 3 {
+			slog.Debug("subid: skipping malformed map line", "line", line)
+			continue
+		}
+
+		first, firstErr := strconv.ParseUint(parts[0], 10, 32)
+		size, sizeErr := strconv.ParseUint(parts[2], 10, 32)
+		if firstErr != nil || sizeErr != nil || size == 0 {
+			slog.Debug("subid: skipping malformed map line", "line", line)
+			continue
+		}
+
+		ranges = append(ranges, Range{Start: uint32(first), Size: uint32(size)})
+	}
+
+	return ranges, scanner.Err()
+}
+
+// ValidRanges reads a map file (e.g. /proc/self/uid_map) and returns the ids
+// that are valid in the described namespace. A nested namespace can only map
+// to these ids.
+func ValidRanges(path string) ([]Range, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	return ParseMap(f)
+}
+
+// ClipTo returns the parts of ranges that lie within valid.
+func ClipTo(ranges, valid []Range) []Range {
+	var clipped []Range
+	for _, r := range ranges {
+		for _, v := range valid {
+			start := max(uint64(r.Start), uint64(v.Start))
+			end := min(r.End(), v.End())
+			if start < end {
+				//gosec:disable G115 -- id ranges never exceed 32-bit bounds
+				clipped = append(clipped, Range{Owner: r.Owner, Start: uint32(start), Size: uint32(end - start)})
+			}
+		}
+	}
+	return clipped
+}
+
+// ExcludeID removes id from ranges, splitting ranges as needed.
+func ExcludeID(ranges []Range, id uint32) []Range {
+	var out []Range
+	for _, r := range ranges {
+		start := uint64(r.Start)
+		end := r.End()
+		if uint64(id) < start || uint64(id) >= end {
+			out = append(out, r)
+			continue
+		}
+		if start < uint64(id) {
+			//gosec:disable G115 -- id ranges never exceed 32-bit bounds
+			out = append(out, Range{Owner: r.Owner, Start: r.Start, Size: uint32(uint64(id) - start)})
+		}
+		if uint64(id)+1 < end {
+			//gosec:disable G115 -- id ranges never exceed 32-bit bounds
+			out = append(out, Range{Owner: r.Owner, Start: id + 1, Size: uint32(end - uint64(id) - 1)})
+		}
+	}
+	return out
+}
+
+// CoversAll reports whether ranges cover every id Linux allows (2^32-1 is
+// never a valid id).
+func CoversAll(ranges []Range) bool {
+	sorted := make([]Range, len(ranges))
+	copy(sorted, ranges)
+	sort.Slice(sorted, func(i, j int) bool { return sorted[i].Start < sorted[j].Start })
+
+	var next uint64
+	for _, r := range sorted {
+		if uint64(r.Start) > next {
+			return false
+		}
+		next = max(next, r.End())
+	}
+	return next >= math.MaxUint32
+}
+
+// Subordinate returns configured clipped to valid, excluding id. If no ranges
+// remain, synthesize selects valid minus id unless valid covers every id.
+// synthesized reports whether the fallback was used.
+func Subordinate(id uint32, configured, valid []Range, synthesize bool) (ranges []Range, synthesized bool) {
+	ranges = ExcludeID(ClipTo(configured, valid), id)
+	if len(ranges) > 0 {
+		return ranges, false
+	}
+	if !synthesize || CoversAll(valid) {
+		return nil, false
+	}
+	if ranges = ExcludeID(valid, id); len(ranges) == 0 {
+		return nil, false
+	}
+	return ranges, true
 }
 
 // NextFree returns the start of a range of the given size placed after every
