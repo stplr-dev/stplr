@@ -20,6 +20,7 @@ package action
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/leonelquinteros/gotext"
 
@@ -27,14 +28,20 @@ import (
 	"go.stplr.dev/stplr/internal/manager"
 	"go.stplr.dev/stplr/internal/scripter"
 	"go.stplr.dev/stplr/internal/service/repos"
+	"go.stplr.dev/stplr/pkg/staplerfile"
 )
 
-type useCase struct {
-	mgr manager.Manager
+type PackageFinder interface {
+	FindPkgs(ctx context.Context, pkgs []string) (map[string][]staplerfile.Package, []string, error)
 }
 
-func New(manager manager.Manager) *useCase {
-	return &useCase{mgr: manager}
+type useCase struct {
+	mgr    manager.Manager
+	finder PackageFinder
+}
+
+func New(manager manager.Manager, finder PackageFinder) *useCase {
+	return &useCase{mgr: manager, finder: finder}
 }
 
 type Options struct {
@@ -43,14 +50,32 @@ type Options struct {
 }
 
 func (u *useCase) Run(ctx context.Context, opts Options) error {
+	found, _, err := u.finder.FindPkgs(ctx, opts.Pkgs)
+	if err != nil {
+		return errors.WrapIntoI18nError(err, gotext.Get("Error finding packages"))
+	}
+
 	systemPkgsName := make([]string, 0, len(opts.Pkgs))
 	for _, pkg := range opts.Pkgs {
 		name, repo, ok := repos.ExtractNameAndRepo(pkg)
 		if ok {
 			systemPkgsName = append(systemPkgsName, scripter.FormatName(name, repo))
-		} else {
-			systemPkgsName = append(systemPkgsName, pkg)
+			continue
 		}
+
+		systemName := pkg
+		for _, candidate := range found[pkg] {
+			candidateName := scripter.FormatName(candidate.Name, candidate.Repository)
+			installed, err := u.mgr.IsInstalled(candidateName)
+			if err != nil {
+				return fmt.Errorf("check if package %s is installed: %w", candidateName, err)
+			}
+			if installed {
+				systemName = candidateName
+				break
+			}
+		}
+		systemPkgsName = append(systemPkgsName, systemName)
 	}
 
 	if err := u.mgr.Remove(&manager.Opts{

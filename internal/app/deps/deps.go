@@ -47,20 +47,25 @@ type WithRepos struct {
 type Cleanup func()
 
 type RemoveDeps struct {
-	Mgr manager.Manager
+	Mgr   manager.Manager
+	Repos *repos.Repos
 }
 
 func ForRemoveAction(ctx context.Context) (*RemoveDeps, Cleanup, error) {
 	b, err := builder.
 		Start(ctx).
+		Config().
+		OptionalDB().
 		Manager().
+		Repos().
 		End()
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return &RemoveDeps{
-		Mgr: b.Manager,
+		Mgr:   b.Manager,
+		Repos: b.Repos,
 	}, b.Cleanup, nil
 }
 

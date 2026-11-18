@@ -942,7 +942,7 @@ msgstr "Ошибка cброса базы данных"
 msgid "Failed to reread all"
 msgstr "Не удалось перечитать всё"
 
-#: internal/usecase/remove/action/remove.go:59
+#: internal/usecase/remove/action/remove.go:84
 msgid "Error removing packages"
 msgstr "Ошибка при удалении пакетов"
 

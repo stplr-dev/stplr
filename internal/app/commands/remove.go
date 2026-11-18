@@ -65,7 +65,7 @@ func RemoveCmd() *cli.Command {
 			}
 			defer f()
 
-			return action.New(d.Mgr).Run(ctx, action.Options{
+			return action.New(d.Mgr, d.Repos).Run(ctx, action.Options{
 				Pkgs:        c.Args().Slice(),
 				Interactive: c.Bool("interactive"),
 			})
