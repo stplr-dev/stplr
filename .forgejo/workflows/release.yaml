@@ -98,7 +98,7 @@ jobs:
           pack stplr-arm64 aarch64
 
       - name: Release
-        uses: actions/forgejo-release@v2.7.3
+        uses: actions/forgejo-release@v2.13.4
         with:
           direction: upload
           release-dir: ./dist
