@@ -51,7 +51,7 @@ require (
 	github.com/leonelquinteros/gotext v1.7.2
 	github.com/mattn/go-isatty v0.0.24
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/opencontainers/cgroups v0.1.1
+	github.com/opencontainers/cgroups v0.1.2
 	github.com/opencontainers/runc v1.5.3
 	github.com/opencontainers/runtime-spec v1.3.0
 	github.com/pelletier/go-toml/v2 v2.4.3
